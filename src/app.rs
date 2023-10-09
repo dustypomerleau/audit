@@ -1,7 +1,6 @@
 use crate::error_template::{AppError, ErrorTemplate};
 use leptos::{component, create_signal, tracing, view, Errors, IntoView, SignalUpdate};
 use leptos_meta::{provide_meta_context, Stylesheet, Title};
-// use leptos_router::*;
 use leptos_router::{Route, Router, Routes};
 
 #[component]

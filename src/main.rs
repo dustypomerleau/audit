@@ -1,11 +1,10 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
+    use audit::{app::*, fileserv::file_and_error_handler};
     use axum::{routing::post, Router};
-    use leptos::*;
+    use leptos::get_configuration;
     use leptos_axum::{generate_route_list, LeptosRoutes};
-    use audit::app::*;
-    use audit::fileserv::file_and_error_handler;
 
     simple_logger::init_with_level(log::Level::Debug).expect("couldn't initialize logging");
 

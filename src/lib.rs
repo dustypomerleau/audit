@@ -4,9 +4,9 @@ pub mod error_template;
 pub mod fileserv;
 
 cfg_if! { if #[cfg(feature = "hydrate")] {
-    use leptos::*;
+    use crate::app::App;
+    use leptos::mount_to_body;
     use wasm_bindgen::prelude::wasm_bindgen;
-    use crate::app::*;
 
     #[wasm_bindgen]
     pub fn hydrate() {
