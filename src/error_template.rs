@@ -1,7 +1,7 @@
 use cfg_if::cfg_if;
 use http::status::StatusCode;
 use leptos::{
-    component, create_rw_signal, tracing, view, Errors, For, IntoView, RwSignal, SignalGetUntracked,
+    component, create_rw_signal, view, Errors, For, IntoView, RwSignal, SignalGetUntracked,
 };
 use thiserror::Error;
 
