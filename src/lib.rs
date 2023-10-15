@@ -1,3 +1,5 @@
+mod refs; // for rust analyzer support only
+
 use cfg_if::cfg_if;
 pub mod app;
 pub mod error_template;
