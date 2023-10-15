@@ -1,7 +1,7 @@
 use crate::error_template::{AppError, ErrorTemplate};
 use leptos::{component, create_signal, tracing, view, Errors, IntoView, SignalUpdate};
 use leptos_meta::{provide_meta_context, Stylesheet, Title};
-use leptos_router::{Route, Router, Routes};
+use leptos_router::{Route, Router, Routes, SsrMode};
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -30,7 +30,8 @@ pub fn App() -> impl IntoView {
         }>
             <main>
                 <Routes>
-                    <Route path="" view=HomePage/>
+                    // todo: this SsrMode is just an example to check that it builds.
+                    <Route path="" view=HomePage ssr=SsrMode::PartiallyBlocked/>
                 </Routes>
             </main>
         </Router>
