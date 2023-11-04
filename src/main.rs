@@ -1,7 +1,7 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use audit::{app::*, fileserv::file_and_error_handler};
+    use audit::{app::App, fileserv::file_and_error_handler};
     use axum::{routing::post, Router};
     use leptos::get_configuration;
     use leptos_axum::{generate_route_list, LeptosRoutes};
