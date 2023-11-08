@@ -27,8 +27,7 @@ pub fn App() -> impl IntoView {
         }>
             <main>
                 <Routes>
-                    // todo: this SsrMode is just an example to check that it builds.
-                    <Route path="" view=HomePage ssr=SsrMode::PartiallyBlocked/>
+                    <Route path="" view=HomePage />
                 </Routes>
             </main>
         </Router>
