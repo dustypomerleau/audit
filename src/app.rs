@@ -1,5 +1,5 @@
 use crate::error_template::{AppError, ErrorTemplate};
-use leptos::{component, create_signal, tracing, view, Errors, IntoView, SignalUpdate};
+use leptos::{component, create_signal, island, tracing, view, Errors, IntoView, SignalUpdate};
 use leptos_meta::{provide_meta_context, Stylesheet, Title};
 use leptos_router::{Route, Router, Routes, SsrMode};
 
@@ -35,7 +35,7 @@ pub fn App() -> impl IntoView {
 }
 
 /// Renders the home page of your application.
-#[component]
+#[island]
 fn HomePage() -> impl IntoView {
     // Creates a reactive value to update the button
     let (count, set_count) = create_signal(0);
