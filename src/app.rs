@@ -35,6 +35,7 @@ pub fn App() -> impl IntoView {
 }
 
 /// Renders the home page of your application.
+// this can be separated into a view and an enclosed island - see the book
 #[island]
 fn HomePage() -> impl IntoView {
     // Creates a reactive value to update the button
