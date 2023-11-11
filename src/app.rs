@@ -5,45 +5,34 @@ use leptos_router::{Route, Router, Routes, SsrMode};
 
 #[component]
 pub fn App() -> impl IntoView {
-    // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
     view! {
-        // injects a stylesheet into the document <head>
         // id=leptos means cargo-leptos will hot-reload this stylesheet
         <Stylesheet id="leptos" href="/pkg/main.css"/>
+        <Title text="Vic Eye cataract audit | Upload"/>
 
-        // sets the document title
-        <Title text="Welcome to Leptos"/>
-
-        // content for this welcome page
-        <Router fallback=|| {
-            let mut outside_errors = Errors::default();
-            outside_errors.insert_with_default_key(AppError::NotFound);
-            view! {
-                <ErrorTemplate outside_errors/>
+        <Router
+            fallback=|| {
+                let mut outside_errors = Errors::default();
+                outside_errors.insert_with_default_key(AppError::NotFound);
+                view! { <ErrorTemplate outside_errors/> }.into_view()
             }
-            .into_view()
-        }>
+        >
             <main>
                 <Routes>
-                    <Route path="" view=HomePage />
+                    <Route path="" view=Upload />
                 </Routes>
             </main>
         </Router>
     }
 }
 
-/// Renders the home page of your application.
-// this can be separated into a view and an enclosed island - see the book
-#[island]
-fn HomePage() -> impl IntoView {
-    // Creates a reactive value to update the button
-    let (count, set_count) = create_signal(0);
-    let on_click = move |_| set_count.update(|count| *count += 1);
-
+#[component]
+fn Upload() -> impl IntoView {
     view! {
-        <h1>"Welcome to Leptos!"</h1>
-        <button on:click=on_click>"Click Me: " {count}</button>
+        <h1>"Surgeon data upload"</h1>
+        // get this working with Excel first, then add CSV for other users
+        <input type="file" accept=".xlsx"/>
     }
 }
