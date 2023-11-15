@@ -32,7 +32,23 @@ pub fn App() -> impl IntoView {
 fn Upload() -> impl IntoView {
     view! {
         <h1>"Surgeon data upload"</h1>
-        // get this working with Excel first, then add CSV for other users
-        <input type="file" accept=".xlsx"/>
+        // limit to CSV for now
+        // possibly wrap the input in form as shown in the autosubmit example
+        // then presumably you can write a server-side handler for that URL
+        <input type="file" accept=".csv" id="source" />
     }
 }
+
+// show a view that prompts the user to upload a file
+// call std::fs::File::open(source) (start by mocking data in a r#"" and then add a folder for test
+// CSV data)
+//
+// autosubmit after selection:
+//
+// <form id="form" action="http://example.com">
+//    <input type="file" id="file">
+// </form>
+//
+// document.getElementById("file").onchange = function() {
+//     document.getElementById("form").submit();
+// }
