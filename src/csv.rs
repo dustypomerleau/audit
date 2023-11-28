@@ -2,12 +2,15 @@ use csv::Reader;
 use serde::Deserialize;
 use time::{Date, OffsetDateTime};
 
+// leave off Both, until you have a specific use case for it
 pub enum Side {
     Right,
     Left,
-    Both,
 }
 
+/// Represents an adverse intraoperative event. It's up to the surgeon to classify, and only one
+/// option can be selected. For example, a wrap around split in the rhexis opens the PC, but it's
+/// essentially a rhexis complication.
 pub enum Adverse {
     Rhexis,
     Pc,
@@ -20,9 +23,21 @@ pub struct Vision {
     den: i32,
 }
 
-// these could be inside an enum, but the whole point is to make sure they aren't interchangeable
+// make sure that distance and near acuities are not interchangeable
 pub struct VaDistance(Vision);
 pub struct VaNear(Vision);
+
+// We use `best` and `raw` as a more dev-friendly way of saying `bcva` and `ucva`.
+pub struct OpVision {
+    best_before: VaDistance,
+    best_after: VaDistance,
+    raw_before: Option<VaDistance>,
+    raw_after: Option<VaDistance>,
+    best_near_before: Option<VaNear>,
+    best_near_after: Option<VaNear>,
+    raw_near_before: Option<VaNear>,
+    raw_near_after: Option<VaNear>,
+}
 
 pub trait Va {} // for common methods on acuity
 
@@ -36,7 +51,16 @@ pub struct Refraction {
     cyl: Option<Cyl>,
 }
 
+// for now, limit this to distance refraction
+pub struct OpRefraction {
+    before: Refraction,
+    after: Refraction,
+}
+
+/// The residual postop refraction predicted by your formula of choice.
+// At the start, allow only one formula/target.
 pub struct Target {
+    formula: Formula, // todo
     se: f32,
     cyl: Option<Cyl>, // confirm which plane the biometry is predicting
 }
@@ -61,16 +85,12 @@ pub struct Case {
     surgeon: Surgeon,
     urn: String, // should be unique for the surgeon's reference, but not used for database uniqueness - recommend surgeons have a column to deanonymize
     side: Side,
-    ref_before: Refraction,
-    va_before: VaDistance,
-    va_near_before: Option<VaNear>,
     target: Option<Target>,
     date: Date, // consider how this will be used: is there any scenario requiring a utc datetime? plan was to have an uploaded datetime, but there isn't any reason to keep this in the struct when you could get it from the DB created_at
     site: Option<String>,
     incision: Option<Incision>,
     iol: Option<String>,
     adverse: Option<Adverse>,
-    ref_after: Refraction,
-    va_after: VaDistance,
-    va_near_after: Option<VaNear>,
+    vision: OpVision,
+    refraction: OpRefraction,
 }
