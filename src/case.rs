@@ -18,6 +18,13 @@ pub enum Adverse {
     Other,
 }
 
+/// A formula for calculating IOL power from biometry.
+// Limited to common thick-lens formulas to start.
+pub enum Formula {
+    Barrett,
+    Kane,
+}
+
 pub struct Vision {
     num: i32,
     den: i32,
@@ -60,7 +67,7 @@ pub struct OpRefraction {
 /// The residual postop refraction predicted by your formula of choice.
 // At the start, allow only one formula/target.
 pub struct Target {
-    formula: Formula, // todo
+    formula: Formula,
     se: f32,
     cyl: Option<Cyl>, // confirm which plane the biometry is predicting
 }
