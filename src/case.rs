@@ -78,7 +78,6 @@ pub struct Incision {
 }
 
 /// A single surgical case
-// consider moving this elsewhere, as csv::Case seems munted.
 // for now, leave biometry parameters out - these can be added later with a working system
 pub struct Case {
     surgeon: Surgeon,
