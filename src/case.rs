@@ -1,4 +1,5 @@
 use serde::Deserialize;
+use surgeon::Surgeon;
 use time::{Date, OffsetDateTime};
 
 // leave off Both, until you have a specific use case for it
@@ -67,14 +68,6 @@ pub struct Target {
 pub struct Incision {
     meridian: i32,
     sia: Option<i32>,
-}
-
-/// A unique surgeon
-pub struct Surgeon {
-    email: String, // probably best to validate this as unique and email form at both the form and database levels - but pulling in the regex crate will probably make your wasm bundle huge
-    first_name: String,
-    last_name: String,
-    site: Option<String>,
 }
 
 /// A single surgical case
