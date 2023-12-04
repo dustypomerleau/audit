@@ -26,8 +26,8 @@ pub enum Formula {
 }
 
 pub struct Vision {
-    num: u32,
-    den: u32,
+    num: i32,
+    den: i32,
 }
 
 // make sure that distance and near acuities are not interchangeable
@@ -50,7 +50,7 @@ pub trait Va {} // for common methods on acuity
 
 pub struct Cyl {
     power: f32,
-    axis: u32,
+    axis: i32,
 }
 
 pub struct Refraction {
@@ -73,8 +73,8 @@ pub struct Target {
 }
 
 pub struct Incision {
-    meridian: u32,
-    sia: Option<u32>,
+    meridian: i32,
+    sia: Option<i32>,
 }
 
 /// A single surgical case
