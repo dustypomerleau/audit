@@ -93,6 +93,45 @@ pub struct Case {
     refraction: OpRefraction,
 }
 
-// pub struct RawCase... is a flattened version for DB serialization
-// then use impl From<RawCase> for Case {} and impl From<Case> for RawCase {}
-// while you're at it put all of this in case.rs
+/// A flattened version of the Case struct for DB queries.
+// All fields are optional, to allow using the same struct for any DB query on Case.
+pub struct FlatCase {
+    surgeon_email: Option<String>,
+    surgeon_first_name: Option<String>,
+    surgeon_last_name: Option<String>,
+    surgeon_site: Option<String>,
+    urn: Option<String>,
+    side: Option<Side>,
+    target_formula: Option<Formula>,
+    target_se: Option<f32>,
+    target_cyl_power: Option<f32>,
+    target_cyl_axis: Option<i32>,
+    date: Option<Date>,
+    site: Option<String>,
+    incision_meridian: Option<i32>,
+    incision_sia: Option<i32>,
+    iol: Option<String>,
+    adverse: Option<Adverse>,
+    vision_best_before_num: Option<i32>,
+    vision_best_before_den: Option<i32>,
+    vision_best_after_num: Option<i32>,
+    vision_best_after_den: Option<i32>,
+    vision_raw_before_num: Option<i32>,
+    vision_raw_before_den: Option<i32>,
+    vision_raw_after_num: Option<i32>,
+    vision_raw_after_den: Option<i32>,
+    vision_best_near_before_num: Option<i32>,
+    vision_best_near_before_den: Option<i32>,
+    vision_best_near_after_num: Option<i32>,
+    vision_best_near_after_den: Option<i32>,
+    vision_raw_near_before_num: Option<i32>,
+    vision_raw_near_before_den: Option<i32>,
+    vision_raw_near_after_num: Option<i32>,
+    vision_raw_near_after_den: Option<i32>,
+    refraction_before_sph: Option<f32>,
+    refraction_before_cyl_power: Option<f32>,
+    refraction_before_cyl_axis: Option<i32>,
+    refraction_after_sph: Option<f32>,
+    refraction_after_cyl_power: Option<f32>,
+    refraction_after_cyl_axis: Option<i32>,
+}
