@@ -1,5 +1,5 @@
+use crate::surgeon::Surgeon;
 use serde::Deserialize;
-use surgeon::Surgeon;
 use time::{Date, OffsetDateTime};
 
 // leave off Both, until you have a specific use case for it
@@ -67,7 +67,7 @@ pub struct OpRefraction {
 /// The residual postop refraction predicted by your formula of choice.
 // At the start, allow only one formula/target.
 pub struct Target {
-    formula: Formula,
+    formula: Option<Formula>,
     se: f32,
     cyl: Option<Cyl>, // confirm which plane the biometry is predicting
 }
@@ -81,7 +81,7 @@ pub struct Incision {
 // for now, leave biometry parameters out - these can be added later with a working system
 pub struct Case {
     surgeon: Surgeon,
-    urn: String, // should be unique for the surgeon's reference, but not used for database uniqueness - recommend surgeons have a column to deanonymize
+    urn: String, // used for the surgeon's reference, not database uniqueness - recommend surgeons have a column to deanonymize
     side: Side,
     target: Option<Target>,
     date: Date, // consider how this will be used: is there any scenario requiring a utc datetime? plan was to have an uploaded datetime, but there isn't any reason to keep this in the struct when you could get it from the DB created_at
@@ -91,6 +91,99 @@ pub struct Case {
     adverse: Option<Adverse>,
     vision: OpVision,
     refraction: OpRefraction,
+}
+
+impl From<FlatCase> for Case {
+    fn from(fc: FlatCase) -> Self {
+        Case {
+            surgeon: Surgeon {
+                email: fc.surgeon_email.expect("surgeon to have an email"),
+                first_name: fc.surgeon_first_name,
+                last_name: fc.surgeon_last_name,
+                site: fc.surgeon_site,
+            },
+            urn: fc.urn.expect("to have a URN"),
+            side: fc.side.expect("to have a Side"),
+            target: fc.target_se.and(Some(Target {
+                formula: fc.target_formula,
+                se: fc.target_se.unwrap(), // won't panic, as `and()` checks the value above
+                cyl: fc.target_cyl_power.and(Some(Cyl {
+                    power: fc.target_cyl_power.unwrap(),
+                    axis: fc.target_cyl_axis.unwrap(),
+                })),
+            })),
+            date: fc.date.expect("surgery to have a Date"),
+            site: fc.site,
+            incision: fc.incision_meridian.and(Some(Incision {
+                meridian: fc.incision_meridian.unwrap(),
+                sia: fc.incision_sia,
+            })),
+            iol: fc.iol,
+            adverse: fc.adverse,
+            vision: OpVision {
+                best_before: VaDistance(Vision {
+                    num: fc
+                        .vision_best_before_num
+                        .expect("vision to have a numerator"),
+                    den: fc
+                        .vision_best_before_den
+                        .expect("vision to have a denominator"),
+                }),
+                best_after: VaDistance(Vision {
+                    num: fc
+                        .vision_best_after_num
+                        .expect("vision to have a numerator"),
+                    den: fc
+                        .vision_best_after_den
+                        .expect("vision to have a denominator"),
+                }),
+                raw_before: fc.vision_raw_before_den.and(Some(VaDistance(Vision {
+                    num: fc.vision_raw_before_num.unwrap(),
+                    den: fc.vision_raw_before_den.unwrap(),
+                }))),
+                raw_after: fc.vision_raw_after_den.and(Some(VaDistance(Vision {
+                    num: fc.vision_raw_after_num.unwrap(),
+                    den: fc.vision_raw_after_den.unwrap(),
+                }))),
+                best_near_before: fc.vision_best_near_before_den.and(Some(VaNear(Vision {
+                    num: fc.vision_best_near_before_num.unwrap(),
+                    den: fc.vision_best_near_before_den.unwrap(),
+                }))),
+                best_near_after: fc.vision_best_near_after_den.and(Some(VaNear(Vision {
+                    num: fc.vision_best_near_after_num.unwrap(),
+                    den: fc.vision_best_near_after_den.unwrap(),
+                }))),
+                raw_near_before: fc.vision_raw_near_before_den.and(Some(VaNear(Vision {
+                    num: fc.vision_raw_near_before_num.unwrap(),
+                    den: fc.vision_raw_near_before_den.unwrap(),
+                }))),
+                raw_near_after: fc.vision_raw_near_after_den.and(Some(VaNear(Vision {
+                    num: fc.vision_raw_near_after_num.unwrap(),
+                    den: fc.vision_raw_near_after_den.unwrap(),
+                }))),
+            },
+            refraction: OpRefraction {
+                before: Refraction {
+                    sph: fc
+                        .refraction_before_sph
+                        .expect("refraction to have a spherical component"),
+                    cyl: fc.refraction_before_cyl_power.and(Some(Cyl {
+                        power: fc.refraction_before_cyl_power.unwrap(),
+                        axis: fc.refraction_before_cyl_axis.unwrap(),
+                    })),
+                },
+                after: Refraction {
+                    sph: fc
+                        .refraction_after_sph
+                        .expect("refraction to have a spherical component"),
+                    cyl: fc.refraction_after_cyl_power.and(Some(Cyl {
+                        power: fc.refraction_after_cyl_power.unwrap(),
+                        axis: fc.refraction_after_cyl_axis.unwrap(),
+                    })),
+                },
+            },
+        }
+    }
 }
 
 /// A flattened version of the Case struct for DB queries.
