@@ -9,7 +9,7 @@ pub enum Side {
     Left,
 }
 
-/// Represents an adverse intraoperative event. It's up to the surgeon to classify, and only one
+/// An adverse intraoperative event. It's up to the surgeon to classify, and only one
 /// option can be selected. For example, a wrap around split in the rhexis opens the PC, but it's
 /// essentially a rhexis complication.
 pub enum Adverse {
