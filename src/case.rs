@@ -74,9 +74,20 @@ pub struct OpVision {
 
 pub trait Va {} // for common methods on acuity
 
-pub struct Cyl {
-    power: f32,
-    axis: i32,
+/// A generic axis between 0 and 179 degrees. The main uses are for the axis of [`RefCyl`] and the
+/// meridian of [`Incision`]. In the future, it may also be used for the axis of an implanted [`Iol`].
+pub struct Axis(i32);
+
+impl Axis {
+    pub fn new(axis: i32) -> Option<Self> {
+        if (0..180).contains(&axis) {
+            Some(Self(n))
+        } else {
+            None
+        }
+    }
+}
+
 }
 
 pub struct Refraction {
