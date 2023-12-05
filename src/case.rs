@@ -126,6 +126,35 @@ pub struct Incision {
     sia: Option<f32>,
 }
 
+pub struct IolSe(f32);
+
+impl IolSe {
+    pub fn new(se: f32) -> Option<Self> {
+        if (-20.0..=60.0).contains(&se) {
+            Some(Self(se))
+        } else {
+            None
+        }
+    }
+}
+
+pub struct IolCyl(f32);
+
+impl IolCyl {
+    pub fn new(cyl: f32) -> Option<Self> {
+        if (1.0..=20.0).contains(&cyl) {
+            Some(Self(cyl))
+        } else {
+            None
+        }
+    }
+}
+
+pub struct Iol {
+    se: IolSe,
+    cyl: Option<IolCyl>,
+}
+
 /// A single surgical case
 // for now, leave biometry parameters out - these can be added later with a working system
 pub struct Case {
