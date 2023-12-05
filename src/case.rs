@@ -77,7 +77,7 @@ pub struct Target {
 
 pub struct Incision {
     meridian: i32,
-    sia: Option<i32>,
+    sia: Option<f32>,
 }
 
 /// A single surgical case
