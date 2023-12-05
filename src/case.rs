@@ -37,12 +37,15 @@ pub struct VaNear(Vision);
 // We use `best` and `raw` as a more dev-friendly way of saying `bcva` and `ucva`.
 pub struct OpVision {
     best_before: VaDistance,
-    best_after: VaDistance,
     raw_before: Option<VaDistance>,
+
+    best_after: VaDistance,
     raw_after: Option<VaDistance>,
+
     best_near_before: Option<VaNear>,
-    best_near_after: Option<VaNear>,
     raw_near_before: Option<VaNear>,
+
+    best_near_after: Option<VaNear>,
     raw_near_after: Option<VaNear>,
 }
 
