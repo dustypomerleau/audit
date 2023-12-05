@@ -21,6 +21,7 @@ pub enum Adverse {
 
 /// A formula for calculating IOL power from biometry.
 // Limited to common thick-lens formulas to start.
+// Eventually we will add all the formulas commonly in use.
 pub enum Formula {
     Barrett,
     Kane,
