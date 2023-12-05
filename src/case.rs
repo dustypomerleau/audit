@@ -122,7 +122,7 @@ impl Sia {
 }
 
 pub struct Incision {
-    meridian: i32,
+    meridian: Axis,
     sia: Option<f32>,
 }
 
