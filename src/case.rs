@@ -26,8 +26,8 @@ pub enum Formula {
 }
 
 pub struct Vision {
-    num: i32,
-    den: i32,
+    num: f32,
+    den: f32,
 }
 
 // make sure that distance and near acuities are not interchangeable
