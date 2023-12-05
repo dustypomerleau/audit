@@ -40,8 +40,21 @@ pub struct Vision {
     den: f32,
 }
 
-// make sure that distance and near acuities are not interchangeable
+impl Vision {
+    pub fn new(num: f32, den: f32) -> Option<Self> {
+        if (0.1..=20.0).contains(&num) && den > 0.0 {
+            Some(Self { num, den })
+        } else {
+            None
+        }
+    }
+}
+
+/// A Snellen-style fractional visual acuity measured at distance.
 pub struct VaDistance(Vision);
+
+/// A Snellen-style fractional visual acuity measured at near, and converted to its distance
+/// equivalent.
 pub struct VaNear(Vision);
 
 // We use `best` and `raw` as a more dev-friendly way of saying `bcva` and `ucva`.
