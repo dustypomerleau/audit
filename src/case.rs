@@ -98,93 +98,115 @@ pub struct Case {
 
 impl From<FlatCase> for Case {
     fn from(fc: FlatCase) -> Self {
-        Case {
-            surgeon: Surgeon {
-                email: fc.surgeon_email.expect("surgeon to have an email"),
-                first_name: fc.surgeon_first_name,
-                last_name: fc.surgeon_last_name,
-                site: fc.surgeon_site,
-            },
-            urn: fc.urn.expect("to have a URN"),
-            side: fc.side.expect("to have a Side"),
-            target: fc.target_se.and(Some(Target {
-                formula: fc.target_formula,
-                se: fc.target_se.unwrap(), // won't panic, as `and()` checks the value above
-                cyl: fc.target_cyl_power.and(Some(Cyl {
-                    power: fc.target_cyl_power.unwrap(),
-                    axis: fc.target_cyl_axis.unwrap(),
+        let surgeon = Surgeon {
+            email: fc.surgeon_email.expect("surgeon to have an email"),
+            first_name: fc.surgeon_first_name,
+            last_name: fc.surgeon_last_name,
+            site: fc.surgeon_site,
+        };
+
+        let urn = fc.urn.expect("case to have a URN");
+        let side = fc.side.expect("case to have a Side");
+
+        let target = fc.target_se.and(Some(Target {
+            formula: fc.target_formula,
+            se: fc.target_se.unwrap(), // won't panic, as `and()` checks the value above
+            cyl: fc.target_cyl_power.and(Some(Cyl {
+                power: fc.target_cyl_power.unwrap(),
+                axis: fc.target_cyl_axis.unwrap(),
+            })),
+        }));
+
+        let date = fc.date.expect("case to have a Date");
+        let site = fc.site;
+
+        let incision = fc.incision_meridian.and(Some(Incision {
+            meridian: fc.incision_meridian.unwrap(),
+            sia: fc.incision_sia,
+        }));
+
+        let iol = fc.iol;
+        let adverse = fc.adverse;
+
+        let vision = OpVision {
+            best_before: VaDistance(Vision {
+                num: fc
+                    .vision_best_before_num
+                    .expect("vision to have a numerator"),
+                den: fc
+                    .vision_best_before_den
+                    .expect("vision to have a denominator"),
+            }),
+            raw_before: fc.vision_raw_before_den.and(Some(VaDistance(Vision {
+                num: fc.vision_raw_before_num.unwrap(),
+                den: fc.vision_raw_before_den.unwrap(),
+            }))),
+
+            best_after: VaDistance(Vision {
+                num: fc
+                    .vision_best_after_num
+                    .expect("vision to have a numerator"),
+                den: fc
+                    .vision_best_after_den
+                    .expect("vision to have a denominator"),
+            }),
+            raw_after: fc.vision_raw_after_den.and(Some(VaDistance(Vision {
+                num: fc.vision_raw_after_num.unwrap(),
+                den: fc.vision_raw_after_den.unwrap(),
+            }))),
+
+            best_near_before: fc.vision_best_near_before_den.and(Some(VaNear(Vision {
+                num: fc.vision_best_near_before_num.unwrap(),
+                den: fc.vision_best_near_before_den.unwrap(),
+            }))),
+            raw_near_before: fc.vision_raw_near_before_den.and(Some(VaNear(Vision {
+                num: fc.vision_raw_near_before_num.unwrap(),
+                den: fc.vision_raw_near_before_den.unwrap(),
+            }))),
+
+            best_near_after: fc.vision_best_near_after_den.and(Some(VaNear(Vision {
+                num: fc.vision_best_near_after_num.unwrap(),
+                den: fc.vision_best_near_after_den.unwrap(),
+            }))),
+            raw_near_after: fc.vision_raw_near_after_den.and(Some(VaNear(Vision {
+                num: fc.vision_raw_near_after_num.unwrap(),
+                den: fc.vision_raw_near_after_den.unwrap(),
+            }))),
+        };
+
+        let refraction = OpRefraction {
+            before: Refraction {
+                sph: fc
+                    .refraction_before_sph
+                    .expect("refraction to have a spherical component"),
+                cyl: fc.refraction_before_cyl_power.and(Some(Cyl {
+                    power: fc.refraction_before_cyl_power.unwrap(),
+                    axis: fc.refraction_before_cyl_axis.unwrap(),
                 })),
-            })),
-            date: fc.date.expect("surgery to have a Date"),
-            site: fc.site,
-            incision: fc.incision_meridian.and(Some(Incision {
-                meridian: fc.incision_meridian.unwrap(),
-                sia: fc.incision_sia,
-            })),
-            iol: fc.iol,
-            adverse: fc.adverse,
-            vision: OpVision {
-                best_before: VaDistance(Vision {
-                    num: fc
-                        .vision_best_before_num
-                        .expect("vision to have a numerator"),
-                    den: fc
-                        .vision_best_before_den
-                        .expect("vision to have a denominator"),
-                }),
-                best_after: VaDistance(Vision {
-                    num: fc
-                        .vision_best_after_num
-                        .expect("vision to have a numerator"),
-                    den: fc
-                        .vision_best_after_den
-                        .expect("vision to have a denominator"),
-                }),
-                raw_before: fc.vision_raw_before_den.and(Some(VaDistance(Vision {
-                    num: fc.vision_raw_before_num.unwrap(),
-                    den: fc.vision_raw_before_den.unwrap(),
-                }))),
-                raw_after: fc.vision_raw_after_den.and(Some(VaDistance(Vision {
-                    num: fc.vision_raw_after_num.unwrap(),
-                    den: fc.vision_raw_after_den.unwrap(),
-                }))),
-                best_near_before: fc.vision_best_near_before_den.and(Some(VaNear(Vision {
-                    num: fc.vision_best_near_before_num.unwrap(),
-                    den: fc.vision_best_near_before_den.unwrap(),
-                }))),
-                best_near_after: fc.vision_best_near_after_den.and(Some(VaNear(Vision {
-                    num: fc.vision_best_near_after_num.unwrap(),
-                    den: fc.vision_best_near_after_den.unwrap(),
-                }))),
-                raw_near_before: fc.vision_raw_near_before_den.and(Some(VaNear(Vision {
-                    num: fc.vision_raw_near_before_num.unwrap(),
-                    den: fc.vision_raw_near_before_den.unwrap(),
-                }))),
-                raw_near_after: fc.vision_raw_near_after_den.and(Some(VaNear(Vision {
-                    num: fc.vision_raw_near_after_num.unwrap(),
-                    den: fc.vision_raw_near_after_den.unwrap(),
-                }))),
             },
-            refraction: OpRefraction {
-                before: Refraction {
-                    sph: fc
-                        .refraction_before_sph
-                        .expect("refraction to have a spherical component"),
-                    cyl: fc.refraction_before_cyl_power.and(Some(Cyl {
-                        power: fc.refraction_before_cyl_power.unwrap(),
-                        axis: fc.refraction_before_cyl_axis.unwrap(),
-                    })),
-                },
-                after: Refraction {
-                    sph: fc
-                        .refraction_after_sph
-                        .expect("refraction to have a spherical component"),
-                    cyl: fc.refraction_after_cyl_power.and(Some(Cyl {
-                        power: fc.refraction_after_cyl_power.unwrap(),
-                        axis: fc.refraction_after_cyl_axis.unwrap(),
-                    })),
-                },
+            after: Refraction {
+                sph: fc
+                    .refraction_after_sph
+                    .expect("refraction to have a spherical component"),
+                cyl: fc.refraction_after_cyl_power.and(Some(Cyl {
+                    power: fc.refraction_after_cyl_power.unwrap(),
+                    axis: fc.refraction_after_cyl_axis.unwrap(),
+                })),
             },
+        };
+
+        Case {
+            surgeon,
+            urn,
+            side,
+            target,
+            date,
+            site,
+            incision,
+            iol,
+            adverse,
+            vision,
+            refraction,
         }
     }
 }
