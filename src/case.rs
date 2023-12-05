@@ -109,6 +109,18 @@ pub struct Target {
     cyl: Option<Cyl>, // confirm which plane the biometry is predicting
 }
 
+pub struct Sia(f32);
+
+impl Sia {
+    pub fn new(sia: f32) -> Option<Self> {
+        if (0.0..=2.0).contains(&sia) {
+            Some(Self(sia))
+        } else {
+            None
+        }
+    }
+}
+
 pub struct Incision {
     meridian: i32,
     sia: Option<f32>,
