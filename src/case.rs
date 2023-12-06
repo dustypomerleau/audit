@@ -104,7 +104,7 @@ pub struct OpVision {
     raw_near_after: Option<VaNear>,
 }
 
-pub trait Va {} // for common methods on acuity
+pub trait Va {} // todo: for common methods on acuity
 
 /// A generic axis between 0 and 179 degrees. The main uses are for the axis of [`RefCyl`] and the
 /// meridian of [`Incision`]. In the future, it may also be used for the axis of an implanted [`Iol`].
