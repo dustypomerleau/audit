@@ -120,11 +120,41 @@ impl Axis {
     }
 }
 
+/// The spherical component of a subjective refraction. The type is constrained to values in
+/// [`REF_SPH_POWERS`] by the `new()` method on [`Refraction`].
+pub struct RefSphPower(f32);
+
+/// The cylindrical power component of a subjective refraction. The type is constrained to values in
+/// [`REF_CYL_POWERS`] by the `new()` method on [`Refraction`].
+pub struct RefCylPower(f32);
+
+/// The cylinder component of a subjective refraction, consisting of a cylindrical power in
+/// diopters, and an axis in degrees.
+pub struct RefCyl {
+    power: RefCylPower,
+    axis: Axis,
 }
 
 pub struct Refraction {
-    sph: f32,
-    cyl: Option<Cyl>,
+    sph: RefSphPower,
+    cyl: Option<RefCyl>,
+}
+
+impl Refraction {
+    pub fn new(sph: f32, cyl: f32, axis: i32) -> Option<Self> {
+        if REF_SPH_POWERS.contains(&sph) && REF_CYL_POWERS.contains(&cyl) {
+            if let Some(axis) = Axis::new(axis) {
+                Some(Self {
+                    sph,
+                    cyl: Some(RefCyl { power: cyl, axis }),
+                })
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    }
 }
 
 // for now, limit this to distance refraction
