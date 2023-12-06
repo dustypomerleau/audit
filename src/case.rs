@@ -31,7 +31,7 @@ fn make_powers() -> [f32; 321] {
     powers
 }
 
-// leave off Both, until you have a specific use case for it
+/// The side of the patient's surgery.
 pub enum Side {
     Right,
     Left,
