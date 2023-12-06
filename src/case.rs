@@ -87,7 +87,9 @@ pub struct VaDistance(Vision);
 /// equivalent.
 pub struct VaNear(Vision);
 
-// We use `best` and `raw` as a more dev-friendly way of saying `bcva` and `ucva`.
+/// A collection of preoperative and postoperative visual acuity measurements for a given case. The
+/// best-corrected preoperative visual acuity and the best-corrected postoperative visual acuity
+/// are mandatory. Near and uncorrected (raw) visual acuities are optional.
 pub struct OpVision {
     best_before: VaDistance,
     raw_before: Option<VaDistance>,
