@@ -113,7 +113,7 @@ pub struct Axis(i32);
 impl Axis {
     pub fn new(axis: i32) -> Option<Self> {
         if (0..180).contains(&axis) {
-            Some(Self(n))
+            Some(Self(axis))
         } else {
             None
         }
