@@ -69,6 +69,8 @@ pub struct Vision {
 }
 
 impl Vision {
+    /// Create a new [`Vision`], with numerator between 0.1 and 20.0. The denominator may be any
+    /// positive, nonzero f32.
     pub fn new(num: f32, den: f32) -> Option<Self> {
         if (0.1..=20.0).contains(&num) && den > 0.0 {
             Some(Self { num, den })
