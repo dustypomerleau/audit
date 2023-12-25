@@ -1,5 +1,5 @@
 // todo: break out vision, incision, iol, etc all into separate files
-use crate::surgeon::Surgeon;
+use crate::{cyl::Cyl, surgeon::Surgeon};
 use serde::Deserialize;
 use time::{Date, OffsetDateTime};
 
@@ -120,6 +120,13 @@ impl Axis {
     }
 }
 
+// todo: consider the right place in the code to constrain these values
+// it probably makes sense for each of the power dypes to have a new constructor like axis, and
+// then to have simpler logic in the new function for refraction, for example
+// but you're too tired to think clearly about it rn, maybe they should all be trashed and just use
+// f32s
+//
+//
 /// The spherical component of a subjective refraction. The type is constrained to values in
 /// [`REF_SPH_POWERS`] by the `new()` method on [`Refraction`].
 pub struct RefSphPower(f32);
@@ -135,22 +142,41 @@ pub struct RefCyl {
     axis: Axis,
 }
 
+impl Cyl for RefCyl {
+    fn new_with_bounds(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
+         match (power, axis) {
+                (Some(power), Some(axis)) => {
+                    if REF_CYL_POWERS.contains(&power) {
+                        if let Some(axis) = Axis::new(axis) {
+                            Some(RefCyl { power: RefCylPower(power), axis })
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                }
+
+                (_, _) => {
+                    None
+                }
+            }
+    }
+}
+
+/// A patient's subjective refraction.
 pub struct Refraction {
     sph: RefSphPower,
     cyl: Option<RefCyl>,
 }
 
 impl Refraction {
-    pub fn new(sph: f32, cyl: f32, axis: i32) -> Option<Self> {
-        if REF_SPH_POWERS.contains(&sph) && REF_CYL_POWERS.contains(&cyl) {
-            if let Some(axis) = Axis::new(axis) {
-                Some(Self {
-                    sph,
-                    cyl: Some(RefCyl { power: cyl, axis }),
-                })
-            } else {
-                None
-            }
+    pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Option<Self> {
+        if REF_SPH_POWERS.contains(&sph) {
+            let sph = RefSphPower(sph);
+            let cyl = RefCyl::new_with_bounds(cyl, axis);
+
+            Some(Self { sph, cyl })
         } else {
             None
         }
@@ -163,12 +189,82 @@ pub struct OpRefraction {
     after: Refraction,
 }
 
+pub struct TargetCyl {
+    power: f32,
+    axis: Axis,
+}
+
+impl Cyl for TargetCyl {
+    fn new_with_bounds(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
+         match (power, axis) {
+                (Some(power), Some(axis)) => {
+                    if REF_CYL_POWERS.contains(&power) {
+                        if let Some(axis) = Axis::new(axis) {
+                            Some(RefCyl { power: RefCylPower(power), axis })
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                }
+
+                (_, _) => {
+                    None
+                }
+            }
+    }
+}
 /// The residual postop refraction predicted by your formula of choice.
 // At the start, allow only one formula/target.
+// todo: should we make the Cyl here a new TargetCyl type, with different bounds than RefCyl?
 pub struct Target {
     formula: Option<Formula>,
     se: f32,
-    cyl: Option<Cyl>, // confirm which plane the biometry is predicting
+    cyl: Option<TargetCyl>, // todo: confirm which plane the biometry is predicting, IOL or corneal
+}
+
+impl Target {
+    pub fn new(formula: Option<Formula>, se: f32, cyl: Option<f32>, axis: Option<i32>) -> Option<Self> {
+        // you've done this twice, if it happens again, you need to make a new_with_bounds (or something) function within the cyl
+        // trait that checks that the cyl values given are within bounds for the type of cyl and
+        // returns Self - in fact, definitely do this
+        let cyl = match (cyl, axis) {
+            (Some(power), Some(axis)) => {
+                // It's not clear at this point what cyl targets we should allow
+                // 6 seems ludicrous, but it depends what the patient starts with: what if they
+                //    have KCN?
+                // Perhaps you could argue not to limit this in any way, but it seems like we want
+                // to at least flag extreme cases to make sure it's not an accident.
+                // Probably best to limit it, and then just exclude the cyl in cases that are very
+                // extreme.
+                if (0.0..=6.0).contains(&power) {
+                    if let Some(axis) = Axis::new(axis) {
+                        Some(TargetCyl { power, axis })
+                    } else {
+                        None
+                    }
+                } else {
+                    // we should probably throw an error here, how else will we provide feedback to
+                    // the user?
+                    // Alternatively, we could screen all the values in each column of the CSV at
+                    // the time of submission, before doing anything with them
+                    None
+                }
+            }
+
+            (_, _) => {
+                None
+            }
+        };
+
+        if (-6.0..=2.0).contains(&se) {
+            Some(Self { formula, se, cyl, })
+        } else {
+            None
+        }
+
+    }
 }
 
 pub struct Sia(f32);
@@ -245,12 +341,14 @@ impl From<FlatCase> for Case {
         let urn = fc.urn.expect("case to have a URN");
         let side = fc.side.expect("case to have a Side");
 
+        // todo: fix this, you can't just unwrap axis - do you maybe want to work on that cyl trait before proceeding?
+        let axis = Axis::new(fc.target_cyl_axis.unwrap()).unwrap();
         let target = fc.target_se.and(Some(Target {
             formula: fc.target_formula,
             se: fc.target_se.unwrap(), // won't panic, as `and()` checks the value above
-            cyl: fc.target_cyl_power.and(Some(Cyl {
+            cyl: fc.target_cyl_power.and(Some(TargetCyl {
                 power: fc.target_cyl_power.unwrap(),
-                axis: fc.target_cyl_axis.unwrap(),
+                axis
             })),
         }));
 
@@ -395,4 +493,87 @@ pub struct FlatCase {
     refraction_after_sph: Option<f32>,
     refraction_after_cyl_power: Option<f32>,
     refraction_after_cyl_axis: Option<i32>,
+}
+
+#[cfg(test)]
+mod tests {
+    use time::Date;
+
+    use crate::surgeon::Surgeon;
+
+    use super::{Adverse, FlatCase, Side};
+
+    #[test]
+    fn case_implements_from_flatcase() {
+        let fc = FlatCase {
+            surgeon_email: Some("test@test.com".to_string()),
+            surgeon_first_name: Some("test first".to_string()),
+            surgeon_last_name: Some("test last".to_string()),
+            surgeon_site: None,
+            urn: Some("AB700693".to_string()),
+            side: Some(Side::Right),
+            target_formula: None,
+            target_se: Some(-0.1),
+            target_cyl_power: Some(2.5),
+            target_cyl_axis: Some(160),
+            date: Some(Date::from_calendar_date(2022, 8, 10)),
+            site: Some("The Hospital".to_string()),
+            incision_meridian: Some(100),
+            incision_sia: Some(0.1),
+            iol: Some("AMO Symfony".to_string()),
+            adverse: Some(Adverse::Rhexis),
+
+            vision_best_before_num: Some(6),
+            vision_best_before_den: Some(12),
+            vision_raw_before_num: Some(6),
+            vision_raw_before_den: Some(24),
+
+            vision_best_after_num: Some(6),
+            vision_best_after_den: Some(5),
+            vision_raw_after_num: Some(6),
+            vision_raw_after_den: Some(7.5),
+
+            vision_best_near_before_num: Some(6),
+            vision_best_near_before_den: Some(9),
+            vision_raw_near_before_num: None,
+            vision_raw_near_before_den: None,
+
+            vision_best_near_after_num: Some(6),
+            vision_best_near_after_den: Some(6),
+            vision_raw_near_after_num: None,
+            vision_raw_near_after_den: None,
+
+            refraction_before_sph: Some(-5.25),
+            refraction_before_cyl_power: Some(1.5),
+            refraction_before_cyl_axis: Some(10),
+
+            refraction_after_sph: Some(0.25),
+            refraction_after_cyl_power: Some(-0.5),
+            refraction_after_cyl_axis: Some(12),
+        };
+
+        let c = Case {
+            surgeon: Surgeon {
+                email: "test@test.com".to_string(),
+                first_name: Some("test first".to_string()),
+                last_name: Some("test last".to_string()),
+                site: None,
+            },
+
+            urn: "AB700693".to_string(),
+            side: Side::Right,
+
+            target: Target {
+                formula: None,
+                se: Some(-0.1),
+                cyl: Some(TargetCyl {
+                    power: 
+                    axis: 160
+                })
+            }
+            .into(),
+        };
+
+        assert_eq!(Case::from(fc), c)
+    }
 }
