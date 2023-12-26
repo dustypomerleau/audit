@@ -68,15 +68,13 @@ pub struct Vision {
     den: f32,
 }
 
-impl Vision {
-    /// Create a new [`Vision`], with numerator between 0.1 and 20.0. The denominator may be any
-    /// positive, nonzero f32.
-    pub fn new(num: f32, den: f32) -> Option<Self> {
-        if (0.1..=20.0).contains(&num) && den > 0.0 {
-            Some(Self { num, den })
-        } else {
-            None
-        }
+impl Bounded for Vision {
+    fn min_value() -> Self {
+        Vision { num: 1.0, den: 1.0 }
+    }
+
+    fn max_value() -> Self {
+        Vision { num: 20.0, den: 9999.0 }
     }
 }
 
