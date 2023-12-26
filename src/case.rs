@@ -21,6 +21,8 @@ const REF_SPH_POWERS: &[f32] = &POWERS[0..161]; // -20.0 to +20.0
 
 /// A range of powers (diopters) for the cylinder component of a subjective refraction (-10.0 D to
 /// +10.0 D in 0.25 D steps)
+// todo: consider whether this should be increased to -20.0 to +20.0
+// Why would you limit it if you are going to allow IOL cyl powers +1.0 to +20.0?
 const REF_CYL_POWERS: &[f32] = &POWERS[40..121]; // -10.0 to +10.0
 
 /// A range of powers (diopters) for the spherical equivalent labeling of an IOL (-20.0 D to +60.0
