@@ -136,7 +136,7 @@ pub struct RefCyl {
 }
 
 impl RefCyl {
-    fn new_with_bounds(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
+    fn new(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
          match (power, axis) {
                 (Some(power), Some(axis)) => {
                     if REF_CYL_POWERS.contains(&power) {
