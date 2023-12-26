@@ -137,23 +137,23 @@ pub struct RefCyl {
 
 impl RefCyl {
     fn new(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
-         match (power, axis) {
-                (Some(power), Some(axis)) => {
-                    if REF_CYL_POWERS.contains(&power) {
-                        if let Some(axis) = Axis::new(axis) {
-                            Some(Self { power: RefCylPower(power), axis })
-                        } else {
-                            None
-                        }
+        match (power, axis) {
+            (Some(power), Some(axis)) => {
+                if REF_CYL_POWERS.contains(&power) {
+                    if let Some(axis) = Axis::new(axis) {
+                        Some(Self { power: RefCylPower(power), axis })
                     } else {
                         None
                     }
-                }
-
-                (_, _) => {
+                } else {
                     None
                 }
             }
+
+            (_, _) => {
+                None
+            }
+        }
     }
 }
 
