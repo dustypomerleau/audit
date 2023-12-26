@@ -126,7 +126,7 @@ pub struct RefSphPower(f32);
 impl RefSphPower {
     pub fn new(value: f32) -> Option<Self> {
         if REF_SPH_POWERS.contains(&value) {
-             Some(Self(value))
+            Some(Self(value))
         } else {
             None
         }
@@ -140,7 +140,7 @@ pub struct RefCylPower(f32);
 impl RefCylPower {
     pub fn new(value: f32) -> Option<Self> {
         if REF_CYL_POWERS.contains(&value) {
-             Some(Self(value))
+            Some(Self(value))
         } else {
             None
         }
@@ -159,15 +159,13 @@ impl RefCyl {
         match (power, axis) {
             (Some(power), Some(axis)) => {
                 if let (Some(power), Some(axis)) = (RefCylPower::new(power), Axis::new(axis)) {
-                        Some(Self { power, axis })
+                    Some(Self { power, axis })
                 } else {
                     None
                 }
             }
 
-            (_, _) => {
-                None
-            }
+            (_, _) => None,
         }
     }
 }
