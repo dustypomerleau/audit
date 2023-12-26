@@ -110,23 +110,16 @@ pub trait Va {} // todo: for common methods on acuity
 /// meridian of [`Incision`]. In the future, it may also be used for the axis of an implanted [`Iol`].
 pub struct Axis(i32);
 
-impl Axis {
-    pub fn new(axis: i32) -> Option<Self> {
-        if (0..180).contains(&axis) {
-            Some(Self(axis))
-        } else {
-            None
-        }
+impl Bounded for Axis {
+    fn min_value() -> Self {
+        Self(0)
     }
+
+    fn max_value() -> Self {
+        Self(179)
+    } 
 }
 
-// todo: consider the right place in the code to constrain these values
-// it probably makes sense for each of the power dypes to have a new constructor like axis, and
-// then to have simpler logic in the new function for refraction, for example
-// but you're too tired to think clearly about it rn, maybe they should all be trashed and just use
-// f32s
-//
-//
 /// The spherical component of a subjective refraction. The type is constrained to values in
 /// [`REF_SPH_POWERS`] by the `new()` method on [`Refraction`].
 pub struct RefSphPower(f32);
