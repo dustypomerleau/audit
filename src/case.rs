@@ -1,5 +1,5 @@
 // todo: break out vision, incision, iol, etc all into separate files
-use crate::{cyl::Cyl, surgeon::Surgeon};
+use crate::{surgeon::Surgeon};
 use serde::Deserialize;
 use time::{Date, OffsetDateTime};
 
@@ -70,13 +70,13 @@ pub struct Vision {
     den: f32,
 }
 
-impl Bounded for Vision {
-    fn min_value() -> Self {
-        Self { num: 1.0, den: 1.0 }
-    }
-
-    fn max_value() -> Self {
-        Self { num: 20.0, den: 9999.0 }
+impl Vision {
+    pub fn new(num: f32, den: f32) -> Option<Self> {
+        if (0.1..=20.0).contains(&num) && den > 0.0 {
+            Some(Self { num, den })
+        } else {
+            None
+        }
     }
 }
 
@@ -110,23 +110,43 @@ pub trait Va {} // todo: for common methods on acuity
 /// meridian of [`Incision`]. In the future, it may also be used for the axis of an implanted [`Iol`].
 pub struct Axis(i32);
 
-impl Bounded for Axis {
-    fn min_value() -> Self {
-        Self(0)
+impl Axis {
+    pub fn new(axis: i32) -> Option<Self> {
+        if (0..180).contains(&axis) {
+            Some(Axis(axis))
+        } else {
+            None
+        }
     }
-
-    fn max_value() -> Self {
-        Self(179)
-    } 
 }
 
 /// The spherical component of a subjective refraction. The type is constrained to values in
 /// [`REF_SPH_POWERS`] by the `new()` method on [`Refraction`].
 pub struct RefSphPower(f32);
 
+impl RefSphPower {
+    pub fn new(value: f32) -> Option<Self> {
+        if REF_SPH_POWERS.contains(&value) {
+             Some(Self(value))
+        } else {
+            None
+        }
+    }
+}
+
 /// The cylindrical power component of a subjective refraction. The type is constrained to values in
 /// [`REF_CYL_POWERS`] by the `new()` method on [`Refraction`].
 pub struct RefCylPower(f32);
+
+impl RefCylPower {
+    pub fn new(value: f32) -> Option<Self> {
+        if REF_CYL_POWERS.contains(&value) {
+             Some(Self(value))
+        } else {
+            None
+        }
+    }
+}
 
 /// The cylinder component of a subjective refraction, consisting of a cylindrical power in
 /// diopters, and an axis in degrees.
@@ -139,12 +159,8 @@ impl RefCyl {
     fn new(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
         match (power, axis) {
             (Some(power), Some(axis)) => {
-                if REF_CYL_POWERS.contains(&power) {
-                    if let Some(axis) = Axis::new(axis) {
-                        Some(Self { power: RefCylPower(power), axis })
-                    } else {
-                        None
-                    }
+                if let (Some(power), Some(axis)) = (RefCylPower::new(power), Axis::new(axis)) {
+                        Some(Self { power, axis })
                 } else {
                     None
                 }
@@ -165,12 +181,18 @@ pub struct Refraction {
 
 impl Refraction {
     pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Option<Self> {
-        if REF_SPH_POWERS.contains(&sph) {
-            let sph = RefSphPower(sph);
-            let cyl = RefCyl::new(cyl, axis);
-            Some(Self { sph, cyl })
-        } else {
-            None
+        match (RefSphPower::new(sph), RefCyl::new(cyl, axis)) {
+            (Some(sph), Some(cyl)) => {
+                Some(Refraction { sph, cyl: Some(cyl) })
+            }
+
+            (Some(sph), None) => {
+                Some(Refraction { sph, cyl: None })
+            }
+
+            (_, _) => {
+                None
+            }
         }
     }
 }
@@ -181,35 +203,45 @@ pub struct OpRefraction {
     after: Refraction,
 }
 
+pub struct TargetCylPower(f32);
+
+impl TargetCylPower {
+    pub fn new(value: f32) -> Option<Self> {
+        if (0.0..=6.0).contains(&value) {
+             Some(Self(value))
+        } else {
+            None
+        }
+    }
+}
+
 pub struct TargetCyl {
-    power: f32,
+    power: TargetCylPower,
     axis: Axis,
 }
 
-impl Cyl for TargetCyl {
-    fn new_with_bounds(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
-         match (power, axis) {
-                (Some(power), Some(axis)) => {
-                    if REF_CYL_POWERS.contains(&power) {
-                        if let Some(axis) = Axis::new(axis) {
-                            Some(RefCyl { power: RefCylPower(power), axis })
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                }
-
-                (_, _) => {
+// note: This is the second impl of SomeCyl::new()
+// If you do this a third time, perhaps abstract it into a generic.
+impl TargetCyl {
+    fn new(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
+        match (power, axis) {
+            (Some(power), Some(axis)) => {
+                if let (Some(power), Some(axis)) = (TargetCylPower::new(power), Axis::new(axis)) {
+                        Some(Self { power, axis })
+                } else {
                     None
                 }
             }
+
+            (_, _) => {
+                None
+            }
+        }
     }
 }
+
 /// The residual postop refraction predicted by your formula of choice.
 // At the start, allow only one formula/target.
-// todo: should we make the Cyl here a new TargetCyl type, with different bounds than RefCyl?
 pub struct Target {
     formula: Option<Formula>,
     se: f32,
