@@ -1,5 +1,5 @@
 // todo: break out vision, incision, iol, etc all into separate files
-use crate::{surgeon::Surgeon};
+use crate::surgeon::Surgeon;
 use serde::Deserialize;
 use time::{Date, OffsetDateTime};
 
