@@ -179,17 +179,14 @@ pub struct Refraction {
 impl Refraction {
     pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Option<Self> {
         match (RefSphPower::new(sph), RefCyl::new(cyl, axis)) {
-            (Some(sph), Some(cyl)) => {
-                Some(Refraction { sph, cyl: Some(cyl) })
-            }
+            (Some(sph), Some(cyl)) => Some(Refraction {
+                sph,
+                cyl: Some(cyl),
+            }),
 
-            (Some(sph), None) => {
-                Some(Refraction { sph, cyl: None })
-            }
+            (Some(sph), None) => Some(Refraction { sph, cyl: None }),
 
-            (_, _) => {
-                None
-            }
+            (_, _) => None,
         }
     }
 }
@@ -205,7 +202,7 @@ pub struct TargetCylPower(f32);
 impl TargetCylPower {
     pub fn new(value: f32) -> Option<Self> {
         if (0.0..=6.0).contains(&value) {
-             Some(Self(value))
+            Some(Self(value))
         } else {
             None
         }
@@ -224,15 +221,13 @@ impl TargetCyl {
         match (power, axis) {
             (Some(power), Some(axis)) => {
                 if let (Some(power), Some(axis)) = (TargetCylPower::new(power), Axis::new(axis)) {
-                        Some(Self { power, axis })
+                    Some(Self { power, axis })
                 } else {
                     None
                 }
             }
 
-            (_, _) => {
-                None
-            }
+            (_, _) => None,
         }
     }
 }
@@ -246,15 +241,19 @@ pub struct Target {
 }
 
 impl Target {
-    pub fn new(formula: Option<Formula>, se: f32, cyl: Option<f32>, axis: Option<i32>) -> Option<Self> {
+    pub fn new(
+        formula: Option<Formula>,
+        se: f32,
+        cyl: Option<f32>,
+        axis: Option<i32>,
+    ) -> Option<Self> {
         let cyl = TargetCyl::new(cyl, axis);
 
         if (-6.0..=2.0).contains(&se) {
-            Some(Self { formula, se, cyl, })
+            Some(Self { formula, se, cyl })
         } else {
             None
         }
-
     }
 }
 
@@ -351,7 +350,7 @@ impl From<FlatCase> for Case {
             se: fc.target_se.unwrap(), // won't panic, as `and()` checks the value above
             cyl: fc.target_cyl_power.and(Some(TargetCyl {
                 power: fc.target_cyl_power.unwrap(),
-                axis
+                axis,
             })),
         }));
 
