@@ -1,4 +1,3 @@
-// todo: break out vision, incision, iol, etc all into separate files
 use crate::{
     refraction::{OpRefraction, Refraction},
     surgeon::Surgeon,
