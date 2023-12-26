@@ -167,7 +167,7 @@ impl Refraction {
     pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Option<Self> {
         if REF_SPH_POWERS.contains(&sph) {
             let sph = RefSphPower(sph);
-            let cyl = RefCyl::new_with_bounds(cyl, axis);
+            let cyl = RefCyl::new(cyl, axis);
 
             Some(Self { sph, cyl })
         } else {
