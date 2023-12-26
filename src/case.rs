@@ -168,7 +168,6 @@ impl Refraction {
         if REF_SPH_POWERS.contains(&sph) {
             let sph = RefSphPower(sph);
             let cyl = RefCyl::new(cyl, axis);
-
             Some(Self { sph, cyl })
         } else {
             None
