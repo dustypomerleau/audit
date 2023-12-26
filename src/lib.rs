@@ -7,6 +7,7 @@ pub mod case;
 pub mod csv;
 pub mod error_template;
 pub mod fileserv;
+pub mod iol;
 pub mod powers;
 pub mod refraction;
 pub mod surgeon;

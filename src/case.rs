@@ -69,35 +69,6 @@ impl Incision {
     }
 }
 
-pub struct IolSe(f32);
-
-impl IolSe {
-    pub fn new(se: f32) -> Option<Self> {
-        if IOL_SE_POWERS.contains(&se) {
-            Some(Self(se))
-        } else {
-            None
-        }
-    }
-}
-
-pub struct IolCyl(f32);
-
-impl IolCyl {
-    pub fn new(cyl: f32) -> Option<Self> {
-        if IOL_CYL_POWERS.contains(&cyl) {
-            Some(Self(cyl))
-        } else {
-            None
-        }
-    }
-}
-
-pub struct Iol {
-    se: IolSe,
-    cyl: Option<IolCyl>,
-}
-
 /// A single surgical case
 // for now, leave biometry parameters out - these can be added later with a working system
 #[derive(Debug, PartialEq)]
