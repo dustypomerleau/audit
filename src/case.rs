@@ -499,11 +499,8 @@ pub struct FlatCase {
 
 #[cfg(test)]
 mod tests {
-    use time::Date;
-
-    use crate::surgeon::Surgeon;
-
     use super::*;
+    use time::Month;
 
     #[test]
     fn case_implements_from_flatcase() {
