@@ -250,29 +250,11 @@ pub struct Target {
 
 impl Target {
     pub fn new(formula: Option<Formula>, se: f32, cyl: Option<f32>, axis: Option<i32>) -> Option<Self> {
-        // you've done this twice, if it happens again, you need to make a new_with_bounds (or something) function within the cyl
-        // trait that checks that the cyl values given are within bounds for the type of cyl and
-        // returns Self - in fact, definitely do this
         let cyl = match (cyl, axis) {
             (Some(power), Some(axis)) => {
-                // It's not clear at this point what cyl targets we should allow
-                // 6 seems ludicrous, but it depends what the patient starts with: what if they
-                //    have KCN?
-                // Perhaps you could argue not to limit this in any way, but it seems like we want
-                // to at least flag extreme cases to make sure it's not an accident.
-                // Probably best to limit it, and then just exclude the cyl in cases that are very
-                // extreme.
-                if (0.0..=6.0).contains(&power) {
-                    if let Some(axis) = Axis::new(axis) {
-                        Some(TargetCyl { power, axis })
-                    } else {
-                        None
-                    }
+                if let (Some(power), Some(axis)) = (TargetCylPower::new(power), Axis::new(axis)) {
+                    Some(TargetCyl { power, axis })
                 } else {
-                    // we should probably throw an error here, how else will we provide feedback to
-                    // the user?
-                    // Alternatively, we could screen all the values in each column of the CSV at
-                    // the time of submission, before doing anything with them
                     None
                 }
             }
