@@ -72,11 +72,11 @@ pub struct Vision {
 
 impl Bounded for Vision {
     fn min_value() -> Self {
-        Vision { num: 1.0, den: 1.0 }
+        Self { num: 1.0, den: 1.0 }
     }
 
     fn max_value() -> Self {
-        Vision { num: 20.0, den: 9999.0 }
+        Self { num: 20.0, den: 9999.0 }
     }
 }
 
