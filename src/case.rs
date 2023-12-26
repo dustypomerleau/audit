@@ -1,5 +1,8 @@
 // todo: break out vision, incision, iol, etc all into separate files
-use crate::surgeon::Surgeon;
+use crate::{
+    surgeon::Surgeon,
+    vision::{OpVision, VaDistance, VaNear, Vision},
+};
 use time::Date;
 
 fn make_powers() -> [f32; 321] {
@@ -33,6 +36,7 @@ const IOL_SE_POWERS: &[f32] = &POWERS[..]; // -20.0 to +60.0
 const IOL_CYL_POWERS: &[f32] = &POWERS[84..161]; // +1.0 to +20.0
 
 /// The side of the patient's surgery.
+#[derive(Debug, PartialEq)]
 pub enum Side {
     Right,
     Left,
@@ -41,6 +45,7 @@ pub enum Side {
 /// An adverse intraoperative event. It's up to the surgeon to classify, and only one
 /// option can be selected. For example, a wrap around split in the rhexis opens the PC, but it's
 /// essentially a rhexis complication.
+#[derive(Debug, PartialEq)]
 pub enum Adverse {
     Rhexis,
     Pc,
@@ -51,6 +56,7 @@ pub enum Adverse {
 /// A formula for calculating IOL power from biometry.
 // Limited to common thick-lens formulas to start.
 // Eventually we will add all the formulas commonly in use.
+#[derive(Debug, PartialEq)]
 pub enum Formula {
     Barrett,
     Kane,
@@ -58,6 +64,7 @@ pub enum Formula {
 
 /// A generic axis between 0 and 179 degrees. The main uses are for the axis of [`RefCyl`] and the
 /// meridian of [`Incision`]. In the future, it may also be used for the axis of an implanted [`Iol`].
+#[derive(Debug, PartialEq)]
 pub struct Axis(i32);
 
 impl Axis {
@@ -72,6 +79,7 @@ impl Axis {
 
 /// The spherical component of a subjective refraction. The type is constrained to values in
 /// [`REF_SPH_POWERS`] by the `new()` method on [`Refraction`].
+#[derive(Debug, PartialEq)]
 pub struct RefSphPower(f32);
 
 impl RefSphPower {
@@ -86,6 +94,7 @@ impl RefSphPower {
 
 /// The cylindrical power component of a subjective refraction. The type is constrained to values in
 /// [`REF_CYL_POWERS`] by the `new()` method on [`Refraction`].
+#[derive(Debug, PartialEq)]
 pub struct RefCylPower(f32);
 
 impl RefCylPower {
@@ -100,6 +109,7 @@ impl RefCylPower {
 
 /// The cylinder component of a subjective refraction, consisting of a cylindrical power in
 /// diopters, and an axis in degrees.
+#[derive(Debug, PartialEq)]
 pub struct RefCyl {
     power: RefCylPower,
     axis: Axis,
@@ -122,6 +132,7 @@ impl RefCyl {
 }
 
 /// A patient's subjective refraction.
+#[derive(Debug, PartialEq)]
 pub struct Refraction {
     sph: RefSphPower,
     cyl: Option<RefCyl>,
@@ -143,11 +154,13 @@ impl Refraction {
 }
 
 // for now, limit this to distance refraction
+#[derive(Debug, PartialEq)]
 pub struct OpRefraction {
     before: Refraction,
     after: Refraction,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct TargetCylPower(f32);
 
 impl TargetCylPower {
@@ -160,6 +173,7 @@ impl TargetCylPower {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct TargetCyl {
     power: TargetCylPower,
     axis: Axis,
@@ -185,6 +199,7 @@ impl TargetCyl {
 
 /// The residual postop refraction predicted by your formula of choice.
 // At the start, allow only one formula/target.
+#[derive(Debug, PartialEq)]
 pub struct Target {
     formula: Option<Formula>,
     se: f32,
@@ -208,6 +223,7 @@ impl Target {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct Sia(f32);
 
 impl Sia {
@@ -220,6 +236,7 @@ impl Sia {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub struct Incision {
     meridian: Axis,
     sia: Sia,
@@ -268,6 +285,7 @@ pub struct Iol {
 
 /// A single surgical case
 // for now, leave biometry parameters out - these can be added later with a working system
+#[derive(Debug, PartialEq)]
 pub struct Case {
     surgeon: Surgeon,
     urn: String, // used for the surgeon's reference, not database uniqueness - recommend surgeons have a column to deanonymize
@@ -517,9 +535,9 @@ mod tests {
                 formula: None,
                 se: Some(-0.1),
                 cyl: Some(TargetCyl {
-                    power: 
-                    axis: 160
-                })
+                    power: 2.5,
+                    axis: 160,
+                }),
             }
             .into(),
         };
