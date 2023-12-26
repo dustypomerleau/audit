@@ -275,14 +275,26 @@ impl Sia {
 
 pub struct Incision {
     meridian: Axis,
-    sia: Option<f32>,
+    sia: Sia,
+}
+
+// todo: this mess
+// first question to answer is whether to express Incision.sia as None or 0.0 when there isn't one
+impl Incision {
+    pub fn new(meridian: i32, sia: f32) -> Option<Self> {
+        if let (Some(meridian), Some(sia)) = (Axis::new(meridian), Sia::new(sia)) {
+            Some(Self { meridian, sia })
+        } else {
+            None
+        }
+    }
 }
 
 pub struct IolSe(f32);
 
 impl IolSe {
     pub fn new(se: f32) -> Option<Self> {
-        if (-20.0..=60.0).contains(&se) {
+        if IOL_SE_POWERS.contains(&se) {
             Some(Self(se))
         } else {
             None
@@ -294,7 +306,7 @@ pub struct IolCyl(f32);
 
 impl IolCyl {
     pub fn new(cyl: f32) -> Option<Self> {
-        if (1.0..=20.0).contains(&cyl) {
+        if IOL_CYL_POWERS.contains(&cyl) {
             Some(Self(cyl))
         } else {
             None
