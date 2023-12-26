@@ -7,7 +7,10 @@ pub mod case;
 pub mod csv;
 pub mod error_template;
 pub mod fileserv;
+pub mod powers;
+pub mod refraction;
 pub mod surgeon;
+pub mod target;
 pub mod vision;
 
 cfg_if! { if #[cfg(feature = "hydrate")] {
