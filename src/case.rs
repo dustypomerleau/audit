@@ -1,7 +1,6 @@
 // todo: break out vision, incision, iol, etc all into separate files
 use crate::surgeon::Surgeon;
-use serde::Deserialize;
-use time::{Date, OffsetDateTime};
+use time::Date;
 
 fn make_powers() -> [f32; 321] {
     let mut powers = [0.0; 321];
