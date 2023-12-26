@@ -5,7 +5,6 @@ use cfg_if::cfg_if;
 pub mod app;
 pub mod case;
 pub mod csv;
-pub mod cyl;
 pub mod error_template;
 pub mod fileserv;
 pub mod surgeon;

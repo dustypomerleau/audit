@@ -18,6 +18,7 @@ leptos_axum = { version = "0.5", optional = true, features = ["experimental-isla
 leptos_meta = { version = "0.5", features = ["nightly"] }
 leptos_router = { version = "0.5", features = ["nightly"] }
 log = "0.4"
+num = "0.4.1"
 serde = { version = "1", features = ["derive"] }
 simple_logger = "4"
 thiserror = "1"
