@@ -503,7 +503,7 @@ mod tests {
 
     use crate::surgeon::Surgeon;
 
-    use super::{Adverse, FlatCase, Side};
+    use super::*;
 
     #[test]
     fn case_implements_from_flatcase() {
