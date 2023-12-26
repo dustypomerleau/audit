@@ -250,19 +250,7 @@ pub struct Target {
 
 impl Target {
     pub fn new(formula: Option<Formula>, se: f32, cyl: Option<f32>, axis: Option<i32>) -> Option<Self> {
-        let cyl = match (cyl, axis) {
-            (Some(power), Some(axis)) => {
-                if let (Some(power), Some(axis)) = (TargetCylPower::new(power), Axis::new(axis)) {
-                    Some(TargetCyl { power, axis })
-                } else {
-                    None
-                }
-            }
-
-            (_, _) => {
-                None
-            }
-        };
+        let cyl = TargetCyl::new(cyl, axis);
 
         if (-6.0..=2.0).contains(&se) {
             Some(Self { formula, se, cyl, })
