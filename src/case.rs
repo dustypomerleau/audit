@@ -515,7 +515,7 @@ mod tests {
             target_se: Some(-0.1),
             target_cyl_power: Some(2.5),
             target_cyl_axis: Some(160),
-            date: Some(Date::from_calendar_date(2022, 8, 10)),
+            date: Some(Date::from_calendar_date(2022, Month::August, 10).unwrap()),
             site: Some("The Hospital".to_string()),
             incision_meridian: Some(100),
             incision_sia: Some(0.1),
