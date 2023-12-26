@@ -8,6 +8,7 @@ pub mod csv;
 pub mod error_template;
 pub mod fileserv;
 pub mod surgeon;
+pub mod vision;
 
 cfg_if! { if #[cfg(feature = "hydrate")] {
     use crate::app::App;
