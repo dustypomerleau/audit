@@ -135,13 +135,13 @@ pub struct RefCyl {
     axis: Axis,
 }
 
-impl Cyl for RefCyl {
+impl RefCyl {
     fn new_with_bounds(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
          match (power, axis) {
                 (Some(power), Some(axis)) => {
                     if REF_CYL_POWERS.contains(&power) {
                         if let Some(axis) = Axis::new(axis) {
-                            Some(RefCyl { power: RefCylPower(power), axis })
+                            Some(Self { power: RefCylPower(power), axis })
                         } else {
                             None
                         }
