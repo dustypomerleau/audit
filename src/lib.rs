@@ -11,6 +11,7 @@ pub mod fileserv;
 pub mod iol;
 pub mod powers;
 pub mod refraction;
+pub mod sca;
 pub mod surgeon;
 pub mod target;
 pub mod vision;

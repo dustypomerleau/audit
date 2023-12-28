@@ -1,6 +1,7 @@
 use crate::{
-    case::Axis,
+    axis::Axis,
     powers::{REF_CYL_POWERS, REF_SPH_POWERS},
+    sca::{Bad, Sca},
 };
 
 /// The spherical component of a subjective refraction. The type is constrained to values in
@@ -57,24 +58,67 @@ impl RefCyl {
     }
 }
 
-/// A patient's subjective refraction.
 #[derive(Debug, PartialEq)]
-pub struct Refraction {
-    sph: RefSphPower,
-    cyl: Option<RefCyl>,
+pub enum Refraction {
+    OutOfBounds(Bad),
+    Sph(RefSphPower),
+    Cyl { sph: RefSphPower, cyl: RefCyl },
 }
 
 impl Refraction {
-    pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Option<Self> {
-        match (RefSphPower::new(sph), RefCyl::new(cyl, axis)) {
-            (Some(sph), Some(cyl)) => Some(Refraction {
-                sph,
-                cyl: Some(cyl),
-            }),
+    pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Self {
+        if Self::sph_bounds(sph) {
+            match (cyl, axis) {
+                (Some(cyl), Some(axis)) => {
+                    if Self::cyl_bounds(cyl) {
+                        if let Some(axis) = Axis::new(axis) {
+                            Self::Cyl {
+                                sph: RefSphPower(sph),
+                                cyl: RefCyl {
+                                    power: RefCylPower(cyl),
+                                    axis,
+                                },
+                            }
+                        } else {
+                            Self::OutOfBounds(Bad::Axis)
+                        }
+                    } else {
+                        Self::OutOfBounds(Bad::Cyl)
+                    }
+                }
 
-            (Some(sph), None) => Some(Refraction { sph, cyl: None }),
+                _ => Self::Sph(RefSphPower(sph)),
+            }
+        } else {
+            Self::OutOfBounds(Bad::Sph)
+        }
+    }
 
-            (_, _) => None,
+    fn sph_bounds(f: f32) -> bool {
+        if REF_SPH_POWERS.contains(&f) {
+            true
+        } else {
+            false
+        }
+    }
+
+    fn cyl_bounds(f: f32) -> bool {
+        if REF_CYL_POWERS.contains(&f) {
+            true
+        } else {
+            false
+        }
+    }
+}
+
+impl From<Sca> for Refraction {
+    fn from(s: Sca) -> Self {
+        let Sca { sph, cyl, axis } = s;
+
+        if let Some(sph) = sph {
+            Refraction::new(sph, cyl, axis)
+        } else {
+            Self::OutOfBounds(Bad::Sph)
         }
     }
 }
