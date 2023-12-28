@@ -6,6 +6,17 @@
 ///
 /// The type of vision chart is left to the surgeon's discretion, but is presumed to be a Snellen,
 /// ETDRS, or similar chart that provides fractional equivalents.
+// todo: another option would be to get rid of VaDistance and VaNear and make this an enum, which
+// on reflection seems better, but it may not allow enforcing which enum variant can occupy a given
+// struct field
+// something like:
+// pub enum Vision {
+//     OutOfBounds,
+//     Distance { num: f32, den: f32 },
+//     Near { num: f32, den: f32 },
+// }
+// downside would be that you would need to match on the type whenever you access a field holding a
+// Vision...
 #[derive(Debug, PartialEq)]
 pub struct Vision {
     num: f32,
@@ -34,6 +45,8 @@ pub struct VaNear(pub Vision);
 /// A collection of preoperative and postoperative visual acuity measurements for a given case. The
 /// best-corrected preoperative visual acuity and the best-corrected postoperative visual acuity
 /// are mandatory. Near and uncorrected (raw) visual acuities are optional.
+// todo: consider nesting instead of these field names
+// something like OpVision { before: { distance: { best: VaDistance, raw: Option<VaDistance> }}}
 #[derive(Debug, PartialEq)]
 pub struct OpVision {
     best_before: VaDistance,
