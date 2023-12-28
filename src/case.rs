@@ -85,8 +85,16 @@ impl From<FlatCase> for Case {
         let urn = fc.urn.expect("case to have a URN");
         let side = fc.side.expect("case to have a Side");
 
-        // todo: fix this, you can't just unwrap axis - do you maybe want to work on that cyl trait before proceeding?
-        let axis = Axis::new(fc.target_cyl_axis.unwrap()).unwrap();
+        let axis = if let Some(axis) = fc.target_cyl_axis {
+            if let Some(axis) = Axis::new(axis) {
+                axis
+            } // what should optional fields be if they aren't in range coming from fc? throw? In
+              // this case I think we make axis None and then TargetCyl::new() will be None.
+              // probably remove the second if let and bind axis to Option<i32>, passing it to
+              // TargetCyl::new() - in fact, I think that means you don't need this whole let
+              // binding, because you can just pass fc.target_cyl_axis directly to the TargetCyl
+              // constructor!
+        };
         let target = fc.target_se.and(Some(Target {
             formula: fc.target_formula,
             se: fc.target_se.unwrap(), // won't panic, as `and()` checks the value above
@@ -193,50 +201,50 @@ impl From<FlatCase> for Case {
 /// A flattened version of the Case struct for DB queries.
 // All fields are optional, to allow using the same struct for any DB query on Case.
 pub struct FlatCase {
-    surgeon_email: Option<String>,
-    surgeon_first_name: Option<String>,
-    surgeon_last_name: Option<String>,
-    surgeon_site: Option<String>,
-    urn: Option<String>,
-    side: Option<Side>,
-    target_formula: Option<Formula>,
-    target_se: Option<f32>,
-    target_cyl_power: Option<f32>,
-    target_cyl_axis: Option<i32>,
-    date: Option<Date>,
-    site: Option<String>,
-    incision_meridian: Option<i32>,
-    incision_sia: Option<f32>,
-    iol: Option<String>,
-    adverse: Option<Adverse>,
+    pub surgeon_email: Option<String>,
+    pub surgeon_first_name: Option<String>,
+    pub surgeon_last_name: Option<String>,
+    pub surgeon_site: Option<String>,
+    pub urn: Option<String>,
+    pub side: Option<Side>,
+    pub target_formula: Option<Formula>,
+    pub target_se: Option<f32>,
+    pub target_cyl_power: Option<f32>,
+    pub target_cyl_axis: Option<i32>,
+    pub date: Option<Date>,
+    pub site: Option<String>,
+    pub incision_meridian: Option<i32>,
+    pub incision_sia: Option<f32>,
+    pub iol: Option<String>,
+    pub adverse: Option<Adverse>,
 
-    vision_best_before_num: Option<f32>,
-    vision_best_before_den: Option<f32>,
-    vision_raw_before_num: Option<f32>,
-    vision_raw_before_den: Option<f32>,
+    pub vision_best_before_num: Option<f32>,
+    pub vision_best_before_den: Option<f32>,
+    pub vision_raw_before_num: Option<f32>,
+    pub vision_raw_before_den: Option<f32>,
 
-    vision_best_after_num: Option<f32>,
-    vision_best_after_den: Option<f32>,
-    vision_raw_after_num: Option<f32>,
-    vision_raw_after_den: Option<f32>,
+    pub vision_best_after_num: Option<f32>,
+    pub vision_best_after_den: Option<f32>,
+    pub vision_raw_after_num: Option<f32>,
+    pub vision_raw_after_den: Option<f32>,
 
-    vision_best_near_before_num: Option<f32>,
-    vision_best_near_before_den: Option<f32>,
-    vision_raw_near_before_num: Option<f32>,
-    vision_raw_near_before_den: Option<f32>,
+    pub vision_best_near_before_num: Option<f32>,
+    pub vision_best_near_before_den: Option<f32>,
+    pub vision_raw_near_before_num: Option<f32>,
+    pub vision_raw_near_before_den: Option<f32>,
 
-    vision_best_near_after_num: Option<f32>,
-    vision_best_near_after_den: Option<f32>,
-    vision_raw_near_after_num: Option<f32>,
-    vision_raw_near_after_den: Option<f32>,
+    pub vision_best_near_after_num: Option<f32>,
+    pub vision_best_near_after_den: Option<f32>,
+    pub vision_raw_near_after_num: Option<f32>,
+    pub vision_raw_near_after_den: Option<f32>,
 
-    refraction_before_sph: Option<f32>,
-    refraction_before_cyl_power: Option<f32>,
-    refraction_before_cyl_axis: Option<i32>,
+    pub refraction_before_sph: Option<f32>,
+    pub refraction_before_cyl_power: Option<f32>,
+    pub refraction_before_cyl_axis: Option<i32>,
 
-    refraction_after_sph: Option<f32>,
-    refraction_after_cyl_power: Option<f32>,
-    refraction_after_cyl_axis: Option<i32>,
+    pub refraction_after_sph: Option<f32>,
+    pub refraction_after_cyl_power: Option<f32>,
+    pub refraction_after_cyl_axis: Option<i32>,
 }
 
 #[cfg(test)]
