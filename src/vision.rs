@@ -24,12 +24,12 @@ impl Vision {
 
 /// A Snellen-style fractional visual acuity measured at distance.
 #[derive(Debug, PartialEq)]
-pub struct VaDistance(Vision);
+pub struct VaDistance(pub Vision);
 
 /// A Snellen-style fractional visual acuity measured at near, and converted to its distance
 /// equivalent.
 #[derive(Debug, PartialEq)]
-pub struct VaNear(Vision);
+pub struct VaNear(pub Vision);
 
 /// A collection of preoperative and postoperative visual acuity measurements for a given case. The
 /// best-corrected preoperative visual acuity and the best-corrected postoperative visual acuity
