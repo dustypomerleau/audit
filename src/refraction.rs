@@ -1,7 +1,7 @@
 use crate::{
     axis::Axis,
     powers::{REF_CYL_POWERS, REF_SPH_POWERS},
-    sca::{Bad, Sca},
+    sca::{BadSca, Sca},
 };
 
 /// The spherical component of a subjective refraction. The type is constrained to values in
@@ -60,7 +60,7 @@ impl RefCyl {
 
 #[derive(Debug, PartialEq)]
 pub enum Refraction {
-    OutOfBounds(Bad),
+    OutOfBounds(BadSca),
     Sph(RefSphPower),
     Cyl { sph: RefSphPower, cyl: RefCyl },
 }
@@ -80,17 +80,17 @@ impl Refraction {
                                 },
                             }
                         } else {
-                            Self::OutOfBounds(Bad::Axis)
+                            Self::OutOfBounds(BadSca::Axis)
                         }
                     } else {
-                        Self::OutOfBounds(Bad::Cyl)
+                        Self::OutOfBounds(BadSca::Cyl)
                     }
                 }
 
                 _ => Self::Sph(RefSphPower(sph)),
             }
         } else {
-            Self::OutOfBounds(Bad::Sph)
+            Self::OutOfBounds(BadSca::Sph)
         }
     }
 
@@ -118,7 +118,7 @@ impl From<Sca> for Refraction {
         if let Some(sph) = sph {
             Refraction::new(sph, cyl, axis)
         } else {
-            Self::OutOfBounds(Bad::Sph)
+            Self::OutOfBounds(BadSca::Sph)
         }
     }
 }

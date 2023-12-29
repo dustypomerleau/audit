@@ -5,7 +5,7 @@ pub struct Sca {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Bad {
+pub enum BadSca {
     Sph,
     Cyl,
     Axis,
