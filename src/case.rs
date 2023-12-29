@@ -45,9 +45,9 @@ pub struct Incision {
     sia: Sia,
 }
 
-// todo: this mess
-// first question to answer is whether to express Incision.sia as None or 0.0 when there isn't one
 impl Incision {
+    // There isn't any point to calling this function if there is no sia, but when you
+    // call it, you'll need to pass 0.0 for sia if the value of the FlatCase field is None.
     pub fn new(meridian: i32, sia: f32) -> Option<Self> {
         if let (Some(meridian), Some(sia)) = (Axis::new(meridian), Sia::new(sia)) {
             Some(Self { meridian, sia })
