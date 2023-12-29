@@ -28,8 +28,6 @@ pub struct TargetCyl {
     axis: Axis,
 }
 
-// note: This is the second impl of SomeCyl::new()
-// If you do this a third time, perhaps abstract it into a generic.
 impl TargetCyl {
     fn new(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
         match (power, axis) {
