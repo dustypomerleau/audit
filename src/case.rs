@@ -1,5 +1,6 @@
 use crate::{
     axis::Axis,
+    flatcase::FlatCase,
     refraction::{OpRefraction, Refraction},
     surgeon::Surgeon,
     target::{Formula, Target, TargetCyl},
