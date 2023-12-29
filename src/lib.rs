@@ -9,6 +9,7 @@ pub mod csv;
 pub mod error_template;
 pub mod fileserv;
 pub mod flatcase;
+pub mod incision;
 pub mod iol;
 pub mod powers;
 pub mod refraction;

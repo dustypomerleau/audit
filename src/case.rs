@@ -1,6 +1,7 @@
 use crate::{
     axis::Axis,
     flatcase::FlatCase,
+    incision::{Incision, Sia},
     refraction::{OpRefraction, Refraction},
     surgeon::Surgeon,
     target::{Formula, Target, TargetCyl},
@@ -24,37 +25,6 @@ pub enum Adverse {
     Pc,
     Zonule,
     Other,
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Sia(f32);
-
-impl Sia {
-    pub fn new(sia: f32) -> Option<Self> {
-        if (0.0..=2.0).contains(&sia) {
-            Some(Self(sia))
-        } else {
-            None
-        }
-    }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Incision {
-    meridian: Axis,
-    sia: Sia,
-}
-
-impl Incision {
-    // There isn't any point to calling this function if there is no sia, but when you
-    // call it, you'll need to pass 0.0 for sia if the value of the FlatCase field is None.
-    pub fn new(meridian: i32, sia: f32) -> Option<Self> {
-        if let (Some(meridian), Some(sia)) = (Axis::new(meridian), Sia::new(sia)) {
-            Some(Self { meridian, sia })
-        } else {
-            None
-        }
-    }
 }
 
 /// A single surgical case
