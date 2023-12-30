@@ -10,11 +10,14 @@ pub enum Va {
     Near { num: f32, den: f32 },
 }
 
+/// A helper enum for specifying the kind of `Va` you want to generate with `Va::new()`.
 pub enum VaKind {
     Distance,
     Near,
 }
 
+/// A helper enum for specifying the out of bounds value when `Va::new()` returns
+/// `Va::OutOfBounds`.
 pub enum BadVa {
     Num,
     Den,
@@ -42,15 +45,10 @@ struct VaSet {
     after: Va,
 }
 
-/// A collection of preoperative and postoperative visual acuity measurements for a given case. The
-/// best-corrected preoperative visual acuity and the best-corrected postoperative visual acuity
-/// are mandatory. Near and uncorrected (raw) visual acuities are optional.
+/// A collection of preoperative and postoperative visual acuity measurements for a given case.
+/// The `VaSet` for best-corrected distance is mandatory. Other fields are optional.
 // todo: perhaps we want a new() function that ensures the correct enum variants for each VaSet
-// in OpVision
-// Note: this structure forces you to have both a before and an after for a given type of
-// acuity (meaning that only full sets are allowed). I think this is desireable, because
-// analysis is only possible if you have before and after datea, but if it
-// causes headaches, you may need to rethink it.
+// in OpVa
 #[derive(Debug, PartialEq)]
 pub struct OpVa {
     best_distance: VaSet,
