@@ -16,7 +16,7 @@ pub mod refraction;
 pub mod sca;
 pub mod surgeon;
 pub mod target;
-pub mod vision;
+pub mod va;
 
 cfg_if! { if #[cfg(feature = "hydrate")] {
     use crate::app::App;

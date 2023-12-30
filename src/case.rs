@@ -5,7 +5,7 @@ use crate::{
     refraction::{OpRefraction, Refraction},
     surgeon::Surgeon,
     target::{Formula, Target, TargetCyl},
-    vision::{OpVision, Va},
+    vision::{OpVa, Va},
 };
 use time::Date;
 
