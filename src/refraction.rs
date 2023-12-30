@@ -36,6 +36,10 @@ impl RefCylPower {
 
 /// The cylinder component of a subjective refraction, consisting of a cylindrical power in
 /// diopters, and an axis in degrees.
+// todo: use an enum here, with the same pattern you used in TargetCyl, and change the new function
+// to take non-optional fields. For now, probably also remove sph_bounds() and cyl_bounds() on
+// Refraction and just inline those checks, as there isn't any other location you would use those
+// functions at the moment.
 #[derive(Debug, PartialEq)]
 pub struct RefCyl {
     power: RefCylPower,
