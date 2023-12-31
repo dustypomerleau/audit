@@ -1,18 +1,19 @@
 use crate::{
     axis::Axis,
     powers::{REF_CYL_POWERS, REF_SPH_POWERS},
-    sca::{BadSca, Sca},
+    sca::Sca,
 };
+use thiserror::Error;
 
 /// The spherical component of a subjective refraction. The type is constrained to values in
-/// [`REF_SPH_POWERS`] by the `new()` method on [`Refraction`].
+/// [`REF_SPH_POWERS`] (increments of 0.25 diopters).
 #[derive(Debug, PartialEq)]
 pub struct RefSphPower(f32);
 
 impl RefSphPower {
-    pub fn new(value: f32) -> Option<Self> {
-        if REF_SPH_POWERS.contains(&value) {
-            Some(Self(value))
+    pub fn new(power: f32) -> Option<Self> {
+        if REF_SPH_POWERS.contains(&power) {
+            Some(Self(power))
         } else {
             None
         }
@@ -20,14 +21,14 @@ impl RefSphPower {
 }
 
 /// The cylindrical power component of a subjective refraction. The type is constrained to values in
-/// [`REF_CYL_POWERS`] by the `new()` method on [`Refraction`].
+/// [`REF_CYL_POWERS`] (increments of 0.25 diopters).
 #[derive(Debug, PartialEq)]
 pub struct RefCylPower(f32);
 
 impl RefCylPower {
-    pub fn new(value: f32) -> Option<Self> {
-        if REF_CYL_POWERS.contains(&value) {
-            Some(Self(value))
+    pub fn new(power: f32) -> Option<Self> {
+        if REF_CYL_POWERS.contains(&power) {
+            Some(Self(power))
         } else {
             None
         }
@@ -36,10 +37,6 @@ impl RefCylPower {
 
 /// The cylinder component of a subjective refraction, consisting of a cylindrical power in
 /// diopters, and an axis in degrees.
-// todo: use an enum here, with the same pattern you used in TargetCyl, and change the new function
-// to take non-optional fields. For now, probably also remove sph_bounds() and cyl_bounds() on
-// Refraction and just inline those checks, as there isn't any other location you would use those
-// functions at the moment.
 #[derive(Debug, PartialEq)]
 pub struct RefCyl {
     power: RefCylPower,
@@ -47,87 +44,89 @@ pub struct RefCyl {
 }
 
 impl RefCyl {
-    fn new(power: Option<f32>, axis: Option<i32>) -> Option<Self> {
-        match (power, axis) {
-            (Some(power), Some(axis)) => {
-                if let (Some(power), Some(axis)) = (RefCylPower::new(power), Axis::new(axis)) {
-                    Some(Self { power, axis })
-                } else {
-                    None
-                }
+    fn new(power: f32, axis: i32) -> Result<Self, RefBoundsError> {
+        if let Some(power) = RefCylPower::new(power) {
+            if let Some(axis) = Axis::new(axis) {
+                Ok(Self { power, axis })
+            } else {
+                Err(RefBoundsError::Axis(axis))
             }
-
-            (_, _) => None,
+        } else {
+            Err(RefBoundsError::Cyl(power))
         }
     }
 }
 
 #[derive(Debug, PartialEq)]
 pub enum Refraction {
-    OutOfBounds(BadSca),
     Sph(RefSphPower),
     Cyl { sph: RefSphPower, cyl: RefCyl },
 }
 
+#[derive(Debug, PartialEq)]
+enum Cyl {
+    Power,
+    Axis,
+}
+
+#[derive(Debug, Error)]
+pub enum RefBoundsError {
+    #[error("refraction must always have a spherical component, but `None` was supplied")]
+    NoSph,
+
+    #[error(
+        "refraction cylinder must have both a power and an axis but the {0:?} was not supplied"
+    )]
+    NoPair(Cyl),
+
+    #[error("refraction sphere must be a float contained in REF_SPH_POWERS (supplied value: {0})")]
+    Sph(f32),
+
+    #[error(
+        "refraction cylinder must be a float contained in REF_CYL_POWERS (supplied value: {0})"
+    )]
+    Cyl(f32),
+
+    #[error("refraction axis must be a u32 in the range 0..180 (supplied value: {0})")]
+    Axis(u32),
+}
+
 impl Refraction {
-    pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Self {
-        if Self::sph_bounds(sph) {
+    pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Result<Self, RefBoundsError> {
+        if let Some(sph) = RefSphPower::new(sph) {
             match (cyl, axis) {
                 (Some(cyl), Some(axis)) => {
-                    if Self::cyl_bounds(cyl) {
-                        if let Some(axis) = Axis::new(axis) {
-                            Self::Cyl {
-                                sph: RefSphPower(sph),
-                                cyl: RefCyl {
-                                    power: RefCylPower(cyl),
-                                    axis,
-                                },
-                            }
-                        } else {
-                            Self::OutOfBounds(BadSca::Axis)
-                        }
-                    } else {
-                        Self::OutOfBounds(BadSca::Cyl)
-                    }
+                    let cyl = RefCyl::new(cyl, axis)?;
+                    Ok(Self::Cyl { sph, cyl })
                 }
 
-                _ => Self::Sph(RefSphPower(sph)),
+                (Some(_cyl), _) => Err(RefBoundsError::NoPair(Cyl::Axis)),
+
+                (_, Some(_axis)) => Err(RefBoundsError::NoPair(Cyl::Power)),
+
+                (_, _) => Ok(Self::Sph(sph)),
             }
         } else {
-            Self::OutOfBounds(BadSca::Sph)
-        }
-    }
-
-    fn sph_bounds(f: f32) -> bool {
-        if REF_SPH_POWERS.contains(&f) {
-            true
-        } else {
-            false
-        }
-    }
-
-    fn cyl_bounds(f: f32) -> bool {
-        if REF_CYL_POWERS.contains(&f) {
-            true
-        } else {
-            false
+            Err(RefBoundsError::Sph(sph))
         }
     }
 }
 
 impl From<Sca> for Refraction {
-    fn from(s: Sca) -> Self {
+    fn from(s: Sca) -> Result<Self, RefBoundsError> {
         let Sca { sph, cyl, axis } = s;
 
         if let Some(sph) = sph {
             Refraction::new(sph, cyl, axis)
         } else {
-            Self::OutOfBounds(BadSca::Sph)
+            Err(RefBoundsError::Sph)
         }
     }
 }
 
 // for now, limit this to distance refraction
+// todo: consider how best to enforce this - you could wrap with something like
+// `Distance(Refraction)` and `Near(Refraction)` but it may complicate other access
 #[derive(Debug, PartialEq)]
 pub struct OpRefraction {
     before: Refraction,
