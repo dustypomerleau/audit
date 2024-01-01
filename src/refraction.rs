@@ -112,17 +112,18 @@ impl Refraction {
     }
 }
 
-impl From<Sca> for Refraction {
-    fn from(s: Sca) -> Result<Self, RefBoundsError> {
-        let Sca { sph, cyl, axis } = s;
-
-        if let Some(sph) = sph {
-            Refraction::new(sph, cyl, axis)
-        } else {
-            Err(RefBoundsError::NoSph)
-        }
-    }
-}
+// todo: this needs to be TryFrom because it can fail
+// impl From<Sca> for Refraction {
+//     fn from(s: Sca) -> Result<Self, RefBoundsError> {
+//         let Sca { sph, cyl, axis } = s;
+//
+//         if let Some(sph) = sph {
+//             Refraction::new(sph, cyl, axis)
+//         } else {
+//             Err(RefBoundsError::NoSph)
+//         }
+//     }
+// }
 
 // for now, limit this to distance refraction
 // todo: consider how best to enforce this - you could wrap with something like
