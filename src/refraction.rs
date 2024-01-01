@@ -119,7 +119,7 @@ impl From<Sca> for Refraction {
         if let Some(sph) = sph {
             Refraction::new(sph, cyl, axis)
         } else {
-            Err(RefBoundsError::Sph(sph))
+            Err(RefBoundsError::NoSph)
         }
     }
 }
