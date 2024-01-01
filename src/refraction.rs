@@ -44,6 +44,8 @@ pub struct RefCyl {
     axis: Axis,
 }
 
+// todo: this function should probably be generic, but we will need the associated type of the
+// error
 impl RefCyl {
     fn new(power: f32, axis: i32) -> Result<Self, RefBoundsError> {
         if let Some(power) = RefCylPower::new(power) {
