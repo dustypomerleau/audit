@@ -108,3 +108,15 @@ impl Target {
         }
     }
 }
+
+impl From<Sca> for Target {
+    fn from(s: Sca) -> Result<Self, TargetBoundsError> {
+        let Sca { sph, cyl, axis } = s;
+
+        if let Some(se) = sph {
+            Target::new(None, se, cyl, axis)
+        } else {
+            Err(TargetBoundsError::NoSph)
+        }
+    }
+}
