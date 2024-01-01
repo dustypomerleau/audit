@@ -1,3 +1,6 @@
+// todo: Refraction and Target have almost identical modules
+// work out a trait/generics that they can both use
+
 use crate::{
     axis::Axis,
     cyl::Cyl,
