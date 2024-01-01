@@ -6,6 +6,28 @@ use crate::{
 };
 use thiserror::Error;
 
+#[derive(Debug, Error)]
+pub enum RefBoundsError {
+    #[error("refraction must always have a spherical component, but `None` was supplied")]
+    NoSph,
+
+    #[error(
+        "refraction cylinder must have both a power and an axis but the {0:?} was not supplied"
+    )]
+    NoPair(Cyl),
+
+    #[error("refraction sphere must be a float contained in REF_SPH_POWERS (supplied value: {0})")]
+    Sph(f32),
+
+    #[error(
+        "refraction cylinder must be a float contained in REF_CYL_POWERS (supplied value: {0})"
+    )]
+    Cyl(f32),
+
+    #[error("refraction axis must be a u32 in the range 0..180 (supplied value: {0})")]
+    Axis(u32),
+}
+
 /// The spherical component of a subjective refraction. The type is constrained to values in
 /// [`REF_SPH_POWERS`] (increments of 0.25 diopters).
 #[derive(Debug, PartialEq)]
@@ -64,28 +86,6 @@ impl RefCyl {
 pub enum Refraction {
     Sph(RefSphPower),
     Cyl { sph: RefSphPower, cyl: RefCyl },
-}
-
-#[derive(Debug, Error)]
-pub enum RefBoundsError {
-    #[error("refraction must always have a spherical component, but `None` was supplied")]
-    NoSph,
-
-    #[error(
-        "refraction cylinder must have both a power and an axis but the {0:?} was not supplied"
-    )]
-    NoPair(Cyl),
-
-    #[error("refraction sphere must be a float contained in REF_SPH_POWERS (supplied value: {0})")]
-    Sph(f32),
-
-    #[error(
-        "refraction cylinder must be a float contained in REF_CYL_POWERS (supplied value: {0})"
-    )]
-    Cyl(f32),
-
-    #[error("refraction axis must be a u32 in the range 0..180 (supplied value: {0})")]
-    Axis(u32),
 }
 
 impl Refraction {
