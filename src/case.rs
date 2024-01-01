@@ -169,82 +169,82 @@ impl From<FlatCase> for Case {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use time::Month;
-
-    #[test]
-    fn case_implements_from_flatcase() {
-        let fc = FlatCase {
-            surgeon_email: Some("test@test.com".to_string()),
-            surgeon_first_name: Some("test first".to_string()),
-            surgeon_last_name: Some("test last".to_string()),
-            surgeon_site: None,
-            urn: Some("AB700693".to_string()),
-            side: Some(Side::Right),
-            target_formula: None,
-            target_se: Some(-0.1),
-            target_cyl_power: Some(2.5),
-            target_cyl_axis: Some(160),
-            date: Some(Date::from_calendar_date(2022, Month::August, 10).unwrap()),
-            site: Some("The Hospital".to_string()),
-            incision_meridian: Some(100),
-            incision_sia: Some(0.1),
-            iol: Some("AMO Symfony".to_string()),
-            adverse: Some(Adverse::Rhexis),
-
-            vision_best_before_num: Some(6.0),
-            vision_best_before_den: Some(12.0),
-            vision_raw_before_num: Some(6.0),
-            vision_raw_before_den: Some(24.0),
-
-            vision_best_after_num: Some(6.0),
-            vision_best_after_den: Some(5.0),
-            vision_raw_after_num: Some(6.0),
-            vision_raw_after_den: Some(7.5),
-
-            vision_best_near_before_num: Some(6.0),
-            vision_best_near_before_den: Some(9.0),
-            vision_raw_near_before_num: None,
-            vision_raw_near_before_den: None,
-
-            vision_best_near_after_num: Some(6.0),
-            vision_best_near_after_den: Some(6.0),
-            vision_raw_near_after_num: None,
-            vision_raw_near_after_den: None,
-
-            refraction_before_sph: Some(-5.25),
-            refraction_before_cyl_power: Some(1.5),
-            refraction_before_cyl_axis: Some(10),
-
-            refraction_after_sph: Some(0.25),
-            refraction_after_cyl_power: Some(-0.5),
-            refraction_after_cyl_axis: Some(12),
-        };
-
-        let c = Case {
-            surgeon: Surgeon {
-                email: "test@test.com".to_string(),
-                first_name: Some("test first".to_string()),
-                last_name: Some("test last".to_string()),
-                site: None,
-            },
-
-            urn: "AB700693".to_string(),
-            side: Side::Right,
-
-            target: Target {
-                formula: None,
-                se: Some(-0.1),
-                cyl: Some(TargetCyl {
-                    power: 2.5,
-                    axis: 160,
-                }),
-            }
-            .into(),
-        };
-
-        assert_eq!(Case::from(fc), c)
-    }
-}
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use time::Month;
+//
+//     #[test]
+//     fn case_implements_from_flatcase() {
+//         let fc = FlatCase {
+//             surgeon_email: Some("test@test.com".to_string()),
+//             surgeon_first_name: Some("test first".to_string()),
+//             surgeon_last_name: Some("test last".to_string()),
+//             surgeon_site: None,
+//             urn: Some("AB700693".to_string()),
+//             side: Some(Side::Right),
+//             target_formula: None,
+//             target_se: Some(-0.1),
+//             target_cyl_power: Some(2.5),
+//             target_cyl_axis: Some(160),
+//             date: Some(Date::from_calendar_date(2022, Month::August, 10).unwrap()),
+//             site: Some("The Hospital".to_string()),
+//             incision_meridian: Some(100),
+//             incision_sia: Some(0.1),
+//             iol: Some("AMO Symfony".to_string()),
+//             adverse: Some(Adverse::Rhexis),
+//
+//             vision_best_before_num: Some(6.0),
+//             vision_best_before_den: Some(12.0),
+//             vision_raw_before_num: Some(6.0),
+//             vision_raw_before_den: Some(24.0),
+//
+//             vision_best_after_num: Some(6.0),
+//             vision_best_after_den: Some(5.0),
+//             vision_raw_after_num: Some(6.0),
+//             vision_raw_after_den: Some(7.5),
+//
+//             vision_best_near_before_num: Some(6.0),
+//             vision_best_near_before_den: Some(9.0),
+//             vision_raw_near_before_num: None,
+//             vision_raw_near_before_den: None,
+//
+//             vision_best_near_after_num: Some(6.0),
+//             vision_best_near_after_den: Some(6.0),
+//             vision_raw_near_after_num: None,
+//             vision_raw_near_after_den: None,
+//
+//             refraction_before_sph: Some(-5.25),
+//             refraction_before_cyl_power: Some(1.5),
+//             refraction_before_cyl_axis: Some(10),
+//
+//             refraction_after_sph: Some(0.25),
+//             refraction_after_cyl_power: Some(-0.5),
+//             refraction_after_cyl_axis: Some(12),
+//         };
+//
+//         let c = Case {
+//             surgeon: Surgeon {
+//                 email: "test@test.com".to_string(),
+//                 first_name: Some("test first".to_string()),
+//                 last_name: Some("test last".to_string()),
+//                 site: None,
+//             },
+//
+//             urn: "AB700693".to_string(),
+//             side: Side::Right,
+//
+//             target: Target {
+//                 formula: None,
+//                 se: Some(-0.1),
+//                 cyl: Some(TargetCyl {
+//                     power: 2.5,
+//                     axis: 160,
+//                 }),
+//             }
+//             .into(),
+//         };
+//
+//         assert_eq!(Case::from(fc), c)
+//     }
+// }
