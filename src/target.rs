@@ -1,4 +1,25 @@
-use crate::{axis::Axis, sca::BadSca};
+use crate::{axis::Axis, cyl::Cyl, sca::Sca};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum TargetBoundsError {
+    #[error("target must always have a spherical equivalent, but `None` was supplied")]
+    NoSph,
+
+    #[error("target cylinder must have both a power and an axis but the {0:?} was not supplied")]
+    NoPair(Cyl),
+
+    #[error("refraction sphere must be a float contained in REF_SPH_POWERS (supplied value: {0})")]
+    Sph(f32),
+
+    #[error(
+        "refraction cylinder must be a float contained in REF_CYL_POWERS (supplied value: {0})"
+    )]
+    Cyl(f32),
+
+    #[error("refraction axis must be a u32 in the range 0..180 (supplied value: {0})")]
+    Axis(u32),
+}
 
 /// A formula for calculating IOL power from biometry.
 // Limited to common thick-lens formulas to start.
@@ -27,24 +48,21 @@ impl TargetCylPower {
 
 /// A [`Target`] cylinder value, including power and axis.
 #[derive(Debug, PartialEq)]
-pub enum TargetCyl {
-    OutOfBounds(BadSca),
-    Value { power: TargetCylPower, axis: Axis },
+pub struct TargetCyl {
+    power: TargetCylPower,
+    axis: Axis,
 }
 
 impl TargetCyl {
-    /// Returns a new [`TargetCyl::Value`] if both the [`TargetCylPower`] and the [`Axis`] are within
-    /// bounds. Returns [`TargetCyl::OutOfBounds`] with the offending field if either is out of
-    /// bounds.
-    fn new(power: f32, axis: f32) -> Self {
+    fn new(power: f32, axis: f32) -> Result<Self, TargetBoundsError> {
         if let Some(power) = TargetCylPower::new(power) {
             if let Some(axis) = Axis::new(axis) {
-                Self::Value { power, axis }
+                Ok(Self { power, axis })
             } else {
-                Self::OutOfBounds(BadSca::Axis)
+                Err(TargetBoundsError::Axis(axis))
             }
         } else {
-            Self::OutOfBounds(BadSca::Cyl)
+            Err(TargetBoundsError::Cyl(power))
         }
     }
 }
@@ -53,42 +71,40 @@ impl TargetCyl {
 // At the start, allow only one formula/target.
 #[derive(Debug, PartialEq)]
 pub enum Target {
-    OutOfBounds(BadSca),
-    Value {
+    Se {
         formula: Option<Formula>,
         se: f32,
-        cyl: Option<TargetCyl>,
+    },
+
+    Cyl {
+        formula: Option<Formula>,
+        se: f32,
+        cyl: TargetCyl,
     },
 }
 
 impl Target {
-    /// Returns a new [`Target`], giving the [`Target::Value`] variant if the spherical equivalent is within bounds,
-    /// and [`Target::OutOfBounds`] if the `se` is out of bounds. The `cyl` field only contains
-    /// `Some(TargetCyl)` if both `cyl` and `axis` are within bounds.
-    pub fn new(formula: Option<Formula>, se: f32, cyl: Option<f32>, axis: Option<i32>) -> Self {
+    pub fn new(
+        formula: Option<Formula>,
+        se: f32,
+        cyl: Option<f32>,
+        axis: Option<i32>,
+    ) -> Result<Self, TargetBoundsError> {
         if (-6.0..=2.0).contains(&se) {
             match (cyl, axis) {
                 (Some(cyl), Some(axis)) => {
-                    let cyl = TargetCyl::new(cyl, axis);
-                    let cyl = match cyl {
-                        TargetCyl::Value => Some(cyl),
-                        // todo: log bad cyl, throw an error explaining that cyl is out of bounds
-                        TargetCyl::OutOfBounds(BadSca::Cyl) => None,
-                        // todo: log bad axis, throw an error explaining that axis is out of bounds
-                        TargetCyl::OutOfBounds(BadSca::Axis) => None,
-                    };
-
-                    Self::Value { formula, se, cyl }
+                    let cyl = TargetCyl::new(cyl, axis)?;
+                    Ok(Self::Cyl { formula, se, cyl })
                 }
 
-                _ => Self::Value {
-                    formula,
-                    se,
-                    cyl: None,
-                },
+                (Some(cyl), _) => Err(TargetBoundsError::NoPair(Cyl::Axis)),
+
+                (_, Some(axis)) => Err(TargetBoundsError::NoPair(Cyl::Power)),
+
+                (_, _) => Ok(Self::Se { formula, se }),
             }
         } else {
-            Self::OutOfBounds(BadSca::Sph)
+            Err(TargetBoundsError::Sph(se))
         }
     }
 }
