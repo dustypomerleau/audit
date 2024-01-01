@@ -6,6 +6,7 @@ pub mod app;
 pub mod axis;
 pub mod case;
 pub mod csv;
+pub mod cyl;
 pub mod error_template;
 pub mod fileserv;
 pub mod flatcase;
