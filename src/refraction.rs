@@ -1,5 +1,6 @@
 use crate::{
     axis::Axis,
+    cyl::Cyl,
     powers::{REF_CYL_POWERS, REF_SPH_POWERS},
     sca::Sca,
 };
@@ -61,12 +62,6 @@ impl RefCyl {
 pub enum Refraction {
     Sph(RefSphPower),
     Cyl { sph: RefSphPower, cyl: RefCyl },
-}
-
-#[derive(Debug, PartialEq)]
-enum Cyl {
-    Power,
-    Axis,
 }
 
 #[derive(Debug, Error)]
