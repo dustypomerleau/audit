@@ -10,6 +10,7 @@ use crate::{
 use thiserror::Error;
 use time::Date;
 
+#[derive(Debug, PartialEq)]
 pub enum Required {
     Surgeon,
     Urn,
