@@ -1,5 +1,9 @@
 use crate::{
-    incision::Incision, refraction::OpRefraction, surgeon::Surgeon, target::Target, va::OpVa,
+    incision::Incision,
+    refraction::{OpRefraction, RefBoundsError},
+    surgeon::Surgeon,
+    target::{Target, TargetBoundsError},
+    va::{OpVa, VaBoundsError},
 };
 use thiserror::Error;
 use time::Date;
@@ -18,8 +22,12 @@ pub enum Required {
 pub enum CaseError {
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
-    #[error("out of bounds value on `Case`: {0:?}")]
-    Bounds(Error),
+    #[error("out of bounds value on field `target` of `Case`: {0:?}")]
+    Target(TargetBoundsError),
+    #[error("out of bounds value on field `refraction` of `Case`: {0:?}")]
+    Refraction(RefBoundsError),
+    #[error("out of bounds value on field `va` of `Case`: {0:?}")]
+    Va(VaBoundsError),
 }
 
 /// The side of the patient's surgery.
