@@ -97,9 +97,9 @@ impl Target {
                     Ok(Self::Cyl { formula, se, cyl })
                 }
 
-                (Some(cyl), _) => Err(TargetBoundsError::NoPair(Cyl::Axis)),
+                (Some(_cyl), _) => Err(TargetBoundsError::NoPair(Cyl::Axis)),
 
-                (_, Some(axis)) => Err(TargetBoundsError::NoPair(Cyl::Power)),
+                (_, Some(_axis)) => Err(TargetBoundsError::NoPair(Cyl::Power)),
 
                 (_, _) => Ok(Self::Se { formula, se }),
             }
