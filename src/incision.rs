@@ -1,3 +1,5 @@
+use crate::axis::Axis;
+
 #[derive(Debug, PartialEq)]
 pub struct Sia(f32);
 
