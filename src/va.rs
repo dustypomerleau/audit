@@ -1,3 +1,11 @@
+#[derive(Debug, PartialEq)]
+pub enum VaBoundsError {
+    #[error("Va numerator must be between 0.1 and 20.0. {0} was supplied")]
+    Num(f32),
+    #[error("Va denominator must be > 0. {0} was supplied")]
+    Den(f32),
+}
+
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  
 ///
@@ -5,15 +13,8 @@
 /// ETDRS, or similar chart that provides fractional equivalents.
 #[derive(Debug, PartialEq)]
 pub enum Va {
-    OutOfBounds(BadVa),
     Distance { num: f32, den: f32 },
     Near { num: f32, den: f32 },
-}
-
-/// A helper enum for specifying the kind of `Va` you want to generate with `Va::new()`.
-pub enum VaKind {
-    Distance,
-    Near,
 }
 
 /// A helper enum for specifying the out of bounds value when `Va::new()` returns
@@ -24,18 +25,18 @@ pub enum BadVa {
 }
 
 impl Va {
-    pub fn new(kind: VaKind, num: f32, den: f32) -> Self {
+    pub fn new(kind: VaKind, num: f32, den: f32) -> Result<Self, VaBoundsError> {
         if (0.1..=20.0).contains(&num) {
             if den > 0.0 {
                 match kind {
-                    VaKind::Distance => Self::Distance { num, den },
-                    VaKind::Near => Self::Near { num, den },
+                    VaKind::Distance => Ok(Self::Distance { num, den }),
+                    VaKind::Near => Ok(Self::Near { num, den }),
                 }
             } else {
-                Self::OutOfBounds(BadVa::Den)
+                Err(VaBoundsError::Den(den))
             }
         } else {
-            Self::OutOfBounds(BadVa::Num)
+            Err(VaBoundsError::Num(num))
         }
     }
 }
