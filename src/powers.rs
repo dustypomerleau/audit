@@ -1,4 +1,6 @@
-const fn make_powers() -> [f32; 321] {
+// todo: I think you need whatever the modern alternative was to lazy_static! or something
+// research how to do this
+fn make_powers() -> [f32; 321] {
     let mut powers = [0.0; 321];
     powers[0] = -20.0;
     for i in 1..321 {
