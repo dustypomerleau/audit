@@ -38,8 +38,8 @@ impl TargetCylPower {
     /// Creates a new [`TargetCylPower`] of up to 6 diopters, returning `None` if the value is out
     /// of bounds.
     pub fn new(power: f32) -> Option<Self> {
-        if (0.0..=6.0).contains(&value) {
-            Some(Self(value))
+        if (0.0..=6.0).contains(&power) {
+            Some(Self(power))
         } else {
             None
         }
