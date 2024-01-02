@@ -54,7 +54,7 @@ pub struct TargetCyl {
 }
 
 impl TargetCyl {
-    fn new(power: f32, axis: f32) -> Result<Self, TargetBoundsError> {
+    fn new(power: f32, axis: u32) -> Result<Self, TargetBoundsError> {
         if let Some(power) = TargetCylPower::new(power) {
             if let Some(axis) = Axis::new(axis) {
                 Ok(Self { power, axis })
