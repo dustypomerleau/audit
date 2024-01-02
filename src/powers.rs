@@ -1,4 +1,4 @@
-fn make_powers() -> [f32; 321] {
+const fn make_powers() -> [f32; 321] {
     let mut powers = [0.0; 321];
     powers[0] = -20.0;
     for i in 1..321 {
