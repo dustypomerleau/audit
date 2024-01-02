@@ -1,4 +1,6 @@
-#[derive(Debug, PartialEq)]
+use thiserror::Error;
+
+#[derive(Debug, Error)]
 pub enum VaBoundsError {
     #[error("Va numerator must be between 0.1 and 20.0. {0} was supplied")]
     Num(f32),
