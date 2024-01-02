@@ -19,7 +19,7 @@ pub enum CaseError {
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
     #[error("out of bounds value on `Case`: {0:?}")]
-    Bounds(thiserror::Error),
+    Bounds(Error),
 }
 
 /// The side of the patient's surgery.
