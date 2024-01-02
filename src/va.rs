@@ -40,6 +40,7 @@ impl Va {
     }
 }
 
+#[derive(Debug, PartialEq)]
 struct VaSet {
     before: Va,
     after: Va,
