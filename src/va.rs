@@ -6,6 +6,13 @@ pub enum VaBoundsError {
     Den(f32),
 }
 
+/// A helper enum for specifying the type of acuity you want to generate with `Va::new()`.
+#[derive(Debug, PartialEq)]
+pub enum VaKind {
+    Distance,
+    Near,
+}
+
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  
 ///
@@ -15,13 +22,6 @@ pub enum VaBoundsError {
 pub enum Va {
     Distance { num: f32, den: f32 },
     Near { num: f32, den: f32 },
-}
-
-/// A helper enum for specifying the out of bounds value when `Va::new()` returns
-/// `Va::OutOfBounds`.
-pub enum BadVa {
-    Num,
-    Den,
 }
 
 impl Va {

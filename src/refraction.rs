@@ -27,8 +27,8 @@ pub enum RefBoundsError {
     )]
     Cyl(f32),
 
-    #[error("refraction axis must be a u32 in the range 0..180 (supplied value: {0})")]
-    Axis(u32),
+    #[error("refraction axis must be a i32 in the range 0..180 (supplied value: {0})")]
+    Axis(i32),
 }
 
 /// The spherical component of a subjective refraction. The type is constrained to values in

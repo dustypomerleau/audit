@@ -17,8 +17,8 @@ pub enum TargetBoundsError {
     )]
     Cyl(f32),
 
-    #[error("refraction axis must be a u32 in the range 0..180 (supplied value: {0})")]
-    Axis(u32),
+    #[error("refraction axis must be a i32 in the range 0..180 (supplied value: {0})")]
+    Axis(i32),
 }
 
 /// A formula for calculating IOL power from biometry.
@@ -54,7 +54,7 @@ pub struct TargetCyl {
 }
 
 impl TargetCyl {
-    fn new(power: f32, axis: u32) -> Result<Self, TargetBoundsError> {
+    fn new(power: f32, axis: i32) -> Result<Self, TargetBoundsError> {
         if let Some(power) = TargetCylPower::new(power) {
             if let Some(axis) = Axis::new(axis) {
                 Ok(Self { power, axis })
