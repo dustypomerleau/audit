@@ -1,3 +1,5 @@
+#![feature(const_trait_impl)] // allows using range syntax on constants in powers.rs
+
 mod refs; // for rust analyzer support only
 
 use cfg_if::cfg_if;
