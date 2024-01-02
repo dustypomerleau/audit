@@ -5,7 +5,6 @@ use crate::{
     axis::Axis,
     cyl::Cyl,
     powers::{REF_CYL_POWERS, REF_SPH_POWERS},
-    sca::Sca,
 };
 use thiserror::Error;
 

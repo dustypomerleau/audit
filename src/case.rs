@@ -1,11 +1,5 @@
 use crate::{
-    axis::Axis,
-    flatcase::FlatCase,
-    incision::{Incision, Sia},
-    refraction::{OpRefraction, RefBoundsError, Refraction},
-    surgeon::Surgeon,
-    target::{Formula, Target, TargetBoundsError, TargetCyl},
-    va::{OpVa, Va},
+    incision::Incision, refraction::OpRefraction, surgeon::Surgeon, target::Target, va::OpVa,
 };
 use thiserror::Error;
 use time::Date;
