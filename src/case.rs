@@ -19,13 +19,12 @@ pub enum Required {
     Refraction,
 }
 
-// todo: think through more carefully how `From<FlatCase>` can fail and what you want to
-// communicate - ideally we just want to propagate RefBoundsError and TargetBoundsError
 #[derive(Debug, Error)]
 pub enum CaseError {
+    #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
-    Bounds(RefBoundsError),
-    Bounds(TargetBoundsError),
+    #[error("out of bounds value on `Case`: {0:?}")]
+    Bounds(thiserror::Error),
 }
 
 /// The side of the patient's surgery.
