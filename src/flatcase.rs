@@ -1,3 +1,9 @@
+use crate::{
+    case::{Adverse, Side},
+    target::Formula,
+};
+use time::Date;
+
 /// A flattened version of the [`Case`](crate::case::Case) struct for use in database queries and
 /// the initial ingestion of CSV data.
 // All fields are optional, to allow using the same struct for any DB query on Case.
