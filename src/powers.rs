@@ -1,5 +1,8 @@
 // todo: I think you need whatever the modern alternative was to lazy_static! or something
 // research how to do this
+// alternatively, just write plain functions that check the bounds and then that the power is
+// modulo 0.25 - this might be simpler
+// pub fn validate_sph(sph: f32) -> bool {...}
 fn make_powers() -> [f32; 321] {
     let mut powers = [0.0; 321];
     powers[0] = -20.0;
