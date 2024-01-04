@@ -9,7 +9,7 @@ use thiserror::Error;
 use time::Date;
 
 #[derive(Debug, PartialEq)]
-pub enum Required {
+enum Required {
     Surgeon,
     Urn,
     Side,
@@ -19,7 +19,7 @@ pub enum Required {
 }
 
 #[derive(Debug, Error)]
-pub enum CaseError {
+enum CaseError {
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
     #[error("out of bounds value on field `target` of `Case`: {0:?}")]
