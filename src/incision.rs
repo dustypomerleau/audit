@@ -2,7 +2,7 @@ use crate::axis::Axis;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-enum IncisionBoundsError {
+pub enum IncisionBoundsError {
     #[error(
         "incision meridian must be an integer value between 0° and 179° (supplied value: {0})"
     )]
