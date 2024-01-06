@@ -11,15 +11,13 @@ pub enum RefBoundsError {
     )]
     NoPair(Cyl),
 
-    #[error("refraction sphere must be a float contained in REF_SPH_POWERS (supplied value: {0})")]
+    #[error("refraction sphere must be a value between -20 and +20 (supplied value: {0})")]
     Sph(f32),
 
-    #[error(
-        "refraction cylinder must be a float contained in REF_CYL_POWERS (supplied value: {0})"
-    )]
+    #[error("refraction cylinder must be a value between -10 and +10 (supplied value: {0})")]
     Cyl(f32),
 
-    #[error("refraction axis must be a i32 in the range 0..180 (supplied value: {0})")]
+    #[error("refraction axis must be an integer between 0 and 179 (supplied value: {0})")]
     Axis(i32),
 }
 
