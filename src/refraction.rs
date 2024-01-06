@@ -76,9 +76,9 @@ impl RefCyl {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Refraction {
-    Sph(RefSphPower),
-    Cyl { sph: RefSphPower, cyl: RefCyl },
+pub struct Refraction {
+    sph: RefSphPower,
+    cyl: Option<RefCyl>,
 }
 
 impl Refraction {
@@ -87,7 +87,10 @@ impl Refraction {
             match (cyl, axis) {
                 (Some(cyl), Some(axis)) => {
                     let cyl = RefCyl::new(cyl, axis)?;
-                    Ok(Self::Cyl { sph, cyl })
+                    Ok(Self {
+                        sph,
+                        cyl: Some(cyl),
+                    })
                 }
 
                 (Some(_cyl), _) => Err(RefBoundsError::NoPair(Cyl::Axis)),
