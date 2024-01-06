@@ -29,7 +29,7 @@ pub struct RefSphPower(f32);
 
 impl RefSphPower {
     pub fn new(power: f32) -> Option<Self> {
-        if (-20.0..=20.0).contains(&power) && power % 0.25 == 0 {
+        if (-20.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
             Some(Self(power))
         } else {
             None
