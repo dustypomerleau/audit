@@ -84,21 +84,17 @@ pub struct Refraction {
 impl Refraction {
     pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Result<Self, RefBoundsError> {
         if let Some(sph) = RefSphPower::new(sph) {
-            match (cyl, axis) {
-                (Some(cyl), Some(axis)) => {
-                    let cyl = RefCyl::new(cyl, axis)?;
-                    Ok(Self {
-                        sph,
-                        cyl: Some(cyl),
-                    })
-                }
+            let cyl = match (cyl, axis) {
+                (Some(cyl), Some(axis)) => Some(RefCyl::new(cyl, axis)?),
 
-                (Some(_cyl), _) => Err(RefBoundsError::NoPair(Cyl::Axis)),
+                (Some(_cyl), _) => return Err(RefBoundsError::NoPair(Cyl::Axis)),
 
-                (_, Some(_axis)) => Err(RefBoundsError::NoPair(Cyl::Power)),
+                (_, Some(_axis)) => return Err(RefBoundsError::NoPair(Cyl::Power)),
 
-                (_, _) => Ok(Self::Sph(sph)),
-            }
+                (_, _) => None,
+            };
+
+            Ok(Self { sph, cyl })
         } else {
             Err(RefBoundsError::Sph(sph))
         }
