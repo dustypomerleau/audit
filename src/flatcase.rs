@@ -6,9 +6,6 @@ use time::Date;
 
 /// A flattened version of the [`Case`](crate::case::Case) struct for use in database queries and
 /// the initial ingestion of CSV data.
-// All fields are optional, to allow using the same struct for any DB query on Case.
-// todo: revisit this after you've created your DB model, to see if any of the types need to be
-// altered.
 pub struct FlatCase {
     pub surgeon_email: Option<String>,
     pub surgeon_first_name: Option<String>,
