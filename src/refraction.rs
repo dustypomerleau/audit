@@ -103,8 +103,8 @@ impl Refraction {
 }
 
 // for now, limit this to distance refraction
-// todo: consider how best to enforce this - you could wrap with something like
-// `Distance(Refraction)` and `Near(Refraction)` but it may complicate other access
+// todo: consider how best to enforce this - it might complicate your life, but you could consider
+// something like Refraction::Sph(Refr::Cyl { sph: RefSphPower, cyl: RefCyl })
 #[derive(Debug, PartialEq)]
 pub struct OpRefraction {
     before: Refraction,
