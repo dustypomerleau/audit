@@ -85,7 +85,7 @@ impl TargetCyl {
 #[derive(Debug, PartialEq)]
 pub struct Target {
     formula: Option<Formula>,
-    se: f32,
+    se: TargetSePower,
     cyl: Option<TargetCyl>,
 }
 
