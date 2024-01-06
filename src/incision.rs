@@ -1,4 +1,15 @@
 use crate::axis::Axis;
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+enum IncisionBoundsError {
+    #[error(
+        "incision meridian must be an integer value between 0° and 179° (supplied value: {0})"
+    )]
+    Meridian(i32),
+    #[error("SIA must be a value between 0 D and 2 D (supplied value: {0})")]
+    Sia(f32),
+}
 
 #[derive(Debug, PartialEq)]
 pub struct Sia(f32);
@@ -20,13 +31,15 @@ pub struct Incision {
 }
 
 impl Incision {
-    // If no sia is given by the surgeon (meaning FlatCase contains sia: None), you'll
-    // have to call this with 0.0.
-    pub fn new(meridian: i32, sia: f32) -> Option<Self> {
-        if let (Some(meridian), Some(sia)) = (Axis::new(meridian), Sia::new(sia)) {
-            Some(Self { meridian, sia })
+    pub fn new(meridian: i32, sia: f32) -> Result<Self, IncisionBoundsError> {
+        if let Some(meridian) = Axis::new(meridian) {
+            if let Some(sia) = Sia::new(sia) {
+                Ok(Self { meridian, sia })
+            } else {
+                Err(IncisionBoundsError::Sia(sia))
+            }
         } else {
-            None
+            Err(IncisionBoundsError::Meridian(meridian))
         }
     }
 }
