@@ -7,5 +7,4 @@ reorder_impl_items = true
 trailing_comma = "Always"
 use_field_init_shorthand = true
 where_single_line = true
-wrap_comments = true
 
