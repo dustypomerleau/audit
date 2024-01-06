@@ -43,7 +43,7 @@ pub struct RefCylPower(f32);
 
 impl RefCylPower {
     pub fn new(power: f32) -> Option<Self> {
-        if (-10.0..=10.0).contains(&power) && power % 0.25 == 0 {
+        if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
             Some(Self(power))
         } else {
             None
