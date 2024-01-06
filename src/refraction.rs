@@ -1,11 +1,4 @@
-// todo: Refraction and Target have almost identical modules
-// work out a trait/generics that they can both use
-
-use crate::{
-    axis::Axis,
-    cyl::Cyl,
-    powers::{REF_CYL_POWERS, REF_SPH_POWERS},
-};
+use crate::{axis::Axis, cyl::Cyl};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -30,14 +23,13 @@ pub enum RefBoundsError {
     Axis(i32),
 }
 
-/// The spherical component of a subjective refraction. The type is constrained to values in
-/// [`REF_SPH_POWERS`] (increments of 0.25 diopters).
+/// The spherical component of a subjective refraction.
 #[derive(Debug, PartialEq)]
 pub struct RefSphPower(f32);
 
 impl RefSphPower {
     pub fn new(power: f32) -> Option<Self> {
-        if REF_SPH_POWERS.contains(&power) {
+        if (-20.0..=20.0).contains(&power) && power % 0.25 == 0 {
             Some(Self(power))
         } else {
             None
@@ -45,14 +37,13 @@ impl RefSphPower {
     }
 }
 
-/// The cylindrical power component of a subjective refraction. The type is constrained to values in
-/// [`REF_CYL_POWERS`] (increments of 0.25 diopters).
+/// The cylindrical power component of a subjective refraction.
 #[derive(Debug, PartialEq)]
 pub struct RefCylPower(f32);
 
 impl RefCylPower {
     pub fn new(power: f32) -> Option<Self> {
-        if REF_CYL_POWERS.contains(&power) {
+        if (-10.0..=10.0).contains(&power) && power % 0.25 == 0 {
             Some(Self(power))
         } else {
             None
@@ -110,19 +101,6 @@ impl Refraction {
         }
     }
 }
-
-// todo: this needs to be TryFrom because it can fail
-// impl From<Sca> for Refraction {
-//     fn from(s: Sca) -> Result<Self, RefBoundsError> {
-//         let Sca { sph, cyl, axis } = s;
-//
-//         if let Some(sph) = sph {
-//             Refraction::new(sph, cyl, axis)
-//         } else {
-//             Err(RefBoundsError::NoSph)
-//         }
-//     }
-// }
 
 // for now, limit this to distance refraction
 // todo: consider how best to enforce this - you could wrap with something like
