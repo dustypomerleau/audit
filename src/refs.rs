@@ -15,8 +15,7 @@ fn rc() {
 // Arc
 // immutable, multithread
 fn arc() {
-    use std::sync::Arc;
-    use std::thread;
+    use std::{sync::Arc, thread};
 
     let apple = Arc::new("the same apple");
 
