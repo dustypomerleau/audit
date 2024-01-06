@@ -84,24 +84,19 @@ impl Target {
         axis: Option<i32>,
     ) -> Result<Self, TargetBoundsError> {
         if (-6.0..=2.0).contains(&se) {
-            match (cyl, axis) {
-                (Some(cyl), Some(axis)) => {
-                    let cyl = TargetCyl::new(cyl, axis)?;
-                    Ok(Self {
-                        formula,
-                        se,
-                        cyl: Some(cyl),
-                    })
-                }
+            let cyl = match (cyl, axis) {
+                (Some(cyl), Some(axis)) => Some(TargetCyl::new(cyl, axis)?),
 
-                (Some(_cyl), _) => Err(TargetBoundsError::NoPair(Cyl::Axis)),
+                (Some(_cyl), _) => return Err(TargetBoundsError::NoPair(Cyl::Axis)),
 
-                (_, Some(_axis)) => Err(TargetBoundsError::NoPair(Cyl::Power)),
+                (_, Some(_axis)) => return Err(TargetBoundsError::NoPair(Cyl::Power)),
 
-                (_, _) => Ok(Self::Se { formula, se }),
-            }
+                (_, _) => None,
+            };
         } else {
             Err(TargetBoundsError::Sph(se))
         }
+
+        Ok(Self { formula, se, cyl })
     }
 }
