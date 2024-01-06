@@ -70,17 +70,10 @@ impl TargetCyl {
 /// The residual postop refraction predicted by your formula of choice.
 // At the start, allow only one formula/target.
 #[derive(Debug, PartialEq)]
-pub enum Target {
-    Se {
-        formula: Option<Formula>,
-        se: f32,
-    },
-
-    Cyl {
-        formula: Option<Formula>,
-        se: f32,
-        cyl: TargetCyl,
-    },
+pub struct Target {
+    formula: Option<Formula>,
+    se: f32,
+    cyl: Option<TargetCyl>,
 }
 
 impl Target {
@@ -94,7 +87,11 @@ impl Target {
             match (cyl, axis) {
                 (Some(cyl), Some(axis)) => {
                     let cyl = TargetCyl::new(cyl, axis)?;
-                    Ok(Self::Cyl { formula, se, cyl })
+                    Ok(Self {
+                        formula,
+                        se,
+                        cyl: Some(cyl),
+                    })
                 }
 
                 (Some(_cyl), _) => Err(TargetBoundsError::NoPair(Cyl::Axis)),
@@ -108,16 +105,3 @@ impl Target {
         }
     }
 }
-
-// todo: this needs to be TryFrom because it can fail
-// impl From<Sca> for Target {
-//     fn from(s: Sca) -> Result<Self, TargetBoundsError> {
-//         let Sca { sph, cyl, axis } = s;
-//
-//         if let Some(se) = sph {
-//             Target::new(None, se, cyl, axis)
-//         } else {
-//             Err(TargetBoundsError::NoSph)
-//         }
-//     }
-// }
