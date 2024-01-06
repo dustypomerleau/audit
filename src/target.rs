@@ -96,7 +96,7 @@ impl Target {
         cyl: Option<f32>,
         axis: Option<i32>,
     ) -> Result<Self, TargetBoundsError> {
-        if let Some(se) = TargetSePower::new(power) {
+        if let Some(se) = TargetSePower::new(se) {
             let cyl = match (cyl, axis) {
                 (Some(cyl), Some(axis)) => Some(TargetCyl::new(cyl, axis)?),
 
