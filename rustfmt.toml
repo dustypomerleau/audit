@@ -4,7 +4,6 @@ format_macro_matchers = true
 group_imports = "One"
 imports_granularity = "Crate"
 reorder_impl_items = true
-trailing_comma = "Always"
 use_field_init_shorthand = true
 where_single_line = true
 
