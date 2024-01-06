@@ -9,15 +9,15 @@ pub enum TargetBoundsError {
     #[error("target cylinder must have both a power and an axis but the {0:?} was not supplied")]
     NoPair(Cyl),
 
-    #[error("refraction sphere must be a float contained in REF_SPH_POWERS (supplied value: {0})")]
+    #[error(
+        "target spherical equivalent must be a value between -6 D and +2 D (supplied value: {0})"
+    )]
     Sph(f32),
 
-    #[error(
-        "refraction cylinder must be a float contained in REF_CYL_POWERS (supplied value: {0})"
-    )]
+    #[error("target cylinder power must be a value between 0 D and +6 D (supplied value: {0})")]
     Cyl(f32),
 
-    #[error("refraction axis must be a i32 in the range 0..180 (supplied value: {0})")]
+    #[error("target axis must be an integer value between 0° and 179° (supplied value: {0})")]
     Axis(i32),
 }
 

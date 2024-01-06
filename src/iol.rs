@@ -9,13 +9,15 @@ pub enum IolBoundsError {
     #[error("IOL cylinder must have both a power and an axis but the {0:?} was not supplied")]
     NoPair(Cyl),
 
-    #[error("IOL spherical equivalent must be a multiple of 0.25 between -20 and +60 (supplied value: {0})")]
+    #[error("IOL spherical equivalent must be a multiple of 0.25 D between -20 D and +60 D (supplied value: {0})")]
     Se(f32),
 
-    #[error("IOL cylinder must be a multiple of 0.25 between +1 and +20 (supplied value: {0})")]
+    #[error(
+        "IOL cylinder must be a multiple of 0.25 D between +1 D and +20 D (supplied value: {0})"
+    )]
     Cyl(f32),
 
-    #[error("IOL axis must be an integer between 0 and 179 (supplied value: {0})")]
+    #[error("IOL axis must be an integer value between 0° and 179° (supplied value: {0})")]
     Axis(i32),
 }
 

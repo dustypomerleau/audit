@@ -3,7 +3,7 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum RefBoundsError {
-    #[error("refraction must always have a spherical component, but `None` was supplied")]
+    #[error("refraction must always have a spherical power component, but `None` was supplied")]
     NoSph,
 
     #[error(
@@ -11,13 +11,17 @@ pub enum RefBoundsError {
     )]
     NoPair(Cyl),
 
-    #[error("refraction sphere must be a value between -20 and +20 (supplied value: {0})")]
+    #[error(
+        "refraction spherical power must be a value between -20 D and +20 D (supplied value: {0})"
+    )]
     Sph(f32),
 
-    #[error("refraction cylinder must be a value between -10 and +10 (supplied value: {0})")]
+    #[error(
+        "refraction cylinder power must be a value between -10 D and +10 D (supplied value: {0})"
+    )]
     Cyl(f32),
 
-    #[error("refraction axis must be an integer between 0 and 179 (supplied value: {0})")]
+    #[error("refraction axis must be an integer value between 0° and 179° (supplied value: {0})")]
     Axis(i32),
 }
 
