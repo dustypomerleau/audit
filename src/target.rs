@@ -30,6 +30,19 @@ pub enum Formula {
     Kane,
 }
 
+#[derive(Debug, PartialEq)]
+pub struct TargetSePower(f32);
+
+impl TargetSePower {
+    pub fn new(power: f32) -> Option<Self> {
+        if (-6.0..=2.0).contains(&power) {
+            Some(Self(power))
+        } else {
+            None
+        }
+    }
+}
+
 /// A newtype to hold powers compatible with a target cylinder value.
 #[derive(Debug, PartialEq)]
 pub struct TargetCylPower(f32);
@@ -83,7 +96,7 @@ impl Target {
         cyl: Option<f32>,
         axis: Option<i32>,
     ) -> Result<Self, TargetBoundsError> {
-        if (-6.0..=2.0).contains(&se) {
+        if let Some(se) = TargetSePower::new(power) {
             let cyl = match (cyl, axis) {
                 (Some(cyl), Some(axis)) => Some(TargetCyl::new(cyl, axis)?),
 
