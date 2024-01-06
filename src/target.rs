@@ -93,10 +93,10 @@ impl Target {
 
                 (_, _) => None,
             };
+
+            Ok(Self { formula, se, cyl })
         } else {
             Err(TargetBoundsError::Sph(se))
         }
-
-        Ok(Self { formula, se, cyl })
     }
 }
