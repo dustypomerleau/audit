@@ -2,21 +2,22 @@ mod refs; // for rust analyzer support only, not part of the crate
 
 use cfg_if::cfg_if;
 
-pub mod app;
-pub mod axis;
-pub mod case;
-pub mod csv;
-pub mod cyl;
-pub mod error_template;
-pub mod fileserv;
-pub mod flatcase;
-pub mod incision;
-pub mod iol;
-pub mod refraction;
-pub mod sca;
-pub mod surgeon;
-pub mod target;
-pub mod va;
+mod app;
+mod axis;
+mod case;
+mod csv;
+mod cyl;
+mod error_template;
+mod fileserv;
+mod flatcase;
+mod incision;
+mod iol;
+mod power;
+mod refraction;
+mod sca;
+mod surgeon;
+mod target;
+mod va;
 
 cfg_if! { if #[cfg(feature = "hydrate")] {
     use crate::app::App;
