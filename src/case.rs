@@ -1,5 +1,6 @@
 use crate::{
     incision::Incision,
+    iol::Iol,
     refraction::{OpRefraction, RefBoundsError},
     surgeon::Surgeon,
     target::{Target, TargetBoundsError},
@@ -59,7 +60,7 @@ pub struct Case {
     date: Date, // consider how this will be used: is there any scenario requiring a utc datetime? plan was to have an uploaded datetime, but there isn't any reason to keep this in the struct when you could get it from the DB created_at
     site: Option<String>,
     incision: Option<Incision>,
-    iol: Option<String>,
+    iol: Option<Iol>,
     adverse: Option<Adverse>,
     va: OpVa,
     refraction: OpRefraction,
