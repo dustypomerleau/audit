@@ -1,4 +1,7 @@
-use crate::{axis::Axis, cyl::Cyl};
+use crate::{
+    cyl::{Cyl, CylPair},
+    power::Power,
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -7,7 +10,7 @@ pub enum IolBoundsError {
     NoSe,
 
     #[error("IOL cylinder must have both a power and an axis but the {0:?} was not supplied")]
-    NoPair(Cyl),
+    NoPair(CylPair),
 
     #[error("IOL spherical equivalent must be a multiple of 0.25 D between -20 D and +60 D (supplied value: {0})")]
     Se(f32),
@@ -22,71 +25,29 @@ pub enum IolBoundsError {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct IolSePower(f32);
-
-impl IolSePower {
-    pub fn new(power: f32) -> Option<Self> {
-        if (-20.0..=60.0).contains(&power) && power % 0.25 == 0.0 {
-            Some(Self(power))
-        } else {
-            None
-        }
-    }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct IolCylPower(f32);
-
-impl IolCylPower {
-    pub fn new(power: f32) -> Option<Self> {
-        if (1.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
-            Some(Self(power))
-        } else {
-            None
-        }
-    }
-}
-
-#[derive(Debug, PartialEq)]
-pub struct IolCyl {
-    power: IolCylPower,
-    axis: Axis,
-}
-
-impl IolCyl {
-    fn new(power: f32, axis: i32) -> Result<Self, IolBoundsError> {
-        if let Some(power) = IolCylPower::new(power) {
-            if let Some(axis) = Axis::new(axis) {
-                Ok(Self { power, axis })
-            } else {
-                Err(IolBoundsError::Axis(axis))
-            }
-        } else {
-            Err(IolBoundsError::Cyl(power))
-        }
-    }
-}
-
-#[derive(Debug, PartialEq)]
 pub struct Iol {
-    se: IolSePower,
-    cyl: Option<IolCyl>,
+    se: f32,
+    cyl: Option<Cyl>,
 }
 
-impl Iol {
-    pub fn new(se: f32, cyl: Option<f32>, axis: Option<i32>) -> Result<Self, IolBoundsError> {
-        if let Some(se) = IolSePower::new(se) {
-            let cyl = match (cyl, axis) {
-                (Some(cyl), Some(axis)) => Some(IolCyl::new(cyl, axis)?),
+impl TryFrom<Power> for Iol {
+    type Error = IolBoundsError;
 
-                (Some(_cyl), _) => return Err(IolBoundsError::NoPair(Cyl::Axis)),
+    fn try_from(power: Power) -> Result<Self, Self::Error> {
+        let Power { sph: se, cyl } = power;
 
-                (_, Some(_axis)) => return Err(IolBoundsError::NoPair(Cyl::Power)),
+        if (-20.0..=60.0).contains(&se) && se % 0.25 == 0.0 {
+            match cyl {
+                Some(Cyl { power, axis: _ }) => {
+                    if (1.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
+                        Ok(Self { se, cyl })
+                    } else {
+                        Err(IolBoundsError::Cyl(power))
+                    }
+                }
 
-                (_, _) => None,
-            };
-
-            Ok(Self { se, cyl })
+                None => Ok(Self { se, cyl: None }),
+            }
         } else {
             Err(IolBoundsError::Se(se))
         }

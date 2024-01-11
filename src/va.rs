@@ -1,7 +1,4 @@
-use crate::{
-    distance::{Distance, Near},
-    power::Power,
-};
+use crate::distance::{Distance, Near};
 use thiserror::Error;
 
 #[derive(Debug, Error)]

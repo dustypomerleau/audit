@@ -1,4 +1,4 @@
-use crate::{axis::Axis, cyl::Cyl, power::Power, va::Distance};
+use crate::{cyl::Cyl, distance::Distance, power::Power};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -47,12 +47,14 @@ impl TryFrom<Power> for Refraction {
                             sph,
                             cyl: Some(Cyl { power, axis }),
                         })
+                    } else {
+                        Err(RefBoundsError::Cyl(power))
                     }
                 }
                 None => Ok(Self { sph, cyl: None }),
             }
         } else {
-            RefBoundsError::Sph(sph)
+            Err(RefBoundsError::Sph(sph))
         }
     }
 }

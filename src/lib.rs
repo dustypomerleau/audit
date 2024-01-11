@@ -15,7 +15,6 @@ mod incision;
 mod iol;
 mod power;
 mod refraction;
-mod sca;
 mod surgeon;
 mod target;
 mod va;
