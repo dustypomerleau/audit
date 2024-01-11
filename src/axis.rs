@@ -1,6 +1,6 @@
-/// A generic axis between 0° and 179°. The main uses are for the axes of
-/// [`RefCyl`](crate::refraction::RefCyl), [`TargetCyl`](crate::target::TargetCyl), [`IolCyl`](crate::iol::IolCyl), and the
-/// meridian of [`Incision`](crate::incision::Incision::meridian).
+/// A generic axis between 0° and 179°. This is used for the axis of [`Cyl`](crate::cyl::Cyl)
+/// in [`Refraction`](crate::refraction::Refraction), [`Target`](crate::target::Target),
+/// [`Iol`](crate::iol::Iol), and the meridian of [`Incision`](crate::incision::Incision::meridian).
 #[derive(Debug, PartialEq)]
 pub struct Axis(i32);
 
