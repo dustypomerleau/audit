@@ -7,6 +7,7 @@ mod axis;
 mod case;
 mod csv;
 mod cyl;
+mod distance;
 mod error_template;
 mod fileserv;
 mod flatcase;

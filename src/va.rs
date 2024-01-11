@@ -1,3 +1,7 @@
+use crate::{
+    distance::{Distance, Near},
+    power::Power,
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -34,21 +38,15 @@ impl Va {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Distance(Va);
-
-#[derive(Debug, PartialEq)]
-pub struct DistanceSet {
-    before: Distance,
-    after: Distance,
+pub struct DistanceVaSet {
+    before: Distance<Va>,
+    after: Distance<Va>,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Near(Va);
-
-#[derive(Debug, PartialEq)]
-pub struct NearSet {
-    before: Near,
-    after: Near,
+pub struct NearVaSet {
+    before: Near<Va>,
+    after: Near<Va>,
 }
 
 /// A collection of preoperative and postoperative visual acuity measurements for a given case.
@@ -57,8 +55,8 @@ pub struct NearSet {
 // in OpVa
 #[derive(Debug, PartialEq)]
 pub struct OpVa {
-    best_distance: DistanceSet,
-    best_near: Option<NearSet>,
-    raw_distance: Option<DistanceSet>,
-    raw_near: Option<NearSet>,
+    best_distance: DistanceVaSet,
+    best_near: Option<NearVaSet>,
+    raw_distance: Option<DistanceVaSet>,
+    raw_near: Option<NearVaSet>,
 }

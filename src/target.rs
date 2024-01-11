@@ -1,4 +1,7 @@
-use crate::{axis::Axis, cyl::Cyl};
+use crate::{
+    axis::Axis,
+    cyl::{Cyl, CylPair},
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -7,12 +10,12 @@ pub enum TargetBoundsError {
     NoSph,
 
     #[error("target cylinder must have both a power and an axis but the {0:?} was not supplied")]
-    NoPair(Cyl),
+    NoPair(CylPair),
 
     #[error(
         "target spherical equivalent must be a value between -6 D and +2 D (supplied value: {0})"
     )]
-    Sph(f32),
+    Se(f32),
 
     #[error("target cylinder power must be a value between 0 D and +6 D (supplied value: {0})")]
     Cyl(f32),
@@ -30,63 +33,13 @@ pub enum Formula {
     Kane,
 }
 
-#[derive(Debug, PartialEq)]
-pub struct TargetSePower(f32);
-
-impl TargetSePower {
-    pub fn new(power: f32) -> Option<Self> {
-        if (-6.0..=2.0).contains(&power) {
-            Some(Self(power))
-        } else {
-            None
-        }
-    }
-}
-
-/// A newtype to hold powers compatible with a target cylinder value.
-#[derive(Debug, PartialEq)]
-pub struct TargetCylPower(f32);
-
-impl TargetCylPower {
-    /// Creates a new [`TargetCylPower`] of up to 6 diopters, returning `None` if the value is out
-    /// of bounds.
-    pub fn new(power: f32) -> Option<Self> {
-        if (0.0..=6.0).contains(&power) {
-            Some(Self(power))
-        } else {
-            None
-        }
-    }
-}
-
-/// A [`Target`] cylinder value, including power and axis.
-#[derive(Debug, PartialEq)]
-pub struct TargetCyl {
-    power: TargetCylPower,
-    axis: Axis,
-}
-
-impl TargetCyl {
-    fn new(power: f32, axis: i32) -> Result<Self, TargetBoundsError> {
-        if let Some(power) = TargetCylPower::new(power) {
-            if let Some(axis) = Axis::new(axis) {
-                Ok(Self { power, axis })
-            } else {
-                Err(TargetBoundsError::Axis(axis))
-            }
-        } else {
-            Err(TargetBoundsError::Cyl(power))
-        }
-    }
-}
-
 /// The residual postop refraction predicted by your formula of choice.
 // At the start, allow only one formula/target.
 #[derive(Debug, PartialEq)]
 pub struct Target {
     formula: Option<Formula>,
-    se: TargetSePower,
-    cyl: Option<TargetCyl>,
+    se: f32,
+    cyl: Option<Cyl>,
 }
 
 impl Target {
@@ -96,20 +49,36 @@ impl Target {
         cyl: Option<f32>,
         axis: Option<i32>,
     ) -> Result<Self, TargetBoundsError> {
-        if let Some(se) = TargetSePower::new(se) {
-            let cyl = match (cyl, axis) {
-                (Some(cyl), Some(axis)) => Some(TargetCyl::new(cyl, axis)?),
+        if (-6.0..=2.0).contains(&se) {
+            match (cyl, axis) {
+                (Some(cyl), Some(axis)) => {
+                    if (0.0..=6.0).contains(&cyl) {
+                        if let Some(axis) = Axis::new(axis) {
+                            Ok(Self {
+                                formula,
+                                se,
+                                cyl: Some(Cyl { power: cyl, axis }),
+                            })
+                        } else {
+                            Err(TargetBoundsError::Axis(axis))
+                        }
+                    } else {
+                        Err(TargetBoundsError::Cyl(cyl))
+                    }
+                }
 
-                (Some(_cyl), _) => return Err(TargetBoundsError::NoPair(Cyl::Axis)),
+                (Some(cyl), _) => Err(TargetBoundsError::NoPair(CylPair::Axis)),
 
-                (_, Some(_axis)) => return Err(TargetBoundsError::NoPair(Cyl::Power)),
+                (_, Some(axis)) => Err(TargetBoundsError::NoPair(CylPair::Power)),
 
-                (_, _) => None,
-            };
-
-            Ok(Self { formula, se, cyl })
+                (_, _) => Ok(Self {
+                    formula,
+                    se,
+                    cyl: None,
+                }),
+            }
         } else {
-            Err(TargetBoundsError::Sph(se))
+            Err(TargetBoundsError::Se(se))
         }
     }
 }

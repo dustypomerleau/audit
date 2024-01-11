@@ -1,4 +1,4 @@
-use crate::{axis::Axis, cyl::Cyl};
+use crate::{axis::Axis, cyl::Cyl, power::Power, va::Distance};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -25,89 +25,40 @@ pub enum RefBoundsError {
     Axis(i32),
 }
 
-/// The spherical component of a subjective refraction.
-#[derive(Debug, PartialEq)]
-pub struct RefSphPower(f32);
-
-impl RefSphPower {
-    pub fn new(power: f32) -> Option<Self> {
-        if (-20.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
-            Some(Self(power))
-        } else {
-            None
-        }
-    }
-}
-
-/// The cylindrical power component of a subjective refraction.
-#[derive(Debug, PartialEq)]
-pub struct RefCylPower(f32);
-
-impl RefCylPower {
-    pub fn new(power: f32) -> Option<Self> {
-        if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
-            Some(Self(power))
-        } else {
-            None
-        }
-    }
-}
-
-/// The cylinder component of a subjective refraction, consisting of a cylindrical power in
-/// diopters, and an axis in degrees.
-#[derive(Debug, PartialEq)]
-pub struct RefCyl {
-    power: RefCylPower,
-    axis: Axis,
-}
-
-// todo: this function should probably be generic, but we will need the associated type of the
-// error
-impl RefCyl {
-    fn new(power: f32, axis: i32) -> Result<Self, RefBoundsError> {
-        if let Some(power) = RefCylPower::new(power) {
-            if let Some(axis) = Axis::new(axis) {
-                Ok(Self { power, axis })
-            } else {
-                Err(RefBoundsError::Axis(axis))
-            }
-        } else {
-            Err(RefBoundsError::Cyl(power))
-        }
-    }
-}
-
 #[derive(Debug, PartialEq)]
 pub struct Refraction {
-    sph: RefSphPower,
-    cyl: Option<RefCyl>,
+    sph: f32,
+    cyl: Option<Cyl>,
 }
 
-impl Refraction {
-    pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Result<Self, RefBoundsError> {
-        if let Some(sph) = RefSphPower::new(sph) {
-            let cyl = match (cyl, axis) {
-                (Some(cyl), Some(axis)) => Some(RefCyl::new(cyl, axis)?),
+// Do the bounds check on Axis when you construct Power, because the axis check is identical for
+// every type that you will try_into() from Power.
+impl TryFrom<Power> for Refraction {
+    type Error = RefBoundsError;
 
-                (Some(_cyl), _) => return Err(RefBoundsError::NoPair(Cyl::Axis)),
+    fn try_from(power: Power) -> Result<Self, Self::Error> {
+        let Power { sph, cyl } = power;
 
-                (_, Some(_axis)) => return Err(RefBoundsError::NoPair(Cyl::Power)),
-
-                (_, _) => None,
-            };
-
-            Ok(Self { sph, cyl })
+        if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
+            match cyl {
+                Some(Cyl { power, axis }) => {
+                    if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
+                        Ok(Self {
+                            sph,
+                            cyl: Some(Cyl { power, axis }),
+                        })
+                    }
+                }
+                None => Ok(Self { sph, cyl: None }),
+            }
         } else {
-            Err(RefBoundsError::Sph(sph))
+            RefBoundsError::Sph(sph)
         }
     }
 }
 
-// for now, limit this to distance refraction
-// todo: consider how best to enforce this - it might complicate your life, but you could consider
-// something like Refraction::Sph(Refr::Cyl { sph: RefSphPower, cyl: RefCyl })
 #[derive(Debug, PartialEq)]
 pub struct OpRefraction {
-    before: Refraction,
-    after: Refraction,
+    before: Distance<Refraction>,
+    after: Distance<Refraction>,
 }
