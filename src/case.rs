@@ -9,6 +9,7 @@ use crate::{
 use thiserror::Error;
 use time::Date;
 
+/// A representation of the required fields for each [`Case`], for use in [`CaseError::MissingField`].
 #[derive(Debug, PartialEq)]
 enum Required {
     Surgeon,
@@ -19,6 +20,7 @@ enum Required {
     Refraction,
 }
 
+/// The error type for a [`Case`] with missing mandatory fields or out of bounds values.
 #[derive(Debug, Error)]
 enum CaseError {
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
@@ -49,15 +51,18 @@ pub enum Adverse {
     Other,
 }
 
-/// A single surgical case
-// for now, leave biometry parameters out - these can be added later with a working system
+/// A single surgical case. In the future, biometry values may be added.
 #[derive(Debug, PartialEq)]
 pub struct Case {
     surgeon: Surgeon,
-    urn: String, // used for the surgeon's reference, not database uniqueness - recommend surgeons have a column to deanonymize
+    /// A unique value provided by the surgeon, such that deanonymization may only be performed by
+    /// the surgeon.
+    urn: String,
     side: Side,
+    /// The surgeon's intended refractive target, based on the formula of their choice.
     target: Option<Target>,
-    date: Date, // consider how this will be used: is there any scenario requiring a utc datetime? plan was to have an uploaded datetime, but there isn't any reason to keep this in the struct when you could get it from the DB created_at
+    date: Date,
+    /// The institution where surgery was performed.
     site: Option<String>,
     incision: Option<Incision>,
     iol: Option<Iol>,
