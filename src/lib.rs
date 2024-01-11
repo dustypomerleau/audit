@@ -1,14 +1,4 @@
-// allows using range syntax on constants in powers.rs. todo: consider whether these really need to be
-// const
-#![feature(
-    const_for,
-    const_fn_floating_point_arithmetic,
-    const_mut_refs,
-    const_trait_impl,
-    effects
-)]
-
-mod refs; // for rust analyzer support only
+mod refs; // for rust analyzer support only, not part of the crate
 
 use cfg_if::cfg_if;
 
