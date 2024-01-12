@@ -26,7 +26,7 @@ pub enum ScaBoundsError {
 /// [`Sca`] does have bounds checking for [`Axis`](crate::axis::Axis), because the bounds for
 /// this value are always the same. Bounds checking of sphere and cylinder powers is performed
 /// during conversion to the above types.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Sca {
     pub sph: f32,
     pub cyl: Option<Cyl>,
