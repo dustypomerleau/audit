@@ -1,7 +1,7 @@
 use crate::{
     iol::{Iol, IolBoundsError},
     refraction::{OpRefraction, RefBoundsError},
-    sia::SiaBoundsError,
+    sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
     target::{Target, TargetBoundsError},
     va::{OpVa, VaBoundsError},
