@@ -1,7 +1,7 @@
 use crate::{
-    incision::Incision,
-    iol::Iol,
+    iol::{Iol, IolBoundsError},
     refraction::{OpRefraction, RefBoundsError},
+    sia::SiaBoundsError,
     surgeon::Surgeon,
     target::{Target, TargetBoundsError},
     va::{OpVa, VaBoundsError},
@@ -23,8 +23,12 @@ enum Required {
 /// The error type for a [`Case`] with missing mandatory fields or out of bounds values.
 #[derive(Debug, Error)]
 enum CaseError {
+    #[error("out of bounds value on field `iol` of `Case`: {0:?}")]
+    Iol(IolBoundsError),
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
+    #[error("out of bounds value on field `sia` of `Case`: {0:?}")]
+    Sia(SiaBoundsError),
     #[error("out of bounds value on field `target` of `Case`: {0:?}")]
     Target(TargetBoundsError),
     #[error("out of bounds value on field `refraction` of `Case`: {0:?}")]
@@ -64,7 +68,7 @@ pub struct Case {
     date: Date,
     /// The institution where surgery was performed.
     site: Option<String>,
-    incision: Option<Incision>,
+    sia: Option<Sia>,
     iol: Option<Iol>,
     adverse: Option<Adverse>,
     va: OpVa,
