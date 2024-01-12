@@ -1,9 +1,11 @@
 use crate::{
     cyl::{Cyl, CylPair},
-    power::Power,
+    sca::Sca,
 };
 use thiserror::Error;
 
+// We don't provide IolBoundsError::Axis(i32), because this error would already be thrown during
+// construction of the wrapped Sca.
 #[derive(Debug, Error)]
 pub enum IolBoundsError {
     #[error("IOL must always have a spherical equivalent, but `None` was supplied")]
@@ -19,37 +21,31 @@ pub enum IolBoundsError {
         "IOL cylinder must be a multiple of 0.25 D between +1 D and +20 D (supplied value: {0})"
     )]
     Cyl(f32),
-
-    #[error("IOL axis must be an integer value between 0° and 179° (supplied value: {0})")]
-    Axis(i32),
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Iol {
-    pub se: f32,
-    pub cyl: Option<Cyl>,
-}
+pub struct Iol(Sca);
 
-impl TryFrom<Power> for Iol {
+impl TryFrom<Sca> for Iol {
     type Error = IolBoundsError;
 
-    fn try_from(power: Power) -> Result<Self, Self::Error> {
-        let Power { sph: se, cyl } = power;
+    fn try_from(sca: Sca) -> Result<Self, Self::Error> {
+        let Sca { sph, cyl } = sca;
 
-        if (-20.0..=60.0).contains(&se) && se % 0.25 == 0.0 {
+        if (-20.0..=60.0).contains(&sph) && sph % 0.25 == 0.0 {
             match cyl {
                 Some(Cyl { power, axis: _ }) => {
                     if (1.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
-                        Ok(Self { se, cyl })
+                        Ok(Self(sca))
                     } else {
                         Err(IolBoundsError::Cyl(power))
                     }
                 }
 
-                None => Ok(Self { se, cyl: None }),
+                None => Ok(Self(sca)),
             }
         } else {
-            Err(IolBoundsError::Se(se))
+            Err(IolBoundsError::Se(sph))
         }
     }
 }
