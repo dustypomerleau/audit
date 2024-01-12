@@ -4,6 +4,7 @@
 use crate::{
     axis::Axis,
     cyl::{Cyl, CylPair},
+    iol::Iol,
 };
 use thiserror::Error;
 
@@ -58,6 +59,18 @@ impl Power {
             (Some(sph), _, _) => Ok(Self { sph, cyl: None }),
 
             (_, _, _) => Err(PowerBoundsError::NoSph),
+        }
+    }
+}
+
+// would it be better to have a field that takes a Power on each of the Power types and just
+// check bounds without actually converting?
+// it would save a lot of back and forth
+impl From<Iol> for Power {
+    fn from(iol: Iol) -> Self {
+        Self {
+            sph: iol.se,
+            cyl: iol.cyl,
         }
     }
 }

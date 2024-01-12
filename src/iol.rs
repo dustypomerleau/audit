@@ -26,8 +26,8 @@ pub enum IolBoundsError {
 
 #[derive(Debug, PartialEq)]
 pub struct Iol {
-    se: f32,
-    cyl: Option<Cyl>,
+    pub se: f32,
+    pub cyl: Option<Cyl>,
 }
 
 impl TryFrom<Power> for Iol {
