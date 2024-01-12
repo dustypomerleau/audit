@@ -46,6 +46,8 @@ impl Power {
                         sph,
                         cyl: Some(Cyl { power: cyl, axis }),
                     })
+                } else {
+                    Err(PowerBoundsError::Axis(axis))
                 }
             }
 
