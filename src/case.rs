@@ -1,6 +1,8 @@
 use crate::{
+    flatcase::FlatCase,
     iol::{Iol, IolBoundsError},
     refraction::{OpRefraction, RefBoundsError},
+    sca::{Sca, ScaBoundsError},
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
     target::{Target, TargetBoundsError},
