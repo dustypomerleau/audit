@@ -25,7 +25,7 @@ impl Cyl {
 
             (Some(power), _) => Err(ScaBoundsError::NoPair(CylPair::Axis)),
 
-            (_, _) => Err(ScaBoundsError::NoPair(CylPair::Power)),
+            (..) => Err(ScaBoundsError::NoPair(CylPair::Power)),
         }
     }
 }

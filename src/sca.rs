@@ -32,11 +32,12 @@ pub struct Sca {
     pub cyl: Option<Cyl>,
 }
 
-// the approach should be to implement anything fancy on Sca and then all the other types can
-// leverage that with try_into
 // A simple approach to getting Option<Cyl> would be:
 // let cyl = Cyl::new(cyl, axis).ok();
 // but this deprives you of detailed errors if only one of the cylinder values is missing.
+// The general approach is to build any Sca derivative using try_from() if there are no
+// additional fields (like Iol), and a custom new() if there are additional fields (like
+// Target).
 impl Sca {
     pub fn new(
         sph: Option<f32>,
@@ -46,12 +47,12 @@ impl Sca {
         match (sph, cyl, axis) {
             (Some(sph), None, None) => Ok(Self { sph, cyl: None }),
 
-            (Some(sph), _, _) => Ok(Self {
+            (Some(sph), ..) => Ok(Self {
                 sph,
                 cyl: Some(Cyl::new(cyl, axis)?),
             }),
 
-            (_, _, _) => Err(ScaBoundsError::NoSph),
+            (..) => Err(ScaBoundsError::NoSph),
         }
     }
 }
