@@ -20,8 +20,8 @@ pub struct FlatCase {
     pub target_cyl_axis: Option<i32>,
     pub date: Option<Date>,
     pub site: Option<String>,
-    pub incision_meridian: Option<i32>,
-    pub incision_sia: Option<f32>,
+    pub sia_power: Option<f32>,
+    pub sia_meridian: Option<i32>,
     pub iol: Option<String>,
     pub adverse: Option<Adverse>,
 
