@@ -29,9 +29,6 @@ pub struct Sca {
     pub cyl: Option<Cyl>,
 }
 
-// A simple approach to getting Option<Cyl> would be:
-// let cyl = Cyl::new(cyl, axis).ok();
-// but this deprives you of detailed errors if only one of the cylinder values is missing.
 // The general approach is to build any Sca derivative using try_from() if there are no
 // additional fields (like Iol), and a custom new() if there are additional fields (like
 // Target).
@@ -40,10 +37,18 @@ impl Sca {
         match (cyl, axis) {
             (None, None) => Ok(Self { sph, cyl: None }),
 
-            (..) => Ok(Self {
-                sph,
-                cyl: Some(Cyl::new(cyl, axis)?),
-            }),
+            (Some(cyl), Some(axis)) => {
+                let cyl = Cyl::new(cyl, axis)?;
+
+                Ok(Self {
+                    sph,
+                    cyl: Some(cyl),
+                })
+            }
+
+            (Some(_cyl), _) => Err(ScaBoundsError::NoPair(CylPair::Axis)),
+
+            (_, Some(_cyl)) => Err(ScaBoundsError::NoPair(CylPair::Power)),
         }
     }
 }

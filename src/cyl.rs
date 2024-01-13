@@ -9,23 +9,12 @@ pub struct Cyl {
     pub axis: Axis,
 }
 
-// it makes sense to have the more primitive constructors take option, so we can construct
-// them directly from the DB. However, if you're implementing this logic here, you don't need
-// to repeat it, just call Cyl::new in Sca::new.
 impl Cyl {
-    pub fn new(power: Option<f32>, axis: Option<i32>) -> Result<Self, ScaBoundsError> {
-        match (power, axis) {
-            (Some(power), Some(axis)) => {
-                if let Some(axis) = Axis::new(axis) {
-                    Ok(Self { power, axis })
-                } else {
-                    Err(ScaBoundsError::Axis(axis))
-                }
-            }
-
-            (Some(power), _) => Err(ScaBoundsError::NoPair(CylPair::Axis)),
-
-            (..) => Err(ScaBoundsError::NoPair(CylPair::Power)),
+    pub fn new(power: f32, axis: i32) -> Result<Self, ScaBoundsError> {
+        if let Some(axis) = Axis::new(axis) {
+            Ok(Self { power, axis })
+        } else {
+            Err(ScaBoundsError::Axis(axis))
         }
     }
 }
