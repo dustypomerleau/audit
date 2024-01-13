@@ -11,7 +11,8 @@ use crate::{
 use thiserror::Error;
 use time::Date;
 
-/// A representation of the required fields for each [`Case`], for use in [`CaseError::MissingField`].
+/// A representation of the required fields for each [`Case`], for use in
+/// [`CaseError::MissingField`].
 #[derive(Debug, PartialEq)]
 enum Required {
     Email,
