@@ -26,18 +26,10 @@ enum Required {
 /// The error type for a [`Case`] with missing mandatory fields or out of bounds values.
 #[derive(Debug, Error)]
 enum CaseError {
-    #[error("out of bounds value on field `iol` of `Case`: {0:?}")]
-    Iol(IolBoundsError),
+    #[error("out of bounds value on field {0:?} of `Case`")]
+    Bounds(err),
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
-    #[error("out of bounds value on field `sia` of `Case`: {0:?}")]
-    Sia(SiaBoundsError),
-    #[error("out of bounds value on field `target` of `Case`: {0:?}")]
-    Target(TargetBoundsError),
-    #[error("out of bounds value on field `refraction` of `Case`: {0:?}")]
-    Refraction(RefBoundsError),
-    #[error("out of bounds value on field `va` of `Case`: {0:?}")]
-    Va(VaBoundsError),
 }
 
 /// The side of the patient's surgery.
