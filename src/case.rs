@@ -12,7 +12,7 @@ use time::Date;
 /// A representation of the required fields for each [`Case`], for use in [`CaseError::MissingField`].
 #[derive(Debug, PartialEq)]
 enum Required {
-    Surgeon,
+    Email,
     Urn,
     Side,
     Date,
@@ -73,4 +73,21 @@ pub struct Case {
     adverse: Option<Adverse>,
     va: OpVa,
     refraction: OpRefraction,
+}
+
+impl TryFrom<FlatCase> for Case {
+    type Error = CaseError;
+
+    fn try_from(f: FlatCase) -> Result<Self, Self::Error> {
+        let surgeon = if let Some(email) = f.surgeon_email {
+            Surgeon {
+                email,
+                first_name: f.surgeon_first_name,
+                last_name: f.surgeon_last_name,
+                site: f.surgeon_site,
+            }
+        } else {
+            Err(CaseError::MissingField(Required::Email))
+        };
+    }
 }
