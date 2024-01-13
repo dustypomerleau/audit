@@ -24,17 +24,11 @@ impl TryFrom<Sca> for Refraction {
         let Sca { sph, cyl } = sca;
 
         if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
-            match cyl {
-                Some(Cyl { power, axis: _ }) => {
-                    if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
-                        Ok(Self(sca))
-                    } else {
-                        Err(RefBoundsError::Cyl(power))
-                    }
-                }
-
-                None => Ok(Self(sca)),
+            if cyl.is_some() && !((-10.0..=10.0).contains(&cyl.power) && cyl.power % 0.25 == 0.0) {
+                return Err(RefBoundsError::Cyl(cyl.power));
             }
+
+            Ok(Self(sca))
         } else {
             Err(RefBoundsError::Sph(sph))
         }
