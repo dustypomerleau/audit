@@ -13,7 +13,6 @@ pub struct Sia(Cyl);
 impl TryFrom<Cyl> for Sia {
     type Error = SiaBoundsError;
 
-    // todo:
     fn try_from(cyl: Cyl) -> Result<Self, Self::Error> {
         if (0.0..=2.0).contains(&cyl.power) {
             Ok(Self(cyl))
@@ -22,6 +21,3 @@ impl TryFrom<Cyl> for Sia {
         }
     }
 }
-
-
-
