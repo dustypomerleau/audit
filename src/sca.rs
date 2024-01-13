@@ -10,9 +10,6 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum ScaBoundsError {
-    #[error("sphere, cylinder, axis trios must always have a spherical component, but `None` was supplied")]
-    NoSph,
-
     #[error("cylinder must have both a power and an axis but the {0:?} was not supplied")]
     NoPair(CylPair),
 
@@ -39,20 +36,14 @@ pub struct Sca {
 // additional fields (like Iol), and a custom new() if there are additional fields (like
 // Target).
 impl Sca {
-    pub fn new(
-        sph: Option<f32>,
-        cyl: Option<f32>,
-        axis: Option<i32>,
-    ) -> Result<Self, ScaBoundsError> {
-        match (sph, cyl, axis) {
-            (Some(sph), None, None) => Ok(Self { sph, cyl: None }),
+    pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Result<Self, ScaBoundsError> {
+        match (cyl, axis) {
+            (None, None) => Ok(Self { sph, cyl: None }),
 
-            (Some(sph), ..) => Ok(Self {
+            (..) => Ok(Self {
                 sph,
                 cyl: Some(Cyl::new(cyl, axis)?),
             }),
-
-            (..) => Err(ScaBoundsError::NoSph),
         }
     }
 }
