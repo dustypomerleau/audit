@@ -70,6 +70,9 @@ pub struct Case {
     refraction: OpRefraction,
 }
 
+// This impl needs to surface detailed errors, because calling `FlatCase::try_into::<Case>()` is
+// the primary way of bounds checking all the values obtained from the raw CSV before putting them
+// in the DB.
 impl TryFrom<FlatCase> for Case {
     type Error = CaseError;
 
