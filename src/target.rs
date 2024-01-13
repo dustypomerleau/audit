@@ -41,11 +41,17 @@ impl Target {
         let Sca { sph, cyl } = sca;
 
         if (-6.0..=2.0).contains(&sph) {
-            if cyl.is_some() && !(0.0..=6.0).contains(&cyl.power) {
-                return Err(TargetBoundsError::Cyl(cyl.power));
-            }
+            match cyl {
+                Some(Cyl { power, axis: _ }) => {
+                    if (0.0..=6.0).contains(&power) {
+                        Ok(Self { formula, sca })
+                    } else {
+                        Err(TargetBoundsError::Cyl(power))
+                    }
+                }
 
-            Ok(Self { formula, sca })
+                None => Ok(Self { formula, sca }),
+            }
         } else {
             Err(TargetBoundsError::Se(sph))
         }
