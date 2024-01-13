@@ -37,7 +37,7 @@ pub struct Target {
 }
 
 impl Target {
-    fn new(formula: Option<Formula>, sca: Sca) -> Result<Self, TargetBoundsError> {
+    pub fn new(formula: Option<Formula>, sca: Sca) -> Result<Self, TargetBoundsError> {
         let Sca { sph, cyl } = sca;
 
         if (-6.0..=2.0).contains(&sph) {
