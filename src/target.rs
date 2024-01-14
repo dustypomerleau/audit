@@ -1,6 +1,5 @@
 use crate::{
-    axis::Axis,
-    cyl::{Cyl, CylPair},
+    cyl::Cyl,
     sca::{Sca, ScaBoundsError},
 };
 use thiserror::Error;

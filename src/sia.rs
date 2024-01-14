@@ -1,4 +1,4 @@
-use crate::{axis::Axis, cyl::Cyl};
+use crate::cyl::Cyl;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
