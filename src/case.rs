@@ -1,5 +1,5 @@
 use crate::{
-    cyl::Cyl,
+    cyl::{Cyl, CylPair},
     flatcase::FlatCase,
     iol::{Iol, IolBoundsError},
     refraction::{OpRefraction, RefBoundsError},
@@ -9,9 +9,49 @@ use crate::{
     target::{Target, TargetBoundsError},
     va::{OpVa, VaBoundsError},
 };
-use std::{error::Error, fmt::Debug};
 use thiserror::Error;
 use time::Date;
+
+/// A wrapper for any type of bounds error.
+#[derive(Debug, Error)]
+enum BoundsError {
+    #[error("IOL bounds error: ({0:?})")]
+    Iol(IolBoundsError),
+    #[error("refraction bounds error: ({0:?})")]
+    Ref(RefBoundsError),
+    #[error("SCA bounds error: ({0:?})")]
+    Sca(ScaBoundsError),
+    #[error("SIA bounds error: ({0:?})")]
+    Sia(SiaBoundsError),
+    #[error("target bounds error: ({0:?})")]
+    Target(TargetBoundsError),
+    #[error("VA bounds error: ({0:?})")]
+    Va(VaBoundsError),
+}
+
+impl From<IolBoundsError> for CaseError {
+    fn from(err: IolBoundsError) -> Self { Self::Bounds(BoundsError::Iol(err)) }
+}
+
+impl From<RefBoundsError> for CaseError {
+    fn from(err: RefBoundsError) -> Self { Self::Bounds(BoundsError::Ref(err)) }
+}
+
+impl From<ScaBoundsError> for CaseError {
+    fn from(err: ScaBoundsError) -> Self { Self::Bounds(BoundsError::Sca(err)) }
+}
+
+impl From<SiaBoundsError> for CaseError {
+    fn from(err: SiaBoundsError) -> Self { Self::Bounds(BoundsError::Sia(err)) }
+}
+
+impl From<TargetBoundsError> for CaseError {
+    fn from(err: TargetBoundsError) -> Self { Self::Bounds(BoundsError::Target(err)) }
+}
+
+impl From<VaBoundsError> for CaseError {
+    fn from(err: VaBoundsError) -> Self { Self::Bounds(BoundsError::Va(err)) }
+}
 
 /// A representation of the required fields for each [`Case`], for use in
 /// [`CaseError::MissingField`].
@@ -27,15 +67,15 @@ enum Required {
 
 /// The error type for a [`Case`] with missing mandatory fields or out of bounds values.
 #[derive(Debug, Error)]
-enum CaseError<T: Debug + Error> {
-    #[error("out of bounds value on field {0:?} of `Case`")]
-    Bounds(T),
+enum CaseError {
+    #[error("out of bounds value on a `Case`: {0:?}")]
+    Bounds(BoundsError),
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
 }
 
-impl<T: Debug + Error> From<T> for CaseError<T> {
-    fn from(err: T) -> Self { CaseError::Bounds(err) }
+impl From<BoundsError> for CaseError {
+    fn from(err: BoundsError) -> Self { CaseError::Bounds(err) }
 }
 
 /// The side of the patient's surgery.
@@ -91,7 +131,65 @@ impl TryFrom<FlatCase> for Case {
                 site: f.surgeon_site,
             }
         } else {
-            Err(CaseError::MissingField(Required::Email))
+            return Err(CaseError::MissingField(Required::Email));
         };
+
+        let urn = if let Some(urn) = f.urn {
+            urn
+        } else {
+            return Err(CaseError::MissingField(Required::Urn));
+        };
+
+        let side = if let Some(side) = f.side {
+            side
+        } else {
+            return Err(CaseError::MissingField(Required::Side));
+        };
+
+        let target = if let Some(sph) = f.target_se {
+            let target_sca = Sca::new(sph, f.target_cyl_power, f.target_cyl_axis)?;
+            // Avoid calling `.ok()` in order to propagate the `TargetBoundsError`.
+            let target = Target::new(f.target_formula, target_sca)?;
+            Some(target)
+        } else {
+            None
+        };
+
+        let date = if let Some(date) = f.date {
+            date
+        } else {
+            return Err(CaseError::MissingField(Required::Date));
+        };
+
+        let site = f.site;
+
+        let sia = match (f.sia_power, f.sia_meridian) {
+            (Some(power), Some(meridian)) => {
+                let sia: Sia = Cyl::new(power, meridian)?.try_into()?;
+                Some(sia)
+            }
+
+            (None, None) => None,
+
+            (Some(_power), _) => return Err(ScaBoundsError::NoPair(CylPair::Axis).into()),
+
+            (_, Some(_meridian)) => return Err(ScaBoundsError::NoPair(CylPair::Power).into()),
+        };
+
+        let case = Case {
+            surgeon,
+            urn,
+            side,
+            target,
+            date,
+            site,
+            sia,
+            iol,
+            adverse,
+            va,
+            refraction,
+        };
+
+        Ok(case)
     }
 }
