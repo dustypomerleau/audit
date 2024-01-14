@@ -1,4 +1,5 @@
 use crate::{
+    cyl::Cyl,
     flatcase::FlatCase,
     iol::{Iol, IolBoundsError},
     refraction::{OpRefraction, RefBoundsError},
