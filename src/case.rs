@@ -34,7 +34,7 @@ enum CaseError<T: Error + Debug> {
     MissingField(Required),
 }
 
-impl<T: Debug + Error> From<T> for CaseError {
+impl<T: Debug + Error> From<T> for CaseError<T> {
     fn from(err: T) -> Self { CaseError::Bounds(err) }
 }
 
