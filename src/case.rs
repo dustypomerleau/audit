@@ -8,6 +8,7 @@ use crate::{
     target::{Target, TargetBoundsError},
     va::{OpVa, VaBoundsError},
 };
+use std::{error::Error, fmt::Debug};
 use thiserror::Error;
 use time::Date;
 
@@ -25,11 +26,15 @@ enum Required {
 
 /// The error type for a [`Case`] with missing mandatory fields or out of bounds values.
 #[derive(Debug, Error)]
-enum CaseError {
+enum CaseError<T: Error + Debug> {
     #[error("out of bounds value on field {0:?} of `Case`")]
-    Bounds(err),
+    Bounds(T),
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
+}
+
+impl<T: Debug + Error> From<T> for CaseError {
+    fn from(err: T) -> Self { CaseError::Bounds(err) }
 }
 
 /// The side of the patient's surgery.
