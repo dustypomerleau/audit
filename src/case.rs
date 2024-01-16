@@ -9,48 +9,24 @@ use crate::{
     target::{Target, TargetBoundsError},
     va::{OpVa, VaBoundsError},
 };
+use std::{error::Error, fmt::Debug};
 use thiserror::Error;
 use time::Date;
 
-/// A wrapper for any type of bounds error.
-#[derive(Debug, Error)]
-enum BoundsError {
-    #[error("IOL bounds error: ({0:?})")]
-    Iol(IolBoundsError),
-    #[error("refraction bounds error: ({0:?})")]
-    Ref(RefBoundsError),
-    #[error("SCA bounds error: ({0:?})")]
-    Sca(ScaBoundsError),
-    #[error("SIA bounds error: ({0:?})")]
-    Sia(SiaBoundsError),
-    #[error("target bounds error: ({0:?})")]
-    Target(TargetBoundsError),
-    #[error("VA bounds error: ({0:?})")]
-    Va(VaBoundsError),
+pub trait BoundsError
+where Self: std::error::Error
+{
 }
 
-impl From<IolBoundsError> for CaseError {
-    fn from(err: IolBoundsError) -> Self { Self::Bounds(BoundsError::Iol(err)) }
-}
+impl BoundsError for IolBoundsError {}
+impl BoundsError for RefBoundsError {}
+impl BoundsError for ScaBoundsError {}
+impl BoundsError for SiaBoundsError {}
+impl BoundsError for TargetBoundsError {}
+impl BoundsError for VaBoundsError {}
 
-impl From<RefBoundsError> for CaseError {
-    fn from(err: RefBoundsError) -> Self { Self::Bounds(BoundsError::Ref(err)) }
-}
-
-impl From<ScaBoundsError> for CaseError {
-    fn from(err: ScaBoundsError) -> Self { Self::Bounds(BoundsError::Sca(err)) }
-}
-
-impl From<SiaBoundsError> for CaseError {
-    fn from(err: SiaBoundsError) -> Self { Self::Bounds(BoundsError::Sia(err)) }
-}
-
-impl From<TargetBoundsError> for CaseError {
-    fn from(err: TargetBoundsError) -> Self { Self::Bounds(BoundsError::Target(err)) }
-}
-
-impl From<VaBoundsError> for CaseError {
-    fn from(err: VaBoundsError) -> Self { Self::Bounds(BoundsError::Va(err)) }
+impl<T: BoundsError> From<T> for CaseError {
+    fn from(err: T) -> Self { Self::Bounds(Box::new(err)) }
 }
 
 /// A representation of the required fields for each [`Case`], for use in
@@ -69,13 +45,9 @@ enum Required {
 #[derive(Debug, Error)]
 enum CaseError {
     #[error("out of bounds value on a `Case`: {0:?}")]
-    Bounds(BoundsError),
+    Bounds(Box<dyn BoundsError>),
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
-}
-
-impl From<BoundsError> for CaseError {
-    fn from(err: BoundsError) -> Self { CaseError::Bounds(err) }
 }
 
 /// The side of the patient's surgery.
