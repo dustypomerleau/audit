@@ -3,7 +3,7 @@ use crate::{refraction::Refraction, va::Va};
 /// A distance wrapper to ensure that distance and near values
 /// ([`Refraction`](crate::refraction::Refraction), [`Va`](crate::va::Va)) are not confused.
 #[derive(Debug, PartialEq)]
-pub struct Distance<T>(T);
+pub struct Distance<T>(pub T);
 
 impl From<Va> for Distance<Va> {
     fn from(va: Va) -> Self { Self(va) }
@@ -16,7 +16,7 @@ impl From<Refraction> for Distance<Refraction> {
 /// A near wrapper to ensure that distance and near values
 /// ([`Refraction`](crate::refraction::Refraction), [`Va`](crate::va::Va)) are not confused.
 #[derive(Debug, PartialEq)]
-pub struct Near<T>(T);
+pub struct Near<T>(pub T);
 
 impl From<Va> for Near<Va> {
     fn from(va: Va) -> Self { Self(va) }
