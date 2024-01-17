@@ -214,12 +214,10 @@ impl TryFrom<FlatCase> for Case {
                         Ok(DistanceVaSet { before, after })
                     }
 
-                    (None, ..) | (_, _, None, _) => {
-                        Err(VaBoundsError::NoPair(VaPair::Numerator).into())
-                    }
+                    (None, ..) | (_, _, None, _) => Err(VaBoundsError::NoPair(VaPair::Numerator)),
 
                     (_, None, ..) | (_, _, _, None) => {
-                        Err(VaBoundsError::NoPair(VaPair::Denominator).into())
+                        Err(VaBoundsError::NoPair(VaPair::Denominator))
                     }
                 }
             }
