@@ -43,6 +43,6 @@ impl TryFrom<Sca> for Refraction {
 
 #[derive(Debug, PartialEq)]
 pub struct OpRefraction {
-    before: Distance<Refraction>,
-    after: Distance<Refraction>,
+    pub before: Distance<Refraction>,
+    pub after: Distance<Refraction>,
 }
