@@ -1,4 +1,5 @@
 use crate::{
+    axis::Axis,
     cyl::{Cyl, CylPair},
     flatcase::FlatCase,
     iol::{Iol, IolBoundsError},
@@ -72,10 +73,6 @@ enum CaseError {
     Bounds(BoundsError),
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
-}
-
-impl From<BoundsError> for CaseError {
-    fn from(err: BoundsError) -> Self { CaseError::Bounds(err) }
 }
 
 /// The side of the patient's surgery.
@@ -176,6 +173,26 @@ impl TryFrom<FlatCase> for Case {
             (..) => None,
         };
 
+        let iol = if let Some(sph) = f.iol_se {
+            let (cyl, axis) = match (f.iol_cyl_power, f.iol_cyl_axis) {
+                (Some(power), Some(axis)) => (Some(power), Some(axis)),
+
+                (Some(_power), _) => return Err(IolBoundsError::NoPair(CylPair::Axis).into()),
+
+                (_, Some(_axis)) => return Err(IolBoundsError::NoPair(CylPair::Power).into()),
+
+                (..) => (None, None),
+            };
+
+            let iol = Sca::new(sph, cyl, axis).try_into()?;
+
+            Some(iol)
+        } else {
+            match (f.iol_cyl_power, f.iol_cyl_axis) {
+                (None, None) => None,
+
+                (..) => return Err(IolBoundsError::NoSe.into()),
+            }
         };
 
         let case = Case {
