@@ -162,7 +162,7 @@ impl TryFrom<FlatCase> for Case {
 
         let sia = match (f.sia_power, f.sia_meridian) {
             (Some(power), Some(meridian)) => {
-                let sia = Cyl::new(power, meridian).try_into()?;
+                let sia = Cyl::new(power, meridian)?.try_into()?;
                 Some(sia)
             }
 
@@ -184,7 +184,7 @@ impl TryFrom<FlatCase> for Case {
                 (..) => (None, None),
             };
 
-            let iol = Sca::new(sph, cyl, axis).try_into()?;
+            let iol = Sca::new(sph, cyl, axis)?.try_into()?;
 
             Some(iol)
         } else {
