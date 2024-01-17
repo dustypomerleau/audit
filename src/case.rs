@@ -252,6 +252,8 @@ impl TryFrom<FlatCase> for Case {
                     before: Distance(before),
                     after: Distance(after),
                 }
+            } else {
+                return Err(CaseError::MissingField(Required::Refraction));
             }
         };
 
