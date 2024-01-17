@@ -60,8 +60,8 @@ pub struct NearVaSet {
 // in OpVa
 #[derive(Debug, PartialEq)]
 pub struct OpVa {
-    best_distance: DistanceVaSet,
-    best_near: Option<NearVaSet>,
-    raw_distance: Option<DistanceVaSet>,
-    raw_near: Option<NearVaSet>,
+    pub best_distance: DistanceVaSet,
+    pub best_near: Option<NearVaSet>,
+    pub raw_distance: Option<DistanceVaSet>,
+    pub raw_near: Option<NearVaSet>,
 }
