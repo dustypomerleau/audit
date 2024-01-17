@@ -1,6 +1,7 @@
 use crate::{
     axis::Axis,
     cyl::{Cyl, CylPair},
+    distance::Distance,
     flatcase::FlatCase,
     iol::{Iol, IolBoundsError},
     refraction::{OpRefraction, RefBoundsError},
@@ -8,7 +9,7 @@ use crate::{
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
     target::{Target, TargetBoundsError},
-    va::{OpVa, VaBoundsError},
+    va::{DistanceVaSet, OpVa, Va, VaBoundsError, VaPair},
 };
 use thiserror::Error;
 use time::Date;
@@ -192,6 +193,50 @@ impl TryFrom<FlatCase> for Case {
                 (None, None) => None,
 
                 (..) => return Err(IolBoundsError::NoSe.into()),
+            }
+        };
+
+        let adverse = f.adverse;
+
+        // if you need this function anywhere else, move it to module va
+        fn distance_va_set(
+            num_before: Option<f32>,
+            den_before: Option<f32>,
+            num_after: Option<f32>,
+            den_after: Option<f32>,
+        ) -> Result<DistanceVaSet, VaBoundsError> {
+            match (num_before, den_before, num_after, den_after) {
+                (Some(nb), Some(db), Some(na), Some(da)) => {
+                    let before: Distance<Va> = Va::new(nb, db)?.into();
+                    let after: Distance<Va> = Va::new(na, da)?.into();
+
+                    Ok(DistanceVaSet { before, after })
+                }
+
+                (None, ..) | (_, _, None, _) => {
+                    Err(VaBoundsError::NoPair(VaPair::Numerator).into())
+                }
+
+                (_, None, ..) | (_, _, _, None) => {
+                    Err(VaBoundsError::NoPair(VaPair::Denominator).into())
+                }
+            }
+        }
+
+        let va = {
+            let best_distance = distance_va_set(
+                f.va_best_before_num,
+                f.va_best_before_den,
+                f.va_best_after_num,
+                f.va_best_after_den,
+            )?;
+
+            // for now, deal only with best distance acuity
+            OpVa {
+                best_distance,
+                best_near: None,
+                raw_distance: None,
+                raw_near: None,
             }
         };
 
