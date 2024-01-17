@@ -44,8 +44,8 @@ impl Va {
 
 #[derive(Debug, PartialEq)]
 pub struct DistanceVaSet {
-    before: Distance<Va>,
-    after: Distance<Va>,
+    pub before: Distance<Va>,
+    pub after: Distance<Va>,
 }
 
 #[derive(Debug, PartialEq)]
