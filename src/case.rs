@@ -69,7 +69,7 @@ enum Required {
 
 /// The error type for a [`Case`] with missing mandatory fields or out of bounds values.
 #[derive(Debug, Error)]
-enum CaseError {
+pub enum CaseError {
     #[error("out of bounds value on a `Case`: {0:?}")]
     Bounds(BoundsError),
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
