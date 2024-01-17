@@ -274,3 +274,63 @@ impl TryFrom<FlatCase> for Case {
         Ok(case)
     }
 }
+
+mod tests {
+    use super::*;
+    use crate::target::Formula;
+    use time::Month;
+
+    #[test]
+    fn case_implements_from_flatcase() {
+        let fc = FlatCase {
+            surgeon_email: Some("testemail@email.com".to_string()),
+            surgeon_first_name: Some("john".to_string()),
+            surgeon_last_name: Some("wick".to_string()),
+            surgeon_site: Some("the hospital".to_string()),
+            urn: Some("abc123".to_string()),
+            side: Some(Side::Right),
+            target_formula: Some(Formula::Kane),
+            target_se: Some(-0.2),
+            target_cyl_power: Some(0.15),
+            target_cyl_axis: Some(90),
+            date: Some(Date::from_calendar_date(2023, Month::May, 15).unwrap()),
+            site: Some("the hospital site".to_string()),
+            sia_power: Some(0.1),
+            sia_meridian: Some(100),
+            iol_se: Some(24.5),
+            iol_cyl_power: Some(3.25),
+            iol_cyl_axis: Some(179),
+            adverse: None,
+
+            va_best_before_num: Some(6.0),
+            va_best_before_den: Some(24.0),
+            va_best_after_num: Some(6.0),
+            va_best_after_den: Some(6.0),
+
+            va_raw_before_num: None,
+            va_raw_before_den: None,
+            va_raw_after_num: None,
+            va_raw_after_den: None,
+
+            va_best_near_before_num: None,
+            va_best_near_before_den: None,
+            va_best_near_after_num: None,
+            va_best_near_after_den: None,
+
+            va_raw_near_before_num: None,
+            va_raw_near_before_den: None,
+            va_raw_near_after_num: None,
+            va_raw_near_after_den: None,
+
+            ref_before_sph: Some(-5.25),
+            ref_before_cyl_power: Some(-1.50),
+            ref_before_cyl_axis: Some(67),
+
+            ref_after_sph: Some(-0.5),
+            ref_after_cyl_power: Some(-0.5),
+            ref_after_cyl_axis: Some(10),
+        };
+
+        assert!(<FlatCase as TryInto<Case>>::try_into(fc).is_ok())
+    }
+}
