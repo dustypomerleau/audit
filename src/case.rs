@@ -240,6 +240,21 @@ impl TryFrom<FlatCase> for Case {
             }
         };
 
+        let refraction = {
+            if let (Some(before_sph), Some(after_sph)) = (f.ref_before_sph, f.ref_after_sph) {
+                let before: Refraction =
+                    Sca::new(before_sph, f.ref_before_cyl_power, f.ref_before_cyl_axis)?
+                        .try_into()?;
+                let after: Refraction =
+                    Sca::new(after_sph, f.ref_after_cyl_power, f.ref_after_cyl_axis)?.try_into()?;
+
+                OpRefraction {
+                    before: Distance(before),
+                    after: Distance(after),
+                }
+            }
+        };
+
         let case = Case {
             surgeon,
             urn,
