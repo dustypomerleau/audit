@@ -1,12 +1,20 @@
 use crate::distance::{Distance, Near};
 use thiserror::Error;
 
+#[derive(Debug)]
+pub enum VaPair {
+    Numerator,
+    Denominator,
+}
+
 #[derive(Debug, Error)]
 pub enum VaBoundsError {
     #[error("Va numerator must be between 0.1 and 20.0. {0} was supplied")]
     Num(f32),
     #[error("Va denominator must be > 0. {0} was supplied")]
     Den(f32),
+    #[error("visual acuity must have both a numerator and a denominator. {0:?} was not supplied.")]
+    NoPair(VaPair),
 }
 
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
