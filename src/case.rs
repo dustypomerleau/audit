@@ -165,15 +165,17 @@ impl TryFrom<FlatCase> for Case {
 
         let sia = match (f.sia_power, f.sia_meridian) {
             (Some(power), Some(meridian)) => {
-                let sia: Sia = Cyl::new(power, meridian)?.try_into()?;
+                let sia = Cyl::new(power, meridian).try_into()?;
                 Some(sia)
             }
-
-            (None, None) => None,
 
             (Some(_power), _) => return Err(ScaBoundsError::NoPair(CylPair::Axis).into()),
 
             (_, Some(_meridian)) => return Err(ScaBoundsError::NoPair(CylPair::Power).into()),
+
+            (..) => None,
+        };
+
         };
 
         let case = Case {
