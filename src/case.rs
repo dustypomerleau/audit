@@ -4,7 +4,7 @@ use crate::{
     distance::Distance,
     flatcase::FlatCase,
     iol::{Iol, IolBoundsError},
-    refraction::{OpRefraction, RefBoundsError},
+    refraction::{OpRefraction, RefBoundsError, Refraction},
     sca::{Sca, ScaBoundsError},
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
@@ -198,32 +198,32 @@ impl TryFrom<FlatCase> for Case {
 
         let adverse = f.adverse;
 
-        // if you need this function anywhere else, move it to module va
-        fn distance_va_set(
-            num_before: Option<f32>,
-            den_before: Option<f32>,
-            num_after: Option<f32>,
-            den_after: Option<f32>,
-        ) -> Result<DistanceVaSet, VaBoundsError> {
-            match (num_before, den_before, num_after, den_after) {
-                (Some(nb), Some(db), Some(na), Some(da)) => {
-                    let before: Distance<Va> = Va::new(nb, db)?.into();
-                    let after: Distance<Va> = Va::new(na, da)?.into();
+        let va = {
+            // if you need this function anywhere else, move it to module va
+            fn distance_va_set(
+                num_before: Option<f32>,
+                den_before: Option<f32>,
+                num_after: Option<f32>,
+                den_after: Option<f32>,
+            ) -> Result<DistanceVaSet, VaBoundsError> {
+                match (num_before, den_before, num_after, den_after) {
+                    (Some(nb), Some(db), Some(na), Some(da)) => {
+                        let before: Distance<Va> = Va::new(nb, db)?.into();
+                        let after: Distance<Va> = Va::new(na, da)?.into();
 
-                    Ok(DistanceVaSet { before, after })
-                }
+                        Ok(DistanceVaSet { before, after })
+                    }
 
-                (None, ..) | (_, _, None, _) => {
-                    Err(VaBoundsError::NoPair(VaPair::Numerator).into())
-                }
+                    (None, ..) | (_, _, None, _) => {
+                        Err(VaBoundsError::NoPair(VaPair::Numerator).into())
+                    }
 
-                (_, None, ..) | (_, _, _, None) => {
-                    Err(VaBoundsError::NoPair(VaPair::Denominator).into())
+                    (_, None, ..) | (_, _, _, None) => {
+                        Err(VaBoundsError::NoPair(VaPair::Denominator).into())
+                    }
                 }
             }
-        }
 
-        let va = {
             let best_distance = distance_va_set(
                 f.va_best_before_num,
                 f.va_best_before_den,
