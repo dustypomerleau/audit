@@ -22,7 +22,9 @@ pub struct FlatCase {
     pub site: Option<String>,
     pub sia_power: Option<f32>,
     pub sia_meridian: Option<i32>,
-    pub iol: Option<String>,
+    pub iol_se: Option<f32>,
+    pub iol_cyl_power: Option<f32>,
+    pub iol_cyl_axis: Option<i32>,
     pub adverse: Option<Adverse>,
 
     pub va_best_before_num: Option<f32>,
