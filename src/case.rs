@@ -16,7 +16,7 @@ use time::Date;
 
 /// A wrapper for any type of bounds error.
 #[derive(Debug, Error)]
-enum BoundsError {
+pub enum BoundsError {
     #[error("IOL bounds error: ({0:?})")]
     Iol(IolBoundsError),
     #[error("refraction bounds error: ({0:?})")]
@@ -58,7 +58,7 @@ impl From<VaBoundsError> for CaseError {
 /// A representation of the required fields for each [`Case`], for use in
 /// [`CaseError::MissingField`].
 #[derive(Debug, PartialEq)]
-enum Required {
+pub enum Required {
     Email,
     Urn,
     Side,
