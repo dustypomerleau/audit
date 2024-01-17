@@ -1,4 +1,4 @@
-use crate::refraction::Refraction;
+use crate::{refraction::Refraction, va::Va};
 
 /// A distance wrapper to ensure that distance and near values
 /// ([`Refraction`](crate::refraction::Refraction), [`Va`](crate::va::Va)) are not confused.
