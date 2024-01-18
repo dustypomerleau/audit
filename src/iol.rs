@@ -82,10 +82,26 @@ mod tests {
     }
 
     #[test]
+    fn nonzero_rem_iol_se_returns_err() {
+        let iol: Result<Iol, IolBoundsError> =
+            Sca::new(10.35, Some(3.0), Some(12)).unwrap().try_into();
+
+        assert_eq!(iol, Err(IolBoundsError::Se(10.35)))
+    }
+
+    #[test]
     fn out_of_bounds_iol_cyl_power_returns_err() {
         let iol: Result<Iol, IolBoundsError> =
             Sca::new(12.5, Some(31.0), Some(12)).unwrap().try_into();
 
         assert_eq!(iol, Err(IolBoundsError::Cyl(31.0)))
+    }
+
+    #[test]
+    fn nonzero_rem_iol_cyl_power_returns_err() {
+        let iol: Result<Iol, IolBoundsError> =
+            Sca::new(12.5, Some(2.06), Some(12)).unwrap().try_into();
+
+        assert_eq!(iol, Err(IolBoundsError::Cyl(2.06)))
     }
 }
