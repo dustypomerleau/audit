@@ -32,6 +32,7 @@ mod tests {
     #[test]
     fn makes_new_cyl() {
         let cyl = Cyl::new(2.75, 30);
+
         assert_eq!(
             cyl,
             Ok(Cyl {
@@ -43,7 +44,8 @@ mod tests {
 
     #[test]
     fn out_of_bounds_cyl_axis_returns_err() {
-        let cyl = Cyl::new(6.0, 180);
-        assert_eq!(cyl, Err(ScaBoundsError::Axis(180)))
+        let axis = 180i32;
+        let cyl = Cyl::new(6.0, axis);
+        assert_eq!(cyl, Err(ScaBoundsError::Axis(axis)))
     }
 }
