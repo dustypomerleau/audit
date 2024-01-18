@@ -20,7 +20,7 @@ mod tests {
     #[test]
     fn makes_new_axis() {
         let axis = Axis::new(90);
-        assert_eq!(axis, Some(Axis(90i32)))
+        assert_eq!(axis, Some(Axis(90)))
     }
 
     #[test]
