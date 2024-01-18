@@ -46,3 +46,27 @@ pub struct OpRefraction {
     pub before: Distance<Refraction>,
     pub after: Distance<Refraction>,
 }
+
+mod tests {
+    use super::*;
+    use crate::axis::Axis;
+
+    #[test]
+    fn refraction_implements_try_from_sca() {
+        let refraction: Refraction = Sca::new(-3.25, Some(-0.75), Some(100))
+            .unwrap()
+            .try_into()
+            .unwrap();
+
+        assert_eq!(
+            refraction,
+            Refraction(Sca {
+                sph: -3.25f32,
+                cyl: Some(Cyl {
+                    power: -0.75f32,
+                    axis: Axis(100i32)
+                })
+            })
+        )
+    }
+}
