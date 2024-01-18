@@ -4,7 +4,7 @@ use crate::{
 };
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum TargetBoundsError {
     #[error("target cannot be created because the underlying Sca violated its invariants: {0:?}")]
     Sca(ScaBoundsError),
