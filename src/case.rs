@@ -199,7 +199,9 @@ impl TryFrom<FlatCase> for Case {
         let adverse = f.adverse;
 
         let va = {
-            // if you need this function anywhere else, move it to module va
+            /// A helper function for creating a [`DistanceVaSet`] out of the option
+            /// numerator/denominator fields on
+            /// [`FlatCase`].
             fn distance_va_set(
                 num_before: Option<f32>,
                 den_before: Option<f32>,
