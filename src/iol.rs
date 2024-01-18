@@ -6,7 +6,7 @@ use thiserror::Error;
 
 // We don't provide IolBoundsError::Axis(i32), because this error would already be thrown during
 // construction of the wrapped Sca.
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum IolBoundsError {
     #[error("IOL must always have a spherical equivalent, but `None` was supplied")]
     NoSe,
@@ -64,12 +64,28 @@ mod tests {
         assert_eq!(
             iol,
             Iol(Sca {
-                sph: 24.25f32,
+                sph: 24.25,
                 cyl: Some(Cyl {
-                    power: 3.0f32,
-                    axis: Axis(12i32)
+                    power: 3.0,
+                    axis: Axis(12)
                 })
             })
         )
+    }
+
+    #[test]
+    fn out_of_bounds_iol_se_returns_err() {
+        let iol: Result<Iol, IolBoundsError> =
+            Sca::new(100.25, Some(3.0), Some(12)).unwrap().try_into();
+
+        assert_eq!(iol, Err(IolBoundsError::Se(100.25)))
+    }
+
+    #[test]
+    fn out_of_bounds_iol_cyl_power_returns_err() {
+        let iol: Result<Iol, IolBoundsError> =
+            Sca::new(12.5, Some(31.0), Some(12)).unwrap().try_into();
+
+        assert_eq!(iol, Err(IolBoundsError::Cyl(31.0)))
     }
 }
