@@ -21,3 +21,27 @@ impl TryFrom<Cyl> for Sia {
         }
     }
 }
+
+mod tests {
+    use super::*;
+    use crate::axis::Axis;
+
+    #[test]
+    fn sia_implements_try_from_cyl() {
+        let sia: Sia = Cyl::new(0.1, 100).unwrap().try_into().unwrap();
+
+        assert_eq!(
+            sia,
+            Sia(Cyl {
+                power: 0.1,
+                axis: Axis(100)
+            })
+        )
+    }
+
+    #[test]
+    fn out_of_bounds_sia_power_returns_err() {
+        let sia: Result<Sia, SiaBoundsError> = Cyl::new(2.1, 100).unwrap().try_into();
+        assert_eq!(sia, Err(SiaBoundsError::Sia(2.1)))
+    }
+}
