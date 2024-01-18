@@ -72,33 +72,37 @@ mod tests {
 
     #[test]
     fn out_of_bounds_refraction_sph_returns_err() {
+        let sph = -40.5f32;
         let refraction: Result<Refraction, RefBoundsError> =
-            Sca::new(-40.5, Some(-0.25), Some(30)).unwrap().try_into();
+            Sca::new(sph, Some(-0.25), Some(30)).unwrap().try_into();
 
-        assert_eq!(refraction, Err(RefBoundsError::Sph(-40.5)))
+        assert_eq!(refraction, Err(RefBoundsError::Sph(sph)))
     }
 
     #[test]
     fn nonzero_rem_refraction_sph_returns_err() {
+        let sph = -10.2f32;
         let refraction: Result<Refraction, RefBoundsError> =
-            Sca::new(-10.2, Some(-0.25), Some(30)).unwrap().try_into();
+            Sca::new(sph, Some(-0.25), Some(30)).unwrap().try_into();
 
-        assert_eq!(refraction, Err(RefBoundsError::Sph(-10.2)))
+        assert_eq!(refraction, Err(RefBoundsError::Sph(sph)))
     }
 
     #[test]
     fn out_of_bounds_refraction_cyl_power_returns_err() {
+        let cyl = -12.25f32;
         let refraction: Result<Refraction, RefBoundsError> =
-            Sca::new(3.5, Some(-12.25), Some(160)).unwrap().try_into();
+            Sca::new(3.5, Some(cyl), Some(160)).unwrap().try_into();
 
-        assert_eq!(refraction, Err(RefBoundsError::Cyl(-12.25)))
+        assert_eq!(refraction, Err(RefBoundsError::Cyl(cyl)))
     }
 
     #[test]
     fn nonzero_rem_refraction_cyl_power_returns_err() {
+        let cyl = -0.6f32;
         let refraction: Result<Refraction, RefBoundsError> =
-            Sca::new(3.5, Some(-0.6), Some(160)).unwrap().try_into();
+            Sca::new(3.5, Some(cyl), Some(160)).unwrap().try_into();
 
-        assert_eq!(refraction, Err(RefBoundsError::Cyl(-0.6)))
+        assert_eq!(refraction, Err(RefBoundsError::Cyl(cyl)))
     }
 }
