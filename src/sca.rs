@@ -48,3 +48,36 @@ impl Sca {
         }
     }
 }
+
+mod tests {
+    use super::*;
+    use crate::axis::Axis;
+
+    #[test]
+    fn makes_a_sca() {
+        let sca = Sca::new(20.0, Some(5.25), Some(20)).unwrap();
+
+        assert_eq!(
+            sca,
+            Sca {
+                sph: 20.0,
+                cyl: Some(Cyl {
+                    power: 5.25,
+                    axis: Axis(20)
+                })
+            }
+        )
+    }
+
+    #[test]
+    fn missing_sca_cyl_power_returns_err() {
+        let sca: Result<Sca, ScaBoundsError> = Sca::new(20.0, None, Some(20));
+        assert_eq!(sca, Err(ScaBoundsError::NoPair(CylPair::Power)))
+    }
+
+    #[test]
+    fn missing_sca_cyl_axis_returns_err() {
+        let sca: Result<Sca, ScaBoundsError> = Sca::new(20.0, Some(5.25), None);
+        assert_eq!(sca, Err(ScaBoundsError::NoPair(CylPair::Axis)))
+    }
+}
