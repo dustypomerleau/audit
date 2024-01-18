@@ -56,3 +56,46 @@ impl Target {
         }
     }
 }
+
+mod tests {
+    use super::*;
+    use crate::axis::Axis;
+
+    #[test]
+    fn makes_new_target() {
+        let sca = Sca::new(-0.15, Some(0.22), Some(82)).unwrap();
+        let target = Target::new(Some(Formula::Kane), sca).unwrap();
+
+        assert_eq!(
+            target,
+            Target {
+                formula: Some(Formula::Kane),
+                sca: Sca {
+                    sph: -0.15,
+                    cyl: Some(Cyl {
+                        power: 0.22,
+                        axis: Axis(82)
+                    })
+                }
+            }
+        )
+    }
+
+    #[test]
+    fn out_of_bounds_target_se_returns_err() {
+        let se = -12.5f32;
+        let sca = Sca::new(se, Some(0.22), Some(82)).unwrap();
+        let target = Target::new(Some(Formula::Kane), sca);
+
+        assert_eq!(target, Err(TargetBoundsError::Se(se)))
+    }
+
+    #[test]
+    fn out_of_bounds_target_cyl_power_returns_err() {
+        let cyl = 7.1f32;
+        let sca = Sca::new(-0.24, Some(cyl), Some(82)).unwrap();
+        let target = Target::new(Some(Formula::Kane), sca);
+
+        assert_eq!(target, Err(TargetBoundsError::Cyl(cyl)))
+    }
+}
