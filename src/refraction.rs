@@ -1,7 +1,7 @@
 use crate::{cyl::Cyl, distance::Distance, sca::Sca};
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum RefBoundsError {
     #[error(
         "refraction spherical power must be a value between -20 D and +20 D (supplied value: {0})"
