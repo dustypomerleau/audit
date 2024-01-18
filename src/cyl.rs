@@ -25,3 +25,25 @@ pub enum CylPair {
     Power,
     Axis,
 }
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn makes_new_cyl() {
+        let cyl = Cyl::new(2.75, 30);
+        assert_eq!(
+            cyl,
+            Ok(Cyl {
+                power: 2.75f32,
+                axis: Axis(30i32)
+            })
+        )
+    }
+
+    #[test]
+    fn out_of_bounds_cyl_axis_returns_err() {
+        let cyl = Cyl::new(6.0, 180);
+        assert_eq!(cyl, Err(ScaBoundsError::Axis(180i32)))
+    }
+}

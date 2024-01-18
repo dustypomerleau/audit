@@ -280,6 +280,8 @@ mod tests {
     use crate::target::Formula;
     use time::Month;
 
+    // todo: eventually this will be replaced with a series of mocked `FlatCases` with random but
+    // legal values.
     fn get_test_flatcase() -> FlatCase {
         FlatCase {
             surgeon_email: Some("testemail@email.com".to_string()),
