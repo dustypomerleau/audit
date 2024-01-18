@@ -75,33 +75,37 @@ mod tests {
 
     #[test]
     fn out_of_bounds_iol_se_returns_err() {
+        let se = 100.25f32;
         let iol: Result<Iol, IolBoundsError> =
-            Sca::new(100.25, Some(3.0), Some(12)).unwrap().try_into();
+            Sca::new(se, Some(3.0), Some(12)).unwrap().try_into();
 
-        assert_eq!(iol, Err(IolBoundsError::Se(100.25)))
+        assert_eq!(iol, Err(IolBoundsError::Se(se)))
     }
 
     #[test]
     fn nonzero_rem_iol_se_returns_err() {
+        let se = 10.35f32;
         let iol: Result<Iol, IolBoundsError> =
-            Sca::new(10.35, Some(3.0), Some(12)).unwrap().try_into();
+            Sca::new(se, Some(3.0), Some(12)).unwrap().try_into();
 
-        assert_eq!(iol, Err(IolBoundsError::Se(10.35)))
+        assert_eq!(iol, Err(IolBoundsError::Se(se)))
     }
 
     #[test]
     fn out_of_bounds_iol_cyl_power_returns_err() {
+        let cyl = 31.0f32;
         let iol: Result<Iol, IolBoundsError> =
-            Sca::new(12.5, Some(31.0), Some(12)).unwrap().try_into();
+            Sca::new(12.5, Some(cyl), Some(12)).unwrap().try_into();
 
-        assert_eq!(iol, Err(IolBoundsError::Cyl(31.0)))
+        assert_eq!(iol, Err(IolBoundsError::Cyl(cyl)))
     }
 
     #[test]
     fn nonzero_rem_iol_cyl_power_returns_err() {
+        let cyl = 2.06f32;
         let iol: Result<Iol, IolBoundsError> =
-            Sca::new(12.5, Some(2.06), Some(12)).unwrap().try_into();
+            Sca::new(12.5, Some(cyl), Some(12)).unwrap().try_into();
 
-        assert_eq!(iol, Err(IolBoundsError::Cyl(2.06)))
+        assert_eq!(iol, Err(IolBoundsError::Cyl(cyl)))
     }
 }
