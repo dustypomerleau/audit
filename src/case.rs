@@ -280,9 +280,8 @@ mod tests {
     use crate::target::Formula;
     use time::Month;
 
-    #[test]
-    fn case_implements_from_flatcase() {
-        let fc = FlatCase {
+    fn get_test_flatcase() -> FlatCase {
+        FlatCase {
             surgeon_email: Some("testemail@email.com".to_string()),
             surgeon_first_name: Some("john".to_string()),
             surgeon_last_name: Some("wick".to_string()),
@@ -329,8 +328,12 @@ mod tests {
             ref_after_sph: Some(-0.5),
             ref_after_cyl_power: Some(-0.5),
             ref_after_cyl_axis: Some(10),
-        };
+        }
+    }
 
+    #[test]
+    fn case_implements_from_flatcase() {
+        let fc = get_test_flatcase();
         assert!(<FlatCase as TryInto<Case>>::try_into(fc).is_ok())
     }
 }
