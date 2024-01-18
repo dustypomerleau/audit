@@ -19,7 +19,7 @@ impl Cyl {
     }
 }
 
-/// Representation of missing cylinder components for use by error types.
+/// A representation of missing cylinder components for use by error types.
 #[derive(Debug, PartialEq)]
 pub enum CylPair {
     Power,
