@@ -1,7 +1,7 @@
 use crate::cyl::Cyl;
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum SiaBoundsError {
     #[error("SIA must be a value between 0 D and 2 D (supplied value: {0})")]
     Sia(f32),
