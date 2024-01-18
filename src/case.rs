@@ -334,7 +334,7 @@ mod tests {
     }
 
     #[test]
-    fn case_implements_from_flatcase() {
+    fn case_implements_try_from_flatcase() {
         let fc = get_test_flatcase();
         assert!(<FlatCase as TryInto<Case>>::try_into(fc).is_ok())
     }
