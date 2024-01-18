@@ -49,3 +49,27 @@ impl TryFrom<Sca> for Iol {
         }
     }
 }
+
+mod tests {
+    use super::*;
+    use crate::axis::Axis;
+
+    #[test]
+    fn iol_implements_try_from_sca() {
+        let iol: Iol = Sca::new(24.25, Some(3.0), Some(12))
+            .unwrap()
+            .try_into()
+            .unwrap();
+
+        assert_eq!(
+            iol,
+            Iol(Sca {
+                sph: 24.25f32,
+                cyl: Some(Cyl {
+                    power: 3.0f32,
+                    axis: Axis(12i32)
+                })
+            })
+        )
+    }
+}
