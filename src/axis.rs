@@ -2,7 +2,7 @@
 /// in [`Refraction`](crate::refraction::Refraction), [`Target`](crate::target::Target),
 /// [`Iol`](crate::iol::Iol), and [`Sia`](crate::sia::Sia).
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Axis(i32);
+pub struct Axis(pub i32);
 
 impl Axis {
     pub fn new(axis: i32) -> Option<Self> {
