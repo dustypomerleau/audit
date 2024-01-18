@@ -4,7 +4,7 @@
 use crate::cyl::{Cyl, CylPair};
 use thiserror::Error;
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum ScaBoundsError {
     #[error("cylinder must have both a power and an axis but the {0:?} was not supplied")]
     NoPair(CylPair),
