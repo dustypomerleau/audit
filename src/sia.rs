@@ -41,7 +41,8 @@ mod tests {
 
     #[test]
     fn out_of_bounds_sia_power_returns_err() {
-        let sia: Result<Sia, SiaBoundsError> = Cyl::new(2.1, 100).unwrap().try_into();
-        assert_eq!(sia, Err(SiaBoundsError::Sia(2.1)))
+        let power = 2.1f32;
+        let sia: Result<Sia, SiaBoundsError> = Cyl::new(power, 100).unwrap().try_into();
+        assert_eq!(sia, Err(SiaBoundsError::Sia(power)))
     }
 }
