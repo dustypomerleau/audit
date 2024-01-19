@@ -10,7 +10,7 @@ pub enum ScaBoundsError {
     NoPair(CylPair),
 
     // note: this variant is needed, because it gets returned by Cyl::new - maybe we should
-    // just make it a CylBoundsError?
+    // just make it an AxisBoundsError? CylBoundsError?
     #[error("cylinder axis must be an integer value between 0° and 179° (supplied value: {0})")]
     Axis(i32),
 }
