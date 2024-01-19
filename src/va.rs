@@ -1,7 +1,7 @@
 use crate::distance::{Distance, Near};
 use thiserror::Error;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum VaPair {
     Numerator,
     Denominator,
