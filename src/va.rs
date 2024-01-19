@@ -7,7 +7,7 @@ pub enum VaPair {
     Denominator,
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, PartialEq)]
 pub enum VaBoundsError {
     #[error("Va numerator must be between 0.1 and 20.0. {0} was supplied")]
     Num(f32),
