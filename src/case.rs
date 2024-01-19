@@ -1,5 +1,4 @@
 use crate::{
-    axis::Axis,
     cyl::{Cyl, CylPair},
     distance::Distance,
     flatcase::FlatCase,
