@@ -65,3 +65,27 @@ pub struct OpVa {
     pub raw_distance: Option<DistanceVaSet>,
     pub raw_near: Option<NearVaSet>,
 }
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn makes_new_va() {
+        let va = Va::new(6.0, 7.5).unwrap();
+        assert_eq!(va, Va { num: 6.0, den: 7.5 })
+    }
+
+    #[test]
+    fn out_of_bounds_va_numerator_returns_err() {
+        let num = 21.2f32;
+        let va = Va::new(num, 9.0);
+        assert_eq!(va, Err(VaBoundsError::Num(num)))
+    }
+
+    #[test]
+    fn out_of_bounds_va_denominator_returns_err() {
+        let den = -1.2f32;
+        let va = Va::new(6.0, den);
+        assert_eq!(va, Err(VaBoundsError::Den(den)))
+    }
+}
