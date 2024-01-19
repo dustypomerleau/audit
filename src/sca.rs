@@ -9,6 +9,8 @@ pub enum ScaBoundsError {
     #[error("cylinder must have both a power and an axis but the {0:?} was not supplied")]
     NoPair(CylPair),
 
+    // note: this variant is needed, because it gets returned by Cyl::new - maybe we should
+    // just make it a CylBoundsError?
     #[error("cylinder axis must be an integer value between 0° and 179° (supplied value: {0})")]
     Axis(i32),
 }
@@ -79,5 +81,12 @@ mod tests {
     fn missing_sca_cyl_axis_returns_err() {
         let sca: Result<Sca, ScaBoundsError> = Sca::new(20.0, Some(5.25), None);
         assert_eq!(sca, Err(ScaBoundsError::NoPair(CylPair::Axis)))
+    }
+
+    #[test]
+    fn out_of_bounds_sca_cyl_axis_returns_err() {
+        let axis = 180i32;
+        let sca: Result<Sca, ScaBoundsError> = Sca::new(20.0, Some(5.25), Some(axis));
+        assert_eq!(sca, Err(ScaBoundsError::Axis(axis)))
     }
 }
