@@ -50,8 +50,8 @@ pub struct DistanceVaSet {
 
 #[derive(Debug, PartialEq)]
 pub struct NearVaSet {
-    before: Near<Va>,
-    after: Near<Va>,
+    pub before: Near<Va>,
+    pub after: Near<Va>,
 }
 
 /// A collection of preoperative and postoperative visual acuity measurements for a given case.
