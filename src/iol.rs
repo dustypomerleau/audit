@@ -24,6 +24,8 @@ pub enum IolBoundsError {
 }
 
 #[derive(Debug, PartialEq)]
+// todo: see your DB schema - you need Iol as a full struct with several components, and
+// Iol::new() instead of TryFrom<Sca>, and then OpIol wrapping for Case
 pub struct Iol(Sca);
 
 impl TryFrom<Sca> for Iol {
