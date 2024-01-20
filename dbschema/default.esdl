@@ -20,6 +20,7 @@ module default {
         required sph: float32;
         cyl: float32;
         axis: int32 { constraint min_value(0); constraint max_value(179); }
+
         constraint expression on (
             (exists(.cyl) and exists(.axis))
             or (not exists(.cyl) and not exists(.axis))
