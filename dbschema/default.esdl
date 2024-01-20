@@ -79,7 +79,10 @@ module default {
         multi cases := .<surgeon[is Cas];
     }
 
-    type Target extending SoftCreate {}
+    type Target extending Sca, SoftCreate {
+        constraint expression on (.sph >= -6.0 and .sph <= 2.0);
+        constraint expression on (.cyl >= 0.0 and .cyl <= 6.0);
+    }
 
     type Va extending SoftCreate {
         num: float32 { constraint min_ex_value(0.0); constraint max_value(20.0); }
