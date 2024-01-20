@@ -30,7 +30,7 @@ pub struct Va {
 
 impl Va {
     pub fn new(num: f32, den: f32) -> Result<Self, VaBoundsError> {
-        if (0.1..=20.0).contains(&num) {
+        if (0.0..=20.0).contains(&num) && num > 0.0 {
             if den > 0.0 {
                 Ok(Self { num, den })
             } else {
