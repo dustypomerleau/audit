@@ -1,6 +1,8 @@
 # __source__ references the current object
 # __subject__ references the current value
 
+# todo: check exclusive constraints throughout, consider carefully any length constraints on text fields
+
 module default {
     scalar type EmailType extending str {
         # HTML5 allows dotless domains, but ICANN doesn't, so prohibit here
@@ -10,16 +12,17 @@ module default {
 ### enums
 
     scalar type Adverse extending enum<Rhexis, Pc, Zonule, Other>;
-    scalar type Formula extending enum<Barrett, Kane>;
+    scalar type Axis extending int32 { constraint min_value(0); constraint max_value(179); }
+    scalar type Formula extending enum<Barrett, Kane>; # add more to this, should it just be an object? probably yes, even if you keep it as an enum in Rust (allows comparing thick lens formulas as a group, etc. because you can have a thick_lens: bool field, etc.)
     scalar type Side extending enum<Right, Left>;
-    scalar type Urn extending str { constraint max_len_value(36); } # 36 is the max length of UUID
+    scalar type Urn extending str { constraint max_len_value(36); } # 36 is the max length of UUID, not that anyone is likely to use that...
 
 ### abstract object types
 
     abstract type Sca {
         required sph: float32;
         cyl: float32;
-        axis: int32 { constraint min_value(0); constraint max_value(179); }
+        axis: Axis;
 
         constraint expression on (
             (exists(.cyl) and exists(.axis))
@@ -45,10 +48,22 @@ module default {
         required date: cal::local_date;
         site: str;
         sia: Sia;
-        iol: str;
+        iol: OpIol;
         adverse: Adverse;
         required va: OpVa;
         required refraction: OpRefraction;
+    }
+
+    type Iol extending SoftCreate {
+        required model: str { constraint exclusive; }
+        required name: str;
+        required toric: bool { default := false; }
+    }
+
+    type OpIol extending Sca, SoftCreate {
+        required iol: Iol;
+        constraint expression on (.sph >= -20.0 and .sph <= 60.0 and .sph % 0.25 = 0.0);
+        constraint expression on (.cyl >= 1.0 and .cyl <= 20.0 and .sph % 0.25 = 0.0);
     }
 
     type OpRefraction extending SoftCreate {
@@ -80,6 +95,7 @@ module default {
     }
 
     type Target extending Sca, SoftCreate {
+        formula: Formula;
         constraint expression on (.sph >= -6.0 and .sph <= 2.0);
         constraint expression on (.cyl >= 0.0 and .cyl <= 6.0);
     }
