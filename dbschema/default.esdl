@@ -63,8 +63,8 @@ module default {
         # biometry: Biometry # eventually
         target: Target;
         required date: cal::local_date;
-        site: str;
-        sia: Sia;
+        site: str; # if present, overrides surgeon default
+        sia: Sia; # if present, overrides surgeon default
         iol: OpIol;
         adverse: Adverse;
         required va: OpVa;
