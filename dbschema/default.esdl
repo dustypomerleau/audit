@@ -39,6 +39,21 @@ module default {
 
 ### object types
 
+    # # todo:
+    # type Biometry extending SoftCreate {
+    #     flat_k: K;
+    #     steep_k: K;
+    #     al: (constrained)
+    #     acd: (constrained)
+    #     lt: (constrained)
+    #     cct: (constrained)
+    #     wtw: (constrained)
+    # }
+    # type K extending SoftCreate {
+    #     value: (constrained)
+    #     meridian: Axis;
+    # }
+    
     # case is a reserved keyword
     type Cas extending SoftCreate {
         required surgeon: Surgeon;
