@@ -6,6 +6,9 @@ use time::Date;
 
 /// A flattened version of the [`Case`](crate::case::Case) struct for use in database queries and
 /// the initial ingestion of CSV data.
+// todo: this likely needs to be flattened _completely_, which means bringing target_formula in
+// line with the DB by matching on a String value, rather than expecting an enum (Case can keep an
+// enum)
 #[derive(Debug, PartialEq)]
 pub struct FlatCase {
     pub surgeon_email: Option<String>,
