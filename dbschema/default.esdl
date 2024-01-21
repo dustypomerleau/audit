@@ -19,7 +19,7 @@ module default {
         constraint regexp("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$");
     }
 
-    scalar type Focal extending enum<Mono, Edof, Multi>;
+    scalar type Focus extending enum<Mono, Edof, Multi>;
     scalar type Lens extending enum<Thick, Thin>;
     scalar type Side extending enum<Right, Left>;
 
@@ -84,7 +84,7 @@ module default {
     type Iol extending SoftCreate {
         required model: str { constraint exclusive; }
         required name: str;
-        required type: Focal { default := Focal.Mono; }
+        required type: Focus { default := Focus.Mono; }
         required toric: bool { default := false; }
         required multi constants: Constant;
     }
