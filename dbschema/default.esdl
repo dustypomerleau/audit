@@ -12,6 +12,7 @@ module default {
     scalar type Adverse extending enum<Rhexis, Pc, Zonule, Other>;
     scalar type Axis extending int32 { constraint min_value(0); constraint max_value(179); }
     scalar type Distance extending enum<Far, Near>;
+    scalar type Focal extending enum<Mono, Edof, Multi>;
     scalar type Lens extending enum<Thick, Thin>;
     scalar type Side extending enum<Right, Left>;
     scalar type Urn extending str { constraint max_len_value(36); } # 36 is the max length of UUID, not that anyone is likely to use that...
@@ -82,6 +83,7 @@ module default {
     type Iol extending SoftCreate {
         required model: str { constraint exclusive; }
         required name: str;
+        required type: Focal { default := Focal.Mono; }
         required toric: bool { default := false; }
         required multi constants: Constant;
     }
@@ -89,11 +91,7 @@ module default {
     type OpIol extending Sca, SoftCreate {
         required iol: Iol;
         constraint expression on (.sph >= -20.0 and .sph <= 60.0 and .sph % 0.25 = 0.0);
-        constraint expression on (
-            if exists .cyl (
-                .cyl.power >= 1.0 and .cyl.power <= 20.0 and .cyl.power % 0.25 = 0.0
-            )
-        );
+        constraint expression on (.cyl.power >= 1.0 and .cyl.power <= 20.0 and .cyl.power % 0.25 = 0.0);
     }
 
     type OpRefraction extending SoftCreate {
@@ -110,11 +108,7 @@ module default {
         required distance: Distance { default := Distance.Far; }
 
         constraint expression on (.sph >= -20.0 and .sph <= 20.0 and .sph % 0.25 = 0.0);
-        constraint expression on (
-            if exists .cyl (
-                .cyl.power >= -10.0 and .cyl.power <= 10.0 and .cyl.power % 0.25 = 0.0
-            )
-        );
+        constraint expression on (.cyl.power >= -10.0 and .cyl.power <= 10.0 and .cyl.power % 0.25 = 0.0);
     }
 
     type Sia extending SoftCreate {
