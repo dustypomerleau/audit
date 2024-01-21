@@ -55,14 +55,14 @@ pub struct NearVaSet {
 }
 
 /// A collection of preoperative and postoperative visual acuity measurements for a given case.
-/// The `VaSet` for best-corrected distance is mandatory. Other fields are optional.
+/// The `VaSet` for best-corrected far acuity is mandatory. Other fields are optional.
 // todo: perhaps we want a new() function that ensures the correct enum variants for each VaSet
 // in OpVa
 #[derive(Debug, PartialEq)]
 pub struct OpVa {
-    pub best_distance: FarVaSet,
+    pub best_far: FarVaSet,
     pub best_near: Option<NearVaSet>,
-    pub raw_distance: Option<FarVaSet>,
+    pub raw_far: Option<FarVaSet>,
     pub raw_near: Option<NearVaSet>,
 }
 
@@ -89,3 +89,4 @@ mod tests {
         assert_eq!(va, Err(VaBoundsError::Den(den)))
     }
 }
+

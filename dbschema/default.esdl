@@ -106,13 +106,13 @@ module default {
         cyl: IolCyl;
     }
 
-    # for now these values are only distance refraction
+    # for now these values are only far refraction
     type OpRefraction extending SoftCreate {
         required before: Refraction;
         required after: Refraction;
     }
     
-    # for now, these values are only distance BCVA
+    # for now, these values are only far BCVA
     type OpVa extending SoftCreate {
         required before: Va;
         required after: Va;

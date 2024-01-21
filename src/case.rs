@@ -201,7 +201,7 @@ impl TryFrom<FlatCase> for Case {
             /// A helper function for creating a [`FarVaSet`] out of the option
             /// numerator/denominator fields on
             /// [`FlatCase`].
-            fn distance_va_set(
+            fn far_va_set(
                 num_before: Option<f32>,
                 den_before: Option<f32>,
                 num_after: Option<f32>,
@@ -223,18 +223,18 @@ impl TryFrom<FlatCase> for Case {
                 }
             }
 
-            let best_distance = distance_va_set(
+            let best_far = far_va_set(
                 f.va_best_before_num,
                 f.va_best_before_den,
                 f.va_best_after_num,
                 f.va_best_after_den,
             )?;
 
-            // for now, deal only with best distance acuity
+            // for now, deal only with best far acuity
             OpVa {
-                best_distance,
+                best_far,
                 best_near: None,
-                raw_distance: None,
+                raw_far: None,
                 raw_near: None,
             }
         };
@@ -338,3 +338,4 @@ mod tests {
         assert!(<FlatCase as TryInto<Case>>::try_into(fc).is_ok())
     }
 }
+
