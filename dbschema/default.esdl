@@ -106,14 +106,16 @@ module default {
         cyl: IolCyl;
     }
 
+    # for now these values are only distance refraction
     type OpRefraction extending SoftCreate {
-        before: Refraction;
-        after: Refraction;
+        required before: Refraction;
+        required after: Refraction;
     }
     
+    # for now, these values are only distance BCVA
     type OpVa extending SoftCreate {
-        before: Va;
-        after: Va;
+        required before: Va;
+        required after: Va;
     }
 
     type Refraction extending SoftCreate {
@@ -133,12 +135,11 @@ module default {
     }
 
     type Sia extending Cyl, SoftCreate {
-        constraint min_value(0.0);
-        constraint max_value(2.0);
+        constraint expression on (.power >= 0.0 and .power <= 2.0);
     }
 
     type Surgeon extending SoftCreate {
-        required email: EmailType;
+        required email: EmailType { constraint exclusive; }
         first_name: str;
         last_name: str;
         site: str;
@@ -148,8 +149,8 @@ module default {
     }
 
     type SurgeonSia extending SoftCreate {
-        right: Sia;
-        left: Sia;
+        required right: Sia;
+        required left: Sia;
     }
 
     type Target extending SoftCreate {
@@ -163,13 +164,13 @@ module default {
         cyl: TargetCyl;
     }
 
-    type TargetCyl extending Cyl {
+    type TargetCyl extending Cyl, SoftCreate {
         constraint expression on (.power >= 0.0 and .power <= 6.0);
     }
 
     type Va extending SoftCreate {
         required distance: Distance { default := Distance.Far; }
-        num: float32 { constraint min_ex_value(0.0); constraint max_value(20.0); }
-        den: float32 { constraint min_ex_value(0.0); }
+        required num: float32 { constraint min_ex_value(0.0); constraint max_value(20.0); }
+        required den: float32 { constraint min_ex_value(0.0); }
     }
 }
