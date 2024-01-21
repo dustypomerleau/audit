@@ -1,4 +1,4 @@
-use crate::{cyl::Cyl, distance::Distance, sca::Sca};
+use crate::{cyl::Cyl, distance::Far, sca::Sca};
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
@@ -43,8 +43,8 @@ impl TryFrom<Sca> for Refraction {
 
 #[derive(Debug, PartialEq)]
 pub struct OpRefraction {
-    pub before: Distance<Refraction>,
-    pub after: Distance<Refraction>,
+    pub before: Far<Refraction>,
+    pub after: Far<Refraction>,
 }
 
 mod tests {

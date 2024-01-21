@@ -1,4 +1,4 @@
-use crate::distance::{Distance, Near};
+use crate::distance::{Far, Near};
 use thiserror::Error;
 
 #[derive(Debug, PartialEq)]
@@ -43,9 +43,9 @@ impl Va {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct DistanceVaSet {
-    pub before: Distance<Va>,
-    pub after: Distance<Va>,
+pub struct FarVaSet {
+    pub before: Far<Va>,
+    pub after: Far<Va>,
 }
 
 #[derive(Debug, PartialEq)]
@@ -60,9 +60,9 @@ pub struct NearVaSet {
 // in OpVa
 #[derive(Debug, PartialEq)]
 pub struct OpVa {
-    pub best_distance: DistanceVaSet,
+    pub best_distance: FarVaSet,
     pub best_near: Option<NearVaSet>,
-    pub raw_distance: Option<DistanceVaSet>,
+    pub raw_distance: Option<FarVaSet>,
     pub raw_near: Option<NearVaSet>,
 }
 

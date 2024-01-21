@@ -1,6 +1,6 @@
 use crate::{
     cyl::{Cyl, CylPair},
-    distance::Distance,
+    distance::Far,
     flatcase::FlatCase,
     iol::{Iol, IolBoundsError},
     refraction::{OpRefraction, RefBoundsError, Refraction},
@@ -8,7 +8,7 @@ use crate::{
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
     target::{Target, TargetBoundsError},
-    va::{DistanceVaSet, OpVa, Va, VaBoundsError, VaPair},
+    va::{FarVaSet, OpVa, Va, VaBoundsError, VaPair},
 };
 use thiserror::Error;
 use time::Date;
@@ -198,7 +198,7 @@ impl TryFrom<FlatCase> for Case {
         let adverse = f.adverse;
 
         let va = {
-            /// A helper function for creating a [`DistanceVaSet`] out of the option
+            /// A helper function for creating a [`FarVaSet`] out of the option
             /// numerator/denominator fields on
             /// [`FlatCase`].
             fn distance_va_set(
@@ -206,13 +206,13 @@ impl TryFrom<FlatCase> for Case {
                 den_before: Option<f32>,
                 num_after: Option<f32>,
                 den_after: Option<f32>,
-            ) -> Result<DistanceVaSet, VaBoundsError> {
+            ) -> Result<FarVaSet, VaBoundsError> {
                 match (num_before, den_before, num_after, den_after) {
                     (Some(nb), Some(db), Some(na), Some(da)) => {
-                        let before: Distance<Va> = Va::new(nb, db)?.into();
-                        let after: Distance<Va> = Va::new(na, da)?.into();
+                        let before: Far<Va> = Va::new(nb, db)?.into();
+                        let after: Far<Va> = Va::new(na, da)?.into();
 
-                        Ok(DistanceVaSet { before, after })
+                        Ok(FarVaSet { before, after })
                     }
 
                     (None, ..) | (_, _, None, _) => Err(VaBoundsError::NoPair(VaPair::Numerator)),
@@ -248,8 +248,8 @@ impl TryFrom<FlatCase> for Case {
                     Sca::new(after_sph, f.ref_after_cyl_power, f.ref_after_cyl_axis)?.try_into()?;
 
                 OpRefraction {
-                    before: Distance(before),
-                    after: Distance(after),
+                    before: Far(before),
+                    after: Far(after),
                 }
             } else {
                 return Err(CaseError::MissingField(Required::Refraction));
