@@ -5,6 +5,7 @@
 pub struct Axis(pub i32);
 
 impl Axis {
+    /// Create a new [`Axis`] with bounds checking.
     pub fn new(axis: i32) -> Option<Self> {
         if (0..180).contains(&axis) {
             Some(Axis(axis))
