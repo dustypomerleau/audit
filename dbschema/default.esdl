@@ -84,7 +84,7 @@ module default {
     type Iol extending SoftCreate {
         required model: str { constraint exclusive; }
         required name: str;
-        required type: Focus { default := Focus.Mono; }
+        required focus: Focus { default := Focus.Mono; }
         required toric: bool { default := false; }
         required multi constants: Constant;
     }
