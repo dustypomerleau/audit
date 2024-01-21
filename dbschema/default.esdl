@@ -2,31 +2,32 @@
 # __subject__ references the current value
 
 module default {
+
+### scalars
+
+    scalar type Adverse extending enum<Rhexis, Pc, Zonule, Other>;
+    
+    scalar type Axis extending int32 {
+        constraint min_value(0);
+        constraint max_value(179);
+    }
+
+    scalar type Distance extending enum<Far, Near>;
+
     scalar type EmailType extending str {
         # HTML5 allows dotless domains, but ICANN doesn't, so prohibit here
         constraint regexp("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$");
     }
 
-### enums
-
-    scalar type Adverse extending enum<Rhexis, Pc, Zonule, Other>;
-    scalar type Axis extending int32 { constraint min_value(0); constraint max_value(179); }
-    scalar type Distance extending enum<Far, Near>;
     scalar type Focal extending enum<Mono, Edof, Multi>;
     scalar type Lens extending enum<Thick, Thin>;
     scalar type Side extending enum<Right, Left>;
-    scalar type Urn extending str { constraint max_len_value(36); } # 36 is the max length of UUID, not that anyone is likely to use that...
 
-### abstract object types
+### abstract objects
 
     abstract type Cyl {
         required power: float32;
         required axis: Axis;
-    }
-
-    abstract type Sca {
-        required sph: float32;
-        cyl: Cyl;
     }
 
     abstract type SoftCreate {
@@ -36,7 +37,7 @@ module default {
         }
     }
 
-### object types
+### objects
 
     # # todo:
     # # you should probably be quite generous with the constraints here, just confirming that the order of magnitude is correct
@@ -57,7 +58,7 @@ module default {
     # case is a reserved keyword
     type Cas extending SoftCreate {
         required surgeon: Surgeon;
-        required urn: Urn;
+        required urn: str;
         required side: Side;
         # biometry: Biometry # eventually
         target: Target;
@@ -71,7 +72,7 @@ module default {
     }
 
     type Constant extending SoftCreate {
-        required value: float32; # unconstrained for now (barrett factor -2.0-5.0, A 112-125, Kane A 110-125)
+        required value: float32; # unconstrained for now (barrett factor -2.0-5.0, Kane A 110-125)
         required formula: Formula;
     }
 
@@ -88,13 +89,20 @@ module default {
         required multi constants: Constant;
     }
 
-    type OpIol extending Sca, SoftCreate {
+    type IolCyl extending Cyl, SoftCreate {
+        constraint expression on (.power >= 1.0 and .power <= 20.0 and .power % 0.25 = 0.0);
+    }
+
+    type OpIol extending SoftCreate {
         required iol: Iol;
-        constraint expression on (.sph >= -20.0 and .sph <= 60.0 and .sph % 0.25 = 0.0);
-        # todo: this fails because of 2 hops in constraint
-        # you may have to return to checking cyl and axis to make sure they are both or neither present.
-        # or it might be better to remove the abstract type and just enforce the constraints on RefCyl, TargetCyl, OpIolCyl etc.
-        constraint expression on (.cyl.power >= 1.0 and .cyl.power <= 20.0 and .cyl.power % 0.25 = 0.0);
+
+        required se: float32 { 
+            constraint min_value(-20.0);
+            constraint max_value(60.0);
+            constraint expression on (__subject__ % 0.25 = 0.0);
+        }
+
+        cyl: IolCyl;
     }
 
     type OpRefraction extending SoftCreate {
@@ -107,16 +115,25 @@ module default {
         after: Va;
     }
 
-    type Refraction extending Sca, SoftCreate {
+    type Refraction extending SoftCreate {
         required distance: Distance { default := Distance.Far; }
 
-        constraint expression on (.sph >= -20.0 and .sph <= 20.0 and .sph % 0.25 = 0.0);
-        constraint expression on (.cyl.power >= -10.0 and .cyl.power <= 10.0 and .cyl.power % 0.25 = 0.0);
+        required sph: float32 { 
+            constraint min_value(-20.0);
+            constraint max_value(20.0);
+            constraint expression on (__subject__ % 0.25 = 0.0);
+        }
+
+        cyl: RefCyl;
     }
 
-    type Sia extending SoftCreate {
-        value: float32 { constraint min_value(0.0); constraint max_value(2.0) }
-        meridian: Axis;
+    type RefCyl extending Cyl, SoftCreate {
+        constraint expression on (.power >= -10.0 and .power <= 10.0 and .power % 0.25 = 0.0);
+    }
+
+    type Sia extending Cyl, SoftCreate {
+        constraint min_value(0.0);
+        constraint max_value(2.0);
     }
 
     type Surgeon extending SoftCreate {
@@ -125,15 +142,28 @@ module default {
         last_name: str;
         site: str;
         handed: Side;
-        sia_right: Sia;
-        sia_left: Sia;
+        sia: SurgeonSia;
         multi cases := .<surgeon[is Cas];
     }
 
-    type Target extending Sca, SoftCreate {
+    type SurgeonSia extending SoftCreate {
+        right: Sia;
+        left: Sia;
+    }
+
+    type Target extending SoftCreate {
         formula: Formula;
-        constraint expression on (.sph >= -6.0 and .sph <= 2.0);
-        constraint expression on (.cyl >= 0.0 and .cyl <= 6.0);
+        
+        required se: float32 {
+            constraint min_value(-6.0);
+            constraint max_value(2.0);
+        }
+
+        cyl: TargetCyl;
+    }
+
+    type TargetCyl extending Cyl {
+        constraint expression on (.power >= 0.0 and .power <= 6.0);
     }
 
     type Va extending SoftCreate {
