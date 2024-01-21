@@ -72,7 +72,8 @@ module default {
     }
 
     type Constant extending SoftCreate {
-        required value: float32; # unconstrained for now (barrett factor -2.0-5.0, Kane A 110-125)
+        # unconstrained for now (barrett factor -2.0-5.0, Kane A 110-125)
+        required value: float32;
         required formula: Formula;
     }
 
