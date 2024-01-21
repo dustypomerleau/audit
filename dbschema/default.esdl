@@ -91,6 +91,9 @@ module default {
     type OpIol extending Sca, SoftCreate {
         required iol: Iol;
         constraint expression on (.sph >= -20.0 and .sph <= 60.0 and .sph % 0.25 = 0.0);
+        # todo: this fails because of 2 hops in constraint
+        # you may have to return to checking cyl and axis to make sure they are both or neither present.
+        # or it might be better to remove the abstract type and just enforce the constraints on RefCyl, TargetCyl, OpIolCyl etc.
         constraint expression on (.cyl.power >= 1.0 and .cyl.power <= 20.0 and .cyl.power % 0.25 = 0.0);
     }
 
