@@ -119,6 +119,7 @@ pub struct Case {
 impl TryFrom<FlatCase> for Case {
     type Error = CaseError;
 
+    // todo: should we be trying not to consume the FlatCase so we can then just put it into the DB?
     fn try_from(f: FlatCase) -> Result<Self, Self::Error> {
         let surgeon = if let Some(email) = f.surgeon_email {
             Surgeon {
