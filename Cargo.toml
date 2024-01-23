@@ -1,7 +1,7 @@
 [package]
+edition = "2021"
 name = "audit"
 version = "0.1.0"
-edition = "2021"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
@@ -9,25 +9,24 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 axum = { version = "0.7", optional = true }
 cfg-if = "1"
+chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
-csv = "1"
 edgedb-derive = "0.5.1"
 edgedb-protocol = "0.6.0"
 edgedb-tokio = "0.5.0"
 http = "1"
 leptos = { version = "0.5", features = ["nightly", "experimental-islands"] }
-leptos_axum = { version = "0.5", optional = true, features = [
-  "experimental-islands",
-] }
+leptos_axum = { version = "0.5", optional = true, features = ["experimental-islands"] }
 leptos_meta = { version = "0.5", features = ["nightly"] }
 leptos_router = { version = "0.5", features = ["nightly"] }
 log = "0.4"
+polars = "0.36"
 serde = { version = "1", features = ["derive"] }
 simple_logger = "4"
 thiserror = "1"
-time = "0.3" # add features as needed
-tokio = { version = "1", optional = true }
+# macros and rt-multi-thread are needed by edgedb-tokio
+tokio = { version = "1", optional = true, features = ["macros", "rt-multi-thread"] }
 tower = { version = "0.4", optional = true }
 tower-http = { version = "0.5", features = ["fs"], optional = true }
 tracing = { version = "0.1", optional = true }
@@ -49,10 +48,10 @@ ssr = [
 
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
-inherits = "release"
-opt-level = 'z'
-lto = true
 codegen-units = 1
+inherits = "release"
+lto = true
+opt-level = 'z'
 panic = "abort"
 
 [package.metadata.leptos]
