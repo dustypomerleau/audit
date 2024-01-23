@@ -6,7 +6,7 @@ use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum TargetBoundsError {
-    #[error("the formula used for IOL calculation is not recognized (given value {0})")]
+    #[error("the formula used for IOL calculation is not recognized (given value: {0})")]
     Formula(String),
 
     #[error("target cannot be created because the underlying Sca violated its invariants: {0:?}")]
