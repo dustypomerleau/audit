@@ -13,6 +13,7 @@ console_error_panic_hook = "0.1"
 console_log = "1"
 csv = "1"
 edgedb-derive = "0.5.1"
+edgedb-protocol = "0.6.0"
 edgedb-tokio = "0.5.0"
 http = "1"
 leptos = { version = "0.5", features = ["nightly", "experimental-islands"] }
