@@ -12,9 +12,11 @@ cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"
 console_log = "1"
-edgedb-derive = "0.5.1"
-edgedb-protocol = "0.6.0"
-edgedb-tokio = "0.5.0"
+edgedb-derive = "0.5"
+# temporarily switch to git repo for edgedb-protocol, because chrono feature hasn't been put in a release yet
+# edgedb-protocol = { version = "0.6", features = ["chrono"] }
+edgedb-protocol = { git = "https://github.com/edgedb/edgedb-rust", features = ["chrono"] }
+edgedb-tokio = "0.5"
 http = "1"
 leptos = { version = "0.5", features = ["nightly", "experimental-islands"] }
 leptos_axum = { version = "0.5", optional = true, features = ["experimental-islands"] }

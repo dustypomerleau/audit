@@ -194,7 +194,7 @@ dependencies = [
  "console_error_panic_hook",
  "console_log",
  "edgedb-derive",
- "edgedb-protocol",
+ "edgedb-protocol 0.6.0 (git+https://github.com/edgedb/edgedb-rust)",
  "edgedb-tokio",
  "http 1.0.0",
  "leptos",
@@ -206,7 +206,6 @@ dependencies = [
  "serde",
  "simple_logger",
  "thiserror",
- "time",
  "tokio",
  "tower",
  "tower-http",
@@ -882,6 +881,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "edgedb-errors"
+version = "0.4.1"
+source = "git+https://github.com/edgedb/edgedb-rust#60309cf9654545da0036fd714902edcb9784b1f0"
+dependencies = [
+ "bytes",
+]
+
+[[package]]
 name = "edgedb-protocol"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -889,7 +896,20 @@ checksum = "dae5508122c974482cb3383bc264ddb79965b6746e26a648b1122d134d917e97"
 dependencies = [
  "bitflags 2.4.2",
  "bytes",
- "edgedb-errors",
+ "edgedb-errors 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "snafu",
+ "uuid",
+]
+
+[[package]]
+name = "edgedb-protocol"
+version = "0.6.0"
+source = "git+https://github.com/edgedb/edgedb-rust#60309cf9654545da0036fd714902edcb9784b1f0"
+dependencies = [
+ "bitflags 2.4.2",
+ "bytes",
+ "chrono",
+ "edgedb-errors 0.4.1 (git+https://github.com/edgedb/edgedb-rust)",
  "snafu",
  "uuid",
 ]
@@ -909,8 +929,8 @@ dependencies = [
  "crc16",
  "dirs",
  "edgedb-derive",
- "edgedb-errors",
- "edgedb-protocol",
+ "edgedb-errors 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "edgedb-protocol 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "log",
  "once_cell",
  "rand",
