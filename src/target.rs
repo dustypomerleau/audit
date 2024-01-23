@@ -18,13 +18,34 @@ pub enum TargetBoundsError {
     Cyl(f32),
 }
 
+// todo: add all common variants
+#[derive(Debug, PartialEq)]
+pub enum Thick {
+    Barrett,
+    BarrettTrueK,
+    Holladay2,
+    Kane,
+    Olsen,
+}
+
+// todo: add all common variants
+#[derive(Debug, PartialEq)]
+pub enum Thin {
+    Haigis,
+    HofferQ,
+    Holladay1,
+    Srkt,
+}
+
 /// A formula for calculating IOL power from biometry.
 // Limited to common thick-lens formulas to start.
 // Eventually we will add all the formulas commonly in use.
 #[derive(Debug, PartialEq)]
 pub enum Formula {
-    Barrett,
-    Kane,
+    Thick(Thick),
+    Thin(Thin),
+}
+
 }
 
 /// The residual postop refraction predicted by your formula of choice.
@@ -64,12 +85,12 @@ mod tests {
     #[test]
     fn makes_new_target() {
         let sca = Sca::new(-0.15, Some(0.22), Some(82)).unwrap();
-        let target = Target::new(Some(Formula::Kane), sca).unwrap();
+        let target = Target::new(Some(Formula::Thick(Thick::Kane)), sca).unwrap();
 
         assert_eq!(
             target,
             Target {
-                formula: Some(Formula::Kane),
+                formula: Some(Formula::Thick(Thick::Kane)),
                 sca: Sca {
                     sph: -0.15,
                     cyl: Some(Cyl {
@@ -85,7 +106,7 @@ mod tests {
     fn out_of_bounds_target_se_returns_err() {
         let se = -12.5f32;
         let sca = Sca::new(se, Some(0.22), Some(82)).unwrap();
-        let target = Target::new(Some(Formula::Kane), sca);
+        let target = Target::new(Some(Formula::Thick(Thick::Kane)), sca);
 
         assert_eq!(target, Err(TargetBoundsError::Se(se)))
     }
@@ -94,7 +115,7 @@ mod tests {
     fn out_of_bounds_target_cyl_power_returns_err() {
         let cyl = 7.1f32;
         let sca = Sca::new(-0.24, Some(cyl), Some(82)).unwrap();
-        let target = Target::new(Some(Formula::Kane), sca);
+        let target = Target::new(Some(Formula::Thick(Thick::Kane)), sca);
 
         assert_eq!(target, Err(TargetBoundsError::Cyl(cyl)))
     }
