@@ -7,7 +7,7 @@ use crate::{
     sca::{Sca, ScaBoundsError},
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
-    target::{Target, TargetBoundsError},
+    target::{Formula, Target, TargetBoundsError},
     va::{FarVaSet, OpVa, Va, VaBoundsError, VaPair},
 };
 use thiserror::Error;
@@ -143,10 +143,16 @@ impl TryFrom<FlatCase> for Case {
             return Err(CaseError::MissingField(Required::Side));
         };
 
+        let formula = if let Some(form) = f.target_formula {
+            Some(Formula::new_from_str(form.as_str())?)
+        } else {
+            None
+        };
+
         let target = if let Some(sph) = f.target_se {
             let target_sca = Sca::new(sph, f.target_cyl_power, f.target_cyl_axis)?;
             // Avoid calling `.ok()` in order to propagate the `TargetBoundsError`.
-            let target = Target::new(f.target_formula, target_sca)?;
+            let target = Target::new(formula, target_sca)?;
             Some(target)
         } else {
             None

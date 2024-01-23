@@ -50,7 +50,7 @@ pub enum Formula {
 }
 
 impl Formula {
-    fn new_from_str(s: &str) -> Result<Formula, TargetBoundsError> {
+    pub fn new_from_str(s: &str) -> Result<Formula, TargetBoundsError> {
         let mut s = s.to_string().to_lowercase();
         // trying to avoid pulling in regex here. '/' avoids SRK/T, which surely someone will try
         s.retain(|c| c != ' ' && c != '/');
