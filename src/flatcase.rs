@@ -1,7 +1,4 @@
-use crate::{
-    case::{Adverse, Side},
-    target::Formula,
-};
+use crate::case::{Adverse, Side};
 use time::Date;
 
 /// A flattened version of the [`Case`](crate::case::Case) struct for use in database queries and
@@ -17,7 +14,7 @@ pub struct FlatCase {
     pub surgeon_site: Option<String>,
     pub urn: Option<String>,
     pub side: Option<Side>,
-    pub target_formula: Option<Formula>,
+    pub target_formula: Option<String>,
     pub target_se: Option<f32>,
     pub target_cyl_power: Option<f32>,
     pub target_cyl_axis: Option<i32>,

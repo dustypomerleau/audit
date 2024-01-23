@@ -276,7 +276,7 @@ impl TryFrom<FlatCase> for Case {
 
 mod tests {
     use super::*;
-    use crate::target::Formula;
+    use crate::target::{Formula, Thick};
     use time::Month;
 
     // todo: eventually this will be replaced with a series of mocked `FlatCases` with random but
@@ -289,7 +289,7 @@ mod tests {
             surgeon_site: Some("the hospital".to_string()),
             urn: Some("abc123".to_string()),
             side: Some(Side::Right),
-            target_formula: Some(Formula::Kane),
+            target_formula: Some("Barrett".to_string()),
             target_se: Some(-0.2),
             target_cyl_power: Some(0.15),
             target_cyl_axis: Some(90),
@@ -338,4 +338,3 @@ mod tests {
         assert!(<FlatCase as TryInto<Case>>::try_into(fc).is_ok())
     }
 }
-

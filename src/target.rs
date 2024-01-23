@@ -6,6 +6,9 @@ use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum TargetBoundsError {
+    #[error("the formula used for IOL calculation is not recognized (given value {0})")]
+    Formula(String),
+
     #[error("target cannot be created because the underlying Sca violated its invariants: {0:?}")]
     Sca(ScaBoundsError),
 
@@ -46,6 +49,27 @@ pub enum Formula {
     Thin(Thin),
 }
 
+impl Formula {
+    fn new_from_str(s: &str) -> Result<Formula, TargetBoundsError> {
+        let mut s = s.to_string().to_lowercase();
+        // trying to avoid pulling in regex here. '/' avoids SRK/T, which surely someone will try
+        s.retain(|c| c != ' ' && c != '/');
+
+        let formula = match s.as_str() {
+            "barrett" => Formula::Thick(Thick::Barrett),
+            "barretttruek" => Formula::Thick(Thick::BarrettTrueK),
+            "haigis" => Formula::Thin(Thin::Haigis),
+            "hofferq" => Formula::Thin(Thin::HofferQ),
+            "holladay1" => Formula::Thin(Thin::Holladay1),
+            "holladay2" => Formula::Thick(Thick::Holladay2),
+            "kane" => Formula::Thick(Thick::Kane),
+            "olsen" => Formula::Thick(Thick::Olsen),
+            "srkt" => Formula::Thin(Thin::Srkt),
+            _ => return Err(TargetBoundsError::Formula(s)),
+        };
+
+        Ok(formula)
+    }
 }
 
 /// The residual postop refraction predicted by your formula of choice.
