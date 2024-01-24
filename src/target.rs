@@ -143,4 +143,19 @@ mod tests {
 
         assert_eq!(target, Err(TargetBoundsError::Cyl(cyl)))
     }
+
+    #[test]
+    fn makes_new_formula() {
+        let formula = Formula::new_from_str("Barrett True K").unwrap();
+        assert_eq!(formula, Formula::Thick(Thick::BarrettTrueK))
+    }
+
+    #[test]
+    fn unknown_formula_returns_err() {
+        let formula = Formula::new_from_str("Awesome Formula");
+        assert_eq!(
+            formula,
+            Err(TargetBoundsError::Formula("Awesome Formula".to_string()))
+        )
+    }
 }
