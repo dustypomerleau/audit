@@ -3,6 +3,7 @@
 # with additional configuration options in neighboring files
 
 [formatting]
+align_comments = false
 allowed_blank_lines = 1
 column_width = 100
 reorder_keys = true
