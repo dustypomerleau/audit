@@ -50,12 +50,12 @@ pub enum Formula {
 }
 
 impl Formula {
-    pub fn new_from_str(s: &str) -> Result<Formula, TargetBoundsError> {
-        let mut s = s.to_string().to_lowercase();
+    pub fn new_from_str(input: &str) -> Result<Formula, TargetBoundsError> {
+        let mut f = input.to_string().to_lowercase();
         // trying to avoid pulling in regex here. '/' avoids SRK/T, which surely someone will try
-        s.retain(|c| c != ' ' && c != '/');
+        f.retain(|c| c != ' ' && c != '/');
 
-        let formula = match s.as_str() {
+        let formula = match f.as_str() {
             "barrett" => Formula::Thick(Thick::Barrett),
             "barretttruek" => Formula::Thick(Thick::BarrettTrueK),
             "haigis" => Formula::Thin(Thin::Haigis),
@@ -65,7 +65,7 @@ impl Formula {
             "kane" => Formula::Thick(Thick::Kane),
             "olsen" => Formula::Thick(Thick::Olsen),
             "srkt" => Formula::Thin(Thin::Srkt),
-            _ => return Err(TargetBoundsError::Formula(s)),
+            _ => return Err(TargetBoundsError::Formula(input.to_string())),
         };
 
         Ok(formula)
