@@ -19,15 +19,23 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
-    let conn = edgedb_tokio::create_client().await?;
+    // probably expect or throw a specific error here
+    let client = edgedb_tokio::create_client().await?;
+    // Client wraps a Pool and a Config. The Pool wraps an Arc<PoolInner>, so it is thread
+    // safe
+    // PoolInner wraps a BlockingMutex<VecDeque>, which is I assume the actual job queue
+    // that the database operates on
 
     // build our application with a route
     // todo: this is where you need to add your DB connection, see:
     // https://docs.rs/axum/latest/axum/middleware/index.html#sharing-state-with-handlers
+    // and
+    // https://docs.rs/axum/latest/axum/struct.Extension.html
+    // you need your handler to take client: Extension<Client>
     let app = Router::new()
         .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
         .leptos_routes(&leptos_options, routes, App)
-        .layer(ServiceBuilder::new().layer(conn))
+        .layer(ServiceBuilder::new().layer(client))
         .fallback(file_and_error_handler)
         .with_state(leptos_options);
 
