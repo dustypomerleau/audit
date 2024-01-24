@@ -10,8 +10,9 @@ use crate::{
     target::{Formula, Target, TargetBoundsError},
     va::{FarVaSet, OpVa, Va, VaBoundsError, VaPair},
 };
+use chrono::NaiveDate;
+use edgedb_derive::Queryable;
 use thiserror::Error;
-use time::Date;
 
 /// A wrapper for any type of bounds error.
 #[derive(Debug, Error)]
@@ -76,7 +77,7 @@ pub enum CaseError {
 }
 
 /// The side of the patient's surgery.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Queryable)]
 pub enum Side {
     Right,
     Left,
@@ -85,7 +86,7 @@ pub enum Side {
 /// An adverse intraoperative event. It's up to the surgeon to classify, and only one
 /// option can be selected. For example, a wrap around split in the rhexis opens the PC, but it's
 /// essentially a rhexis complication.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Queryable)]
 pub enum Adverse {
     Rhexis,
     Pc,
@@ -103,7 +104,7 @@ pub struct Case {
     side: Side,
     /// The surgeon's intended refractive target, based on the formula of their choice.
     target: Option<Target>,
-    date: Date,
+    date: NaiveDate,
     /// The institution where surgery was performed.
     site: Option<String>,
     sia: Option<Sia>,
@@ -284,7 +285,6 @@ impl TryFrom<FlatCase> for Case {
 mod tests {
     use super::*;
     use crate::target::{Formula, Thick};
-    use time::Month;
 
     // todo: eventually this will be replaced with a series of mocked `FlatCases` with random but
     // legal values.
@@ -300,7 +300,7 @@ mod tests {
             target_se: Some(-0.2),
             target_cyl_power: Some(0.15),
             target_cyl_axis: Some(90),
-            date: Some(Date::from_calendar_date(2023, Month::May, 15).unwrap()),
+            date: NaiveDate::from_ymd_opt(2023, 05, 01), // returns Option<NaiveDate>
             site: Some("the hospital site".to_string()),
             sia_power: Some(0.1),
             sia_meridian: Some(100),
