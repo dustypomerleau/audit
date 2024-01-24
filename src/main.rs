@@ -5,6 +5,7 @@ async fn main() {
     use axum::{routing::post, Router};
     use leptos::get_configuration;
     use leptos_axum::{generate_route_list, LeptosRoutes};
+    use tower::ServiceBuilder;
 
     simple_logger::init_with_level(log::Level::Debug).expect("couldn't initialize logging");
 
@@ -18,10 +19,15 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
+    let conn = edgedb_tokio::create_client().await?;
+
     // build our application with a route
+    // todo: this is where you need to add your DB connection, see:
+    // https://docs.rs/axum/latest/axum/middleware/index.html#sharing-state-with-handlers
     let app = Router::new()
         .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
         .leptos_routes(&leptos_options, routes, App)
+        .layer(ServiceBuilder::new().layer(conn))
         .fallback(file_and_error_handler)
         .with_state(leptos_options);
 
