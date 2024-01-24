@@ -105,3 +105,5 @@ fn arc_mutex() {
 
     rx.recv().unwrap();
 }
+
+fn db_main() { let conn = edgedb_tokio::create_client(); }
