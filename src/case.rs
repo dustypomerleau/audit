@@ -12,6 +12,7 @@ use crate::{
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 /// A wrapper for any type of bounds error.
@@ -95,7 +96,7 @@ pub enum Adverse {
 }
 
 /// A single surgical case. In the future, biometry values may be added.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct Case {
     pub surgeon: Surgeon,
     /// A unique value provided by the surgeon, such that deanonymization may only be performed by
