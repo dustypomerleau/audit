@@ -97,21 +97,21 @@ pub enum Adverse {
 /// A single surgical case. In the future, biometry values may be added.
 #[derive(Debug, PartialEq)]
 pub struct Case {
-    surgeon: Surgeon,
+    pub surgeon: Surgeon,
     /// A unique value provided by the surgeon, such that deanonymization may only be performed by
     /// the surgeon.
-    urn: String,
-    side: Side,
+    pub urn: String,
+    pub side: Side,
     /// The surgeon's intended refractive target, based on the formula of their choice.
-    target: Option<Target>,
-    date: NaiveDate,
+    pub target: Option<Target>,
+    pub date: NaiveDate,
     /// The institution where surgery was performed.
-    site: Option<String>,
-    sia: Option<Sia>,
-    iol: Option<Iol>,
-    adverse: Option<Adverse>,
-    va: OpVa,
-    refraction: OpRefraction,
+    pub site: Option<String>,
+    pub sia: Option<Sia>,
+    pub iol: Option<Iol>,
+    pub adverse: Option<Adverse>,
+    pub va: OpVa,
+    pub refraction: OpRefraction,
 }
 
 // This impl needs to surface detailed errors, because calling `FlatCase::try_into::<Case>()` is
