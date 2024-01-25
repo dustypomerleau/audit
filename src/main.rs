@@ -20,7 +20,9 @@ async fn main() {
     let routes = generate_route_list(App);
 
     // probably expect or throw a specific error here
-    let client = edgedb_tokio::create_client().await?;
+    let client = edgedb_tokio::create_client()
+        .await
+        .expect("edgedb client to be initiated");
     // Client wraps a Pool and a Config. The Pool wraps an Arc<PoolInner>, so it is thread
     // safe
     // PoolInner wraps a BlockingMutex<VecDeque>, which is I assume the actual job queue
