@@ -24,7 +24,8 @@ leptos_meta = { version = "0.5", features = ["nightly"] }
 leptos_router = { version = "0.5", features = ["nightly"] }
 log = "0.4"
 polars = "0.36"
-serde = { version = "1", features = ["derive"] }
+rkyv = { version = "0.7", features = ["uuid"] }
+# serde = { version = "1", features = ["derive"] }
 simple_logger = "4"
 thiserror = "1"
 # macros and rt-multi-thread are needed by edgedb-tokio
