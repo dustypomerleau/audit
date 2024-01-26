@@ -1,8 +1,9 @@
 use crate::{refraction::Refraction, va::Va};
+use serde::{Deserialize, Serialize};
 
 /// A far wrapper to ensure that far and near values
 /// ([`Refraction`](crate::refraction::Refraction), [`Va`](crate::va::Va)) are not confused.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Far<T>(pub T);
 
 impl From<Va> for Far<Va> {
@@ -15,7 +16,7 @@ impl From<Refraction> for Far<Refraction> {
 
 /// A near wrapper to ensure that far and near values
 /// ([`Refraction`](crate::refraction::Refraction), [`Va`](crate::va::Va)) are not confused.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Near<T>(pub T);
 
 impl From<Va> for Near<Va> {
@@ -25,4 +26,3 @@ impl From<Va> for Near<Va> {
 impl From<Refraction> for Near<Refraction> {
     fn from(refraction: Refraction) -> Self { Self(refraction) }
 }
-

@@ -1,4 +1,5 @@
 use crate::{cyl::Cyl, distance::Far, sca::Sca};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
@@ -14,7 +15,7 @@ pub enum RefBoundsError {
     Cyl(f32),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Refraction(Sca);
 
 impl TryFrom<Sca> for Refraction {
@@ -41,7 +42,7 @@ impl TryFrom<Sca> for Refraction {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpRefraction {
     pub before: Far<Refraction>,
     pub after: Far<Refraction>,
@@ -106,3 +107,4 @@ mod tests {
         assert_eq!(refraction, Err(RefBoundsError::Cyl(cyl)))
     }
 }
+

@@ -1,7 +1,9 @@
+use serde::{Deserialize, Serialize};
+
 /// A generic axis between 0° and 179°. This is used for the axis of [`Cyl`](crate::cyl::Cyl)
 /// in [`Refraction`](crate::refraction::Refraction), [`Target`](crate::target::Target),
 /// [`Iol`](crate::iol::Iol), and [`Sia`](crate::sia::Sia).
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Axis(pub i32);
 
 impl Axis {

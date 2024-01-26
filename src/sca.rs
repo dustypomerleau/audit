@@ -2,6 +2,7 @@
 // https://stackoverflow.com/questions/54504026/how-do-i-provide-an-implementation-of-a-generic-struct-in-rust
 
 use crate::cyl::{Cyl, CylPair};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
@@ -21,7 +22,7 @@ pub enum ScaBoundsError {
 /// [`Sca`] does have bounds checking for [`Axis`](crate::axis::Axis), because the bounds for
 /// this value are always the same. Bounds checking of sphere and cylinder powers is performed
 /// during conversion to the above types.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Sca {
     pub sph: f32,
     pub cyl: Option<Cyl>,

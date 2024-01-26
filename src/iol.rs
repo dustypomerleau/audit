@@ -2,6 +2,7 @@ use crate::{
     cyl::{Cyl, CylPair},
     sca::Sca,
 };
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 // We don't provide IolBoundsError::Axis(i32), because this error would already be thrown during
@@ -23,7 +24,7 @@ pub enum IolBoundsError {
     Cyl(f32),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 // todo: see your DB schema - you need Iol as a full struct with several components, and
 // Iol::new() instead of TryFrom<Sca>, and then OpIol wrapping for Case
 pub struct Iol(Sca);

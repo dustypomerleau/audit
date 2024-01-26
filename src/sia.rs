@@ -1,4 +1,5 @@
 use crate::cyl::Cyl;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
@@ -7,7 +8,7 @@ pub enum SiaBoundsError {
     Sia(f32),
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Sia(Cyl);
 
 impl TryFrom<Cyl> for Sia {

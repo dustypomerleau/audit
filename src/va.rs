@@ -1,4 +1,5 @@
 use crate::distance::{Far, Near};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Debug, PartialEq)]
@@ -22,7 +23,7 @@ pub enum VaBoundsError {
 ///
 /// The type of vision chart is left to the surgeon's discretion, but is presumed to be a Snellen,
 /// ETDRS, or similar chart that provides fractional equivalents.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Va {
     num: f32,
     den: f32,
@@ -42,13 +43,13 @@ impl Va {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct FarVaSet {
     pub before: Far<Va>,
     pub after: Far<Va>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct NearVaSet {
     pub before: Near<Va>,
     pub after: Near<Va>,
@@ -58,7 +59,7 @@ pub struct NearVaSet {
 /// The `VaSet` for best-corrected far acuity is mandatory. Other fields are optional.
 // todo: perhaps we want a new() function that ensures the correct enum variants for each VaSet
 // in OpVa
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpVa {
     pub best_far: FarVaSet,
     pub best_near: Option<NearVaSet>,
@@ -89,4 +90,3 @@ mod tests {
         assert_eq!(va, Err(VaBoundsError::Den(den)))
     }
 }
-

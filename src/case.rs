@@ -78,7 +78,7 @@ pub enum CaseError {
 }
 
 /// The side of the patient's surgery.
-#[derive(Debug, PartialEq, Queryable)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub enum Side {
     Right,
     Left,
@@ -87,7 +87,7 @@ pub enum Side {
 /// An adverse intraoperative event. It's up to the surgeon to classify, and only one
 /// option can be selected. For example, a wrap around split in the rhexis opens the PC, but it's
 /// essentially a rhexis complication.
-#[derive(Debug, PartialEq, Queryable)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub enum Adverse {
     Rhexis,
     Pc,
@@ -96,7 +96,7 @@ pub enum Adverse {
 }
 
 /// A single surgical case. In the future, biometry values may be added.
-#[derive(Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Case {
     pub surgeon: Surgeon,
     /// A unique value provided by the surgeon, such that deanonymization may only be performed by

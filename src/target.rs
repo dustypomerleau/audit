@@ -2,6 +2,7 @@ use crate::{
     cyl::Cyl,
     sca::{Sca, ScaBoundsError},
 };
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
@@ -22,7 +23,7 @@ pub enum TargetBoundsError {
 }
 
 // todo: add all common variants
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Thick {
     Barrett,
     BarrettTrueK,
@@ -32,7 +33,7 @@ pub enum Thick {
 }
 
 // todo: add all common variants
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Thin {
     Haigis,
     HofferQ,
@@ -43,7 +44,7 @@ pub enum Thin {
 /// A formula for calculating IOL power from biometry.
 // Limited to common thick-lens formulas to start.
 // Eventually we will add all the formulas commonly in use.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Formula {
     Thick(Thick),
     Thin(Thin),
@@ -74,7 +75,7 @@ impl Formula {
 
 /// The residual postop refraction predicted by your formula of choice.
 // At the start, allow only one formula/target.
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Target {
     formula: Option<Formula>,
     sca: Sca,
