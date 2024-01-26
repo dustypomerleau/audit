@@ -16,7 +16,7 @@ pub enum RefBoundsError {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Refraction(Sca);
+pub struct Refraction(pub Sca);
 
 impl TryFrom<Sca> for Refraction {
     type Error = RefBoundsError;
@@ -107,4 +107,3 @@ mod tests {
         assert_eq!(refraction, Err(RefBoundsError::Cyl(cyl)))
     }
 }
-
