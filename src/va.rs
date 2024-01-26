@@ -25,8 +25,8 @@ pub enum VaBoundsError {
 /// ETDRS, or similar chart that provides fractional equivalents.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Va {
-    num: f32,
-    den: f32,
+    pub num: f32,
+    pub den: f32,
 }
 
 impl Va {

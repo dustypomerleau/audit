@@ -2,10 +2,13 @@ use crate::{
     case::Case,
     distance::Far,
     refraction::{OpRefraction, Refraction},
+    sca::Sca,
     surgeon::Surgeon,
-    va::{FarVaSet, OpVa},
+    va::{FarVaSet, OpVa, Va},
 };
-use axum::Extension;
+// todo: do you really want axum to be an optional dep? Because it could mean a lot of
+// `#[cfg(...)]`
+#[cfg(feature = "ssr")] use axum::Extension;
 use edgedb_tokio::Client;
 use leptos::{server, ServerFnError};
 use uuid::Uuid;
