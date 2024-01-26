@@ -18,7 +18,7 @@ edgedb-derive = "0.5"
 edgedb-protocol = { git = "https://github.com/edgedb/edgedb-rust", features = ["chrono"] }
 edgedb-tokio = "0.5"
 http = "1"
-leptos = { version = "0.6", features = ["nightly", "experimental-islands"] }
+leptos = { version = "0.6", features = ["experimental-islands", "nightly", "ssr"] }
 leptos_axum = { version = "0.6", optional = true, features = ["experimental-islands"] }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
