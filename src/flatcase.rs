@@ -1,14 +1,14 @@
 use crate::{
     case::{Adverse, Case, Side},
     cyl::Cyl,
-    distance::Far,
+    distance::{Far, Near},
     iol::Iol,
     refraction::{OpRefraction, Refraction},
     sca::Sca,
     sia::Sia,
     surgeon::Surgeon,
     target::{Formula, Target},
-    va::{FarVaSet, OpVa, Va},
+    va::{FarVaSet, NearVaSet, OpVa, Va},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
@@ -180,6 +180,62 @@ impl From<Case> for FlatCase {
 
             None => (None, None, None),
         };
+
+        trait VaSet {}
+        impl VaSet for FarVaSet {}
+        impl VaSet for NearVaSet {}
+
+        // note: this is only needed for the optional va sets
+        // rewrite separately for Far and Near and ditch this trait/trait object
+        // or just separately match for each of the 3 optional va sets and ditch the whole function
+        // consider whether you really need Far and Near wrappers for everything
+        fn parse_va(
+            vs: Option<Box<dyn VaSet>>,
+        ) -> (Option<f32>, Option<f32>, Option<f32>, Option<f32>) {
+            if let Some(va_set) = vs {
+                //
+                match va_set {
+                    FarVaSet {
+                        before:
+                            Far(Va {
+                                num: before_num,
+                                den: before_den,
+                            }),
+                        after:
+                            Far(Va {
+                                num: after_num,
+                                den: after_den,
+                            }),
+                    } => (
+                        Some(before_num),
+                        Some(before_den),
+                        Some(after_num),
+                        Some(after_den),
+                    ),
+
+                    NearVaSet {
+                        before:
+                            Near(Va {
+                                num: before_num,
+                                den: before_den,
+                            }),
+                        after:
+                            Near(Va {
+                                num: after_num,
+                                den: after_den,
+                            }),
+                    } => (
+                        Some(before_num),
+                        Some(before_den),
+                        Some(after_num),
+                        Some(after_den),
+                    ),
+                }
+                //
+            } else {
+                (None, None)
+            }
+        }
 
         let fc = FlatCase {
             surgeon_email: Some(surgeon_email),
