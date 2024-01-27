@@ -1,4 +1,4 @@
-use crate::distance::{Far, Near};
+use crate::distance::{Distance, Far, Near};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -44,15 +44,11 @@ impl Va {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct FarVaSet {
-    pub before: Far<Va>,
-    pub after: Far<Va>,
-}
-
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct NearVaSet {
-    pub before: Near<Va>,
-    pub after: Near<Va>,
+pub struct VaSet<T>
+where T: Distance<Va>
+{
+    pub before: T,
+    pub after: T,
 }
 
 /// A collection of preoperative and postoperative visual acuity measurements for a given case.
@@ -61,10 +57,10 @@ pub struct NearVaSet {
 // in OpVa
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpVa {
-    pub best_far: FarVaSet,
-    pub best_near: Option<NearVaSet>,
-    pub raw_far: Option<FarVaSet>,
-    pub raw_near: Option<NearVaSet>,
+    pub best_far: VaSet<Far<Va>>,
+    pub best_near: Option<VaSet<Near<Va>>>,
+    pub raw_far: Option<VaSet<Far<Va>>>,
+    pub raw_near: Option<VaSet<Near<Va>>>,
 }
 
 mod tests {
