@@ -9,7 +9,7 @@ pub enum SiaBoundsError {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Sia(Cyl);
+pub struct Sia(pub Cyl);
 
 impl TryFrom<Cyl> for Sia {
     type Error = SiaBoundsError;

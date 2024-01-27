@@ -71,6 +71,25 @@ impl Formula {
 
         Ok(formula)
     }
+
+    pub fn formula_to_string(f: Formula) -> String {
+        match f {
+            Formula::Thick(thick) => match thick {
+                Thick::Barrett => "Barrett".to_string(),
+                Thick::BarrettTrueK => "Barrett True K".to_string(),
+                Thick::Holladay2 => "Holladay 2".to_string(),
+                Thick::Kane => "Kane".to_string(),
+                Thick::Olsen => "Olsen".to_string(),
+            },
+
+            Formula::Thin(thin) => match thin {
+                Thin::Haigis => "Haigis".to_string(),
+                Thin::HofferQ => "Hoffer Q".to_string(),
+                Thin::Holladay1 => "Holladay 1".to_string(),
+                Thin::Srkt => "SRK/T".to_string(),
+            },
+        }
+    }
 }
 
 /// The residual postop refraction predicted by your formula of choice.

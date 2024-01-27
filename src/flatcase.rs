@@ -2,10 +2,12 @@ use crate::{
     case::{Adverse, Case, Side},
     cyl::Cyl,
     distance::Far,
+    iol::Iol,
     refraction::{OpRefraction, Refraction},
     sca::Sca,
+    sia::Sia,
     surgeon::Surgeon,
-    target::Target,
+    target::{Formula, Target},
     va::{FarVaSet, OpVa, Va},
 };
 use chrono::NaiveDate;
@@ -157,6 +159,28 @@ impl From<Case> for FlatCase {
             None => (None, None, None, None),
         };
 
+        let target_formula = if let Some(formula) = target_formula {
+            Some(Formula::formula_to_string(formula))
+        } else {
+            None
+        };
+
+        let (sia_power, sia_meridian) = match sia {
+            Some(Sia(Cyl { power, axis })) => (Some(power), Some(axis.0)),
+            None => (None, None),
+        };
+
+        let (iol_se, iol_cyl_power, iol_cyl_axis) = match iol {
+            Some(Iol(Sca {
+                sph,
+                cyl: Some(Cyl { power, axis }),
+            })) => (Some(sph), Some(power), Some(axis.0)),
+
+            Some(Iol(Sca { sph, .. })) => (Some(sph), None, None),
+
+            None => (None, None, None),
+        };
+
         let fc = FlatCase {
             surgeon_email: Some(surgeon_email),
             surgeon_first_name,
@@ -168,6 +192,14 @@ impl From<Case> for FlatCase {
             target_se,
             target_cyl_power,
             target_cyl_axis,
+            date: Some(date),
+            site,
+            sia_power,
+            sia_meridian,
+            iol_se,
+            iol_cyl_power,
+            iol_cyl_axis,
+            adverse,
         };
 
         fc
