@@ -77,8 +77,8 @@ impl Formula {
 // At the start, allow only one formula/target.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Target {
-    formula: Option<Formula>,
-    sca: Sca,
+    pub formula: Option<Formula>,
+    pub sca: Sca,
 }
 
 impl Target {
