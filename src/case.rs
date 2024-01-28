@@ -1,6 +1,6 @@
 use crate::{
     cyl::{Cyl, CylPair},
-    distance::Far,
+    distance::{Distance, Far, Near},
     flatcase::FlatCase,
     iol::{Iol, IolBoundsError},
     refraction::{OpRefraction, RefBoundsError, Refraction},
@@ -8,7 +8,7 @@ use crate::{
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
     target::{Formula, Target, TargetBoundsError},
-    va::{FarVaSet, OpVa, Va, VaBoundsError, VaPair},
+    va::{OpVa, Va, VaBoundsError, VaPair, VaSet},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
@@ -206,23 +206,43 @@ impl TryFrom<FlatCase> for Case {
 
         let adverse = f.adverse;
 
+        enum Dist {
+            Far,
+            Near,
+        }
+
         let va = {
-            /// A helper function for creating a [`FarVaSet`] out of the option
+            /// A helper function for creating a [`VaSet`] out of the option
             /// numerator/denominator fields on
             /// [`FlatCase`].
-            fn far_va_set(
+            fn va_set<T: Distance<Va>>(
+                dist: Dist,
                 num_before: Option<f32>,
                 den_before: Option<f32>,
                 num_after: Option<f32>,
                 den_after: Option<f32>,
-            ) -> Result<FarVaSet, VaBoundsError> {
+            ) -> Result<Option<VaSet<T>>, VaBoundsError> {
                 match (num_before, den_before, num_after, den_after) {
                     (Some(nb), Some(db), Some(na), Some(da)) => {
-                        let before: Far<Va> = Va::new(nb, db)?.into();
-                        let after: Far<Va> = Va::new(na, da)?.into();
+                        let before = Va::new(nb, db)?;
+                        let after = Va::new(na, da)?;
 
-                        Ok(FarVaSet { before, after })
+                        let set = match dist {
+                            Dist::Far => VaSet {
+                                before: Far(before),
+                                after: Far(after),
+                            },
+
+                            Dist::Near => VaSet {
+                                before: Near(before),
+                                after: Near(after),
+                            },
+                        };
+
+                        Ok(Some(set))
                     }
+
+                    (None, None, None, None) => Ok(None),
 
                     (None, ..) | (_, _, None, _) => Err(VaBoundsError::NoPair(VaPair::Numerator)),
 
@@ -232,19 +252,47 @@ impl TryFrom<FlatCase> for Case {
                 }
             }
 
-            let best_far = far_va_set(
+            let best_far = if let Some(bf) = va_set(
+                Dist::Far,
                 f.va_best_before_num,
                 f.va_best_before_den,
                 f.va_best_after_num,
                 f.va_best_after_den,
+            )? {
+                bf
+            } else {
+                return Err(CaseError::MissingField(Required::Va));
+            };
+
+            let best_near = va_set(
+                Dist::Near,
+                f.va_best_near_before_num,
+                f.va_best_near_before_den,
+                f.va_best_near_after_num,
+                f.va_best_near_after_den,
             )?;
 
-            // for now, deal only with best far acuity
+            let raw_far = va_set(
+                Dist::Far,
+                f.va_raw_before_num,
+                f.va_raw_before_den,
+                f.va_raw_after_num,
+                f.va_raw_after_den,
+            )?;
+
+            let raw_near = va_set(
+                Dist::Near,
+                f.va_raw_near_before_num,
+                f.va_raw_near_before_den,
+                f.va_raw_near_after_num,
+                f.va_raw_near_after_den,
+            )?;
+
             OpVa {
                 best_far,
-                best_near: None,
-                raw_far: None,
-                raw_near: None,
+                best_near,
+                raw_far,
+                raw_near,
             }
         };
 
@@ -285,7 +333,6 @@ impl TryFrom<FlatCase> for Case {
 
 mod tests {
     use super::*;
-    use crate::target::{Formula, Thick};
 
     // todo: eventually this will be replaced with a series of mocked `FlatCases` with random but
     // legal values.
