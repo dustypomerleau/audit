@@ -18,12 +18,6 @@ impl Axis {
     }
 }
 
-impl Deref for Axis {
-    type Target = i32;
-
-    fn deref(&self) -> &Self::Target { &self.0 }
-}
-
 mod tests {
     use super::*;
 
