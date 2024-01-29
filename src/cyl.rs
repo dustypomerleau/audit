@@ -1,6 +1,13 @@
 use crate::{axis::Axis, sca::ScaBoundsError};
 use serde::{Deserialize, Serialize};
 
+/// A representation of missing cylinder components for use by error types.
+#[derive(Debug, PartialEq)]
+pub enum CylPair {
+    Power,
+    Axis,
+}
+
 /// An agnostic cylinder type. The acceptable bounds of [`power`](Cyl::power) depend on the
 /// type of power being represented. Since the acceptable values of [`axis`](Cyl::axis) are always
 /// the same, we insist upon an [`Axis`](crate::axis::Axis) to constrain it.
@@ -18,13 +25,6 @@ impl Cyl {
             Err(ScaBoundsError::Axis(axis))
         }
     }
-}
-
-/// A representation of missing cylinder components for use by error types.
-#[derive(Debug, PartialEq)]
-pub enum CylPair {
-    Power,
-    Axis,
 }
 
 mod tests {
