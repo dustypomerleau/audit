@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 
-/// A unique surgeon
 // In the DB, the Surgeon type will have an SIA for right and left eyes, but we don't need that
 // value here. After hitting the DB, either the value for `FlatCase::sia` will be `None` (in which
 // case we use the surgeon's default value for that side), or it will be `Some()`, in which case
 // that case-specific value will override the surgeon's defaults.
+/// A unique surgeon
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Surgeon {
     // probably best to validate this as unique and email form at both the form and database levels
