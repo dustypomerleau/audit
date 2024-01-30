@@ -1,14 +1,13 @@
 use crate::{
     case::{Adverse, Case, Side},
     cyl::Cyl,
-    distance::{Far, Near},
     iol::Iol,
     refraction::{OpRefraction, Refraction},
     sca::Sca,
     sia::Sia,
     surgeon::Surgeon,
     target::{Formula, Target},
-    va::{FarVaSet, NearVaSet, OpVa, Va},
+    va::{OpVa, Va, VaSet},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
@@ -89,7 +88,7 @@ impl From<Case> for FlatCase {
             va:
                 OpVa {
                     best_far:
-                        FarVaSet {
+                        VaSet {
                             before:
                                 Far(Va {
                                     num: va_best_before_num,
@@ -181,59 +180,22 @@ impl From<Case> for FlatCase {
             None => (None, None, None),
         };
 
-        trait VaSet {}
-        impl VaSet for FarVaSet {}
-        impl VaSet for NearVaSet {}
-
-        // note: this is only needed for the optional va sets
-        // rewrite separately for Far and Near and ditch this trait/trait object
-        // or just separately match for each of the 3 optional va sets and ditch the whole function
-        // consider whether you really need Far and Near wrappers for everything
-        fn parse_va(
-            vs: Option<Box<dyn VaSet>>,
+        fn unwrap_va<T: Distance<Va> + Sized>(
+            set: Option<VaSet<T>>,
         ) -> (Option<f32>, Option<f32>, Option<f32>, Option<f32>) {
-            if let Some(va_set) = vs {
-                //
-                match va_set {
-                    FarVaSet {
-                        before:
-                            Far(Va {
-                                num: before_num,
-                                den: before_den,
-                            }),
-                        after:
-                            Far(Va {
-                                num: after_num,
-                                den: after_den,
-                            }),
-                    } => (
-                        Some(before_num),
-                        Some(before_den),
-                        Some(after_num),
-                        Some(after_den),
-                    ),
-
-                    NearVaSet {
-                        before:
-                            Near(Va {
-                                num: before_num,
-                                den: before_den,
-                            }),
-                        after:
-                            Near(Va {
-                                num: after_num,
-                                den: after_den,
-                            }),
-                    } => (
-                        Some(before_num),
-                        Some(before_den),
-                        Some(after_num),
-                        Some(after_den),
-                    ),
-                }
-                //
-            } else {
-                (None, None)
+            match set {
+                Some(VaSet {
+                    before:
+                        Far(Va {
+                            num: before_num,
+                            den: before_den,
+                        }),
+                    after:
+                        Far(Va {
+                            num: after_num,
+                            den: after_den,
+                        }),
+                }) => {Some(before_num), Some(before_den), Some(after_num), Some(after_den)}
             }
         }
 
@@ -256,6 +218,14 @@ impl From<Case> for FlatCase {
             iol_cyl_power,
             iol_cyl_axis,
             adverse,
+            va_best_before_num: Some(va_best_before_num),
+            va_best_before_den: Some(va_best_before_den),
+            va_best_after_num: Some(va_best_after_num),
+            va_best_after_den: Some(va_best_after_den),
+            va_best_near_before_num,
+            va_best_near_before_den,
+            va_best_near_after_num,
+            va_best_near_after_den,
         };
 
         fc

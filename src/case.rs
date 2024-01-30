@@ -1,6 +1,5 @@
 use crate::{
     cyl::{Cyl, CylPair},
-    distance::{Distance, Far, Near},
     flatcase::FlatCase,
     iol::{Iol, IolBoundsError},
     refraction::{OpRefraction, RefBoundsError, Refraction},
@@ -84,9 +83,12 @@ pub enum Side {
     Left,
 }
 
-/// An adverse intraoperative event. It's up to the surgeon to classify, and only one
-/// option can be selected. For example, a wrap around split in the rhexis opens the PC, but it's
-/// essentially a rhexis complication.
+/// An adverse intraoperative event. Classification is at the surgeon's discretion, and only one
+/// option can be selected. For example, a wrap around split in the rhexis opens the PC, but in the
+/// surgeon's view it may be essentially a rhexis complication. For our purposes, we aren't
+/// particularly concerned with how the adverse event was handled (for example, whether a
+/// vitrectomy was required). We are interested only in the relative outcomes of cases with adverse
+/// events versus those without.
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub enum Adverse {
     Rhexis,
@@ -108,8 +110,9 @@ pub struct Case {
     pub date: NaiveDate,
     /// The institution where surgery was performed.
     pub site: Option<String>,
+    // If no SIA is provided at the case level, the surgeon's defaults will be used.
     pub sia: Option<Sia>,
-    pub iol: Option<Iol>,
+    pub iol: Option<OpIol>,
     pub adverse: Option<Adverse>,
     pub va: OpVa,
     pub refraction: OpRefraction,
@@ -206,95 +209,7 @@ impl TryFrom<FlatCase> for Case {
 
         let adverse = f.adverse;
 
-        enum Dist {
-            Far,
-            Near,
-        }
-
-        let va = {
-            /// A helper function for creating a [`VaSet`] out of the option
-            /// numerator/denominator fields on
-            /// [`FlatCase`].
-            fn va_set<T: Distance<Va>>(
-                dist: Dist,
-                num_before: Option<f32>,
-                den_before: Option<f32>,
-                num_after: Option<f32>,
-                den_after: Option<f32>,
-            ) -> Result<Option<VaSet<T>>, VaBoundsError> {
-                match (num_before, den_before, num_after, den_after) {
-                    (Some(nb), Some(db), Some(na), Some(da)) => {
-                        let before = Va::new(nb, db)?;
-                        let after = Va::new(na, da)?;
-
-                        let set = match dist {
-                            Dist::Far => VaSet {
-                                before: Far(before),
-                                after: Far(after),
-                            },
-
-                            Dist::Near => VaSet {
-                                before: Near(before),
-                                after: Near(after),
-                            },
-                        };
-
-                        Ok(Some(set))
-                    }
-
-                    (None, None, None, None) => Ok(None),
-
-                    (None, ..) | (_, _, None, _) => Err(VaBoundsError::NoPair(VaPair::Numerator)),
-
-                    (_, None, ..) | (_, _, _, None) => {
-                        Err(VaBoundsError::NoPair(VaPair::Denominator))
-                    }
-                }
-            }
-
-            let best_far = if let Some(bf) = va_set(
-                Dist::Far,
-                f.va_best_before_num,
-                f.va_best_before_den,
-                f.va_best_after_num,
-                f.va_best_after_den,
-            )? {
-                bf
-            } else {
-                return Err(CaseError::MissingField(Required::Va));
-            };
-
-            let best_near = va_set(
-                Dist::Near,
-                f.va_best_near_before_num,
-                f.va_best_near_before_den,
-                f.va_best_near_after_num,
-                f.va_best_near_after_den,
-            )?;
-
-            let raw_far = va_set(
-                Dist::Far,
-                f.va_raw_before_num,
-                f.va_raw_before_den,
-                f.va_raw_after_num,
-                f.va_raw_after_den,
-            )?;
-
-            let raw_near = va_set(
-                Dist::Near,
-                f.va_raw_near_before_num,
-                f.va_raw_near_before_den,
-                f.va_raw_near_after_num,
-                f.va_raw_near_after_den,
-            )?;
-
-            OpVa {
-                best_far,
-                best_near,
-                raw_far,
-                raw_near,
-            }
-        };
+        let va = todo!();
 
         let refraction = {
             if let (Some(before_sph), Some(after_sph)) = (f.ref_before_sph, f.ref_after_sph) {
@@ -337,7 +252,7 @@ mod tests {
 
     // todo: eventually this will be replaced with a series of mocked `FlatCases` with random but
     // legal values.
-    fn get_test_flatcase() -> FlatCase {
+    fn flatcase() -> FlatCase {
         FlatCase {
             surgeon_email: Some("testemail@email.com".to_string()),
             surgeon_first_name: Some("john".to_string()),
@@ -390,7 +305,8 @@ mod tests {
 
     #[test]
     fn case_implements_try_from_flatcase() {
-        let fc = get_test_flatcase();
+        let fc = flatcase();
+
         assert!(<FlatCase as TryInto<Case>>::try_into(fc).is_ok())
     }
 }
