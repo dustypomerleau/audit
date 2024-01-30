@@ -20,11 +20,11 @@ pub enum VaBoundsError {
 
 /// A wrapper type, to ensure that far visual acuities are only compared to other far acuities.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Far(Va);
+pub struct Far(pub Va);
 
 /// A wrapper type, to ensure that near visual acuities are only compared to other near acuities.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Near(Va);
+pub struct Near(pub Va);
 
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  
