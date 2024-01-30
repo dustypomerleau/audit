@@ -120,7 +120,7 @@ mod tests {
         let sca = Sca::new(18.5, Some(cyl), Some(170)).unwrap();
         let opiol = OpIol::new(iol, sca);
 
-        assert_eq!(opiol, Err(IolBoundsError::Se(se)))
+        assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl)))
     }
 
     #[test]
