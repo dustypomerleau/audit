@@ -93,7 +93,8 @@ mod tests {
 
     #[test]
     fn out_of_bounds_iol_se_returns_err() {
-        // todo: randomize the out of bounds value
+        // todo: randomize the out of bounds values on all failing tests
+        // (Axis, Cyl, Iol, Refraction, Sca, Sia, Target, Va)
         let se = 100.25;
         let iol = iol();
         let sca = Sca::new(se, Some(3.0), Some(12)).unwrap();
