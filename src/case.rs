@@ -331,6 +331,7 @@ impl TryFrom<FlatCase> for Case {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 

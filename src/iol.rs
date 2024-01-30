@@ -69,6 +69,7 @@ impl OpIol {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 

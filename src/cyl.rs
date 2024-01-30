@@ -27,6 +27,7 @@ impl Cyl {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 

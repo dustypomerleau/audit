@@ -79,6 +79,7 @@ pub struct OpVa {
     after: AfterVa,
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 

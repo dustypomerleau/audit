@@ -23,6 +23,7 @@ impl TryFrom<Cyl> for Sia {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::axis::Axis;

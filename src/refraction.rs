@@ -50,6 +50,7 @@ pub struct OpRefraction {
     pub after: Refraction,
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::axis::Axis;

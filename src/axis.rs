@@ -18,6 +18,7 @@ impl Axis {
     }
 }
 
+#[cfg(test)]
 mod tests {
     use super::*;
 
