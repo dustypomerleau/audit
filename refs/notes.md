@@ -59,7 +59,3 @@ Or, to be more _extreme_ why not just skip this one at the level of the type sys
 [this is a link](http://test.com)
 
 1. There are only 2 variants (far and near), and only 2 situations where they are needed (`Refraction`, and `Va`), a final option would be dedicated types:
-1. test
-
-- test
-- also
