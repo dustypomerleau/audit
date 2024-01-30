@@ -1,4 +1,4 @@
-use crate::{cyl::Cyl, distance::Far, sca::Sca};
+use crate::{cyl::Cyl, sca::Sca};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -25,17 +25,19 @@ impl TryFrom<Sca> for Refraction {
         let Sca { sph, cyl } = sca;
 
         if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
-            match cyl {
-                Some(Cyl { power, axis: _ }) => {
+            let sca = match cyl {
+                Some(Cyl { power, .. }) => {
                     if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
-                        Ok(Self(sca))
+                        sca
                     } else {
-                        Err(RefBoundsError::Cyl(power))
+                        return Err(RefBoundsError::Cyl(power));
                     }
                 }
 
-                None => Ok(Self(sca)),
-            }
+                None => sca,
+            };
+
+            Ok(Self(sca))
         } else {
             Err(RefBoundsError::Sph(sph))
         }
@@ -44,8 +46,8 @@ impl TryFrom<Sca> for Refraction {
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpRefraction {
-    pub before: Far<Refraction>,
-    pub after: Far<Refraction>,
+    pub before: Refraction,
+    pub after: Refraction,
 }
 
 mod tests {
