@@ -86,7 +86,7 @@ mod tests {
     #[test]
     fn makes_new_opiol() {
         let iol = iol();
-        let sca = Sca::new(24.25, Some(3.0), Some(12))?;
+        let sca = Sca::new(24.25, Some(3.0), Some(12)).unwrap();
         let opiol = OpIol::new(iol, sca).unwrap();
 
         assert_eq!(opiol, OpIol { iol, sca })
