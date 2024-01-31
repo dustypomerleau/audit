@@ -25,6 +25,7 @@ pub struct FlatCase {
     pub surgeon_site: Option<String>,
     pub urn: Option<String>,
     pub side: Option<Side>,
+    pub target_constant: Option<f32>,
     pub target_formula: Option<String>,
     pub target_se: Option<f32>,
     pub target_cyl_power: Option<f32>,

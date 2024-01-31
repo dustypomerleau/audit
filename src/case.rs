@@ -6,7 +6,7 @@ use crate::{
     sca::{Sca, ScaBoundsError},
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
-    target::{Formula, Target, TargetBoundsError},
+    target::{Constant, ConstantPair, Formula, Target, TargetBoundsError},
     va::{OpVa, Va, VaBoundsError, VaPair, VaSet},
 };
 use chrono::NaiveDate;
@@ -149,16 +149,28 @@ impl TryFrom<FlatCase> for Case {
             return Err(CaseError::MissingField(Required::Side));
         };
 
-        let formula = if let Some(form) = f.target_formula {
-            Some(Formula::new_from_str(form.as_str())?)
-        } else {
-            None
+        let target_constant = match (f.target_constant, f.target_formula) {
+            (Some(constant), Some(formula)) => {
+                let constant = Constant {
+                    value: constant,
+                    formula: Formula::new_from_str(&formula),
+                };
+
+                Some(constant)
+            }
+
+            (None, None) => None,
+
+            (None, _) => return Err(TargetBoundsError::NoPair(ConstantPair::Value).into()),
+
+            (_, None) => return Err(TargetBoundsError::NoPair(ConstantPair::Formula).into()),
         };
 
         let target = if let Some(sph) = f.target_se {
             let target_sca = Sca::new(sph, f.target_cyl_power, f.target_cyl_axis)?;
             // Avoid calling `.ok()` in order to propagate the `TargetBoundsError`.
-            let target = Target::new(formula, target_sca)?;
+            let target = Target::new(target_constant, target_sca)?;
+
             Some(target)
         } else {
             None
@@ -260,6 +272,7 @@ mod tests {
             surgeon_site: Some("the hospital".to_string()),
             urn: Some("abc123".to_string()),
             side: Some(Side::Right),
+            target_constant: 119.36,
             target_formula: Some("Barrett".to_string()),
             target_se: Some(-0.2),
             target_cyl_power: Some(0.15),
