@@ -144,10 +144,10 @@ mod tests {
     use super::*;
 
     // todo: replace with a randomized TargetFormula using Mock
-    fn target_formula() -> Option<TargetFormula> {
-        Some(TargetFormula {
+    fn iol_constant() -> Option<Constant> {
+        Some(Constant {
+            value: 119.36,
             formula: Formula::Thick(Thick::Kane),
-            constant: 119.36,
         })
     }
 
@@ -168,25 +168,19 @@ mod tests {
 
     #[test]
     fn makes_new_target() {
-        let target_formula = target_formula();
+        let constant = iol_constant();
         let sca = Sca::new(-0.15, Some(0.22), Some(82)).unwrap();
-        let target = Target::new(target_formula, sca).unwrap();
+        let target = Target::new(constant, sca).unwrap();
 
-        assert_eq!(
-            target,
-            Target {
-                target_formula,
-                sca
-            }
-        )
+        assert_eq!(target, Target { constant, sca })
     }
 
     #[test]
     fn out_of_bounds_target_se_returns_err() {
         let se = -12.5;
-        let target_formula = target_formula();
+        let constant = iol_constant();
         let sca = Sca::new(se, Some(0.22), Some(82)).unwrap();
-        let target = Target::new(target_formula, sca);
+        let target = Target::new(constant, sca);
 
         assert_eq!(target, Err(TargetBoundsError::Se(se)))
     }
@@ -194,9 +188,9 @@ mod tests {
     #[test]
     fn out_of_bounds_target_cyl_power_returns_err() {
         let cyl = 7.1;
-        let target_formula = target_formula();
+        let constant = iol_constant();
         let sca = Sca::new(-0.24, Some(cyl), Some(82)).unwrap();
-        let target = Target::new(target_formula, sca);
+        let target = Target::new(constant, sca);
 
         assert_eq!(target, Err(TargetBoundsError::Cyl(cyl)))
     }
