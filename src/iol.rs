@@ -39,6 +39,7 @@ pub struct Iol {
     toric: bool,
 }
 
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpIol {
     iol: Iol,
     sca: Sca,
