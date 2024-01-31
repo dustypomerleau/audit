@@ -285,23 +285,16 @@ mod tests {
 
             va_best_before_num: Some(6.0),
             va_best_before_den: Some(24.0),
-            va_best_after_num: Some(6.0),
-            va_best_after_den: Some(6.0),
+            va_best_after_num: None,
+            va_best_after_den: None,
 
             va_raw_before_num: None,
             va_raw_before_den: None,
-            va_raw_after_num: None,
-            va_raw_after_den: None,
+            va_raw_after_num: Some(6.0),
+            va_raw_after_den: Some(6.0),
 
-            va_best_near_before_num: None,
-            va_best_near_before_den: None,
-            va_best_near_after_num: None,
-            va_best_near_after_den: None,
-
-            va_raw_near_before_num: None,
-            va_raw_near_before_den: None,
-            va_raw_near_after_num: None,
-            va_raw_near_after_den: None,
+            va_raw_near_after_num: Some(6.0),
+            va_raw_near_after_den: Some(5.0),
 
             ref_before_sph: Some(-5.25),
             ref_before_cyl_power: Some(-1.50),
