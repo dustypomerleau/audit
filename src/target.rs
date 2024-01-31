@@ -101,6 +101,7 @@ impl Formula {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub enum ConstantPair {
     Value,
     Formula,
