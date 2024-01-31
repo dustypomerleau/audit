@@ -103,8 +103,8 @@ impl Formula {
 /// unless explicitly overridden by the surgeon.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Constant {
-    value: f32,
-    formula: Formula,
+    pub value: f32,
+    pub formula: Formula,
 }
 
 /// The residual postop refraction for a case, assuming the provided formula and IOL constant.
