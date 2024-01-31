@@ -20,11 +20,11 @@ pub enum VaBoundsError {
 
 /// A wrapper type, to ensure that far visual acuities are only compared to other far acuities.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Far(pub Va);
+pub struct FarVa(pub Va);
 
 /// A wrapper type, to ensure that near visual acuities are only compared to other near acuities.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Near(pub Va);
+pub struct NearVa(pub Va);
 
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  
@@ -56,20 +56,20 @@ impl Va {
 /// and [`AfterVa`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct BeforeVa {
-    best_far: Far,
-    best_near: Option<Near>,
-    raw_far: Option<Far>,
-    raw_near: Option<Near>,
+    best_far: FarVa,
+    best_near: Option<NearVa>,
+    raw_far: Option<FarVa>,
+    raw_near: Option<NearVa>,
 }
 
 /// A collection of visual acuities from after surgery. We use separate structs for [`BeforeVa`]
 /// and [`AfterVa`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct AfterVa {
-    best_far: Option<Far>,
-    best_near: Option<Near>,
-    raw_far: Far,
-    raw_near: Option<Near>,
+    best_far: Option<FarVa>,
+    best_near: Option<NearVa>,
+    raw_far: FarVa,
+    raw_near: Option<NearVa>,
 }
 
 /// The visual acuity sets from before and after a particular [`Case`](crate::case::Case).
