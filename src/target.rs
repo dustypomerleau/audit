@@ -58,7 +58,7 @@ pub enum Formula {
 impl Formula {
     /// Create a new [`Formula`] from an input string. Primarily useful for converting formula
     /// names pulled from the database.
-    pub fn new_from_str(input: &str) -> Result<Formula, TargetBoundsError> {
+    pub fn new_from_str(input: &str) -> Result<Self, TargetBoundsError> {
         let mut f = input.to_string().to_lowercase();
         // trying to avoid pulling in regex here. '/' avoids SRK/T, which surely someone will try
         f.retain(|c| c != ' ' && c != '/');
@@ -81,8 +81,8 @@ impl Formula {
 
     /// Convert to a [`String`] representation of the [`Formula`] (typically for database
     /// insertion).
-    pub fn to_string(f: Formula) -> String {
-        match f {
+    pub fn to_string(self) -> String {
+        match self {
             Formula::Thick(thick) => match thick {
                 Thick::Barrett => "Barrett".to_string(),
                 Thick::BarrettTrueK => "Barrett True K".to_string(),
