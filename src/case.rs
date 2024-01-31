@@ -231,10 +231,7 @@ impl TryFrom<FlatCase> for Case {
                 let after: Refraction =
                     Sca::new(after_sph, f.ref_after_cyl_power, f.ref_after_cyl_axis)?.try_into()?;
 
-                OpRefraction {
-                    before: Far(before),
-                    after: Far(after),
-                }
+                OpRefraction { before, after }
             } else {
                 return Err(CaseError::MissingField(Required::Refraction));
             }
