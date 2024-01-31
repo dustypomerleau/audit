@@ -23,39 +23,40 @@ pub struct FlatCase {
     pub surgeon_first_name: Option<String>,
     pub surgeon_last_name: Option<String>,
     pub surgeon_site: Option<String>,
+
     pub urn: Option<String>,
     pub side: Option<Side>,
+
     pub target_constant: Option<f32>,
     pub target_formula: Option<String>,
     pub target_se: Option<f32>,
     pub target_cyl_power: Option<f32>,
     pub target_cyl_axis: Option<i32>,
+
     pub date: Option<NaiveDate>,
     pub site: Option<String>,
+
     pub sia_power: Option<f32>,
     pub sia_meridian: Option<i32>,
+
     pub iol_se: Option<f32>,
     pub iol_cyl_power: Option<f32>,
     pub iol_cyl_axis: Option<i32>,
+
     pub adverse: Option<Adverse>,
 
     pub va_best_before_num: Option<f32>,
     pub va_best_before_den: Option<f32>,
+
     pub va_best_after_num: Option<f32>,
     pub va_best_after_den: Option<f32>,
 
     pub va_raw_before_num: Option<f32>,
     pub va_raw_before_den: Option<f32>,
+
     pub va_raw_after_num: Option<f32>,
     pub va_raw_after_den: Option<f32>,
 
-    pub va_best_near_before_num: Option<f32>,
-    pub va_best_near_before_den: Option<f32>,
-    pub va_best_near_after_num: Option<f32>,
-    pub va_best_near_after_den: Option<f32>,
-
-    pub va_raw_near_before_num: Option<f32>,
-    pub va_raw_near_before_den: Option<f32>,
     pub va_raw_near_after_num: Option<f32>,
     pub va_raw_near_after_den: Option<f32>,
 
