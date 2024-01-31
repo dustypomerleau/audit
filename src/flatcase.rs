@@ -6,8 +6,8 @@ use crate::{
     sca::Sca,
     sia::Sia,
     surgeon::Surgeon,
-    target::{Formula, Target},
-    va::{OpVa, Va, VaSet},
+    target::{Constant, Formula, Target},
+    va::{AfterVaSet, BeforeVaSet, FarVa, OpVa, Va},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
@@ -79,6 +79,7 @@ impl From<Case> for FlatCase {
                     last_name: surgeon_last_name,
                     site: surgeon_site,
                 },
+
             urn,
             side,
             target,
@@ -87,87 +88,85 @@ impl From<Case> for FlatCase {
             sia,
             iol,
             adverse,
+
             va:
                 OpVa {
-                    best_far:
-                        VaSet {
-                            before:
-                                Far(Va {
+                    before:
+                        BeforeVaSet {
+                            best_far:
+                                FarVa(Va {
                                     num: va_best_before_num,
                                     den: va_best_before_den,
                                 }),
-                            after:
-                                Far(Va {
-                                    num: va_best_after_num,
-                                    den: va_best_after_den,
-                                }),
+                            raw_far: va_raw_before,
                         },
-                    best_near,
-                    raw_far,
-                    raw_near,
+
+                    after:
+                        AfterVaSet {
+                            best_far: va_best_after,
+                            raw_far:
+                                FarVa(Va {
+                                    num: va_raw_after_num,
+                                    den: va_raw_after_den,
+                                }),
+                            raw_near: va_raw_near_after,
+                        },
                 },
+
             refraction:
                 OpRefraction {
                     before:
-                        Far(Refraction(Sca {
+                        Refraction(Sca {
                             sph: ref_before_sph,
-                            cyl:
-                                Some(Cyl {
-                                    power: ref_before_cyl_power,
-                                    axis: ref_before_cyl_axis,
-                                }),
-                        })),
+                            cyl,
+                        }),
                     after:
-                        Far(Refraction(Sca {
-                            sph: ref_after_sph,
-                            cyl:
-                                Some(Cyl {
-                                    power: ref_after_cyl_power,
-                                    axis: ref_after_cyl_axis,
-                                }),
-                        })),
+                        Refraction(Sca {
+                            sph: ref_before_sph,
+                            cyl,
+                        }),
                 },
         } = case;
 
-        let (target_formula, target_se, target_cyl_power, target_cyl_axis) = match target {
-            Some(Target {
-                formula: target_formula,
-                sca:
-                    Sca {
-                        sph: target_se,
-                        cyl:
-                            Some(Cyl {
-                                power: target_cyl_power,
-                                axis: target_cyl_axis,
-                            }),
-                    },
-            }) => (
-                target_formula,
-                Some(target_se),
-                Some(target_cyl_power),
-                Some(*target_cyl_axis),
-            ),
+        let (target_constant, target_formula, target_se, target_cyl_power, target_cyl_axis) =
+            match target {
+                Some(Target {
+                    constant,
+                    sca:
+                        Sca {
+                            sph: target_se,
+                            cyl,
+                        },
+                }) => {
+                    let (target_constant, target_formula) = match constant {
+                        Some(Constant { value, formula }) => {
+                            (Some(value), Some(formula.to_string()))
+                        }
 
-            Some(Target {
-                formula: target_formula,
-                sca:
-                    Sca {
-                        sph: target_se,
-                        cyl: None,
-                    },
-            }) => (target_formula, Some(target_se), None, None),
+                        None => (None, None),
+                    };
 
-            None => (None, None, None, None),
-        };
+                    let (target_cyl_power, target_cyl_axis) = match cyl {
+                        Some(Cyl { power, axis }) => (power, axis.0),
 
-        let target_formula = if let Some(formula) = target_formula {
-            Some(Formula::formula_to_string(formula))
-        } else {
-            None
-        };
+                        None => (None, None),
+                    };
+
+                    (
+                        target_constant,
+                        target_formula,
+                        Some(target_se),
+                        Some(target_cyl_power),
+                        Some(target_cyl_axis),
+                    )
+                }
+
+                None => (None, None, None, None, None),
+            };
 
         let (sia_power, sia_meridian) = match sia {
             Some(Sia(Cyl { power, axis })) => (Some(power), Some(axis.0)),
+
             None => (None, None),
         };
 
@@ -182,24 +181,23 @@ impl From<Case> for FlatCase {
             None => (None, None, None),
         };
 
-        fn unwrap_va<T: Distance<Va> + Sized>(
-            set: Option<VaSet<T>>,
-        ) -> (Option<f32>, Option<f32>, Option<f32>, Option<f32>) {
-            match set {
-                Some(VaSet {
-                    before:
-                        Far(Va {
-                            num: before_num,
-                            den: before_den,
-                        }),
-                    after:
-                        Far(Va {
-                            num: after_num,
-                            den: after_den,
-                        }),
-                }) => {Some(before_num), Some(before_den), Some(after_num), Some(after_den)}
-            }
-        }
+        let (va_raw_before_num, va_raw_before_den) = match va_raw_before {
+            Some(FarVa(Va { num, den })) => (Some(num), Some(den)),
+
+            None => (None, None),
+        };
+
+        let (va_best_after_num, va_best_after_den) = match va_best_after {
+            Some(FarVa(Va { num, den })) => (Some(num), Some(den)),
+
+            None => (None, None),
+        };
+
+        let (va_raw_near_after_num, va_raw_near_after_den) = match va_raw_near_after {
+            Some(NearVa(Va { num, den })) => (Some(num), Some(den)),
+
+            None => (None, None),
+        };
 
         let fc = FlatCase {
             surgeon_email: Some(surgeon_email),
@@ -208,6 +206,7 @@ impl From<Case> for FlatCase {
             surgeon_site,
             urn: Some(urn),
             side: Some(side),
+            target_constant,
             target_formula,
             target_se,
             target_cyl_power,
@@ -222,12 +221,14 @@ impl From<Case> for FlatCase {
             adverse,
             va_best_before_num: Some(va_best_before_num),
             va_best_before_den: Some(va_best_before_den),
-            va_best_after_num: Some(va_best_after_num),
-            va_best_after_den: Some(va_best_after_den),
-            va_best_near_before_num,
-            va_best_near_before_den,
-            va_best_near_after_num,
-            va_best_near_after_den,
+            va_best_after_num,
+            va_best_after_den,
+            va_raw_before_num,
+            va_raw_before_den,
+            va_raw_after_num: Some(va_raw_after_num),
+            va_raw_after_den: Some(va_raw_after_den),
+            va_raw_near_after_den,
+            va_raw_near_after_num,
         };
 
         fc
