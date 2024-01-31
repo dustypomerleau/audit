@@ -52,20 +52,21 @@ impl Va {
     }
 }
 
-/// A collection of visual acuities from before surgery. We use separate structs for [`BeforeVa`]
-/// and [`AfterVa`], because we enforce different mandatory fields for the two situations.
+/// A collection of visual acuities from before surgery. We use separate structs for [`BeforeVaSet`]
+/// and [`AfterVaSet`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct BeforeVa {
+pub struct BeforeVaSet {
     best_far: FarVa,
     best_near: Option<NearVa>,
     raw_far: Option<FarVa>,
     raw_near: Option<NearVa>,
 }
 
-/// A collection of visual acuities from after surgery. We use separate structs for [`BeforeVa`]
-/// and [`AfterVa`], because we enforce different mandatory fields for the two situations.
+/// A collection of visual acuities from after surgery. We use separate structs for
+/// [`BeforeVaSet`]
+/// and [`AfterVaSet`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct AfterVa {
+pub struct AfterVaSet {
     best_far: Option<FarVa>,
     best_near: Option<NearVa>,
     raw_far: FarVa,
@@ -75,8 +76,8 @@ pub struct AfterVa {
 /// The visual acuity sets from before and after a particular [`Case`](crate::case::Case).
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpVa {
-    before: BeforeVa,
-    after: AfterVa,
+    before: BeforeVaSet,
+    after: AfterVaSet,
 }
 
 #[cfg(test)]
