@@ -59,3 +59,23 @@ Or, to be more _extreme_ why not just skip this one at the level of the type sys
 [this is a link](http://test.com)
 
 1. There are only 2 variants (far and near), and only 2 situations where they are needed (`Refraction`, and `Va`), a final option would be dedicated types:
+
+---
+
+### Dealing with migrations that change a type with values inside
+
+1. Create new temporary type & migrate
+2. Move data to new temp type & any respective links
+3. Delete data from original, make abstract, & migrate
+4. Extend new abstract type as necessary, moving data from temporary type where applicable & respective links
+5. Delete temp type & migrate
+
+if I'm understanding correctly?
+[2:52 AM]m10zeus: As long as moving links from one type to another is straight forward, I should be good to go!
+[2:56 AM]Elvis: I would do it this way:
+
+1. Extend the base type
+2. Move data to the new subtypes
+3. Make base abstract
+
+You can actually do it all in a single migration if you edit the generated migration file and add the data moving statements. Migrations support arbitrary EdgeQL in them, not just DDL.
