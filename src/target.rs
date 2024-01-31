@@ -78,7 +78,7 @@ impl Formula {
 
     /// Convert to a [`String`] representation of the [`Formula`] (typically for database
     /// insertion).
-    pub fn formula_to_string(f: Formula) -> String {
+    pub fn to_string(f: Formula) -> String {
         match f {
             Formula::Thick(thick) => match thick {
                 Thick::Barrett => "Barrett".to_string(),
