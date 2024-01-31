@@ -67,7 +67,6 @@ module default {
     type BeforeVaSet extending SoftCreate {
         required best_far: FarVa;
         raw_far: FarVa;
-        raw_near: NearVa;
     }
     
     # case is a reserved keyword

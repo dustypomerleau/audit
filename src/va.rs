@@ -58,7 +58,6 @@ impl Va {
 pub struct BeforeVaSet {
     best_far: FarVa,
     raw_far: Option<FarVa>,
-    raw_near: Option<NearVa>,
 }
 
 /// A collection of visual acuities from after surgery. We use separate structs for
