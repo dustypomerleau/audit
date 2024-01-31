@@ -1,7 +1,7 @@
 use crate::{
     cyl::{Cyl, CylPair},
     flatcase::FlatCase,
-    iol::IolBoundsError,
+    iol::{IolBoundsError, OpIol},
     refraction::{OpRefraction, RefBoundsError, Refraction},
     sca::{Sca, ScaBoundsError},
     sia::{Sia, SiaBoundsError},
@@ -187,36 +187,46 @@ impl TryFrom<FlatCase> for Case {
         let sia = match (f.sia_power, f.sia_meridian) {
             (Some(power), Some(meridian)) => {
                 let sia = Cyl::new(power, meridian)?.try_into()?;
+
                 Some(sia)
             }
+
+            (None, None) => None,
 
             (Some(_power), _) => return Err(ScaBoundsError::NoPair(CylPair::Axis).into()),
 
             (_, Some(_meridian)) => return Err(ScaBoundsError::NoPair(CylPair::Power).into()),
-
-            (..) => None,
         };
 
-        let iol = if let Some(sph) = f.iol_se {
-            let (cyl, axis) = match (f.iol_cyl_power, f.iol_cyl_axis) {
-                (Some(power), Some(axis)) => (Some(power), Some(axis)),
+        let iol = match f.iol_se {
+            Some(se) => {
+                let (cyl, axis) = match (f.iol_cyl_power, f.iol_cyl_axis) {
+                    (Some(power), Some(axis)) => (Some(power), Some(axis)),
 
-                (Some(_power), _) => return Err(IolBoundsError::NoPair(CylPair::Axis).into()),
+                    (None, None) => (None, None),
 
-                (_, Some(_axis)) => return Err(IolBoundsError::NoPair(CylPair::Power).into()),
+                    (Some(_power), _) => return Err(IolBoundsError::NoPair(CylPair::Axis).into()),
 
-                (..) => (None, None),
-            };
+                    (_, Some(_axis)) => return Err(IolBoundsError::NoPair(CylPair::Power).into()),
+                };
 
-            let iol = Sca::new(sph, cyl, axis)?.try_into()?;
+                let iol = match (f.iol_model, f.iol_name, f.iol_focus, f.toric) {
+                    (Some(model), Some(name), Some(focus), Some(toric)) => Iol {
+                        model,
+                        name,
+                        focus,
+                        toric,
+                    },
 
-            Some(iol)
-        } else {
-            match (f.iol_cyl_power, f.iol_cyl_axis) {
-                (None, None) => None,
+                    (..) => return Err(IolBoundsError::Iol.into()),
+                };
 
-                (..) => return Err(IolBoundsError::NoSe.into()),
+                let sca = Sca::new(se, cyl, axis)?;
+
+                Some(OpIol::new(iol, sca)?)
             }
+
+            None => return Err(IolBoundsError::NoSe.into()),
         };
 
         let adverse = f.adverse;

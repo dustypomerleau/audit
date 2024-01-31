@@ -22,6 +22,9 @@ pub enum IolBoundsError {
         "IOL cylinder must be a multiple of 0.25 D between +1 D and +20 D (supplied value: {0})"
     )]
     Cyl(f32),
+
+    #[error("incomplete IOL: IOL description must contain a model, name, focus (monofocal, EDOF, multifocal), and toric (true/false)")]
+    Iol,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -46,7 +49,7 @@ pub struct OpIol {
 }
 
 impl OpIol {
-    fn new(iol: Iol, sca: Sca) -> Result<Self, IolBoundsError> {
+    pub fn new(iol: Iol, sca: Sca) -> Result<Self, IolBoundsError> {
         let Sca { sph, cyl } = sca;
 
         if (-20.0..=60.0).contains(&sph) && sph % 0.25 == 0.0 {
