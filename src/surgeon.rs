@@ -4,6 +4,10 @@ use serde::{Deserialize, Serialize};
 // value here. After hitting the DB, either the value for `FlatCase::sia` will be `None` (in which
 // case we use the surgeon's default value for that side), or it will be `Some()`, in which case
 // that case-specific value will override the surgeon's defaults.
+//
+// In general, we may not need values that are present on the case or as Surgeon defaults in
+// the DB (like `site` can probably be removed here). Consider.
+//
 /// A unique surgeon
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Surgeon {
