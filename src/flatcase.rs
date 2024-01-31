@@ -118,12 +118,12 @@ impl From<Case> for FlatCase {
                     before:
                         Refraction(Sca {
                             sph: ref_before_sph,
-                            cyl,
+                            cyl: ref_before_cyl,
                         }),
                     after:
                         Refraction(Sca {
                             sph: ref_before_sph,
-                            cyl,
+                            cyl: ref_after_cyl,
                         }),
                 },
         } = case;
@@ -199,6 +199,18 @@ impl From<Case> for FlatCase {
             None => (None, None),
         };
 
+        let (ref_before_cyl_power, ref_before_cyl_axis) = match ref_before_cyl {
+            Some(Cyl { power, axis }) => (Some(power), Some(axis.0)),
+
+            None => (None, None),
+        };
+
+        let (ref_after_cyl_power, ref_after_cyl_axis) = match ref_after_cyl {
+            Some(Cyl { power, axis }) => (Some(power), Some(axis.0)),
+
+            None => (None, None),
+        };
+
         let fc = FlatCase {
             surgeon_email: Some(surgeon_email),
             surgeon_first_name,
@@ -229,6 +241,12 @@ impl From<Case> for FlatCase {
             va_raw_after_den: Some(va_raw_after_den),
             va_raw_near_after_den,
             va_raw_near_after_num,
+            ref_before_sph: Some(ref_before_sph),
+            ref_before_cyl_axis,
+            ref_before_cyl_power,
+            ref_after_sph: Some(ref_after_sph),
+            ref_after_cyl_power,
+            ref_after_cyl_axis,
         };
 
         fc
