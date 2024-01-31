@@ -1,4 +1,4 @@
-CREATE MIGRATION m15bece7tsizwhgmyabdzvvxe56n6ie4akpmyp6atqfgyg7fqtn5qa
+CREATE MIGRATION m1wxyhs7cgg7uyntsy5wrmkwknveeedi4wc4rrxqhatcfdhfj7boqq
     ONTO initial
 {
   CREATE ABSTRACT TYPE default::SoftCreate {
@@ -6,6 +6,31 @@ CREATE MIGRATION m15bece7tsizwhgmyabdzvvxe56n6ie4akpmyp6atqfgyg7fqtn5qa
           SET default := (std::datetime_current());
           SET readonly := true;
       };
+  };
+  CREATE ABSTRACT TYPE default::Va {
+      CREATE REQUIRED PROPERTY den: std::float32 {
+          CREATE CONSTRAINT std::min_ex_value(0.0);
+      };
+      CREATE REQUIRED PROPERTY num: std::float32 {
+          CREATE CONSTRAINT std::max_value(20.0);
+          CREATE CONSTRAINT std::min_ex_value(0.0);
+      };
+  };
+  CREATE TYPE default::FarVa EXTENDING default::SoftCreate, default::Va;
+  CREATE TYPE default::NearVa EXTENDING default::SoftCreate, default::Va;
+  CREATE TYPE default::AfterVaSet EXTENDING default::SoftCreate {
+      CREATE LINK best_far: default::FarVa;
+      CREATE REQUIRED LINK raw_far: default::FarVa;
+      CREATE LINK raw_near: default::NearVa;
+  };
+  CREATE TYPE default::BeforeVaSet EXTENDING default::SoftCreate {
+      CREATE REQUIRED LINK best_far: default::FarVa;
+      CREATE LINK raw_far: default::FarVa;
+      CREATE LINK raw_near: default::NearVa;
+  };
+  CREATE TYPE default::OpVa EXTENDING default::SoftCreate {
+      CREATE REQUIRED LINK after: default::AfterVaSet;
+      CREATE REQUIRED LINK before: default::BeforeVaSet;
   };
   CREATE SCALAR TYPE default::Lens EXTENDING enum<Thick, Thin>;
   CREATE TYPE default::Formula EXTENDING default::SoftCreate {
@@ -55,12 +80,8 @@ CREATE MIGRATION m15bece7tsizwhgmyabdzvvxe56n6ie4akpmyp6atqfgyg7fqtn5qa
   CREATE TYPE default::RefCyl EXTENDING default::Cyl, default::SoftCreate {
       CREATE CONSTRAINT std::expression ON ((((.power >= -10.0) AND (.power <= 10.0)) AND ((.power % 0.25) = 0.0)));
   };
-  CREATE SCALAR TYPE default::Distance EXTENDING enum<Far, Near>;
   CREATE TYPE default::Refraction EXTENDING default::SoftCreate {
       CREATE LINK cyl: default::RefCyl;
-      CREATE REQUIRED PROPERTY distance: default::Distance {
-          SET default := (default::Distance.Far);
-      };
       CREATE REQUIRED PROPERTY sph: std::float32 {
           CREATE CONSTRAINT std::expression ON (((__subject__ % 0.25) = 0.0));
           CREATE CONSTRAINT std::max_value(20.0);
@@ -71,22 +92,6 @@ CREATE MIGRATION m15bece7tsizwhgmyabdzvvxe56n6ie4akpmyp6atqfgyg7fqtn5qa
       CREATE REQUIRED LINK after: default::Refraction;
       CREATE REQUIRED LINK before: default::Refraction;
   };
-  CREATE TYPE default::Va EXTENDING default::SoftCreate {
-      CREATE REQUIRED PROPERTY den: std::float32 {
-          CREATE CONSTRAINT std::min_ex_value(0.0);
-      };
-      CREATE REQUIRED PROPERTY distance: default::Distance {
-          SET default := (default::Distance.Far);
-      };
-      CREATE REQUIRED PROPERTY num: std::float32 {
-          CREATE CONSTRAINT std::max_value(20.0);
-          CREATE CONSTRAINT std::min_ex_value(0.0);
-      };
-  };
-  CREATE TYPE default::OpVa EXTENDING default::SoftCreate {
-      CREATE REQUIRED LINK after: default::Va;
-      CREATE REQUIRED LINK before: default::Va;
-  };
   CREATE TYPE default::Sia EXTENDING default::Cyl, default::SoftCreate {
       CREATE CONSTRAINT std::expression ON (((.power >= 0.0) AND (.power <= 2.0)));
   };
@@ -94,7 +99,7 @@ CREATE MIGRATION m15bece7tsizwhgmyabdzvvxe56n6ie4akpmyp6atqfgyg7fqtn5qa
       CREATE CONSTRAINT std::expression ON (((.power >= 0.0) AND (.power <= 6.0)));
   };
   CREATE TYPE default::Target EXTENDING default::SoftCreate {
-      CREATE LINK formula: default::Formula;
+      CREATE LINK constant: default::Constant;
       CREATE LINK cyl: default::TargetCyl;
       CREATE REQUIRED PROPERTY se: std::float32 {
           CREATE CONSTRAINT std::max_value(2.0);
