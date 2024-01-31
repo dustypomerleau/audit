@@ -12,8 +12,6 @@ module default {
         constraint max_value(179);
     }
 
-    scalar type Distance extending enum<Far, Near>;
-
     scalar type EmailType extending str {
         # HTML5 allows dotless domains, but ICANN doesn't, so prohibit here
         constraint regexp("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$");
@@ -37,6 +35,11 @@ module default {
         }
     }
 
+    abstract type Va {
+        required num: float32 { constraint min_ex_value(0.0); constraint max_value(20.0); }
+        required den: float32 { constraint min_ex_value(0.0); }
+    }
+
 ### objects
 
     # # todo:
@@ -54,6 +57,18 @@ module default {
     #     value: (constrained)
     #     meridian: Axis;
     # }
+
+    type AfterVaSet extending SoftCreate {
+        best_far: FarVa;
+        required raw_far: FarVa;
+        raw_near: NearVa;
+    }
+    
+    type BeforeVaSet extending SoftCreate {
+        required best_far: FarVa;
+        raw_far: FarVa;
+        raw_near: NearVa;
+    }
     
     # case is a reserved keyword
     type Cas extending SoftCreate {
@@ -77,6 +92,8 @@ module default {
         required formula: Formula;
     }
 
+    type FarVa extending SoftCreate, Va {}
+
     type Formula extending SoftCreate {
         required name: str { constraint exclusive; }
         required lens: Lens;
@@ -94,6 +111,8 @@ module default {
         constraint expression on (.power >= 1.0 and .power <= 20.0 and .power % 0.25 = 0.0);
     }
 
+    type NearVa extending SoftCreate, Va {}
+
     type OpIol extending SoftCreate {
         required iol: Iol;
 
@@ -106,21 +125,17 @@ module default {
         cyl: IolCyl;
     }
 
-    # for now these values are only far refraction
     type OpRefraction extending SoftCreate {
         required before: Refraction;
         required after: Refraction;
     }
     
-    # for now, these values are only far BCVA
     type OpVa extending SoftCreate {
-        required before: Va;
-        required after: Va;
+        required before: BeforeVaSet;
+        required after: AfterVaSet;
     }
 
     type Refraction extending SoftCreate {
-        required distance: Distance { default := Distance.Far; }
-
         required sph: float32 { 
             constraint min_value(-20.0);
             constraint max_value(20.0);
@@ -154,7 +169,7 @@ module default {
     }
 
     type Target extending SoftCreate {
-        formula: Formula;
+        constant: Constant;
         
         required se: float32 {
             constraint min_value(-6.0);
@@ -166,11 +181,5 @@ module default {
 
     type TargetCyl extending Cyl, SoftCreate {
         constraint expression on (.power >= 0.0 and .power <= 6.0);
-    }
-
-    type Va extending SoftCreate {
-        required distance: Distance { default := Distance.Far; }
-        required num: float32 { constraint min_ex_value(0.0); constraint max_value(20.0); }
-        required den: float32 { constraint min_ex_value(0.0); }
     }
 }
