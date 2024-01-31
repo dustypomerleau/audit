@@ -99,23 +99,24 @@ impl Formula {
 }
 
 /// The combination of formula and IOL constant used to calculate the [`Target`] for a
-/// [`Case`](crate::case::Case).
+/// [`Case`](crate::case::Case). The default constant for the case's IOL/formula pair is used,
+/// unless explicitly overridden by the surgeon.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct TargetFormula {
+pub struct Constant {
+    value: f32,
     formula: Formula,
-    constant: f32,
 }
 
 /// The residual postop refraction for a case, assuming the provided formula and IOL constant.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Target {
-    pub target_formula: Option<TargetFormula>,
+    pub constant: Option<Constant>,
     pub sca: Sca,
 }
 
 impl Target {
-    /// Create a new [`Target`] with bounds checking on the [`Sca`].
-    pub fn new(target_formula: Option<TargetFormula>, sca: Sca) -> Result<Self, TargetBoundsError> {
+    /// Create a new [`Target`] with bounds checking.
+    pub fn new(constant: Option<Constant>, sca: Sca) -> Result<Self, TargetBoundsError> {
         let Sca { sph, cyl } = sca;
 
         if (-6.0..=2.0).contains(&sph) {
@@ -131,10 +132,7 @@ impl Target {
                 None => sca,
             };
 
-            Ok(Self {
-                target_formula,
-                sca,
-            })
+            Ok(Self { constant, sca })
         } else {
             Err(TargetBoundsError::Se(sph))
         }
