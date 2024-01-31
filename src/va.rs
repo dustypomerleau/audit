@@ -57,7 +57,6 @@ impl Va {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct BeforeVaSet {
     best_far: FarVa,
-    best_near: Option<NearVa>,
     raw_far: Option<FarVa>,
     raw_near: Option<NearVa>,
 }
@@ -68,7 +67,6 @@ pub struct BeforeVaSet {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct AfterVaSet {
     best_far: Option<FarVa>,
-    best_near: Option<NearVa>,
     raw_far: FarVa,
     raw_near: Option<NearVa>,
 }
