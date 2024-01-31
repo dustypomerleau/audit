@@ -20,6 +20,9 @@ pub enum TargetBoundsError {
 
     #[error("target cylinder power must be a value between 0 D and +6 D (supplied value: {0})")]
     Cyl(f32),
+
+    #[error("target constant requires both an IOL and a value, but the {0:?} was not supplied")]
+    NoPair(ConstantPair),
 }
 
 // todo: add all common variants
@@ -96,6 +99,11 @@ impl Formula {
             },
         }
     }
+}
+
+pub enum ConstantPair {
+    Value,
+    Formula,
 }
 
 /// The combination of formula and IOL constant used to calculate the [`Target`] for a
