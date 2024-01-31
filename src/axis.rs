@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::ops::Deref;
 
 /// A generic axis between 0° and 179°. This is used for the axis of [`Cyl`](crate::cyl::Cyl)
 /// in [`Refraction`](crate::refraction::Refraction), [`Target`](crate::target::Target),

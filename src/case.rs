@@ -1,13 +1,13 @@
 use crate::{
     cyl::{Cyl, CylPair},
     flatcase::FlatCase,
-    iol::{Iol, IolBoundsError},
+    iol::IolBoundsError,
     refraction::{OpRefraction, RefBoundsError, Refraction},
     sca::{Sca, ScaBoundsError},
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
     target::{Constant, ConstantPair, Formula, Target, TargetBoundsError},
-    va::{OpVa, Va, VaBoundsError, VaPair, VaSet},
+    va::{OpVa, VaBoundsError, VaSet},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;

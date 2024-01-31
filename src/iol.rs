@@ -1,7 +1,6 @@
 use crate::{
     cyl::{Cyl, CylPair},
     sca::Sca,
-    target::Formula,
 };
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
