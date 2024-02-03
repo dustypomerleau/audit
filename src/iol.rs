@@ -36,6 +36,8 @@ pub enum Focus {
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Iol {
+    // todo: I would eventually prefer for this to be an enum, with IOL models explicitly
+    // allowlisted.
     model: String,
     name: String,
     focus: Focus,
@@ -44,12 +46,18 @@ pub struct Iol {
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpIol {
-    iol: Iol,
+    /// An optional string, provided by the surgeon, to name/describe the IOL.
+    surgeon_iol: Option<String>,
+    iol: Option<Iol>,
     sca: Sca,
 }
 
 impl OpIol {
-    pub fn new(iol: Iol, sca: Sca) -> Result<Self, IolBoundsError> {
+    pub fn new(
+        surgeon_iol: Option<String>,
+        iol: Option<Iol>,
+        sca: Sca,
+    ) -> Result<Self, IolBoundsError> {
         let Sca { sph, cyl } = sca;
 
         if (-20.0..=60.0).contains(&sph) && sph % 0.25 == 0.0 {
@@ -65,7 +73,11 @@ impl OpIol {
                 None => sca,
             };
 
-            Ok(Self { iol, sca })
+            Ok(Self {
+                surgeon_iol,
+                iol,
+                sca,
+            })
         } else {
             Err(IolBoundsError::Se(sph))
         }
@@ -77,22 +89,29 @@ mod tests {
     use super::*;
 
     // todo: replace this function with an implementation of Mock
-    fn iol() -> Iol {
-        Iol {
+    fn iol() -> Option<Iol> {
+        Some(Iol {
             model: "ZXTxxx".to_string(),
             name: "Tecnis Symfony".to_string(),
             focus: Focus::Edof,
             toric: true,
-        }
+        })
     }
 
     #[test]
     fn makes_new_opiol() {
         let iol = iol();
         let sca = Sca::new(24.25, Some(3.0), Some(12)).unwrap();
-        let opiol = OpIol::new(iol, sca).unwrap();
+        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca).unwrap();
 
-        assert_eq!(opiol, OpIol { iol, sca })
+        assert_eq!(
+            opiol,
+            OpIol {
+                surgeon_iol: Some("sn60wf".to_string()),
+                iol,
+                sca
+            }
+        )
     }
 
     #[test]
@@ -102,7 +121,7 @@ mod tests {
         let se = 100.25;
         let iol = iol();
         let sca = Sca::new(se, Some(3.0), Some(12)).unwrap();
-        let opiol = OpIol::new(iol, sca);
+        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca);
 
         assert_eq!(opiol, Err(IolBoundsError::Se(se)))
     }
@@ -112,7 +131,7 @@ mod tests {
         let se = 10.35;
         let iol = iol();
         let sca = Sca::new(se, Some(3.0), Some(12)).unwrap();
-        let opiol = OpIol::new(iol, sca);
+        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca);
 
         assert_eq!(opiol, Err(IolBoundsError::Se(se)))
     }
@@ -122,7 +141,7 @@ mod tests {
         let cyl = 31.0;
         let iol = iol();
         let sca = Sca::new(18.5, Some(cyl), Some(170)).unwrap();
-        let opiol = OpIol::new(iol, sca);
+        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca);
 
         assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl)))
     }
@@ -132,7 +151,7 @@ mod tests {
         let cyl = 2.06;
         let iol = iol();
         let sca = Sca::new(28.5, Some(cyl), Some(170)).unwrap();
-        let opiol = OpIol::new(iol, sca);
+        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca);
 
         assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl)))
     }
