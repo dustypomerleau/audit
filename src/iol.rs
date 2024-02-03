@@ -47,14 +47,14 @@ pub struct Iol {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpIol {
     /// An optional string, provided by the surgeon, to name/describe the IOL.
-    surgeon_iol: Option<String>,
+    surgeon_label: Option<String>,
     iol: Option<Iol>,
     sca: Sca,
 }
 
 impl OpIol {
     pub fn new(
-        surgeon_iol: Option<String>,
+        surgeon_label: Option<String>,
         iol: Option<Iol>,
         sca: Sca,
     ) -> Result<Self, IolBoundsError> {
@@ -74,7 +74,7 @@ impl OpIol {
             };
 
             Ok(Self {
-                surgeon_iol,
+                surgeon_label,
                 iol,
                 sca,
             })
@@ -107,7 +107,7 @@ mod tests {
         assert_eq!(
             opiol,
             OpIol {
-                surgeon_iol: Some("sn60wf".to_string()),
+                surgeon_label: Some("sn60wf".to_string()),
                 iol,
                 sca
             }
