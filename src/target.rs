@@ -1,7 +1,4 @@
-use crate::{
-    cyl::Cyl,
-    sca::{Sca, ScaBoundsError},
-};
+use crate::{cyl::Cyl, sca::Sca};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
