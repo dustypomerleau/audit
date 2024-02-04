@@ -1,4 +1,11 @@
+use crate::sia::Sia;
 use serde::{Deserialize, Serialize};
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct SurgeonSia {
+    pub right: Sia,
+    pub left: Sia,
+}
 
 // In the DB, the Surgeon type will have an SIA for right and left eyes, but we don't need that
 // value here. After hitting the DB, either the value for `FlatCase::sia` will be `None` (in which
@@ -17,4 +24,5 @@ pub struct Surgeon {
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub site: Option<String>,
+    pub sia: Option<SurgeonSia>,
 }

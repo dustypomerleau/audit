@@ -5,7 +5,7 @@ use crate::{
     refraction::{OpRefraction, Refraction},
     sca::Sca,
     sia::Sia,
-    surgeon::Surgeon,
+    surgeon::{Surgeon, SurgeonSia},
     target::{Constant, Target},
     va::{AfterVaSet, BeforeVaSet, FarVa, NearVa, OpVa, Va},
 };
@@ -23,6 +23,10 @@ pub struct FlatCase {
     pub surgeon_first_name: Option<String>,
     pub surgeon_last_name: Option<String>,
     pub surgeon_site: Option<String>,
+    pub surgeon_sia_right_power: Option<f32>,
+    pub surgeon_sia_right_axis: Option<i32>,
+    pub surgeon_sia_left_power: Option<f32>,
+    pub surgeon_sia_left_axis: Option<i32>,
 
     pub urn: Option<String>,
     pub side: Option<Side>,
@@ -83,6 +87,7 @@ impl From<Case> for FlatCase {
                     first_name: surgeon_first_name,
                     last_name: surgeon_last_name,
                     site: surgeon_site,
+                    sia: surgeon_sia,
                 },
 
             urn,
@@ -132,6 +137,33 @@ impl From<Case> for FlatCase {
                         }),
                 },
         } = case;
+
+        let (
+            surgeon_sia_right_power,
+            surgeon_sia_right_axis,
+            surgeon_sia_left_power,
+            surgeon_sia_left_axis,
+        ) = match surgeon_sia {
+            Some(SurgeonSia {
+                right:
+                    Sia(Cyl {
+                        power: right_power,
+                        axis: right_axis,
+                    }),
+                left:
+                    Sia(Cyl {
+                        power: left_power,
+                        axis: left_axis,
+                    }),
+            }) => (
+                Some(right_power),
+                Some(right_axis.0),
+                Some(left_power),
+                Some(left_axis.0),
+            ),
+
+            None => (None, None, None, None),
+        };
 
         let (target_constant, target_formula, target_se, target_cyl_power, target_cyl_axis) =
             match target {
@@ -251,6 +283,10 @@ impl From<Case> for FlatCase {
             surgeon_first_name,
             surgeon_last_name,
             surgeon_site,
+            surgeon_sia_right_power,
+            surgeon_sia_right_axis,
+            surgeon_sia_left_power,
+            surgeon_sia_left_axis,
             urn: Some(urn),
             side: Some(side),
             target_constant,

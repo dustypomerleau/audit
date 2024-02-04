@@ -5,7 +5,7 @@ use crate::{
     refraction::{OpRefraction, RefBoundsError, Refraction},
     sca::{Sca, ScaBoundsError},
     sia::{Sia, SiaBoundsError},
-    surgeon::Surgeon,
+    surgeon::{Surgeon, SurgeonSia},
     target::{Constant, ConstantPair, Formula, Target, TargetBoundsError},
     va::{AfterVaSet, BeforeVaSet, FarVa, NearVa, OpVa, Va, VaBoundsError},
 };
@@ -127,12 +127,31 @@ impl TryFrom<FlatCase> for Case {
 
     // todo: should we be trying not to consume the FlatCase so we can then just put it into the DB?
     fn try_from(f: FlatCase) -> Result<Self, Self::Error> {
+        let sia = match (
+            f.surgeon_sia_right_power,
+            f.surgeon_sia_right_axis,
+            f.surgeon_sia_left_power,
+            f.surgeon_sia_left_axis,
+        ) {
+            (Some(right_power), Some(right_axis), Some(left_power), Some(left_axis)) => {
+                Some(SurgeonSia {
+                    right: Cyl::new(right_power, right_axis)?.try_into()?,
+                    left: Cyl::new(left_power, left_axis)?.try_into()?,
+                })
+            }
+
+            // todo: consider whether we need an error type for a unilaterally-provided
+            // SurgeonSia
+            (..) => None,
+        };
+
         let surgeon = if let Some(email) = f.surgeon_email {
             Surgeon {
                 email,
                 first_name: f.surgeon_first_name,
                 last_name: f.surgeon_last_name,
                 site: f.surgeon_site,
+                sia,
             }
         } else {
             return Err(CaseError::MissingField(Required::Email));
@@ -326,6 +345,10 @@ mod tests {
             surgeon_first_name: Some("john".to_string()),
             surgeon_last_name: Some("wick".to_string()),
             surgeon_site: Some("the hospital".to_string()),
+            surgeon_sia_right_power: Some(0.1),
+            surgeon_sia_right_axis: Some(10),
+            surgeon_sia_left_power: Some(0.1),
+            surgeon_sia_left_axis: Some(10),
             urn: Some("abc123".to_string()),
             side: Some(Side::Right),
             target_constant: Some(119.36),
