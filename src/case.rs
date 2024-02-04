@@ -140,9 +140,15 @@ impl TryFrom<FlatCase> for Case {
                 })
             }
 
-            // todo: consider whether we need an error type for a unilaterally-provided
-            // SurgeonSia
-            (..) => None,
+            (None, None, None, None) => None,
+
+            (Some(_power), ..) | (_, _, Some(_power), _) => {
+                return Err(ScaBoundsError::NoPair(CylPair::Axis).into())
+            }
+
+            (_, Some(_axis), ..) | (_, _, _, Some(_axis)) => {
+                return Err(ScaBoundsError::NoPair(CylPair::Power).into())
+            }
         };
 
         let surgeon = if let Some(email) = f.surgeon_email {
