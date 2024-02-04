@@ -7,7 +7,7 @@ use crate::{
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
     target::{Constant, ConstantPair, Formula, Target, TargetBoundsError},
-    va::{OpVa, VaBoundsError, VaSet},
+    va::{AfterVaSet, BeforeVaSet, FarVa, OpVa, Va, VaBoundsError, VaPair, VaSet},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
@@ -210,7 +210,9 @@ impl TryFrom<FlatCase> for Case {
                     (_, Some(_axis)) => return Err(IolBoundsError::NoPair(CylPair::Power).into()),
                 };
 
-                let iol = match (f.iol_model, f.iol_name, f.iol_focus, f.toric) {
+                let surgeon_label = f.iol_surgeon_label;
+
+                let iol = match (f.iol_model, f.iol_name, f.iol_focus, f.iol_toric) {
                     (Some(model), Some(name), Some(focus), Some(toric)) => Iol {
                         model,
                         name,
@@ -218,20 +220,69 @@ impl TryFrom<FlatCase> for Case {
                         toric,
                     },
 
+                    (None, None, None, None) => None,
+
                     (..) => return Err(IolBoundsError::Iol.into()),
                 };
 
                 let sca = Sca::new(se, cyl, axis)?;
 
-                Some(OpIol::new(iol, sca)?)
+                Some(OpIol::new(surgeon_label, iol, sca)?)
             }
 
-            None => return Err(IolBoundsError::NoSe.into()),
+            // If no sphere is provided, we confirm that no cylinder power is provided. If there is
+            // a cyl, we expect a matching sph, so we return an error. If there is no cylinder
+            // power, we can skip the check on axis and just assume there is no `Iol` for this
+            // `Case`.
+            None => match f.iol_cyl_power {
+                Some(_power) => return Err(IolBoundsError::NoSe.into()),
+
+                None => None,
+            },
         };
 
         let adverse = f.adverse;
 
-        let va = todo!();
+        let before = BeforeVaSet {
+            best_far: FarVa(Va::new(f.va_best_before_num, f.va_best_before_den)?),
+
+            // todo: consider factoring out this num/den match, as you use it 3 times.
+            raw_far: match (f.va_raw_before_num, f.va_raw_before_den) {
+                (Some(num), Some(den)) => Some(FarVa(Va::new(num, den)?)),
+
+                (Some(_num), _) => return Err(VaBoundsError::NoPair(VaPair::Denominator).into()),
+
+                (_, Some(_den)) => return Err(VaBoundsError::NoPair(VaPair::Numerator).into()),
+
+                (..) => None,
+            },
+        };
+
+        let after = AfterVaSet {
+            best_far: match (f.va_best_after_num, f.va_best_after_den) {
+                (Some(num), Some(den)) => Some(FarVa(Va::new(num, den)?)),
+
+                (Some(_num), _) => return Err(VaBoundsError::NoPair(VaPair::Denominator).into()),
+
+                (_, Some(_den)) => return Err(VaBoundsError::NoPair(VaPair::Numerator).into()),
+
+                (..) => None,
+            },
+
+            raw_far: FarVa(Va::new(f.va_raw_after_num, f.va_raw_after_den)?),
+
+            raw_near: match (f.va_raw_near_after_num, f.va_raw_near_after_den) {
+                (Some(num), Some(den)) => Some(FarVa(Va::new(num, den)?)),
+
+                (Some(_num), _) => return Err(VaBoundsError::NoPair(VaPair::Denominator).into()),
+
+                (_, Some(_den)) => return Err(VaBoundsError::NoPair(VaPair::Numerator).into()),
+
+                (..) => None,
+            },
+        };
+
+        let va = OpVa { before, after };
 
         let refraction = {
             if let (Some(before_sph), Some(after_sph)) = (f.ref_before_sph, f.ref_after_sph) {
@@ -268,6 +319,7 @@ impl TryFrom<FlatCase> for Case {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::iol::Focus;
 
     // todo: eventually this will be replaced with a series of mocked `FlatCases` with random but
     // legal values.
@@ -288,6 +340,7 @@ mod tests {
             site: Some("the hospital site".to_string()),
             sia_power: Some(0.1),
             sia_meridian: Some(100),
+            iol_surgeon_label: Some("symfony toric".to_string()),
             iol_model: Some("ZXTxxx".to_string()),
             iol_name: Some("Tecnis Symfony".to_string()),
             iol_focus: Some(Focus::Edof),
