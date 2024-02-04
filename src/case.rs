@@ -7,7 +7,7 @@ use crate::{
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
     target::{Constant, ConstantPair, Formula, Target, TargetBoundsError},
-    va::{AfterVaSet, BeforeVaSet, FarVa, OpVa, Va, VaBoundsError, VaPair, VaSet},
+    va::{AfterVaSet, BeforeVaSet, FarVa, NearVa, OpVa, Va, VaBoundsError, VaPair, VaSet},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
@@ -120,7 +120,8 @@ pub struct Case {
 
 // This impl needs to surface detailed errors, because calling `FlatCase::try_into::<Case>()` is
 // the primary way of bounds checking all the values obtained from the raw CSV before putting them
-// in the DB.
+// in the DB. For this reason, we avoid calling `ok()` to get our `Option` types, and instead
+// propagate the specific error.
 impl TryFrom<FlatCase> for Case {
     type Error = CaseError;
 
@@ -153,7 +154,7 @@ impl TryFrom<FlatCase> for Case {
             (Some(constant), Some(formula)) => {
                 let constant = Constant {
                     value: constant,
-                    formula: Formula::new_from_str(&formula),
+                    formula: Formula::new_from_str(&formula)?,
                 };
 
                 Some(constant)
@@ -168,7 +169,6 @@ impl TryFrom<FlatCase> for Case {
 
         let target = if let Some(sph) = f.target_se {
             let target_sca = Sca::new(sph, f.target_cyl_power, f.target_cyl_axis)?;
-            // Avoid calling `.ok()` in order to propagate the `TargetBoundsError`.
             let target = Target::new(target_constant, target_sca)?;
 
             Some(target)
@@ -244,41 +244,38 @@ impl TryFrom<FlatCase> for Case {
         let adverse = f.adverse;
 
         let before = BeforeVaSet {
-            best_far: FarVa(Va::new(f.va_best_before_num, f.va_best_before_den)?),
+            best_far: if let (Some(va)) = Va::try_new(f.va_best_before_num, f.va_best_before_den)? {
+                FarVa(va)
+            } else {
+                return Err(CaseError::MissingField(Required::Va));
+            },
 
-            // todo: consider factoring out this num/den match, as you use it 3 times.
-            raw_far: match (f.va_raw_before_num, f.va_raw_before_den) {
-                (Some(num), Some(den)) => Some(FarVa(Va::new(num, den)?)),
-
-                (Some(_num), _) => return Err(VaBoundsError::NoPair(VaPair::Denominator).into()),
-
-                (_, Some(_den)) => return Err(VaBoundsError::NoPair(VaPair::Numerator).into()),
-
-                (..) => None,
+            raw_far: if let (Some(va)) = Va::try_new(f.va_raw_before_num, f.va_raw_before_den)? {
+                Some(FarVa(va))
+            } else {
+                None
             },
         };
 
         let after = AfterVaSet {
-            best_far: match (f.va_best_after_num, f.va_best_after_den) {
-                (Some(num), Some(den)) => Some(FarVa(Va::new(num, den)?)),
-
-                (Some(_num), _) => return Err(VaBoundsError::NoPair(VaPair::Denominator).into()),
-
-                (_, Some(_den)) => return Err(VaBoundsError::NoPair(VaPair::Numerator).into()),
-
-                (..) => None,
+            best_far: if let Some(va) = Va::try_new(f.va_best_after_num, f.va_best_after_den)? {
+                Some(FarVa(va))
+            } else {
+                None
             },
 
-            raw_far: FarVa(Va::new(f.va_raw_after_num, f.va_raw_after_den)?),
+            raw_far: if let (Some(va)) = Va::try_new(f.va_raw_after_num, f.va_raw_after_den)? {
+                FarVa(va)
+            } else {
+                return Err(CaseError::MissingField(Required::Va));
+            },
 
-            raw_near: match (f.va_raw_near_after_num, f.va_raw_near_after_den) {
-                (Some(num), Some(den)) => Some(FarVa(Va::new(num, den)?)),
-
-                (Some(_num), _) => return Err(VaBoundsError::NoPair(VaPair::Denominator).into()),
-
-                (_, Some(_den)) => return Err(VaBoundsError::NoPair(VaPair::Numerator).into()),
-
-                (..) => None,
+            raw_near: if let Some(va) =
+                Va::try_new(f.va_raw_near_after_num, f.va_raw_near_after_den)?
+            {
+                Some(NearVa(va))
+            } else {
+                None
             },
         };
 
@@ -331,7 +328,7 @@ mod tests {
             surgeon_site: Some("the hospital".to_string()),
             urn: Some("abc123".to_string()),
             side: Some(Side::Right),
-            target_constant: 119.36,
+            target_constant: Some(119.36),
             target_formula: Some("Barrett".to_string()),
             target_se: Some(-0.2),
             target_cyl_power: Some(0.15),

@@ -2,6 +2,7 @@ use crate::{
     cyl::{Cyl, CylPair},
     sca::Sca,
 };
+use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -27,7 +28,7 @@ pub enum IolBoundsError {
     Iol,
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub enum Focus {
     Mono,
     Edof,

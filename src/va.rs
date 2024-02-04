@@ -50,6 +50,18 @@ impl Va {
             Err(VaBoundsError::Num(num))
         }
     }
+
+    pub fn try_new(num: Option<f32>, den: Option<f32>) -> Result<Option<Self>, VaBoundsError> {
+        match (num, den) {
+            (Some(num), Some(den)) => Some(Va::new(num, den)).transpose(),
+
+            (None, None) => Ok(None),
+
+            (Some(_num), _) => Err(VaBoundsError::NoPair(VaPair::Denominator).into()),
+
+            (_, Some(_den)) => Err(VaBoundsError::NoPair(VaPair::Numerator).into()),
+        }
+    }
 }
 
 /// A collection of visual acuities from before surgery. We use separate structs for [`BeforeVaSet`]
