@@ -137,13 +137,9 @@ impl From<Case> for FlatCase {
             match target {
                 Some(Target {
                     constant,
-                    sca:
-                        Sca {
-                            sph: target_se,
-                            cyl,
-                        },
+                    sca: Sca { sph, cyl },
                 }) => {
-                    let (target_constant, target_formula) = match constant {
+                    let (constant, formula) = match constant {
                         Some(Constant { value, formula }) => {
                             (Some(value), Some(formula.to_string()))
                         }
@@ -151,19 +147,15 @@ impl From<Case> for FlatCase {
                         None => (None, None),
                     };
 
-                    let (target_cyl_power, target_cyl_axis) = match cyl {
+                    let se = Some(sph);
+
+                    let (cyl_power, cyl_axis) = match cyl {
                         Some(Cyl { power, axis }) => (Some(power), Some(axis.0)),
 
                         None => (None, None),
                     };
 
-                    (
-                        target_constant,
-                        target_formula,
-                        Some(target_se),
-                        Some(target_cyl_power),
-                        Some(target_cyl_axis),
-                    )
+                    (constant, formula, se, cyl_power, cyl_axis)
                 }
 
                 None => (None, None, None, None, None),
@@ -221,7 +213,7 @@ impl From<Case> for FlatCase {
                 )
             }
 
-            None => None,
+            None => (None, None, None, None, None, None, None, None),
         };
 
         let (va_raw_before_num, va_raw_before_den) = match va_raw_before {
