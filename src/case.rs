@@ -127,7 +127,7 @@ impl TryFrom<FlatCase> for Case {
 
     // todo: should we be trying not to consume the FlatCase so we can then just put it into the DB?
     fn try_from(f: FlatCase) -> Result<Self, Self::Error> {
-        let sia = match (
+        let surgeon_sia = match (
             f.surgeon_sia_right_power,
             f.surgeon_sia_right_axis,
             f.surgeon_sia_left_power,
@@ -157,7 +157,7 @@ impl TryFrom<FlatCase> for Case {
                 first_name: f.surgeon_first_name,
                 last_name: f.surgeon_last_name,
                 site: f.surgeon_site,
-                sia,
+                sia: surgeon_sia,
             }
         } else {
             return Err(CaseError::MissingField(Required::Email));
