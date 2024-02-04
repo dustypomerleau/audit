@@ -196,15 +196,15 @@ impl From<Case> for FlatCase {
                         name,
                         focus,
                         toric,
-                    }) => (model, name, focus, toric),
+                    }) => (Some(model), Some(name), Some(focus), Some(toric)),
 
                     None => (None, None, None, None),
                 };
 
-                let se = sph;
+                let se = Some(sph);
 
                 let (cyl_power, cyl_axis) = match cyl {
-                    Some(Cyl { power, axis }) => (power, axis.0),
+                    Some(Cyl { power, axis }) => (Some(power), Some(axis.0)),
 
                     None => (None, None),
                 };
