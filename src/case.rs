@@ -1,13 +1,13 @@
 use crate::{
     cyl::{Cyl, CylPair},
     flatcase::FlatCase,
-    iol::{IolBoundsError, OpIol},
+    iol::{Iol, IolBoundsError, OpIol},
     refraction::{OpRefraction, RefBoundsError, Refraction},
     sca::{Sca, ScaBoundsError},
     sia::{Sia, SiaBoundsError},
     surgeon::Surgeon,
     target::{Constant, ConstantPair, Formula, Target, TargetBoundsError},
-    va::{AfterVaSet, BeforeVaSet, FarVa, NearVa, OpVa, Va, VaBoundsError, VaPair, VaSet},
+    va::{AfterVaSet, BeforeVaSet, FarVa, NearVa, OpVa, Va, VaBoundsError},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
@@ -213,12 +213,12 @@ impl TryFrom<FlatCase> for Case {
                 let surgeon_label = f.iol_surgeon_label;
 
                 let iol = match (f.iol_model, f.iol_name, f.iol_focus, f.iol_toric) {
-                    (Some(model), Some(name), Some(focus), Some(toric)) => Iol {
+                    (Some(model), Some(name), Some(focus), Some(toric)) => Some(Iol {
                         model,
                         name,
                         focus,
                         toric,
-                    },
+                    }),
 
                     (None, None, None, None) => None,
 

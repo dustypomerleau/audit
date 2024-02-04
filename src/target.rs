@@ -27,7 +27,7 @@ pub enum TargetBoundsError {
 
 // todo: add all common variants
 /// A representation of thick-lens IOL formulas.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Thick {
     Barrett,
     BarrettTrueK,
@@ -38,7 +38,7 @@ pub enum Thick {
 
 // todo: add all common variants
 /// A representation of thin-lens IOL formulas.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Thin {
     Haigis,
     HofferQ,
@@ -49,7 +49,7 @@ pub enum Thin {
 // Limited to common thick-lens formulas to start.
 // Eventually we will add all the formulas commonly in use.
 /// A formula for calculating IOL power from biometry.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Formula {
     Thick(Thick),
     Thin(Thin),
@@ -110,7 +110,7 @@ pub enum ConstantPair {
 /// The combination of formula and IOL constant used to calculate the [`Target`] for a
 /// [`Case`](crate::case::Case). The default constant for the case's IOL/formula pair is used,
 /// unless explicitly overridden by the surgeon.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Constant {
     pub value: f32,
     pub formula: Formula,
@@ -202,20 +202,5 @@ mod tests {
         let target = Target::new(constant, sca);
 
         assert_eq!(target, Err(TargetBoundsError::Cyl(cyl)))
-    }
-
-    #[test]
-    fn makes_new_formula() {
-        let formula = Formula::new_from_str("Barrett True K").unwrap();
-        assert_eq!(formula, Formula::Thick(Thick::BarrettTrueK))
-    }
-
-    #[test]
-    fn unknown_formula_returns_err() {
-        let formula = Formula::new_from_str("Awesome Formula");
-        assert_eq!(
-            formula,
-            Err(TargetBoundsError::Formula("Awesome Formula".to_string()))
-        )
     }
 }

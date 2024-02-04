@@ -103,7 +103,7 @@ mod tests {
     fn makes_new_opiol() {
         let iol = iol();
         let sca = Sca::new(24.25, Some(3.0), Some(12)).unwrap();
-        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca).unwrap();
+        let opiol = OpIol::new(Some("sn60wf".to_string()), iol.clone(), sca).unwrap();
 
         assert_eq!(
             opiol,

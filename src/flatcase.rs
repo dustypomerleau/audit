@@ -7,7 +7,7 @@ use crate::{
     sia::Sia,
     surgeon::Surgeon,
     target::{Constant, Target},
-    va::{AfterVaSet, BeforeVaSet, FarVa, OpVa, Va},
+    va::{AfterVaSet, BeforeVaSet, FarVa, NearVa, OpVa, Va},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
@@ -127,7 +127,7 @@ impl From<Case> for FlatCase {
                         }),
                     after:
                         Refraction(Sca {
-                            sph: ref_before_sph,
+                            sph: ref_after_sph,
                             cyl: ref_after_cyl,
                         }),
                 },
