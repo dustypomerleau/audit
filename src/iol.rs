@@ -38,18 +38,18 @@ pub enum Focus {
 pub struct Iol {
     // todo: I would eventually prefer for this to be an enum, with IOL models explicitly
     // allowlisted.
-    model: String,
-    name: String,
-    focus: Focus,
-    toric: bool,
+    pub model: String,
+    pub name: String,
+    pub focus: Focus,
+    pub toric: bool,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpIol {
     /// An optional string, provided by the surgeon, to name/describe the IOL.
-    surgeon_label: Option<String>,
-    iol: Option<Iol>,
-    sca: Sca,
+    pub surgeon_label: Option<String>,
+    pub iol: Option<Iol>,
+    pub sca: Sca,
 }
 
 impl OpIol {

@@ -1,7 +1,7 @@
 use crate::{
     case::{Adverse, Case, Side},
     cyl::Cyl,
-    iol::Iol,
+    iol::{Focus, Iol, OpIol},
     refraction::{OpRefraction, Refraction},
     sca::Sca,
     sia::Sia,
@@ -39,6 +39,11 @@ pub struct FlatCase {
     pub sia_power: Option<f32>,
     pub sia_meridian: Option<i32>,
 
+    pub iol_surgeon_label: Option<String>,
+    pub iol_model: Option<String>,
+    pub iol_name: Option<String>,
+    pub iol_focus: Option<Focus>,
+    pub iol_toric: Option<bool>,
     pub iol_se: Option<f32>,
     pub iol_cyl_power: Option<f32>,
     pub iol_cyl_axis: Option<i32>,
@@ -170,15 +175,53 @@ impl From<Case> for FlatCase {
             None => (None, None),
         };
 
-        let (iol_se, iol_cyl_power, iol_cyl_axis) = match iol {
-            Some(Iol(Sca {
-                sph,
-                cyl: Some(Cyl { power, axis }),
-            })) => (Some(sph), Some(power), Some(axis.0)),
+        let (
+            iol_surgeon_label,
+            iol_model,
+            iol_name,
+            iol_focus,
+            iol_toric,
+            iol_se,
+            iol_cyl_power,
+            iol_cyl_axis,
+        ) = match iol {
+            Some(OpIol {
+                surgeon_label,
+                iol,
+                sca: Sca { sph, cyl },
+            }) => {
+                let (model, name, focus, toric) = match iol {
+                    Some(Iol {
+                        model,
+                        name,
+                        focus,
+                        toric,
+                    }) => (model, name, focus, toric),
 
-            Some(Iol(Sca { sph, .. })) => (Some(sph), None, None),
+                    None => (None, None, None, None),
+                };
 
-            None => (None, None, None),
+                let se = sph;
+
+                let (cyl_power, cyl_axis) = match cyl {
+                    Some(Cyl { power, axis }) => (power, axis.0),
+
+                    None => (None, None),
+                };
+
+                (
+                    surgeon_label,
+                    model,
+                    name,
+                    focus,
+                    toric,
+                    se,
+                    cyl_power,
+                    cyl_axis,
+                )
+            }
+
+            None => None,
         };
 
         let (va_raw_before_num, va_raw_before_den) = match va_raw_before {
