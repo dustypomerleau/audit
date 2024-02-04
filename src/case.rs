@@ -244,13 +244,13 @@ impl TryFrom<FlatCase> for Case {
         let adverse = f.adverse;
 
         let before = BeforeVaSet {
-            best_far: if let (Some(va)) = Va::try_new(f.va_best_before_num, f.va_best_before_den)? {
+            best_far: if let Some(va) = Va::try_new(f.va_best_before_num, f.va_best_before_den)? {
                 FarVa(va)
             } else {
                 return Err(CaseError::MissingField(Required::Va));
             },
 
-            raw_far: if let (Some(va)) = Va::try_new(f.va_raw_before_num, f.va_raw_before_den)? {
+            raw_far: if let Some(va) = Va::try_new(f.va_raw_before_num, f.va_raw_before_den)? {
                 Some(FarVa(va))
             } else {
                 None
@@ -264,7 +264,7 @@ impl TryFrom<FlatCase> for Case {
                 None
             },
 
-            raw_far: if let (Some(va)) = Va::try_new(f.va_raw_after_num, f.va_raw_after_den)? {
+            raw_far: if let Some(va) = Va::try_new(f.va_raw_after_num, f.va_raw_after_den)? {
                 FarVa(va)
             } else {
                 return Err(CaseError::MissingField(Required::Va));

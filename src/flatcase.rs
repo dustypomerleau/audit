@@ -6,7 +6,7 @@ use crate::{
     sca::Sca,
     sia::Sia,
     surgeon::Surgeon,
-    target::{Constant, Formula, Target},
+    target::{Constant, Target},
     va::{AfterVaSet, BeforeVaSet, FarVa, OpVa, Va},
 };
 use chrono::NaiveDate;
