@@ -129,6 +129,7 @@ impl TryFrom<FlatCase> for Case {
     fn try_from(f: FlatCase) -> Result<Self, Self::Error> {
         let surgeon_sia = match (
             f.surgeon_sia_right_power,
+            // todo: make these all meridian, or bail on meridian and se entirely
             f.surgeon_sia_right_axis,
             f.surgeon_sia_left_power,
             f.surgeon_sia_left_axis,
@@ -274,12 +275,6 @@ impl TryFrom<FlatCase> for Case {
             } else {
                 return Err(CaseError::MissingField(Required::Va));
             },
-
-            raw_far: if let Some(va) = Va::try_new(f.va_raw_before_num, f.va_raw_before_den)? {
-                Some(FarVa(va))
-            } else {
-                None
-            },
         };
 
         let after = AfterVaSet {
@@ -381,8 +376,6 @@ mod tests {
             va_best_after_num: None,
             va_best_after_den: None,
 
-            va_raw_before_num: None,
-            va_raw_before_den: None,
             va_raw_after_num: Some(6.0),
             va_raw_after_den: Some(6.0),
 

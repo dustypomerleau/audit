@@ -60,9 +60,6 @@ pub struct FlatCase {
     pub va_best_after_num: Option<f32>,
     pub va_best_after_den: Option<f32>,
 
-    pub va_raw_before_num: Option<f32>,
-    pub va_raw_before_den: Option<f32>,
-
     pub va_raw_after_num: Option<f32>,
     pub va_raw_after_den: Option<f32>,
 
@@ -108,7 +105,6 @@ impl From<Case> for FlatCase {
                                     num: va_best_before_num,
                                     den: va_best_before_den,
                                 }),
-                            raw_far: va_raw_before,
                         },
 
                     after:
@@ -248,12 +244,6 @@ impl From<Case> for FlatCase {
             None => (None, None, None, None, None, None, None, None),
         };
 
-        let (va_raw_before_num, va_raw_before_den) = match va_raw_before {
-            Some(FarVa(Va { num, den })) => (Some(num), Some(den)),
-
-            None => (None, None),
-        };
-
         let (va_best_after_num, va_best_after_den) = match va_best_after {
             Some(FarVa(Va { num, den })) => (Some(num), Some(den)),
 
@@ -311,8 +301,6 @@ impl From<Case> for FlatCase {
             va_best_before_den: Some(va_best_before_den),
             va_best_after_num,
             va_best_after_den,
-            va_raw_before_num,
-            va_raw_before_den,
             va_raw_after_num: Some(va_raw_after_num),
             va_raw_after_den: Some(va_raw_after_den),
             va_raw_near_after_den,
