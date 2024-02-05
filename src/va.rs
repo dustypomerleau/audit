@@ -69,7 +69,6 @@ impl Va {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct BeforeVaSet {
     pub best_far: FarVa,
-    pub raw_far: Option<FarVa>,
 }
 
 /// A collection of visual acuities from after surgery. We use separate structs for
