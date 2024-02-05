@@ -23,7 +23,7 @@ leptos_axum = { version = "0.6", optional = true, features = ["experimental-isla
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
 log = "0.4"
-polars = "0.37"
+polars = { version = "0.37", features = ["csv", "lazy"] }
 serde = { version = "1", features = ["derive"] }
 simple_logger = "4"
 thiserror = "1"
