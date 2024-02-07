@@ -1,1 +1,6 @@
-﻿urn,side,ref_sph_before,ref_cyl_power_before,ref_cyl_axis_before,va_num_before,va_den_before,va_near_num_before,va_near_den_before,target_se,target_cyl_power,target_cyl_axis,date,site,incision_mer,sia,iol,adverse,ref_sph_after,ref_cyl_power_after,ref_cyl_axis_after
+﻿URN*,side*,IOL constant,formula,target refraction sphere,target refraction cyl,target refraction axis,date of surgery*,hospital,SIA power,SIA axis,IOL model,IOL sphere,IOL cyl,IOL axis,adverse event,preop BCVA numerator*,preop BCVA denominator*,postop BCVA numerator,postop BCVA denominator,postop UCVA numerator*,postop UCVA denominator*,postop near UCVA numerator,postop near UCVA denominator
+320,right,118.66,barrett,-0.11,-0.02,80,2023-02-28,hospital 1,0.0,16,sn60wf,13.50,0.50,148,rhexis,6.0,18.0,6.0,12.0,6.0,6.0,6.0,12.0
+abc,left,118.60,barrett true k,-0.32,-0.57,17,2019-11-26,hospital 2,0.4,116,zxt300,20.50,5.75,159,,6.0,7.5,6.0,5.0,6.0,5.0,6.0,12.0
+2120,right,119.88,kane,0.12,-0.08,39,2018-10-20,hospital 3,0.5,101,mta4u0,7.50,2.50,67,rhexis,6.0,9.0,6.0,5.0,6.0,6.0,6.0,12.0
+068385,right,118.59,olsen,-0.27,-0.48,12,2023-11-07,hospital 4,0.4,66,icu225,28.50,4.75,87,rhexis,6.0,6.0,6.0,6.0,6.0,18.0,6.0,6.0
+a-2030,left,118.56,kane,0.10,-0.17,118,2017-07-13,hospital 5,0.0,3,LUXGOOD,5.00,3.25,103,pc,6.0,12.0,6.0,15.0,6.0,7.5,6.0,6.0
