@@ -1,6 +1,6 @@
-﻿URN*,side*,IOL constant,formula,target refraction sphere,target refraction cyl,target refraction axis,date of surgery*,hospital,SIA power,SIA axis,IOL model,IOL sphere,IOL cyl,IOL axis,adverse event,preop BCVA numerator*,preop BCVA denominator*,postop BCVA numerator,postop BCVA denominator,postop UCVA numerator*,postop UCVA denominator*,postop near UCVA numerator,postop near UCVA denominator
-320,right,118.66,barrett,-0.11,-0.02,80,2023-02-28,hospital 1,0.0,16,sn60wf,13.50,0.50,148,rhexis,6.0,18.0,6.0,12.0,6.0,6.0,6.0,12.0
-abc,left,118.60,barrett true k,-0.32,-0.57,17,2019-11-26,hospital 2,0.4,116,zxt300,20.50,5.75,159,,6.0,7.5,6.0,5.0,6.0,5.0,6.0,12.0
-2120,right,119.88,kane,0.12,-0.08,39,2018-10-20,hospital 3,0.5,101,mta4u0,7.50,2.50,67,rhexis,6.0,9.0,6.0,5.0,6.0,6.0,6.0,12.0
-068385,right,118.59,olsen,-0.27,-0.48,12,2023-11-07,hospital 4,0.4,66,icu225,28.50,4.75,87,rhexis,6.0,6.0,6.0,6.0,6.0,18.0,6.0,6.0
-a-2030,left,118.56,kane,0.10,-0.17,118,2017-07-13,hospital 5,0.0,3,LUXGOOD,5.00,3.25,103,pc,6.0,12.0,6.0,15.0,6.0,7.5,6.0,6.0
+﻿URN*,side*,IOL constant,formula,target refraction sphere,target refraction cyl,target refraction axis,date of surgery*,hospital,SIA power,SIA axis,IOL model,IOL sphere,IOL cyl,IOL axis,adverse event,preop BCVA numerator*,preop BCVA denominator*,postop BCVA numerator,postop BCVA denominator,postop UCVA numerator*,postop UCVA denominator*,postop near UCVA numerator,postop near UCVA denominator,preop refraction sphere*,preop refraction cyl,preop refraction axis,postop refraction sphere*,postop refraction cyl,postop refraction axis
+320,right,119.08,barrett,-0.04,-0.05,165,2017-04-02,hospital 1,0.1,63,sn60wf,7.00,0.75,24,other,6.0,96.0,6.0,9.0,6.0,12.0,6.0,7.5,3.00,-4.75,47,-0.50,-0.25,107
+abc,left,119.06,barrett true k,-0.24,-0.51,153,2017-09-22,hospital 2,0.2,18,zxt300,25.00,0.50,10,pc,6.0,12.0,6.0,7.5,6.0,7.5,6.0,9.0,-7.00,-4.75,24,-2.00,0.00,131
+2120,right,119.25,kane,-0.05,-0.39,177,2017-06-09,hospital 3,0.1,109,mta4u0,32.00,5.50,71,,6.0,9.0,6.0,9.0,6.0,18.0,6.0,9.0,0.50,-3.25,1,-2.00,0.00,139
+068385,right,118.93,olsen,-0.23,-0.01,97,2020-11-05,hospital 4,0.3,148,icu225,20.50,1.75,128,rhexis,6.0,36.0,6.0,18.0,6.0,9.0,6.0,15.0,0.50,-2.25,137,-2.00,-0.50,110
+a-2030,left,118.27,kane,-0.05,-0.53,122,2020-12-15,hospital 5,0.1,80,LUXGOOD,31.00,0.50,131,rhexis,6.0,60.0,6.0,9.0,6.0,15.0,6.0,5.0,0.75,-4.75,120,-0.50,0.00,0

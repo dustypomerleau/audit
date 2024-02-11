@@ -42,5 +42,9 @@ mod tests {
             .unwrap();
 
         println!("{}", ws.0);
+
+        let fc: FlatCase = serde_json::from_str(ws.0.as_str()).unwrap();
+
+        println!("{fc:?}");
     }
 }
