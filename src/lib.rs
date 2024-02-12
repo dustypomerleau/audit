@@ -1,4 +1,6 @@
-mod refs; // for rust analyzer support only, not part of the crate
+// for rust analyzer support only, not part of the crate
+mod refs;
+// mod trash;
 
 use cfg_if::cfg_if;
 

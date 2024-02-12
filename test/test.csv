@@ -1,6 +1,6 @@
 ﻿URN*,side*,IOL constant,formula,target refraction sphere,target refraction cyl,target refraction axis,date of surgery*,hospital,SIA power,SIA axis,IOL model,IOL sphere,IOL cyl,IOL axis,adverse event,preop BCVA numerator*,preop BCVA denominator*,postop BCVA numerator,postop BCVA denominator,postop UCVA numerator*,postop UCVA denominator*,postop near UCVA numerator,postop near UCVA denominator,preop refraction sphere*,preop refraction cyl,preop refraction axis,postop refraction sphere*,postop refraction cyl,postop refraction axis
-320,right,119.08,barrett,-0.04,-0.05,165,2017-04-02,hospital 1,0.1,63,sn60wf,7.00,0.75,24,other,6.0,96.0,6.0,9.0,6.0,12.0,6.0,7.5,3.00,-4.75,47,-0.50,-0.25,107
-abc,left,119.06,barrett true k,-0.24,-0.51,153,2017-09-22,hospital 2,0.2,18,zxt300,25.00,0.50,10,pc,6.0,12.0,6.0,7.5,6.0,7.5,6.0,9.0,-7.00,-4.75,24,-2.00,0.00,131
-2120,right,119.25,kane,-0.05,-0.39,177,2017-06-09,hospital 3,0.1,109,mta4u0,32.00,5.50,71,,6.0,9.0,6.0,9.0,6.0,18.0,6.0,9.0,0.50,-3.25,1,-2.00,0.00,139
-068385,right,118.93,olsen,-0.23,-0.01,97,2020-11-05,hospital 4,0.3,148,icu225,20.50,1.75,128,rhexis,6.0,36.0,6.0,18.0,6.0,9.0,6.0,15.0,0.50,-2.25,137,-2.00,-0.50,110
-a-2030,left,118.27,kane,-0.05,-0.53,122,2020-12-15,hospital 5,0.1,80,LUXGOOD,31.00,0.50,131,rhexis,6.0,60.0,6.0,9.0,6.0,15.0,6.0,5.0,0.75,-4.75,120,-0.50,0.00,0
+320,right,118.26,barrett,-0.13,-0.35,79,2023-01-11,hospital 1,0.4,167,sn60wf,31.00,1.75,44,zonule,6.0,7.5,6.0,15.0,6.0,12.0,6.0,9.0,-0.75,-2.50,68,0.00,-1.25,105
+abc,left,119.82,barrett true k,-0.26,-0.29,60,2022-02-26,hospital 2,0.0,116,zxt300,6.00,4.25,92,pc,6.0,18.0,6.0,15.0,6.0,9.0,6.0,6.0,-5.25,-2.50,126,-1.75,-0.50,52
+2120,right,119.83,kane,-0.01,-0.28,56,2017-09-18,hospital 3,0.0,31,mta4u0,31.50,2.50,52,,6.0,18.0,6.0,12.0,6.0,18.0,6.0,5.0,-6.50,-4.75,170,-1.25,-1.25,131
+068385,right,118.89,olsen,-0.50,-0.58,79,2018-08-25,hospital 4,0.3,18,icu225,33.50,2.00,135,rhexis,6.0,24.0,6.0,18.0,6.0,6.0,6.0,9.0,-6.00,-0.75,32,-0.50,-0.50,73
+a-2030,left,118.49,kane,-0.37,-0.45,98,2022-05-12,hospital 5,0.5,30,LUXGOOD,26.00,5.50,71,zonule,6.0,96.0,6.0,12.0,6.0,9.0,6.0,6.0,6.75,-4.25,59,-1.50,-1.00,93

@@ -33,7 +33,7 @@ pub struct FlatCase {
     #[serde(rename = "URN*")]
     pub urn: Option<String>,
     #[serde(rename = "side*")]
-    pub side: Option<Side>,
+    pub side: Option<String>,
 
     #[serde(rename = "constant")]
     pub target_constant: Option<f32>,
@@ -60,7 +60,7 @@ pub struct FlatCase {
     pub iol_surgeon_label: Option<String>,
     pub iol_model: Option<String>,
     pub iol_name: Option<String>,
-    pub iol_focus: Option<Focus>,
+    pub iol_focus: Option<String>,
     pub iol_toric: Option<bool>,
     #[serde(rename = "IOL sphere")]
     pub iol_se: Option<f32>,
@@ -70,7 +70,7 @@ pub struct FlatCase {
     pub iol_cyl_axis: Option<i32>,
 
     #[serde(rename = "adverse event")]
-    pub adverse: Option<Adverse>,
+    pub adverse: Option<String>,
 
     #[serde(rename = "preop BCVA numerator*")]
     pub va_best_before_num: Option<f32>,
@@ -193,6 +193,11 @@ impl From<Case> for FlatCase {
             None => (None, None, None, None),
         };
 
+        let side = match side {
+            Side::Right => String::from("right"),
+            Side::Left => String::from("left"),
+        };
+
         let (target_constant, target_formula, target_se, target_cyl_power, target_cyl_axis) =
             match target {
                 Some(Target {
@@ -248,7 +253,15 @@ impl From<Case> for FlatCase {
                         name,
                         focus,
                         toric,
-                    }) => (Some(model), Some(name), Some(focus), Some(toric)),
+                    }) => {
+                        let focus = match focus {
+                            Focus::Mono => "mono".to_string(),
+                            Focus::Edof => "edof".to_string(),
+                            Focus::Multi => "multi".to_string(),
+                        };
+
+                        (Some(model), Some(name), Some(focus), Some(toric))
+                    }
 
                     None => (None, None, None, None),
                 };
@@ -274,6 +287,19 @@ impl From<Case> for FlatCase {
             }
 
             None => (None, None, None, None, None, None, None, None),
+        };
+
+        let adverse = if let Some(adverse) = adverse {
+            let adverse = match adverse {
+                Adverse::Rhexis => "rhexis",
+                Adverse::Pc => "pc",
+                Adverse::Zonule => "zonule",
+                Adverse::Other => "other",
+            };
+
+            Some(adverse.to_string())
+        } else {
+            None
         };
 
         let (va_best_after_num, va_best_after_den) = match va_best_after {

@@ -41,10 +41,11 @@ mod tests {
             .finish(&mut df)
             .unwrap();
 
-        println!("{}", ws.0);
+        let json = &ws.0[..];
+        println!("{json}\n\n");
+        println!("{json:?}\n\n");
 
-        let fc: FlatCase = serde_json::from_str(ws.0.as_str()).unwrap();
-
-        println!("{fc:?}");
+        let fc: Vec<FlatCase> = serde_json::from_str(json).unwrap();
+        println!("{fc:?}\n\n");
     }
 }

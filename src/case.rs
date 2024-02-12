@@ -1,7 +1,7 @@
 use crate::{
     cyl::{Cyl, CylPair},
     flatcase::FlatCase,
-    iol::{Iol, IolBoundsError, OpIol},
+    iol::{Focus, Iol, IolBoundsError, OpIol},
     refraction::{OpRefraction, RefBoundsError, Refraction},
     sca::{Sca, ScaBoundsError},
     sia::{Sia, SiaBoundsError},
@@ -78,6 +78,7 @@ pub enum CaseError {
 
 /// The side of the patient's surgery.
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Side {
     Right,
     Left,
@@ -90,6 +91,7 @@ pub enum Side {
 /// vitrectomy was required). We are interested only in the relative outcomes of cases with adverse
 /// events versus those without.
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Adverse {
     Rhexis,
     Pc,
@@ -171,7 +173,17 @@ impl TryFrom<FlatCase> for Case {
         };
 
         let side = if let Some(side) = f.side {
-            side
+            match side.to_lowercase().as_str() {
+                "right" => Side::Right,
+                "r" => Side::Right,
+                "re" => Side::Right,
+                "od" => Side::Right,
+                "left" => Side::Left,
+                "l" => Side::Left,
+                "le" => Side::Left,
+                "os" => Side::Left,
+                _ => return Err(CaseError::MissingField(Required::Side)),
+            }
         } else {
             return Err(CaseError::MissingField(Required::Side));
         };
@@ -239,12 +251,23 @@ impl TryFrom<FlatCase> for Case {
                 let surgeon_label = f.iol_surgeon_label;
 
                 let iol = match (f.iol_model, f.iol_name, f.iol_focus, f.iol_toric) {
-                    (Some(model), Some(name), Some(focus), Some(toric)) => Some(Iol {
-                        model,
-                        name,
-                        focus,
-                        toric,
-                    }),
+                    (Some(model), Some(name), Some(focus), Some(toric)) => {
+                        let focus = match focus.to_lowercase().as_str() {
+                            "monofocal" => Focus::Mono,
+                            "mono" => Focus::Mono,
+                            "multifocal" => Focus::Multi,
+                            "multi" => Focus::Multi,
+                            "edof" => Focus::Edof,
+                            _ => return Err(IolBoundsError::Iol.into()),
+                        };
+
+                        Some(Iol {
+                            model,
+                            name,
+                            focus,
+                            toric,
+                        })
+                    }
 
                     (None, None, None, None) => None,
 
@@ -267,7 +290,17 @@ impl TryFrom<FlatCase> for Case {
             },
         };
 
-        let adverse = f.adverse;
+        let adverse = match f.adverse {
+            Some(adverse) => match adverse.to_lowercase().as_str() {
+                "rhexis" => Some(Adverse::Rhexis),
+                "pc" => Some(Adverse::Pc),
+                "zonule" => Some(Adverse::Zonule),
+                "other" => Some(Adverse::Other),
+                _ => None,
+            },
+
+            None => None,
+        };
 
         let before = BeforeVaSet {
             best_far: if let Some(va) = Va::try_new(f.va_best_before_num, f.va_best_before_den)? {
@@ -336,7 +369,6 @@ impl TryFrom<FlatCase> for Case {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::iol::Focus;
 
     // todo: eventually this will be replaced with a series of mocked `FlatCases` with random but
     // legal values.
@@ -351,7 +383,7 @@ mod tests {
             surgeon_sia_left_power: Some(0.1),
             surgeon_sia_left_axis: Some(10),
             urn: Some("abc123".to_string()),
-            side: Some(Side::Right),
+            side: Some("re".to_string()),
             target_constant: Some(119.36),
             target_formula: Some("Barrett".to_string()),
             target_se: Some(-0.2),
@@ -364,7 +396,7 @@ mod tests {
             iol_surgeon_label: Some("symfony toric".to_string()),
             iol_model: Some("ZXTxxx".to_string()),
             iol_name: Some("Tecnis Symfony".to_string()),
-            iol_focus: Some(Focus::Edof),
+            iol_focus: Some("edof".to_string()),
             iol_toric: Some(true),
             iol_se: Some(24.5),
             iol_cyl_power: Some(3.25),
