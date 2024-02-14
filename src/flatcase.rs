@@ -1,5 +1,6 @@
 use crate::{
     case::{Adverse, Case, Side},
+    csv::WriteString,
     cyl::Cyl,
     iol::{Focus, Iol, OpIol},
     refraction::{OpRefraction, Refraction},
@@ -11,7 +12,9 @@ use crate::{
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
-use serde::{Deserialize, Serialize};
+use polars::lazy::frame::{LazyCsvReader, LazyFileListReader};
+use serde::{de, Deserialize, Serialize};
+use std::{io::Error, path::Path};
 
 /// A flattened version of the [`Case`](crate::case::Case) struct for use in database queries and
 /// the initial ingestion of CSV data.
@@ -105,6 +108,16 @@ pub struct FlatCase {
     pub ref_after_cyl_power: Option<f32>,
     #[serde(rename = "postop refraction axis")]
     pub ref_after_cyl_axis: Option<i32>,
+}
+
+impl FlatCase {
+    pub fn from_csv(path: Path) -> Result<Vec<Self>, Error> {
+        let ws = WriteString::new_from_csv(path)?;
+        let json = &ws.0[..];
+        let fc: Vec<Self> = serde_json::from_str(json)?;
+
+        Ok(fc)
+    }
 }
 
 impl From<Case> for FlatCase {
