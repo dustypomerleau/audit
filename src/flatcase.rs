@@ -12,9 +12,29 @@ use crate::{
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
-use polars::lazy::frame::{LazyCsvReader, LazyFileListReader};
+use polars::{
+    error::PolarsError,
+    lazy::frame::{LazyCsvReader, LazyFileListReader},
+};
 use serde::{de, Deserialize, Serialize};
 use std::{io::Error, path::Path};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum FcError {
+    #[error("Polars error: {0:?}")]
+    Polars(PolarsError),
+    #[error("Serde error: {0:?}")]
+    Serde(serde_json::error::Error),
+}
+
+impl From<PolarsError> for FcError {
+    fn from(error: PolarsError) -> Self { Self::Polars(error) }
+}
+
+impl From<serde_json::error::Error> for FcError {
+    fn from(error: serde_json::error::Error) -> Self { Self::Serde(error) }
+}
 
 /// A flattened version of the [`Case`](crate::case::Case) struct for use in database queries and
 /// the initial ingestion of CSV data.
@@ -111,7 +131,7 @@ pub struct FlatCase {
 }
 
 impl FlatCase {
-    pub fn from_csv(path: Path) -> Result<Vec<Self>, Error> {
+    pub fn from_csv(path: &Path) -> Result<Vec<Self>, FcError> {
         let ws = WriteString::new_from_csv(path)?;
         let json = &ws.0[..];
         let fc: Vec<Self> = serde_json::from_str(json)?;

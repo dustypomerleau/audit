@@ -1,7 +1,5 @@
-use polars::{
-    error::PolarsError,
-    io::json::JsonFormat,
-    lazy::frame::{LazyCsvReader, LazyFileListReader},
+use polars::prelude::{
+    JsonFormat, JsonWriter, LazyCsvReader, LazyFileListReader, PolarsError, SerWriter,
 };
 use std::{io::Write, path::Path};
 
@@ -9,7 +7,7 @@ use std::{io::Write, path::Path};
 pub struct WriteString(pub String);
 
 impl WriteString {
-    pub fn new_from_csv(path: Path) -> Result<Self, PolarsError> {
+    pub fn new_from_csv(path: &Path) -> Result<Self, PolarsError> {
         let mut df = LazyCsvReader::new(path).finish()?.collect()?;
         let mut ws = WriteString(String::new());
 
