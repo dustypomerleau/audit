@@ -31,14 +31,8 @@ impl Write for WriteString {
 
 #[cfg(test)]
 mod tests {
-    use crate::{csv::WriteString, flatcase::FlatCase};
-    use polars::{
-        io::{
-            json::{JsonFormat, JsonWriter},
-            SerWriter,
-        },
-        lazy::frame::{LazyCsvReader, LazyFileListReader},
-    };
+    use super::*;
+    use crate::flatcase::FlatCase;
 
     #[test]
     fn reads_csv() {

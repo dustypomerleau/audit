@@ -12,8 +12,8 @@ use crate::{
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
-use polars::error::PolarsError;
-use serde::{de, Deserialize, Serialize};
+use polars::prelude::PolarsError;
+use serde::{Deserialize, Serialize};
 use std::path::Path;
 use thiserror::Error;
 
