@@ -18,18 +18,18 @@ use std::path::Path;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
-pub enum FcError {
+pub enum FlatCaseError {
     #[error("Polars error: {0:?}")]
     Polars(PolarsError),
     #[error("Serde error: {0:?}")]
     Serde(serde_json::error::Error),
 }
 
-impl From<PolarsError> for FcError {
+impl From<PolarsError> for FlatCaseError {
     fn from(error: PolarsError) -> Self { Self::Polars(error) }
 }
 
-impl From<serde_json::error::Error> for FcError {
+impl From<serde_json::error::Error> for FlatCaseError {
     fn from(error: serde_json::error::Error) -> Self { Self::Serde(error) }
 }
 
@@ -128,7 +128,7 @@ pub struct FlatCase {
 }
 
 impl FlatCase {
-    pub fn from_csv(path: &Path) -> Result<Vec<Self>, FcError> {
+    pub fn from_csv(path: &Path) -> Result<Vec<Self>, FlatCaseError> {
         let ws = WriteString::new_from_csv(path)?;
         let json = &ws.0[..];
         let fc: Vec<Self> = serde_json::from_str(json)?;
