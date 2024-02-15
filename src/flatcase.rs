@@ -12,12 +12,9 @@ use crate::{
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
-use polars::{
-    error::PolarsError,
-    lazy::frame::{LazyCsvReader, LazyFileListReader},
-};
+use polars::error::PolarsError;
 use serde::{de, Deserialize, Serialize};
-use std::{io::Error, path::Path};
+use std::path::Path;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
