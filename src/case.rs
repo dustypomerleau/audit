@@ -127,7 +127,8 @@ pub struct Case {
 impl TryFrom<FlatCase> for Case {
     type Error = CaseError;
 
-    // todo: should we be trying not to consume the FlatCase so we can then just put it into the DB?
+    // note: We can consume the FlatCase here, because the Case will be used for subsequent DB
+    // insertion.
     fn try_from(f: FlatCase) -> Result<Self, Self::Error> {
         let surgeon_sia = match (
             f.surgeon_sia_right_power,
