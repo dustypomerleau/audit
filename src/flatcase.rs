@@ -26,11 +26,11 @@ pub enum FlatCaseError {
 }
 
 impl From<PolarsError> for FlatCaseError {
-    fn from(error: PolarsError) -> Self { Self::Polars(error) }
+    fn from(err: PolarsError) -> Self { Self::Polars(err) }
 }
 
 impl From<serde_json::error::Error> for FlatCaseError {
-    fn from(error: serde_json::error::Error) -> Self { Self::Serde(error) }
+    fn from(err: serde_json::error::Error) -> Self { Self::Serde(err) }
 }
 
 /// A flattened version of the [`Case`](crate::case::Case) struct for use in database queries and
