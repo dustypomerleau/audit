@@ -132,7 +132,6 @@ impl TryFrom<FlatCase> for Case {
     fn try_from(f: FlatCase) -> Result<Self, Self::Error> {
         let surgeon_sia = match (
             f.surgeon_sia_right_power,
-            // todo: make these all meridian, or bail on meridian and se entirely
             f.surgeon_sia_right_axis,
             f.surgeon_sia_left_power,
             f.surgeon_sia_left_axis,
@@ -223,9 +222,9 @@ impl TryFrom<FlatCase> for Case {
 
         let site = f.site;
 
-        let sia = match (f.sia_power, f.sia_meridian) {
-            (Some(power), Some(meridian)) => {
-                let sia = Cyl::new(power, meridian)?.try_into()?;
+        let sia = match (f.sia_power, f.sia_axis) {
+            (Some(power), Some(axis)) => {
+                let sia = Cyl::new(power, axis)?.try_into()?;
 
                 Some(sia)
             }
@@ -234,7 +233,7 @@ impl TryFrom<FlatCase> for Case {
 
             (Some(_power), _) => return Err(ScaBoundsError::NoPair(CylPair::Axis).into()),
 
-            (_, Some(_meridian)) => return Err(ScaBoundsError::NoPair(CylPair::Power).into()),
+            (_, Some(_axis)) => return Err(ScaBoundsError::NoPair(CylPair::Power).into()),
         };
 
         let iol = match f.iol_se {
@@ -393,7 +392,7 @@ mod tests {
             date: NaiveDate::from_ymd_opt(2023, 05, 01), // returns Option<NaiveDate>
             site: Some("the hospital site".to_string()),
             sia_power: Some(0.1),
-            sia_meridian: Some(100),
+            sia_axis: Some(100),
             iol_surgeon_label: Some("symfony toric".to_string()),
             iol_model: Some("ZXTxxx".to_string()),
             iol_name: Some("Tecnis Symfony".to_string()),

@@ -55,7 +55,7 @@ module default {
     # }
     # type K extending SoftCreate {
     #     value: (constrained)
-    #     meridian: Axis;
+    #     axis: Axis; # meridian
     # }
 
     type AfterVaSet extending SoftCreate {

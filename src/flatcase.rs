@@ -46,9 +46,9 @@ pub struct FlatCase {
     pub surgeon_last_name: Option<String>,
     pub surgeon_site: Option<String>,
     pub surgeon_sia_right_power: Option<f32>,
-    pub surgeon_sia_right_axis: Option<i32>,
+    pub surgeon_sia_right_axis: Option<i32>, // meridian
     pub surgeon_sia_left_power: Option<f32>,
-    pub surgeon_sia_left_axis: Option<i32>,
+    pub surgeon_sia_left_axis: Option<i32>, // meridian
 
     #[serde(rename = "URN*")]
     pub urn: Option<String>,
@@ -64,6 +64,8 @@ pub struct FlatCase {
     #[serde(rename = "target refraction cyl")]
     pub target_cyl_power: Option<f32>,
     #[serde(rename = "target refraction axis")]
+    // +cyl (will need to be converted to compare with -cyl refraction)
+    // I believe this is spectacle plane
     pub target_cyl_axis: Option<i32>,
 
     #[serde(rename = "date of surgery")]
@@ -74,7 +76,7 @@ pub struct FlatCase {
     #[serde(rename = "SIA power")]
     pub sia_power: Option<f32>,
     #[serde(rename = "SIA axis")]
-    pub sia_meridian: Option<i32>,
+    pub sia_axis: Option<i32>, // meridian
 
     #[serde(rename = "IOL model")]
     pub iol_surgeon_label: Option<String>,
@@ -256,7 +258,7 @@ impl From<Case> for FlatCase {
                 None => (None, None, None, None, None),
             };
 
-        let (sia_power, sia_meridian) = match sia {
+        let (sia_power, sia_axis) = match sia {
             Some(Sia(Cyl { power, axis })) => (Some(power), Some(axis.0)),
 
             None => (None, None),
@@ -375,7 +377,7 @@ impl From<Case> for FlatCase {
             date: Some(date),
             site,
             sia_power,
-            sia_meridian,
+            sia_axis,
             iol_surgeon_label,
             iol_model,
             iol_name,
