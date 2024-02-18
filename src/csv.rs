@@ -3,10 +3,13 @@ use polars::prelude::{
 };
 use std::{io::Write, path::Path};
 
+/// A newtype wrapping a String that may be valid JSON.
 #[derive(Clone, Debug)]
 pub struct WriteString(pub String);
 
 impl WriteString {
+    /// Create a new [`WriteString`] from a CSV file. Fails with a [`PolarsError`] if the file is
+    /// not valid CSV, or if conversion to JSON is not possible.
     pub fn new_from_csv(path: &Path) -> Result<Self, PolarsError> {
         let mut df = LazyCsvReader::new(path).finish()?.collect()?;
         let mut ws = WriteString(String::new());
