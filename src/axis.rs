@@ -1,8 +1,8 @@
 use serde::{Deserialize, Serialize};
 
-/// A generic axis between 0° and 179°. This is used for the axis of [`Cyl`](crate::cyl::Cyl)
-/// in [`Refraction`](crate::refraction::Refraction), [`Target`](crate::target::Target),
-/// [`Iol`](crate::iol::Iol), and [`Sia`](crate::sia::Sia).
+/// A bounds-checked generic axis between 0° and 179°. This is used for the axis of
+/// [`Cyl`](crate::cyl::Cyl) in [`Refraction`](crate::refraction::Refraction),
+/// [`Target`](crate::target::Target), [`Iol`](crate::iol::Iol), and [`Sia`](crate::sia::Sia).
 ///
 /// The purist would prefer using `meridian` rather than `axis` for [`Sia`](crate::sia::Sia) and
 /// biometric Ks, but on balance I've decided that the cognitive overhead of using both terms in the

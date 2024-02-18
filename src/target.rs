@@ -2,6 +2,7 @@ use crate::{cyl::Cyl, sca::Sca};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+/// The error type for an invalid [`Target`]
 #[derive(Debug, Error, PartialEq)]
 pub enum TargetBoundsError {
     #[error("the formula used for IOL calculation is not recognized (given value: {0})")]
@@ -19,8 +20,16 @@ pub enum TargetBoundsError {
     NoPair(ConstantPair),
 }
 
+/// Required values for the [`Iol`](crate::iol::Iol) constant to be associated with a specific
+/// [`Target`]
+#[derive(Debug, PartialEq)]
+pub enum ConstantPair {
+    Value,
+    Formula,
+}
+
 // todo: add all common variants
-/// A representation of thick-lens IOL formulas.
+/// A thick-lens IOL formula.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Thick {
     Barrett,
@@ -31,7 +40,7 @@ pub enum Thick {
 }
 
 // todo: add all common variants
-/// A representation of thin-lens IOL formulas.
+/// A thin-lens IOL formula.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Thin {
     Haigis,
@@ -40,8 +49,6 @@ pub enum Thin {
     Srkt,
 }
 
-// Limited to common thick-lens formulas to start.
-// Eventually we will add all the formulas commonly in use.
 /// A formula for calculating IOL power from biometry.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Formula {
@@ -93,12 +100,6 @@ impl Formula {
             },
         }
     }
-}
-
-#[derive(Debug, PartialEq)]
-pub enum ConstantPair {
-    Value,
-    Formula,
 }
 
 /// The combination of formula and IOL constant used to calculate the [`Target`] for a

@@ -2,12 +2,14 @@ use crate::cyl::Cyl;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+/// The error type for an invalid [`Sia`].
 #[derive(Debug, Error, PartialEq)]
 pub enum SiaBoundsError {
     #[error("SIA must be a value between 0 D and 2 D (supplied value: {0})")]
     Sia(f32),
 }
 
+/// A surgically-induced astigmatism.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Sia(pub Cyl);
 

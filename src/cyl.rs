@@ -1,7 +1,7 @@
 use crate::{axis::Axis, sca::ScaBoundsError};
 use serde::{Deserialize, Serialize};
 
-/// A representation of missing cylinder components for use by error types.
+/// A missing cylinder component (for use by error types).
 #[derive(Debug, PartialEq)]
 pub enum CylPair {
     Power,
@@ -18,6 +18,9 @@ pub struct Cyl {
 }
 
 impl Cyl {
+    /// Create a new [`Cyl`], with bounds checking on the [`axis`](Cyl::axis). The
+    /// [`power`](Cyl::power) is unconstrained until the [`Cyl`] is wrapped by a more specific
+    /// type.
     pub fn new(power: f32, axis: i32) -> Result<Self, ScaBoundsError> {
         if let Some(axis) = Axis::new(axis) {
             Ok(Self { power, axis })

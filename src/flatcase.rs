@@ -17,10 +17,12 @@ use serde::{Deserialize, Serialize};
 use std::path::Path;
 use thiserror::Error;
 
+/// An error type for failure to create a FlatCase from CSV.
 #[derive(Debug, Error)]
 pub enum FlatCaseError {
     #[error("Polars error: {0:?}")]
     Polars(PolarsError),
+
     #[error("Serde error: {0:?}")]
     Serde(serde_json::error::Error),
 }
@@ -34,13 +36,13 @@ impl From<serde_json::error::Error> for FlatCaseError {
 }
 
 /// A flattened version of the [`Case`](crate::case::Case) struct for use in database queries and
-/// the initial ingestion of CSV data.
-// todo: this likely needs to be flattened _completely_, which means bringing target_formula in
-// line with the DB by matching on a String value, rather than expecting an enum (Case can keep an
-// enum)
+/// the initial ingestion of CSV data. Bounds and type checking occur during conversion from
+/// [`FlatCase`] to [`Case`].
 #[derive(Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub struct FlatCase {
     // todo: should Surgeon and Iol details be removed from FlatCase?
+    // A better approach is to use the currently logged-in Surgeon to id the surgeon that will be
+    // linked in the Case.
     pub surgeon_email: Option<String>,
     pub surgeon_first_name: Option<String>,
     pub surgeon_last_name: Option<String>,

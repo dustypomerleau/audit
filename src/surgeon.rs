@@ -1,25 +1,19 @@
 use crate::sia::Sia;
 use serde::{Deserialize, Serialize};
 
+/// A surgeon's default [`Sia`] for right and left eyes
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct SurgeonSia {
     pub right: Sia,
     pub left: Sia,
 }
 
-// In the DB, the Surgeon type will have an SIA for right and left eyes, but we don't need that
-// value here. After hitting the DB, either the value for `FlatCase::sia` will be `None` (in which
-// case we use the surgeon's default value for that side), or it will be `Some()`, in which case
-// that case-specific value will override the surgeon's defaults.
-//
-// In general, we may not need values that are present on the case or as Surgeon defaults in
-// the DB (like `site` can probably be removed here). Consider.
-//
 /// A unique surgeon
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Surgeon {
-    // probably best to validate this as unique and email form at both the form and database levels
-    // - but pulling in the regex crate will probably make your wasm bundle huge
+    // todo: pulling in the regex crate will increase wasm bundle size
+    // consider how best to validate
+    /// A unique, valid email.
     pub email: String,
     pub first_name: Option<String>,
     pub last_name: Option<String>,

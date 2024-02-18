@@ -1,19 +1,22 @@
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-/// A representation of a missing member of a fractional visual acuity, for use by error types.
+/// Required values in a fractional [`Va`]
 #[derive(Debug, PartialEq)]
 pub enum VaPair {
     Numerator,
     Denominator,
 }
 
+/// The error type for an invalid [`Va`]
 #[derive(Debug, Error, PartialEq)]
 pub enum VaBoundsError {
     #[error("Va numerator must be between 0.1 and 20.0. {0} was supplied")]
     Num(f32),
+
     #[error("Va denominator must be > 0. {0} was supplied")]
     Den(f32),
+
     #[error("visual acuity must have both a numerator and a denominator. {0:?} was not supplied.")]
     NoPair(VaPair),
 }
@@ -38,7 +41,7 @@ pub struct Va {
 }
 
 impl Va {
-    /// Creates a new visual acuity with bounds checking.
+    /// Creates a new [`Va`] with bounds checking.
     pub fn new(num: f32, den: f32) -> Result<Self, VaBoundsError> {
         if (0.0..=20.0).contains(&num) && num > 0.0 {
             if den > 0.0 {
@@ -51,6 +54,7 @@ impl Va {
         }
     }
 
+    /// Creates a new [`Va`] from optional values, with bounds checking.
     pub fn try_new(num: Option<f32>, den: Option<f32>) -> Result<Option<Self>, VaBoundsError> {
         match (num, den) {
             (Some(num), Some(den)) => Some(Va::new(num, den)).transpose(),
@@ -71,8 +75,7 @@ pub struct BeforeVaSet {
     pub best_far: FarVa,
 }
 
-/// A collection of visual acuities from after surgery. We use separate structs for
-/// [`BeforeVaSet`]
+/// A collection of visual acuities from after surgery. We use separate structs for [`BeforeVaSet`]
 /// and [`AfterVaSet`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct AfterVaSet {

@@ -2,6 +2,7 @@ use crate::{cyl::Cyl, sca::Sca};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+/// The error type for an invalid [`Refraction`].
 #[derive(Debug, Error, PartialEq)]
 pub enum RefBoundsError {
     #[error(
@@ -15,6 +16,7 @@ pub enum RefBoundsError {
     Cyl(f32),
 }
 
+/// A patient's subjective refraction.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Refraction(pub Sca);
 

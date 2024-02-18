@@ -3,7 +3,7 @@ use polars::prelude::{
 };
 use std::{io::Write, path::Path};
 
-/// A newtype wrapping a String that may be valid JSON.
+/// A newtype wrapping a String that will be parsed as JSON.
 #[derive(Clone, Debug)]
 pub struct WriteString(pub String);
 

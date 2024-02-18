@@ -5,23 +5,21 @@ use crate::cyl::{Cyl, CylPair};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+/// The error type for an invalid [`Sca`].
 #[derive(Debug, Error, PartialEq)]
 pub enum ScaBoundsError {
     #[error("cylinder must have both a power and an axis but the {0:?} was not supplied")]
     NoPair(CylPair),
 
-    // note: this variant is needed, because it gets returned by Cyl::new - maybe we should
-    // just make it an AxisBoundsError? CylBoundsError?
     #[error("cylinder axis must be an integer value between 0° and 179° (supplied value: {0})")]
     Axis(i32),
 }
 
-/// A [`Sca`] contains the sphere and cylinder values to be used in an [`Iol`](crate::iol::Iol),
+/// A [`Sca`] contains the sphere and cylinder values for an [`Iol`](crate::iol::Iol),
 /// [`Refraction`](crate::refraction::Refraction), or [`Target`](crate::target::Target),
 /// but it is a more primitive type, without bounds checking for the sphere or cylinder powers.
-/// [`Sca`] does have bounds checking for [`Axis`](crate::axis::Axis), because the bounds for
-/// this value are always the same. Bounds checking of sphere and cylinder powers is performed
-/// during conversion to the above types.
+/// [`Sca`] does have bounds checking for the contained [`Axis`](crate::axis::Axis), because axes
+/// are always between 0° and 179°.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Sca {
     pub sph: f32,
@@ -32,6 +30,7 @@ pub struct Sca {
 // additional fields (like Iol), and a custom new() if there are additional fields (like
 // Target).
 impl Sca {
+    /// Create a new [`Sca`] from its components. Only the [`axis`](Cyl::axis) is bounds-checked.
     pub fn new(sph: f32, cyl: Option<f32>, axis: Option<i32>) -> Result<Self, ScaBoundsError> {
         match (cyl, axis) {
             (None, None) => Ok(Self { sph, cyl: None }),

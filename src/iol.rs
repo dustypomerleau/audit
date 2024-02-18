@@ -6,8 +6,7 @@ use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-// We don't provide IolBoundsError::Axis(i32), because this error would already be thrown during
-// construction of the wrapped Sca.
+/// The error type for an invalid [`Iol`].
 #[derive(Debug, Error, PartialEq)]
 pub enum IolBoundsError {
     #[error("IOL must always have a spherical equivalent, but `None` was supplied")]
@@ -28,6 +27,7 @@ pub enum IolBoundsError {
     Iol,
 }
 
+/// The class of [`Iol`] (monofocal, EDOF, multifocal)
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub enum Focus {
     Mono,
@@ -35,16 +35,18 @@ pub enum Focus {
     Multi,
 }
 
+/// A specific model of IOL
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Iol {
-    // todo: I would eventually prefer for this to be an enum, with IOL models explicitly
-    // allowlisted.
+    // todo: I would eventually prefer for this to be an enum, with IOL models explicitly allowed.
     pub model: String,
     pub name: String,
     pub focus: Focus,
     pub toric: bool,
 }
 
+/// The IOL for a particular [`Case`](crate::case::Case). Includes both the model and the specific
+/// power chosen for this patient.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpIol {
     /// An optional string, provided by the surgeon, to name/describe the IOL.
@@ -54,6 +56,7 @@ pub struct OpIol {
 }
 
 impl OpIol {
+    /// Create a new [`OpIol`] with bounds checking.
     pub fn new(
         surgeon_label: Option<String>,
         iol: Option<Iol>,

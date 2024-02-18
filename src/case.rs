@@ -19,14 +19,19 @@ use thiserror::Error;
 pub enum BoundsError {
     #[error("IOL bounds error: ({0:?})")]
     Iol(IolBoundsError),
+
     #[error("refraction bounds error: ({0:?})")]
     Ref(RefBoundsError),
+
     #[error("SCA bounds error: ({0:?})")]
     Sca(ScaBoundsError),
+
     #[error("SIA bounds error: ({0:?})")]
     Sia(SiaBoundsError),
+
     #[error("target bounds error: ({0:?})")]
     Target(TargetBoundsError),
+
     #[error("VA bounds error: ({0:?})")]
     Va(VaBoundsError),
 }
@@ -55,8 +60,7 @@ impl From<VaBoundsError> for CaseError {
     fn from(err: VaBoundsError) -> Self { Self::Bounds(BoundsError::Va(err)) }
 }
 
-/// A representation of the required fields for each [`Case`], for use in
-/// [`CaseError::MissingField`].
+/// The required fields for each [`Case`]. Used by [`CaseError::MissingField`].
 #[derive(Debug, PartialEq)]
 pub enum Required {
     Email,
@@ -67,7 +71,7 @@ pub enum Required {
     Refraction,
 }
 
-/// The error type for a [`Case`] with missing mandatory fields or out of bounds values.
+/// The error type for a [`Case`] with missing fields or out of bounds values.
 #[derive(Debug, Error)]
 pub enum CaseError {
     #[error("out of bounds value on a `Case`: {0:?}")]
