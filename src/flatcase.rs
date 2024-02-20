@@ -2,11 +2,10 @@ use crate::{
     case::{Adverse, Case, Side},
     csv::WriteString,
     cyl::Cyl,
-    iol::{Focus, Iol, OpIol},
+    iol::OpIol,
     refraction::{OpRefraction, Refraction},
     sca::Sca,
     sia::Sia,
-    surgeon::{Surgeon, SurgeonSia},
     target::{Constant, Target},
     va::{AfterVaSet, BeforeVaSet, FarVa, NearVa, OpVa, Va},
 };
@@ -40,18 +39,19 @@ impl From<serde_json::error::Error> for FlatCaseError {
 /// [`FlatCase`] to [`Case`].
 #[derive(Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub struct FlatCase {
-    // todo: should Surgeon and Iol details be removed from FlatCase?
-    // A better approach is to use the currently logged-in Surgeon to id the surgeon that will be
-    // linked in the Case.
-    pub surgeon_email: Option<String>,
-    pub surgeon_first_name: Option<String>,
-    pub surgeon_last_name: Option<String>,
-    pub surgeon_site: Option<String>,
-    pub surgeon_sia_right_power: Option<f32>,
-    pub surgeon_sia_right_axis: Option<i32>, // meridian
-    pub surgeon_sia_left_power: Option<f32>,
-    pub surgeon_sia_left_axis: Option<i32>, // meridian
-
+    // // todo: should Surgeon and Iol details be removed from FlatCase?
+    // // you need to determine how you are inserting into the DB - if you can insert from Case
+    // // then you don't need surgeon data here
+    // // A better approach is to use the currently logged-in Surgeon to id the surgeon that will
+    // be // linked in the Case.
+    // pub surgeon_email: Option<String>,
+    // pub surgeon_first_name: Option<String>,
+    // pub surgeon_last_name: Option<String>,
+    // pub surgeon_site: Option<String>,
+    // pub surgeon_sia_right_power: Option<f32>,
+    // pub surgeon_sia_right_axis: Option<i32>, // meridian
+    // pub surgeon_sia_left_power: Option<f32>,
+    // pub surgeon_sia_left_axis: Option<i32>, // meridian
     #[serde(rename = "URN*")]
     pub urn: Option<String>,
     #[serde(rename = "side*")]
@@ -82,10 +82,10 @@ pub struct FlatCase {
 
     #[serde(rename = "IOL model")]
     pub iol_surgeon_label: Option<String>,
-    pub iol_model: Option<String>,
-    pub iol_name: Option<String>,
-    pub iol_focus: Option<String>,
-    pub iol_toric: Option<bool>,
+    // pub iol_model: Option<String>,
+    // pub iol_name: Option<String>,
+    // pub iol_focus: Option<String>,
+    // pub iol_toric: Option<bool>,
     #[serde(rename = "IOL sphere")]
     pub iol_se: Option<f32>,
     #[serde(rename = "IOL cyl")]
@@ -144,15 +144,6 @@ impl FlatCase {
 impl From<Case> for FlatCase {
     fn from(case: Case) -> Self {
         let Case {
-            surgeon:
-                Surgeon {
-                    email: surgeon_email,
-                    first_name: surgeon_first_name,
-                    last_name: surgeon_last_name,
-                    site: surgeon_site,
-                    sia: surgeon_sia,
-                },
-
             urn,
             side,
             target,
@@ -198,34 +189,8 @@ impl From<Case> for FlatCase {
                             cyl: ref_after_cyl,
                         }),
                 },
+            ..
         } = case;
-
-        let (
-            surgeon_sia_right_power,
-            surgeon_sia_right_axis,
-            surgeon_sia_left_power,
-            surgeon_sia_left_axis,
-        ) = match surgeon_sia {
-            Some(SurgeonSia {
-                right:
-                    Sia(Cyl {
-                        power: right_power,
-                        axis: right_axis,
-                    }),
-                left:
-                    Sia(Cyl {
-                        power: left_power,
-                        axis: left_axis,
-                    }),
-            }) => (
-                Some(right_power),
-                Some(right_axis.0),
-                Some(left_power),
-                Some(left_axis.0),
-            ),
-
-            None => (None, None, None, None),
-        };
 
         let side = match side {
             Side::Right => String::from("right"),
@@ -266,40 +231,12 @@ impl From<Case> for FlatCase {
             None => (None, None),
         };
 
-        let (
-            iol_surgeon_label,
-            iol_model,
-            iol_name,
-            iol_focus,
-            iol_toric,
-            iol_se,
-            iol_cyl_power,
-            iol_cyl_axis,
-        ) = match iol {
+        let (iol_surgeon_label, iol_se, iol_cyl_power, iol_cyl_axis) = match iol {
             Some(OpIol {
                 surgeon_label,
-                iol,
                 sca: Sca { sph, cyl },
+                ..
             }) => {
-                let (model, name, focus, toric) = match iol {
-                    Some(Iol {
-                        model,
-                        name,
-                        focus,
-                        toric,
-                    }) => {
-                        let focus = match focus {
-                            Focus::Mono => "mono".to_string(),
-                            Focus::Edof => "edof".to_string(),
-                            Focus::Multi => "multi".to_string(),
-                        };
-
-                        (Some(model), Some(name), Some(focus), Some(toric))
-                    }
-
-                    None => (None, None, None, None),
-                };
-
                 let se = Some(sph);
 
                 let (cyl_power, cyl_axis) = match cyl {
@@ -308,19 +245,10 @@ impl From<Case> for FlatCase {
                     None => (None, None),
                 };
 
-                (
-                    surgeon_label,
-                    model,
-                    name,
-                    focus,
-                    toric,
-                    se,
-                    cyl_power,
-                    cyl_axis,
-                )
+                (surgeon_label, se, cyl_power, cyl_axis)
             }
 
-            None => (None, None, None, None, None, None, None, None),
+            None => (None, None, None, None),
         };
 
         let adverse = if let Some(adverse) = adverse {
@@ -361,14 +289,14 @@ impl From<Case> for FlatCase {
         };
 
         let fc = FlatCase {
-            surgeon_email: Some(surgeon_email),
-            surgeon_first_name,
-            surgeon_last_name,
-            surgeon_site,
-            surgeon_sia_right_power,
-            surgeon_sia_right_axis,
-            surgeon_sia_left_power,
-            surgeon_sia_left_axis,
+            // surgeon_email: Some(surgeon_email),
+            // surgeon_first_name,
+            // surgeon_last_name,
+            // surgeon_site,
+            // surgeon_sia_right_power,
+            // surgeon_sia_right_axis,
+            // surgeon_sia_left_power,
+            // surgeon_sia_left_axis,
             urn: Some(urn),
             side: Some(side),
             target_constant,
@@ -381,10 +309,10 @@ impl From<Case> for FlatCase {
             sia_power,
             sia_axis,
             iol_surgeon_label,
-            iol_model,
-            iol_name,
-            iol_focus,
-            iol_toric,
+            // iol_model,
+            // iol_name,
+            // iol_focus,
+            // iol_toric,
             iol_se,
             iol_cyl_power,
             iol_cyl_axis,

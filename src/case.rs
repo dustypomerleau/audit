@@ -134,6 +134,7 @@ impl TryFrom<FlatCase> for Case {
     // note: We can consume the FlatCase here, because the Case will be used for subsequent DB
     // insertion.
     fn try_from(f: FlatCase) -> Result<Self, Self::Error> {
+        // todo: access a global signal to get these values instead
         let surgeon_sia = match (
             f.surgeon_sia_right_power,
             f.surgeon_sia_right_axis,
