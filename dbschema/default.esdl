@@ -3,6 +3,10 @@
 
 module default {
 
+### globals
+
+required global cur_user: uuid;
+
 ### scalars
 
     scalar type Adverse extending enum<Rhexis, Pc, Zonule, Other>;
