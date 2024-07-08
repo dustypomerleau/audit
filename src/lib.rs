@@ -7,6 +7,7 @@ use cfg_if::cfg_if;
 mod app;
 mod axis;
 mod case;
+mod check;
 mod csv;
 mod cyl;
 mod error_template;

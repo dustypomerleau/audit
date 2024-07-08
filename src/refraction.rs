@@ -1,10 +1,15 @@
-use crate::{cyl::Cyl, sca::Sca};
+use crate::{
+    check::{Checked, Unchecked},
+    cyl::Cyl,
+    sca::Sca,
+};
 use serde::{Deserialize, Serialize};
+use std::marker::PhantomData;
 use thiserror::Error;
 
 /// The error type for an invalid [`Refraction`].
 #[derive(Debug, Error, PartialEq)]
-pub enum RefBoundsError {
+pub enum RefractionBoundsError {
     #[error(
         "refraction spherical power must be a value between -20 D and +20 D (supplied value: {0})"
     )]
@@ -18,38 +23,58 @@ pub enum RefBoundsError {
 
 /// A patient's subjective refraction.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Refraction(pub Sca);
+pub struct Refraction<Bounds = Unchecked> {
+    sph: f32,
+    cyl: Option<Cyl>,
+    bounds: PhantomData<Bounds>,
+}
 
-impl TryFrom<Sca> for Refraction {
-    type Error = RefBoundsError;
+// impl<T: BoundsCheck> Sca for Refraction<T> {}
+// actually you don't use Bounds in any of these functions so maybe it's not needed here?
+// see https://users.rust-lang.org/t/why-do-we-need-to-add-the-generic-type-two-times-after-impl/92928/8
+impl<Bounds> Sca for Refraction<Bounds> {
+    fn sph(&self) -> f32 {
+        self.sph
+    }
 
-    fn try_from(sca: Sca) -> Result<Self, Self::Error> {
-        let Sca { sph, cyl } = sca;
+    fn cyl(&self) -> Option<Cyl> {
+        self.cyl
+    }
+}
 
+impl Refraction<Checked> {}
+
+impl<T: Sca> TryFrom<T> for Refraction<Checked> {
+    type Error = RefractionBoundsError;
+
+    fn try_from(t: T) -> Result<Self, Self::Error> {
+        let (sph, cyl) = (t.sph(), t.cyl());
+
+        // todo: from here on
         if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
-            let sca = match cyl {
+            let cyl = match cyl {
                 Some(Cyl { power, .. }) => {
                     if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
-                        sca
+                        cyl
                     } else {
-                        return Err(RefBoundsError::Cyl(power));
+                        return Err(RefractionBoundsError::Cyl(power));
                     }
                 }
 
-                None => sca,
+                None => None,
             };
 
             Ok(Self(sca))
         } else {
-            Err(RefBoundsError::Sph(sph))
+            Err(RefractionBoundsError::Sph(sph))
         }
     }
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpRefraction {
-    pub before: Refraction,
-    pub after: Refraction,
+    pub before: Refraction<Checked>,
+    pub after: Refraction<Checked>,
 }
 
 #[cfg(test)]
