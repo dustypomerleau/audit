@@ -12,7 +12,6 @@ mod csv;
 mod cyl;
 mod error_template;
 mod fileserv;
-mod flatcase;
 mod handler;
 mod iol;
 mod refraction;
