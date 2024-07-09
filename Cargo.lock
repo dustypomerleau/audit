@@ -148,22 +148,18 @@ name = "audit"
 version = "0.1.0"
 dependencies = [
  "axum",
- "cfg-if",
  "chrono",
  "console_error_panic_hook",
- "console_log",
  "edgedb-derive",
- "edgedb-protocol 0.6.0 (git+https://github.com/edgedb/edgedb-rust)",
+ "edgedb-protocol",
  "edgedb-tokio",
  "http 1.0.0",
  "leptos",
  "leptos_axum",
  "leptos_meta",
  "leptos_router",
- "log",
  "serde",
  "serde_json",
- "simple_logger",
  "thiserror",
  "tokio",
  "tower",
@@ -444,16 +440,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "186dce98367766de751c42c4f03970fc60fc012296e706ccbb9d5df9b6c1e271"
 
 [[package]]
-name = "colored"
-version = "2.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbf2150cce219b664a8a70df7a1f933836724b503f8a413af9365b4dcc4d90b8"
-dependencies = [
- "lazy_static",
- "windows-sys 0.48.0",
-]
-
-[[package]]
 name = "config"
 version = "0.14.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -474,16 +460,6 @@ checksum = "a06aeb73f470f66dcdbf7223caeebb85984942f22f1adb2a088cf9668146bbbc"
 dependencies = [
  "cfg-if",
  "wasm-bindgen",
-]
-
-[[package]]
-name = "console_log"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be8aed40e4edbf4d3b4431ab260b63fdc40f5780a4766824329ea0f1eefe3c0f"
-dependencies = [
- "log",
- "web-sys",
 ]
 
 [[package]]
@@ -611,15 +587,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "deranged"
-version = "0.3.11"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b42b6fa04a440b495c8b04d0e71b707c585f83cb9cb28cf8cd0d976c315e31b4"
-dependencies = [
- "powerfmt",
-]
-
-[[package]]
 name = "derive-where"
 version = "1.2.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -695,14 +662,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "edgedb-errors"
-version = "0.4.1"
-source = "git+https://github.com/edgedb/edgedb-rust#da9c81b7d06586818fa973bf0f91a9a9e99a48e7"
-dependencies = [
- "bytes",
-]
-
-[[package]]
 name = "edgedb-protocol"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -710,20 +669,8 @@ checksum = "dae5508122c974482cb3383bc264ddb79965b6746e26a648b1122d134d917e97"
 dependencies = [
  "bitflags 2.4.2",
  "bytes",
- "edgedb-errors 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "snafu",
- "uuid",
-]
-
-[[package]]
-name = "edgedb-protocol"
-version = "0.6.0"
-source = "git+https://github.com/edgedb/edgedb-rust#da9c81b7d06586818fa973bf0f91a9a9e99a48e7"
-dependencies = [
- "bitflags 2.4.2",
- "bytes",
  "chrono",
- "edgedb-errors 0.4.1 (git+https://github.com/edgedb/edgedb-rust)",
+ "edgedb-errors",
  "snafu",
  "uuid",
 ]
@@ -743,8 +690,8 @@ dependencies = [
  "crc16",
  "dirs",
  "edgedb-derive",
- "edgedb-errors 0.4.1 (registry+https://github.com/rust-lang/crates.io-index)",
- "edgedb-protocol 0.6.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "edgedb-errors",
+ "edgedb-protocol",
  "log",
  "once_cell",
  "rand",
@@ -1716,12 +1663,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num-conv"
-version = "0.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "51d515d32fb182ee37cda2ccdcb92950d6a3c2893aa280e540671c2cd0f3b1d9"
-
-[[package]]
 name = "num-traits"
 version = "0.2.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1737,15 +1678,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4161fcb6d602d4d2081af7c3a45852d875a03dd337a6bfdd6e06407b61342a43"
 dependencies = [
  "hermit-abi 0.3.8",
- "libc",
-]
-
-[[package]]
-name = "num_threads"
-version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c7398b9c8b70908f6371f47ed36737907c87c52af34c268fed0bf0ceb92ead9"
-dependencies = [
  "libc",
 ]
 
@@ -1865,12 +1797,6 @@ name = "pin-utils"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8b870d8c151b6f2fb93e84a13146138f05d02ed11c7e7c54f8826aaaf7c9f184"
-
-[[package]]
-name = "powerfmt"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "439ee305def115ba05938db6eb1644ff94165c5ab5e9420d1c1bcedbba909391"
 
 [[package]]
 name = "ppv-lite86"
@@ -2498,18 +2424,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f27f6278552951f1f2b8cf9da965d10969b2efdea95a6ec47987ab46edfe263a"
 
 [[package]]
-name = "simple_logger"
-version = "4.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e7e46c8c90251d47d08b28b8a419ffb4aede0f87c2eea95e17d1d5bacbf3ef1"
-dependencies = [
- "colored",
- "log",
- "time",
- "windows-sys 0.48.0",
-]
-
-[[package]]
 name = "slab"
 version = "0.4.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2680,39 +2594,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.50",
-]
-
-[[package]]
-name = "time"
-version = "0.3.34"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c8248b6521bb14bc45b4067159b9b6ad792e2d6d754d6c41fb50e29fefe38749"
-dependencies = [
- "deranged",
- "itoa",
- "libc",
- "num-conv",
- "num_threads",
- "powerfmt",
- "serde",
- "time-core",
- "time-macros",
-]
-
-[[package]]
-name = "time-core"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef927ca75afb808a4d64dd374f00a2adf8d0fcff8e7b184af886c3c87ec4a3f3"
-
-[[package]]
-name = "time-macros"
-version = "0.2.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7ba3a3ef41e6672a2f0f001392bb5dcd3ff0a9992d618ca761a11c3121547774"
-dependencies = [
- "num-conv",
- "time-core",
 ]
 
 [[package]]

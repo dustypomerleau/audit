@@ -8,24 +8,20 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 axum = { version = "0.7", optional = true }
-cfg-if = "1"
 chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"
-console_log = "1"
 edgedb-derive = "0.5"
 # temporarily switch to git repo for edgedb-protocol, because chrono feature hasn't been put in a release yet
-# edgedb-protocol = { version = "0.6", features = ["chrono"] }
-edgedb-protocol = { git = "https://github.com/edgedb/edgedb-rust", features = ["chrono"] }
+edgedb-protocol = { version = "0.6", features = ["chrono"] }
+# edgedb-protocol = { git = "https://github.com/edgedb/edgedb-rust", features = ["chrono"] }
 edgedb-tokio = "0.5"
 http = "1"
 leptos = { version = "0.6", features = ["experimental-islands", "nightly", "ssr"] }
 leptos_axum = { version = "0.6", optional = true, features = ["experimental-islands"] }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
-log = "0.4"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-simple_logger = "4"
 thiserror = "1"
 # macros and rt-multi-thread are needed by edgedb-tokio
 tokio = { version = "1", optional = true, features = ["macros", "rt-multi-thread"] }
@@ -90,9 +86,6 @@ end2end-dir = "end2end"
 
 #  The browserlist query used for optimizing the CSS.
 browserquery = "defaults"
-
-# Set by cargo-leptos watch when building with that tool. Controls whether autoreload JS will be included in the head
-watch = false
 
 # The environment Leptos will run in, usually either "DEV" or "PROD"
 env = "DEV"
