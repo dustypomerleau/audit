@@ -30,6 +30,8 @@ pub struct Refraction<Bounds = Unchecked> {
     bounds: PhantomData<Bounds>,
 }
 
+// We implement Default with zeroed cyl rather than None, so that `unwrap_or_default()` can be
+// called in both the `Unchecked` and `Checked` cases. Perhaps we only need it for `Checked`?
 impl<Bounds> Default for Refraction<Bounds> {
     fn default() -> Self {
         Self {
@@ -43,6 +45,7 @@ impl<Bounds> Default for Refraction<Bounds> {
     }
 }
 
+// Reading values is allowed in both the `Unchecked` and `Checked` variants...
 impl<Bounds> Sca for Refraction<Bounds> {
     fn sph(&self) -> f32 {
         self.sph
@@ -53,6 +56,8 @@ impl<Bounds> Sca for Refraction<Bounds> {
     }
 }
 
+// ...but writing to values is only allowed in `Unchecked`, essentially rendering `Checked`
+// immutable once instantiated.
 impl ScaMut for Refraction<Unchecked> {
     fn set_sph(&mut self, sph: f32) -> Self {
         *self.sph = sph;
@@ -73,21 +78,22 @@ impl<T: Sca> TryFrom<T> for Refraction<Checked> {
     fn try_from(t: T) -> Result<Self, Self::Error> {
         let (sph, cyl) = (t.sph(), t.cyl());
 
-        // todo: from here on
         if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
-            let cyl = match cyl {
-                Some(Cyl { power, .. }) => {
-                    if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
-                        cyl
-                    } else {
-                        return Err(RefractionBoundsError::Cyl(power));
-                    }
+            let cyl = if let Some(Cyl { power, .. }) = cyl {
+                if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
+                    cyl
+                } else {
+                    return Err(RefractionBoundsError::Cyl(power));
                 }
-
-                None => None,
+            } else {
+                None
             };
 
-            Ok(Self(sca))
+            Ok(Refraction {
+                sph,
+                cyl,
+                bounds: PhantomData,
+            })
         } else {
             Err(RefractionBoundsError::Sph(sph))
         }
