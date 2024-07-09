@@ -18,5 +18,9 @@ pub enum ScaBoundsError {
 pub trait Sca {
     fn sph(&self) -> f32;
     fn cyl(&self) -> Option<Cyl>;
-    // todo - add methods that mut self and update sph or cyl
+}
+
+pub trait ScaMut {
+    fn set_sph(&mut self, sph: f32) -> Self;
+    fn set_cyl(&mut self, cyl: Cyl) -> Self;
 }

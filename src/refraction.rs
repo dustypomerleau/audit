@@ -1,7 +1,8 @@
 use crate::{
+    axis::Axis,
     check::{Checked, Unchecked},
     cyl::Cyl,
-    sca::Sca,
+    sca::{Sca, ScaMut},
 };
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
@@ -29,9 +30,19 @@ pub struct Refraction<Bounds = Unchecked> {
     bounds: PhantomData<Bounds>,
 }
 
-// impl<T: BoundsCheck> Sca for Refraction<T> {}
-// actually you don't use Bounds in any of these functions so maybe it's not needed here?
-// see https://users.rust-lang.org/t/why-do-we-need-to-add-the-generic-type-two-times-after-impl/92928/8
+impl<Bounds> Default for Refraction<Bounds> {
+    fn default() -> Self {
+        Self {
+            sph: 0,
+            cyl: Some(Cyl {
+                power: 0,
+                axis: Axis(0),
+            }),
+            bounds: PhantomData,
+        }
+    }
+}
+
 impl<Bounds> Sca for Refraction<Bounds> {
     fn sph(&self) -> f32 {
         self.sph
@@ -39,6 +50,18 @@ impl<Bounds> Sca for Refraction<Bounds> {
 
     fn cyl(&self) -> Option<Cyl> {
         self.cyl
+    }
+}
+
+impl ScaMut for Refraction<Unchecked> {
+    fn set_sph(&mut self, sph: f32) -> Self {
+        *self.sph = sph;
+        self
+    }
+
+    fn set_cyl(&mut self, cyl: Cyl) -> Self {
+        *self.cyl = Some(cyl);
+        self
     }
 }
 

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 /// biometric Ks, but on balance I've decided that the cognitive overhead of using both terms in the
 /// code is higher than the cognitive overhead of knowing when `axis` actually refers to a
 /// meridian.
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Axis(pub i32);
 
 impl Axis {
