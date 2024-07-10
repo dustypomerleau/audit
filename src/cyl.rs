@@ -21,7 +21,7 @@ pub struct Cyl {
 impl Default for Cyl {
     fn default() -> Self {
         Cyl {
-            power: 0,
+            power: 0.0,
             axis: Axis(0),
         }
     }

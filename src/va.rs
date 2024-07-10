@@ -21,10 +21,6 @@ pub enum VaBoundsError {
     NoPair(VaPair),
 }
 
-/// A wrapper type, to ensure that far visual acuities are only compared to other far acuities.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct FarVa(pub Va);
-
 /// A wrapper type, to ensure that near visual acuities are only compared to other near acuities.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct NearVa(pub Va);
@@ -34,6 +30,8 @@ pub struct NearVa(pub Va);
 ///
 /// The type of vision chart is left to the surgeon's discretion, but is presumed to be a Snellen,
 /// ETDRS, or similar chart that provides fractional equivalents.
+///
+/// The [`Va`] is assumed to be a distance visual acuity, unless wrapped by [`NearVa`].
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Va {
     pub num: f32,
@@ -72,15 +70,15 @@ impl Va {
 /// and [`AfterVaSet`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct BeforeVaSet {
-    pub best_far: FarVa,
+    pub best_far: Va,
 }
 
 /// A collection of visual acuities from after surgery. We use separate structs for [`BeforeVaSet`]
 /// and [`AfterVaSet`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct AfterVaSet {
-    pub best_far: Option<FarVa>,
-    pub raw_far: FarVa,
+    pub best_far: Option<Va>,
+    pub raw_far: Va,
     pub raw_near: Option<NearVa>,
 }
 

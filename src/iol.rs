@@ -103,14 +103,14 @@ impl<Bounds> Sca for OpIol<Bounds> {
 }
 
 impl ScaMut for OpIol<Unchecked> {
-    fn set_sph(&mut self, sph: f32) -> Self {
-        *self.se = sph;
-        *self
+    fn set_sph(mut self, sph: f32) -> Self {
+        self.se = sph;
+        self
     }
 
-    fn set_cyl(&mut self, cyl: Cyl) -> Self {
-        *self.cyl = cyl;
-        *self
+    fn set_cyl(mut self, cyl: Option<Cyl>) -> Self {
+        self.cyl = cyl;
+        self
     }
 }
 
