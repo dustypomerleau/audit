@@ -29,13 +29,35 @@ pub struct RawSca {
     pub cyl: Option<Cyl>,
 }
 
+impl Sca for RawSca {
+    fn sph(&self) -> f32 {
+        self.sph
+    }
+
+    fn cyl(&self) -> Option<Cyl> {
+        self.cyl
+    }
+}
+
+impl ScaMut for RawSca {
+    fn set_sph(mut self, sph: f32) -> Self {
+        self.sph = sph;
+        self
+    }
+
+    fn set_cyl(mut self, cyl: Option<Cyl>) -> Self {
+        self.cyl = cyl;
+        self
+    }
+}
+
 impl RawSca {
     pub fn new(sph: f32, power: Option<f32>, axis: Option<i32>) -> Result<Self, ScaBoundsError> {
         let cyl = match (power, axis) {
             (Some(power), Some(axis)) => Some(Cyl::new(power, axis)?),
             (None, None) => None,
-            (Some(_cyl), _) => return Err(ScaBoundsError::NoPair(CylPair::Axis)),
-            (_, Some(_axis)) => return Err(ScaBoundsError::NoPair(CylPair::Power)),
+            (_, None) => return Err(ScaBoundsError::NoPair(CylPair::Axis)),
+            (None, _) => return Err(ScaBoundsError::NoPair(CylPair::Power)),
         };
 
         Ok(Self { sph, cyl })

@@ -1,7 +1,7 @@
 use crate::{
     check::{BoundsCheck, Checked, Unchecked},
     cyl::{Cyl, CylPair},
-    sca::{Sca, ScaMut},
+    sca::{RawSca, Sca, ScaMut},
 };
 use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
@@ -66,18 +66,21 @@ impl BoundsCheck for OpIol<Unchecked> {
     fn check(self) -> Result<Self::Output, Self::Error> {
         let OpIol { se, cyl, .. } = self;
 
-        if (-20.0..=60.0).contains(&se) && se % 0.25 == 0.0 {
-            let _ = if let Some(Cyl { power, .. }) = cyl {
-                if (1.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
-                } else {
-                    return Err(IolBoundsError::Cyl(power));
-                }
-            };
+        let checked = OpIol::<Checked> {
+            bounds: PhantomData,
+            ..self
+        };
 
-            Ok(OpIol::<Checked> {
-                bounds: PhantomData,
-                ..self
-            })
+        if (-20.0..=60.0).contains(&se) && se % 0.25 == 0.0 {
+            if let Some(Cyl { power, .. }) = cyl {
+                if (1.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
+                    Ok(checked)
+                } else {
+                    Err(IolBoundsError::Cyl(power))
+                }
+            } else {
+                Ok(checked)
+            }
         } else {
             Err(IolBoundsError::Se(se))
         }
@@ -103,6 +106,18 @@ impl ScaMut for OpIol<Unchecked> {
     fn set_cyl(mut self, cyl: Option<Cyl>) -> Self {
         self.cyl = cyl;
         self
+    }
+}
+
+impl OpIol<Unchecked> {
+    pub fn new<T: Sca>(surgeon_label: Option<String>, iol: Option<Iol>, sca: T) -> Self {
+        Self {
+            surgeon_label,
+            iol,
+            se: sca.sph(),
+            cyl: sca.cyl(),
+            bounds: PhantomData,
+        }
     }
 }
 
