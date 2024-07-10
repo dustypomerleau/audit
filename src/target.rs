@@ -139,7 +139,7 @@ impl BoundsCheck for Target<Unchecked> {
     type Error = TargetBoundsError;
     type Output = Target<Checked>;
 
-    fn check(&self) -> Result<Self::Output, Self::Error> {
+    fn check(self) -> Result<Self::Output, Self::Error> {
         let (se, cyl) = (self.sph(), self.cyl());
 
         if (-6.0..=2.0).contains(&se) {
