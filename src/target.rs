@@ -140,7 +140,9 @@ impl BoundsCheck for Target<Unchecked> {
     type Output = Target<Checked>;
 
     fn check(self) -> Result<Self::Output, Self::Error> {
-        let (se, cyl) = (self.sph(), self.cyl());
+        let Target {
+            constant, se, cyl, ..
+        } = self;
 
         if (-6.0..=2.0).contains(&se) {
             let cyl = if let Some(Cyl { power, .. }) = cyl {
@@ -154,8 +156,10 @@ impl BoundsCheck for Target<Unchecked> {
             };
 
             Ok(Target::<Checked> {
+                constant,
+                se,
+                cyl,
                 bounds: PhantomData,
-                ..self
             })
         } else {
             Err(TargetBoundsError::Se(se))
