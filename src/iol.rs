@@ -69,7 +69,6 @@ impl BoundsCheck for OpIol<Unchecked> {
         if (-20.0..=60.0).contains(&se) && se % 0.25 == 0.0 {
             let _ = if let Some(Cyl { power, .. }) = cyl {
                 if (1.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
-                    ()
                 } else {
                     return Err(IolBoundsError::Cyl(power));
                 }

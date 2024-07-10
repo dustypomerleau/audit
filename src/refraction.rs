@@ -50,7 +50,6 @@ impl BoundsCheck for Refraction<Unchecked> {
         if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
             let _ = if let Some(Cyl { power, .. }) = cyl {
                 if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
-                    ()
                 } else {
                     return Err(RefractionBoundsError::Cyl(power));
                 }
