@@ -24,6 +24,7 @@ pub trait ScaMut {
     fn set_cyl(self, cyl: Option<Cyl>) -> Self;
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct RawSca {
     pub sph: f32,
     pub cyl: Option<Cyl>,

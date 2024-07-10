@@ -155,18 +155,10 @@ mod tests {
     fn out_of_bounds_iol_se_returns_err() {
         // todo: randomize the out of bounds values on all failing tests
         // (Axis, Cyl, Iol, Refraction, Sca, Sia, Target, Va)
-        let se = 100.25;
-        let iol = iol();
-        let cyl = Cyl::new(3.0, 12).unwrap();
-        let opiol = OpIol {
-            surgeon_label: None,
-            iol,
-            se,
-            cyl: Some(cyl),
-            bounds: PhantomData,
-        };
+        let sca = RawSca::new(100.25, Some(3.0), Some(12)).unwrap();
+        let check = OpIol::new(None, iol(), sca).check();
 
-        assert_eq!(opiol.check(), Err(IolBoundsError::Se(se)))
+        assert_eq!(check, Err(IolBoundsError::Se(sca.sph())))
     }
 
     #[test]
