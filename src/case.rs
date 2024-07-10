@@ -1,12 +1,11 @@
 use crate::{
-    cyl::{Cyl, CylPair},
-    iol::{Focus, Iol, IolBoundsError, OpIol},
-    refraction::{OpRefraction, Refraction, RefractionBoundsError},
-    sca::{Sca, ScaBoundsError},
+    iol::{IolBoundsError, OpIol},
+    refraction::{OpRefraction, RefractionBoundsError},
+    sca::ScaBoundsError,
     sia::{Sia, SiaBoundsError},
-    surgeon::{Surgeon, SurgeonSia},
-    target::{Constant, ConstantPair, Formula, Target, TargetBoundsError},
-    va::{AfterVaSet, BeforeVaSet, FarVa, NearVa, OpVa, Va, VaBoundsError},
+    surgeon::Surgeon,
+    target::{Target, TargetBoundsError},
+    va::{OpVa, VaBoundsError},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;

@@ -11,7 +11,7 @@ pub enum CylPair {
 /// An agnostic cylinder type. The acceptable bounds of [`power`](Cyl::power) depend on the
 /// type of power being represented. Since the acceptable values of [`axis`](Cyl::axis) are always
 /// the same, we insist upon an [`Axis`](crate::axis::Axis) to constrain it.
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Cyl {
     pub power: f32,
     pub axis: Axis,

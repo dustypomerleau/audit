@@ -2,7 +2,6 @@
 // https://stackoverflow.com/questions/54504026/how-do-i-provide-an-implementation-of-a-generic-struct-in-rust
 
 use crate::cyl::{Cyl, CylPair};
-use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 /// The error type for an invalid [`Sca`].
@@ -21,6 +20,6 @@ pub trait Sca {
 }
 
 pub trait ScaMut {
-    fn set_sph(mut self, sph: f32) -> Self;
-    fn set_cyl(mut self, cyl: Option<Cyl>) -> Self;
+    fn set_sph(self, sph: f32) -> Self;
+    fn set_cyl(self, cyl: Option<Cyl>) -> Self;
 }

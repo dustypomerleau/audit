@@ -1,7 +1,7 @@
 use crate::{
     check::BoundsCheck,
     cyl::{Cyl, CylPair},
-    sca::{Sca, ScaBoundsError, ScaMut},
+    sca::{Sca, ScaMut},
 };
 use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};

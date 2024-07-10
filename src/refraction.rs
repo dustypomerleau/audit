@@ -1,5 +1,4 @@
 use crate::{
-    axis::Axis,
     check::{BoundsCheck, Checked, Unchecked},
     cyl::Cyl,
     sca::{Sca, ScaMut},

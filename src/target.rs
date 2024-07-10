@@ -1,5 +1,5 @@
 use crate::{
-    check::{BoundsCheck, Unchecked},
+    check::{BoundsCheck, Checked, Unchecked},
     cyl::Cyl,
     sca::{Sca, ScaMut},
 };
@@ -153,8 +153,10 @@ impl BoundsCheck for Target<Unchecked> {
                 None
             };
 
-            // no idea if this will work, coercing Self<Unchecked> to Self<Checked>
-            Ok(self)
+            Ok(Target::<Checked> {
+                bounds: PhantomData,
+                ..self
+            })
         } else {
             Err(TargetBoundsError::Se(se))
         }
@@ -174,13 +176,13 @@ impl ScaMut for Target<Unchecked> {
 }
 
 impl Target<Unchecked> {
-    /// Create a new [`Target`] with bounds checking.
+    /// Create a new [`Target`] without bounds checking.
     pub fn new(constant: Option<Constant>, se: f32, cyl: Option<Cyl>) -> Self {
         Self {
             constant,
             se,
             cyl,
-            bounds,
+            bounds: PhantomData,
         }
     }
 }
