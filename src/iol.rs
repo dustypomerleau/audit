@@ -1,5 +1,5 @@
 use crate::{
-    check::BoundsCheck,
+    check::{BoundsCheck, Checked, Unchecked},
     cyl::{Cyl, CylPair},
     sca::{Sca, ScaMut},
 };
@@ -63,28 +63,21 @@ impl BoundsCheck for OpIol<Unchecked> {
     type Error = IolBoundsError;
     type Output = OpIol<Checked>;
 
-    fn check(&self) -> Result<Self::Output, Self::Error> {
-        // you may need to disambiguate with <self as Sca>::cyl()
-        let (se, cyl) = (self.sph(), self.cyl());
+    fn check(self) -> Result<Self::Output, Self::Error> {
+        let OpIol { se, cyl, .. } = self;
 
         if (-20.0..=60.0).contains(&se) && se % 0.25 == 0.0 {
-            let cyl = if let Some(Cyl { power, .. }) = cyl {
+            let _ = if let Some(Cyl { power, .. }) = cyl {
                 if (1.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
-                    cyl
+                    ()
                 } else {
                     return Err(IolBoundsError::Cyl(power));
                 }
-            } else {
-                None
             };
 
-            // todo: fix this - you don't have these vars
-            Ok(Self {
-                surgeon_label,
-                iol,
-                se,
-                cyl,
+            Ok(OpIol::<Checked> {
                 bounds: PhantomData,
+                ..self
             })
         } else {
             Err(IolBoundsError::Se(sph))

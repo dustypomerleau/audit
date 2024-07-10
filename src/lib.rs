@@ -1,3 +1,7 @@
+// Allows using existing fields to change from MyType<Zst1> to MyType<Zst2> without
+// repeating all of them.
+#![feature(type_changing_struct_update)]
+
 // for rust analyzer support only, not part of the crate
 mod refs;
 // mod trash;

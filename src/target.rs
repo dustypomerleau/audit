@@ -140,7 +140,7 @@ impl BoundsCheck for Target<Unchecked> {
     type Output = Target<Checked>;
 
     fn check(self) -> Result<Self::Output, Self::Error> {
-        let Target {
+        let Self {
             constant, se, cyl, ..
         } = self;
 

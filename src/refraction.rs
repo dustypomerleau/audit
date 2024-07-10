@@ -44,24 +44,21 @@ impl BoundsCheck for Refraction<Unchecked> {
     type Error = RefractionBoundsError;
     type Output = Refraction<Checked>;
 
-    fn check(&self) -> Result<Self::Output, Self::Error> {
-        let (sph, cyl) = (self.sph(), self.cyl());
+    fn check(self) -> Result<Self::Output, Self::Error> {
+        let Self { sph, cyl, .. } = self;
 
         if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
-            let cyl = if let Some(Cyl { power, .. }) = cyl {
+            let _ = if let Some(Cyl { power, .. }) = cyl {
                 if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
-                    cyl
+                    ()
                 } else {
                     return Err(RefractionBoundsError::Cyl(power));
                 }
-            } else {
-                None
             };
 
-            Ok(Refraction {
-                sph,
-                cyl,
+            Ok(Refraction::<Checked> {
                 bounds: PhantomData,
+                ..self
             })
         } else {
             Err(RefractionBoundsError::Sph(sph))
