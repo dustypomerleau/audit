@@ -1,5 +1,10 @@
-use crate::{cyl::Cyl, sca::Sca};
+use crate::{
+    check::{BoundsCheck, Unchecked},
+    cyl::Cyl,
+    sca::{Sca, ScaMut},
+};
 use serde::{Deserialize, Serialize};
+use std::marker::PhantomData;
 use thiserror::Error;
 
 /// The error type for an invalid [`Target`]
@@ -113,32 +118,69 @@ pub struct Constant {
 
 /// The residual postop refraction for a case, assuming the provided formula and IOL constant.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Target {
+pub struct Target<Bounds = Unchecked> {
     pub constant: Option<Constant>,
-    pub sca: Sca,
+    pub se: f32,
+    pub cyl: Option<Cyl>,
+    pub bounds: PhantomData<Bounds>,
 }
 
-impl Target {
-    /// Create a new [`Target`] with bounds checking.
-    pub fn new(constant: Option<Constant>, sca: Sca) -> Result<Self, TargetBoundsError> {
-        let Sca { sph, cyl } = sca;
+impl<Bounds> Sca for Target<Bounds> {
+    fn sph(&self) -> f32 {
+        self.se
+    }
 
-        if (-6.0..=2.0).contains(&sph) {
-            let sca = match cyl {
-                Some(Cyl { power, .. }) => {
-                    if (0.0..=6.0).contains(&power) {
-                        sca
-                    } else {
-                        return Err(TargetBoundsError::Cyl(power));
-                    }
+    fn cyl(&self) -> Option<Cyl> {
+        self.cyl
+    }
+}
+
+impl BoundsCheck for Target<Unchecked> {
+    type Error = TargetBoundsError;
+    type Output = Target<Checked>;
+
+    fn check(&self) -> Result<Self::Output, Self::Error> {
+        let (se, cyl) = (self.sph(), self.cyl());
+
+        if (-6.0..=2.0).contains(&se) {
+            let cyl = if let Some(Cyl { power, .. }) = cyl {
+                if (0.0..=6.0).contains(&power) {
+                    cyl
+                } else {
+                    return Err(TargetBoundsError::Cyl(power));
                 }
-
-                None => sca,
+            } else {
+                None
             };
 
-            Ok(Self { constant, sca })
+            // no idea if this will work, coercing Self<Unchecked> to Self<Checked>
+            Ok(self)
         } else {
-            Err(TargetBoundsError::Se(sph))
+            Err(TargetBoundsError::Se(se))
+        }
+    }
+}
+
+impl ScaMut for Target<Unchecked> {
+    fn set_sph(mut self, sph: f32) -> Self {
+        self.se = sph;
+        self
+    }
+
+    fn set_cyl(mut self, cyl: Option<Cyl>) -> Self {
+        self.cyl = cyl;
+        self
+    }
+}
+
+impl Target<Unchecked> {
+    /// Create a new [`Target`] with bounds checking.
+    pub fn new(constant: Option<Constant>, se: f32, cyl: Option<Cyl>) -> Self {
+        Self {
+            constant,
+            se,
+            cyl,
+            bounds,
         }
     }
 }
@@ -147,7 +189,7 @@ impl Target {
 mod tests {
     use super::*;
 
-    // todo: replace with a randomized TargetFormula using Mock
+    // todo: replace with a randomized TargetFormula using Mock(all)
     fn iol_constant() -> Option<Constant> {
         Some(Constant {
             value: 119.36,
@@ -172,29 +214,35 @@ mod tests {
 
     #[test]
     fn makes_new_target() {
-        let constant = iol_constant();
-        let sca = Sca::new(-0.15, Some(0.22), Some(82)).unwrap();
-        let target = Target::new(constant, sca).unwrap();
+        let target = Target::new(
+            Some(iol_constant()),
+            -0.15,
+            Some(Cyl {
+                power: 0.22,
+                axis: Axis(82),
+            }),
+        )
+        .check();
 
-        assert_eq!(target, Target { constant, sca })
+        println!(std::any::type_name(target));
     }
 
     #[test]
     fn out_of_bounds_target_se_returns_err() {
-        let se = -12.5;
         let constant = iol_constant();
-        let sca = Sca::new(se, Some(0.22), Some(82)).unwrap();
-        let target = Target::new(constant, sca);
+        let se = -12.5;
+        let cyl = Cyl::new(0.22, 82);
+        let target = Target::new(constant, se, cyl);
 
         assert_eq!(target, Err(TargetBoundsError::Se(se)))
     }
 
     #[test]
     fn out_of_bounds_target_cyl_power_returns_err() {
-        let cyl = 7.1;
         let constant = iol_constant();
-        let sca = Sca::new(-0.24, Some(cyl), Some(82)).unwrap();
-        let target = Target::new(constant, sca);
+        let se = -12.5;
+        let cyl = Cyl::new(7.1, 82);
+        let target = Target::new(constant, se, cyl);
 
         assert_eq!(target, Err(TargetBoundsError::Cyl(cyl)))
     }

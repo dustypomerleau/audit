@@ -1,6 +1,6 @@
 use crate::{
     axis::Axis,
-    check::{Checked, Unchecked},
+    check::{BoundsCheck, Checked, Unchecked},
     cyl::Cyl,
     sca::{Sca, ScaMut},
 };
@@ -30,21 +30,6 @@ pub struct Refraction<Bounds = Unchecked> {
     bounds: PhantomData<Bounds>,
 }
 
-// We implement Default with zeroed cyl rather than None, so that `unwrap_or_default()` can be
-// called in both the `Unchecked` and `Checked` cases. Perhaps we only need it for `Checked`?
-impl<Bounds> Default for Refraction<Bounds> {
-    fn default() -> Self {
-        Self {
-            sph: 0,
-            cyl: Some(Cyl {
-                power: 0,
-                axis: Axis(0),
-            }),
-            bounds: PhantomData,
-        }
-    }
-}
-
 // Reading values is allowed in both the `Unchecked` and `Checked` variants...
 impl<Bounds> Sca for Refraction<Bounds> {
     fn sph(&self) -> f32 {
@@ -56,27 +41,12 @@ impl<Bounds> Sca for Refraction<Bounds> {
     }
 }
 
-// ...but writing to values is only allowed in `Unchecked`, essentially rendering `Checked`
-// immutable once instantiated.
-impl ScaMut for Refraction<Unchecked> {
-    fn set_sph(&mut self, sph: f32) -> Self {
-        *self.sph = sph;
-        self
-    }
-
-    fn set_cyl(&mut self, cyl: Cyl) -> Self {
-        *self.cyl = Some(cyl);
-        self
-    }
-}
-
-impl Refraction<Checked> {}
-
-impl<T: Sca> TryFrom<T> for Refraction<Checked> {
+impl BoundsCheck for Refraction<Unchecked> {
     type Error = RefractionBoundsError;
+    type Output = Refraction<Checked>;
 
-    fn try_from(t: T) -> Result<Self, Self::Error> {
-        let (sph, cyl) = (t.sph(), t.cyl());
+    fn check(&self) -> Result<Self::Output, Self::Error> {
+        let (sph, cyl) = (self.sph(), self.cyl());
 
         if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
             let cyl = if let Some(Cyl { power, .. }) = cyl {
@@ -100,6 +70,40 @@ impl<T: Sca> TryFrom<T> for Refraction<Checked> {
     }
 }
 
+// ...but writing to values is only allowed in `Unchecked`, essentially rendering `Checked`
+// immutable once instantiated.
+impl ScaMut for Refraction<Unchecked> {
+    fn set_sph(mut self, sph: f32) -> Self {
+        self.sph = sph;
+        self
+    }
+
+    fn set_cyl(mut self, cyl: Option<Cyl>) -> Self {
+        self.cyl = cyl;
+        self
+    }
+}
+
+impl Refraction<Unchecked> {
+    pub fn new(sph: f32, cyl: Option<Cyl>) -> Self {
+        Refraction {
+            sph,
+            cyl,
+            bounds: PhantomData,
+        }
+    }
+}
+
+impl TryFrom<Refraction<Unchecked>> for Refraction<Checked> {
+    type Error = RefractionBoundsError;
+
+    fn try_from(value: Refraction<Unchecked>) -> Result<Self, Self::Error> {
+        value.check()
+    }
+}
+
+impl Refraction<Checked> {}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpRefraction {
     pub before: Refraction<Checked>,
@@ -113,21 +117,29 @@ mod tests {
 
     #[test]
     fn refraction_implements_try_from_sca() {
-        let refraction: Refraction = Sca::new(-3.25, Some(-0.75), Some(100))
-            .unwrap()
-            .try_into()
-            .unwrap();
+        let unchecked: Refraction<Unchecked> = Refraction {
+            sph: -3.25,
+            cyl: Some(Cyl {
+                power: -0.75,
+                axis: Axis(100),
+            }),
+            bounds: PhantomData,
+        };
 
-        assert_eq!(
-            refraction,
-            Refraction(Sca {
-                sph: -3.25,
-                cyl: Some(Cyl {
-                    power: -0.75,
-                    axis: Axis(100)
-                })
-            })
-        )
+        let test = unchecked.try_into::<Refraction<Checked>>().unwrap();
+
+        let output: Refraction<Checked> = unchecked.try_into().unwrap();
+
+        let expected: Refraction<Checked> = Refraction {
+            sph: -3.25,
+            cyl: Some(Cyl {
+                power: -0.75,
+                axis: Axis(100),
+            }),
+            bounds: PhantomData,
+        };
+
+        assert_eq!(output, expected);
     }
 
     #[test]

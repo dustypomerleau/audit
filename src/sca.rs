@@ -21,6 +21,6 @@ pub trait Sca {
 }
 
 pub trait ScaMut {
-    fn set_sph(&mut self, sph: f32) -> Self;
-    fn set_cyl(&mut self, cyl: Cyl) -> Self;
+    fn set_sph(mut self, sph: f32) -> Self;
+    fn set_cyl(mut self, cyl: Option<Cyl>) -> Self;
 }

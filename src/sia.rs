@@ -1,4 +1,4 @@
-use crate::cyl::Cyl;
+use crate::{axis::Axis, cyl::Cyl};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -11,16 +11,17 @@ pub enum SiaBoundsError {
 
 /// A surgically-induced astigmatism.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct Sia(pub Cyl);
+pub struct Sia {
+    power: f32,
+    axis: Axis,
+}
 
-impl TryFrom<Cyl> for Sia {
-    type Error = SiaBoundsError;
-
-    fn try_from(cyl: Cyl) -> Result<Self, Self::Error> {
-        if (0.0..=2.0).contains(&cyl.power) {
-            Ok(Self(cyl))
+impl Sia {
+    pub fn new(power: f32, axis: Axis) -> Result<Self, SiaBoundsError> {
+        if (0.0..=2.0).contains(&power) {
+            Ok(Self { power, axis })
         } else {
-            Err(SiaBoundsError::Sia(cyl.power))
+            Err(SiaBoundsError::Sia(power))
         }
     }
 }
@@ -31,22 +32,9 @@ mod tests {
     use crate::axis::Axis;
 
     #[test]
-    fn sia_implements_try_from_cyl() {
-        let sia: Sia = Cyl::new(0.1, 100).unwrap().try_into().unwrap();
-
-        assert_eq!(
-            sia,
-            Sia(Cyl {
-                power: 0.1,
-                axis: Axis(100)
-            })
-        )
-    }
-
-    #[test]
     fn out_of_bounds_sia_power_returns_err() {
         let power = 2.1;
-        let sia: Result<Sia, SiaBoundsError> = Cyl::new(power, 100).unwrap().try_into();
+        let sia = Sia::new(power, Axis(100));
 
         assert_eq!(sia, Err(SiaBoundsError::Sia(power)))
     }

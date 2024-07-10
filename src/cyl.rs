@@ -17,6 +17,16 @@ pub struct Cyl {
     pub axis: Axis,
 }
 
+// When we call `unwrap_or_default()`, we always want a value, so replace None with 0s.
+impl Default for Cyl {
+    fn default() -> Self {
+        Cyl {
+            power: 0,
+            axis: Axis(0),
+        }
+    }
+}
+
 impl Cyl {
     /// Create a new [`Cyl`], with bounds checking on the [`axis`](Cyl::axis). The
     /// [`power`](Cyl::power) is unconstrained until the [`Cyl`] is wrapped by a more specific
