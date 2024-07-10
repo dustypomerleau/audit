@@ -156,9 +156,9 @@ mod tests {
         // todo: randomize the out of bounds values on all failing tests
         // (Axis, Cyl, Iol, Refraction, Sca, Sia, Target, Va)
         let sca = RawSca::new(100.25, Some(3.0), Some(12)).unwrap();
-        let check = OpIol::new(None, iol(), sca).check();
+        let checked = OpIol::new(None, iol(), sca).check();
 
-        assert_eq!(check, Err(IolBoundsError::Se(sca.sph())))
+        assert_eq!(checked, Err(IolBoundsError::Se(sca.sph())))
     }
 
     #[test]
