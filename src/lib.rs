@@ -4,9 +4,6 @@
 
 // for rust analyzer support only, not part of the crate
 mod refs;
-// mod trash;
-
-use cfg_if::cfg_if;
 
 mod app;
 mod axis;
@@ -24,20 +21,10 @@ mod surgeon;
 mod target;
 mod va;
 
-cfg_if! { if #[cfg(feature = "hydrate")] {
+#[cfg(feature = "hydrate")]
+#[wasm_bindgen::prelude::wasm_bindgen]
+pub fn hydrate() {
     use crate::app::App;
-    use leptos::mount_to_body;
-    use wasm_bindgen::prelude::wasm_bindgen;
-
-    #[wasm_bindgen]
-    pub fn hydrate() {
-        // initializes logging using the `log` crate
-        _ = console_log::init_with_level(log::Level::Debug);
-        console_error_panic_hook::set_once();
-
-        // commented out to try islands architecture:
-        // leptos::mount_to_body(App);
-        // added in to replace above in islands architecture:
-        leptos::leptos_dom::HydrationCtx::stop_hydrating();
-    }
-}}
+    console_error_panic_hook::set_once();
+    leptos::mount_to_body(App);
+}

@@ -79,7 +79,7 @@ impl BoundsCheck for OpIol<Unchecked> {
                 ..self
             })
         } else {
-            Err(IolBoundsError::Se(sph))
+            Err(IolBoundsError::Se(se))
         }
     }
 }
@@ -110,7 +110,7 @@ impl ScaMut for OpIol<Unchecked> {
 mod tests {
     use super::*;
 
-    // todo: replace this function with an implementation of Mock
+    // todo: replace this function with an implementation of Mock(all)
     fn iol() -> Option<Iol> {
         Some(Iol {
             model: "ZXTxxx".to_string(),
@@ -142,10 +142,16 @@ mod tests {
         // (Axis, Cyl, Iol, Refraction, Sca, Sia, Target, Va)
         let se = 100.25;
         let iol = iol();
-        let sca = Sca::new(se, Some(3.0), Some(12)).unwrap();
-        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca);
+        let cyl = Cyl::new(3.0, 12).unwrap();
+        let opiol = OpIol {
+            surgeon_label: None,
+            iol,
+            se,
+            cyl: Some(cyl),
+            bounds: PhantomData,
+        };
 
-        assert_eq!(opiol, Err(IolBoundsError::Se(se)))
+        assert_eq!(opiol.check(), Err(IolBoundsError::Se(se)))
     }
 
     #[test]
