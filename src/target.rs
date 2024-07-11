@@ -136,10 +136,10 @@ impl<Bounds> Sca for Target<Bounds> {
 }
 
 impl BoundsCheck for Target<Unchecked> {
+    type CheckedOutput = Target<Checked>;
     type Error = TargetBoundsError;
-    type Output = Target<Checked>;
 
-    fn check(self) -> Result<Self::Output, Self::Error> {
+    fn check(self) -> Result<Self::CheckedOutput, Self::Error> {
         let Self {
             constant, se, cyl, ..
         } = self;

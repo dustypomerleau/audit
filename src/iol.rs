@@ -1,7 +1,7 @@
 use crate::{
     check::{BoundsCheck, Checked, Unchecked},
     cyl::{Cyl, CylPair},
-    sca::{RawSca, Sca, ScaMut},
+    sca::{Sca, ScaMut},
 };
 use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
@@ -60,10 +60,10 @@ pub struct OpIol<Bounds = Unchecked> {
 }
 
 impl BoundsCheck for OpIol<Unchecked> {
+    type CheckedOutput = OpIol<Checked>;
     type Error = IolBoundsError;
-    type Output = OpIol<Checked>;
 
-    fn check(self) -> Result<Self::Output, Self::Error> {
+    fn check(self) -> Result<Self::CheckedOutput, Self::Error> {
         let OpIol { se, cyl, .. } = self;
 
         let checked = OpIol::<Checked> {
@@ -124,6 +124,7 @@ impl OpIol<Unchecked> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::{axis::Axis, sca::RawSca};
 
     // todo: replace this function with an implementation of Mock(all)
     fn iol() -> Option<Iol> {
@@ -137,18 +138,22 @@ mod tests {
 
     #[test]
     fn makes_new_opiol() {
-        // let iol = iol();
-        // let sca = Sca::new(24.25, Some(3.0), Some(12)).unwrap();
-        // let opiol = OpIol::new(Some("sn60wf".to_string()), iol.clone(), sca).unwrap();
-        //
-        // assert_eq!(
-        //     opiol,
-        //     OpIol {
-        //         surgeon_label: Some("sn60wf".to_string()),
-        //         iol,
-        //         sca
-        //     }
-        // )
+        let sca = RawSca::new(24.25, Some(3.0), Some(12)).unwrap();
+        let checked = OpIol::new(None, iol(), sca).check().unwrap();
+
+        assert_eq!(
+            checked,
+            OpIol::<Checked> {
+                surgeon_label: None,
+                iol: iol(),
+                se: 24.25,
+                cyl: Some(Cyl {
+                    power: 3.0,
+                    axis: Axis(12)
+                }),
+                bounds: PhantomData
+            }
+        );
     }
 
     #[test]
@@ -163,30 +168,26 @@ mod tests {
 
     #[test]
     fn nonzero_rem_iol_se_returns_err() {
-        let se = 10.35;
-        let iol = iol();
-        let sca = Sca::new(se, Some(3.0), Some(12)).unwrap();
-        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca);
+        let sca = RawSca::new(10.35, Some(3.0), Some(12)).unwrap();
+        let opiol = OpIol::new(None, iol(), sca).check();
 
-        assert_eq!(opiol, Err(IolBoundsError::Se(se)))
+        assert_eq!(opiol, Err(IolBoundsError::Se(sca.sph())))
     }
 
     #[test]
     fn out_of_bounds_iol_cyl_power_returns_err() {
-        let cyl = 31.0;
-        let iol = iol();
-        let sca = Sca::new(18.5, Some(cyl), Some(170)).unwrap();
-        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca);
+        let sca = RawSca::new(18.5, Some(31.0), Some(170)).unwrap();
+        let cyl = sca.cyl().unwrap().power;
+        let opiol = OpIol::new(None, iol(), sca).check();
 
         assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl)))
     }
 
     #[test]
     fn nonzero_rem_iol_cyl_power_returns_err() {
-        let cyl = 2.06;
-        let iol = iol();
-        let sca = Sca::new(28.5, Some(cyl), Some(170)).unwrap();
-        let opiol = OpIol::new(Some("sn60wf".to_string()), iol, sca);
+        let sca = RawSca::new(28.5, Some(2.06), Some(170)).unwrap();
+        let cyl = sca.cyl().unwrap().power;
+        let opiol = OpIol::new(None, iol(), sca).check();
 
         assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl)))
     }

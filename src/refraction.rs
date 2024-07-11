@@ -41,10 +41,10 @@ impl<Bounds> Sca for Refraction<Bounds> {
 }
 
 impl BoundsCheck for Refraction<Unchecked> {
+    type CheckedOutput = Refraction<Checked>;
     type Error = RefractionBoundsError;
-    type Output = Refraction<Checked>;
 
-    fn check(self) -> Result<Self::Output, Self::Error> {
+    fn check(self) -> Result<Self::CheckedOutput, Self::Error> {
         let Self { sph, cyl, .. } = self;
 
         if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {

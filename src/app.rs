@@ -23,7 +23,7 @@ pub fn App() -> impl IntoView {
     view! {
         // id=leptos means cargo-leptos will hot-reload this stylesheet
         <Stylesheet id="leptos" href="/pkg/main.css"/>
-        <Title text="Vic Eye cataract audit | Upload"/>
+        <Title text="Vic Eye cataract audit"/>
 
         <Router
             fallback=|| {
@@ -34,7 +34,7 @@ pub fn App() -> impl IntoView {
         >
             <main>
                 <Routes>
-                    <Route path="" view=Upload />
+                    <Route path="" view=Home />
                 </Routes>
             </main>
         </Router>
@@ -42,26 +42,6 @@ pub fn App() -> impl IntoView {
 }
 
 #[component]
-fn Upload() -> impl IntoView {
-    view! {
-        <h1>"Surgeon data upload"</h1>
-        // limit to CSV for now
-        // possibly wrap the input in form as shown in the autosubmit example
-        // then presumably you can write a server-side handler for that URL
-        <input type="file" accept=".csv" id="source" />
-    }
+pub fn Home() -> impl IntoView {
+    view! { "Home page view" }
 }
-
-// show a view that prompts the user to upload a file
-// call std::fs::File::open(source) (start by mocking data in a r#"" and then add a folder for test
-// CSV data)
-//
-// autosubmit after selection:
-//
-// <form id="form" action="http://example.com">
-//    <input type="file" id="file">
-// </form>
-//
-// document.getElementById("file").onchange = function() {
-//     document.getElementById("form").submit();
-// }

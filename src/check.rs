@@ -8,7 +8,7 @@ pub struct Checked;
 
 pub trait BoundsCheck: Sca {
     type Error;
-    type Output;
+    type CheckedOutput;
 
-    fn check(self) -> Result<Self::Output, Self::Error>;
+    fn check(self) -> Result<Self::CheckedOutput, Self::Error>;
 }
