@@ -1,5 +1,9 @@
 # Notes
 
+## Auth
+
+Consider [EdgeDB Auth](https://docs.edgedb.com/guides/auth)
+
 ## Types
 
 ### Separating Far and Near values
