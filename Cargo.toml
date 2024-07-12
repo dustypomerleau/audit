@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "muffin"
+name = "audit"
 version = "0.1.0"
 
 [lib]
@@ -56,7 +56,7 @@ panic = "abort"
 
 [package.metadata.leptos]
 # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
-output-name = "muffin"
+output-name = "audit"
 
 # The site root folder is where cargo-leptos generate all output. WARNING: all content of this folder will be erased on a rebuild. Use it in your server setup.
 site-root = "target/site"
