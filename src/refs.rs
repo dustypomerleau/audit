@@ -107,5 +107,5 @@ fn arc_mutex() {
 }
 
 fn db_main() {
-    let _conn = edgedb_tokio::create_client();
+    // let _conn = edgedb_tokio::create_client();
 }

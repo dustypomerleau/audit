@@ -12,7 +12,7 @@ This is a template for use with the [Leptos](https://github.com/leptos-rs/leptos
 If you don't have `cargo-leptos` installed you can install it with
 
 ```bash
-cargo install cargo-leptos
+cargo install cargo-leptos --locked
 ```
 
 Then run
@@ -23,7 +23,7 @@ cargo leptos new --git leptos-rs/start-axum
 to generate a new project template.
 
 ```bash
-cd audit
+cd muffin
 ```
 
 to go to your newly created project.  
@@ -72,15 +72,19 @@ After running a `cargo leptos build --release` the minimum files needed are:
 
 Copy these files to your remote server. The directory structure should be:
 ```text
-audit
+muffin
 site/
 ```
 Set the following environment variables (updating for your project as needed):
 ```text
-LEPTOS_OUTPUT_NAME="audit"
+LEPTOS_OUTPUT_NAME="muffin"
 LEPTOS_SITE_ROOT="site"
 LEPTOS_SITE_PKG_DIR="pkg"
 LEPTOS_SITE_ADDR="127.0.0.1:3000"
 LEPTOS_RELOAD_PORT="3001"
 ```
 Finally, run the server binary.
+
+## Licensing
+
+This template itself is released under the Unlicense. You should replace the LICENSE for your own application with an appropriate license if you plan to release it publicly.

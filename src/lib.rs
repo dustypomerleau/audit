@@ -2,29 +2,28 @@
 // repeating all of them.
 #![feature(type_changing_struct_update)]
 
-// for rust analyzer support only, not part of the crate
+// for RA support only
 mod refs;
 
-mod app;
-mod axis;
-mod case;
-mod check;
-mod cyl;
-mod error_template;
-mod fileserv;
-mod handler;
-mod iol;
-mod refraction;
-mod sca;
-mod sia;
-mod surgeon;
-mod target;
-mod va;
+pub mod app;
+pub mod axis;
+pub mod case;
+pub mod check;
+pub mod cyl;
+pub mod error_template;
+#[cfg(feature = "ssr")] pub mod fileserv;
+pub mod iol;
+pub mod refraction;
+pub mod sca;
+pub mod sia;
+pub mod surgeon;
+pub mod target;
+pub mod va;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]
 pub fn hydrate() {
-    use crate::app::App;
+    use crate::app::*;
     console_error_panic_hook::set_once();
     leptos::mount_to_body(App);
 }

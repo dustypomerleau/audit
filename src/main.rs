@@ -2,9 +2,10 @@
 #[tokio::main]
 async fn main() {
     use axum::Router;
-    use leptos::{get_configuration, logging};
+    use leptos::*;
     use leptos_axum::{generate_route_list, LeptosRoutes};
-    use talks::{app::App, fileserv::file_and_error_handler};
+    use muffin::app::*;
+    use muffin::fileserv::file_and_error_handler;
 
     // Setting get_configuration(None) means we'll be using cargo-leptos's env values
     // For deployment these variables are:
@@ -16,21 +17,6 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
 
-    // probably expect or throw a specific error here
-    let client = edgedb_tokio::create_client()
-        .await
-        .expect("edgedb client to be initiated");
-    // Client wraps a Pool and a Config. The Pool wraps an Arc<PoolInner>, so it is thread
-    // safe
-    // PoolInner wraps a BlockingMutex<VecDeque>, which is I assume the actual job queue
-    // that the database operates on
-
-    // build our application with a route
-    // todo: this is where you need to add your DB connection, see:
-    // https://docs.rs/axum/latest/axum/middleware/index.html#sharing-state-with-handlers
-    // and
-    // https://docs.rs/axum/latest/axum/struct.Extension.html
-    // you need your handler to take client: Extension<Client>
     // build our application with a route
     let app = Router::new()
         .leptos_routes(&leptos_options, routes, App)

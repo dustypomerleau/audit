@@ -8,7 +8,7 @@ use crate::{
     va::{OpVa, VaBoundsError},
 };
 use chrono::NaiveDate;
-use edgedb_derive::Queryable;
+// use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -92,7 +92,7 @@ impl From<VaBoundsError> for CaseError {
 }
 
 /// The side of the patient's surgery.
-#[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Side {
     Right,
@@ -105,7 +105,7 @@ pub enum Side {
 /// particularly concerned with how the adverse event was handled (for example, whether a
 /// vitrectomy was required). We are interested only in the relative outcomes of cases with adverse
 /// events versus those without.
-#[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Adverse {
     Rhexis,

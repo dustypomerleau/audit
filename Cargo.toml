@@ -1,6 +1,6 @@
 [package]
 edition = "2021"
-name = "audit"
+name = "muffin"
 version = "0.1.0"
 
 [lib]
@@ -10,26 +10,27 @@ crate-type = ["cdylib", "rlib"]
 axum = { version = "0.7", optional = true }
 chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"
-edgedb-derive = "0.5"
-# temporarily switch to git repo for edgedb-protocol, because chrono feature hasn't been put in a release yet
-edgedb-protocol = { version = "0.6", features = ["chrono"] }
-# edgedb-protocol = { git = "https://github.com/edgedb/edgedb-rust", features = ["chrono"] }
-edgedb-tokio = "0.5"
 http = "1"
-leptos = { version = "0.6", features = ["nightly", "ssr"] }
+# revisit features - ssr removed for now
+leptos = { version = "0.6", features = ["nightly"] }
 leptos_axum = { version = "0.6", optional = true }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
 serde = { version = "1", features = ["derive"] }
-serde_json = "1"
+# serde_json = "1"
 thiserror = "1"
-# macros and rt-multi-thread are needed by edgedb-tokio
-tokio = { version = "1", optional = true, features = ["macros", "rt-multi-thread"] }
+# note: edgedb-tokio requires the macros feature and explicitly requests 1.28.0, so try hardcoding the value if needed
+tokio = { version = "1", features = ["macros", "rt-multi-thread"], optional = true }
 tower = { version = "0.4", optional = true }
 tower-http = { version = "0.5", features = ["fs"], optional = true }
 tracing = { version = "0.1", optional = true }
-uuid = { version = "1", features = ["serde", "v4"] }
-wasm-bindgen = "0.2"
+wasm-bindgen = "=0.2.92"
+# edgedb-derive = "0.5"
+# # temporarily switch to git repo for edgedb-protocol, because chrono feature hasn't been put in a release yet
+# edgedb-protocol = { version = "0.6", features = ["chrono"] }
+# # edgedb-protocol = { git = "https://github.com/edgedb/edgedb-rust", features = ["chrono"] }
+# edgedb-tokio = "0.5"
+# uuid = { version = "1", features = ["serde", "v4"] }
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
@@ -55,7 +56,7 @@ panic = "abort"
 
 [package.metadata.leptos]
 # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
-output-name = "audit"
+output-name = "muffin"
 
 # The site root folder is where cargo-leptos generate all output. WARNING: all content of this folder will be erased on a rebuild. Use it in your server setup.
 site-root = "target/site"
