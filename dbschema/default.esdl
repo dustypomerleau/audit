@@ -5,7 +5,7 @@ module default {
 
 ### globals
 
-required global cur_user: uuid;
+global cur_user: uuid;
 
 ### scalars
 
