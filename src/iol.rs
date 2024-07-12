@@ -41,6 +41,7 @@ pub enum Focus {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Iol {
     // todo: I would eventually prefer for this to be an enum, with IOL models explicitly allowed.
+    pub company: String,
     pub model: String,
     pub name: String,
     pub focus: Focus,
@@ -52,8 +53,7 @@ pub struct Iol {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpIol<Bounds = Unchecked> {
     /// An optional string, provided by the surgeon, to name/describe the IOL.
-    pub surgeon_label: Option<String>,
-    pub iol: Option<Iol>,
+    pub iol: Iol,
     pub se: f32,
     pub cyl: Option<Cyl>,
     pub bounds: PhantomData<Bounds>,
@@ -110,9 +110,8 @@ impl ScaMut for OpIol<Unchecked> {
 }
 
 impl OpIol<Unchecked> {
-    pub fn new<T: Sca>(surgeon_label: Option<String>, iol: Option<Iol>, sca: T) -> Self {
+    pub fn new<T: Sca>(iol: Iol, sca: T) -> Self {
         Self {
-            surgeon_label,
             iol,
             se: sca.sph(),
             cyl: sca.cyl(),
@@ -129,6 +128,7 @@ mod tests {
     // todo: replace this function with an implementation of Mock(all)
     fn iol() -> Option<Iol> {
         Some(Iol {
+            company: "Johnson & Johnson (TECNIS)".to_string(),
             model: "ZXTxxx".to_string(),
             name: "Tecnis Symfony".to_string(),
             focus: Focus::Edof,
@@ -139,12 +139,11 @@ mod tests {
     #[test]
     fn makes_new_opiol() {
         let sca = RawSca::new(24.25, Some(3.0), Some(12)).unwrap();
-        let checked = OpIol::new(None, iol(), sca).check().unwrap();
+        let checked = OpIol::new(iol(), sca).check().unwrap();
 
         assert_eq!(
             checked,
             OpIol::<Checked> {
-                surgeon_label: None,
                 iol: iol(),
                 se: 24.25,
                 cyl: Some(Cyl {
@@ -161,7 +160,7 @@ mod tests {
         // todo: randomize the out of bounds values on all failing tests
         // (Axis, Cyl, Iol, Refraction, Sca, Sia, Target, Va)
         let sca = RawSca::new(100.25, Some(3.0), Some(12)).unwrap();
-        let checked = OpIol::new(None, iol(), sca).check();
+        let checked = OpIol::new(iol(), sca).check();
 
         assert_eq!(checked, Err(IolBoundsError::Se(sca.sph())))
     }
@@ -169,7 +168,7 @@ mod tests {
     #[test]
     fn nonzero_rem_iol_se_returns_err() {
         let sca = RawSca::new(10.35, Some(3.0), Some(12)).unwrap();
-        let opiol = OpIol::new(None, iol(), sca).check();
+        let opiol = OpIol::new(iol(), sca).check();
 
         assert_eq!(opiol, Err(IolBoundsError::Se(sca.sph())))
     }
@@ -178,7 +177,7 @@ mod tests {
     fn out_of_bounds_iol_cyl_power_returns_err() {
         let sca = RawSca::new(18.5, Some(31.0), Some(170)).unwrap();
         let cyl = sca.cyl().unwrap().power;
-        let opiol = OpIol::new(None, iol(), sca).check();
+        let opiol = OpIol::new(iol(), sca).check();
 
         assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl)))
     }
@@ -187,7 +186,7 @@ mod tests {
     fn nonzero_rem_iol_cyl_power_returns_err() {
         let sca = RawSca::new(28.5, Some(2.06), Some(170)).unwrap();
         let cyl = sca.cyl().unwrap().power;
-        let opiol = OpIol::new(None, iol(), sca).check();
+        let opiol = OpIol::new(iol(), sca).check();
 
         assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl)))
     }

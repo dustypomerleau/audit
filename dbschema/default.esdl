@@ -22,7 +22,6 @@ global cur_user: uuid;
     }
 
     scalar type Focus extending enum<Mono, Edof, Multi>;
-    scalar type Lens extending enum<Thick, Thin>;
     scalar type Side extending enum<Right, Left>;
 
 ### abstract objects
@@ -68,6 +67,7 @@ global cur_user: uuid;
         raw_near: NearVa;
     }
     
+    # raw_far has been removed from the Rust code. Probably easier to leave it here as optional than to add it back later.
     type BeforeVaSet extending SoftCreate {
         required best_far: FarVa;
         raw_far: FarVa;
@@ -99,10 +99,12 @@ global cur_user: uuid;
 
     type Formula extending SoftCreate {
         required name: str { constraint exclusive; }
-        required lens: Lens;
+        # use a boolean here, rather than an enum like in Rust code
+        required thick_lens: bool;
     }
 
     type Iol extending SoftCreate {
+        required company: str;
         required model: str { constraint exclusive; }
         required name: str;
         required focus: Focus { default := Focus.Mono; }
@@ -145,10 +147,10 @@ global cur_user: uuid;
             constraint expression on (__subject__ % 0.25 = 0.0);
         }
 
-        cyl: RefCyl;
+        cyl: RefractionCyl;
     }
 
-    type RefCyl extending Cyl, SoftCreate {
+    type RefractionCyl extending Cyl, SoftCreate {
         constraint expression on (.power >= -10.0 and .power <= 10.0 and .power % 0.25 = 0.0);
     }
 
