@@ -47,18 +47,21 @@ impl BoundsCheck for Refraction<Unchecked> {
     fn check(self) -> Result<Self::CheckedOutput, Self::Error> {
         let Self { sph, cyl, .. } = self;
 
-        if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
-            let _ = if let Some(Cyl { power, .. }) = cyl {
-                if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
-                } else {
-                    return Err(RefractionBoundsError::Cyl(power));
-                }
-            };
+        let checked = Refraction::<Checked> {
+            bounds: PhantomData,
+            ..self
+        };
 
-            Ok(Refraction::<Checked> {
-                bounds: PhantomData,
-                ..self
-            })
+        if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
+            if let Some(Cyl { power, .. }) = cyl {
+                if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
+                    Ok(checked)
+                } else {
+                    Err(RefractionBoundsError::Cyl(power))
+                }
+            } else {
+                Ok(checked)
+            }
         } else {
             Err(RefractionBoundsError::Sph(sph))
         }
@@ -121,8 +124,6 @@ mod tests {
             bounds: PhantomData,
         };
 
-        let test = unchecked.try_into::<Refraction<Checked>>().unwrap();
-
         let output: Refraction<Checked> = unchecked.try_into().unwrap();
 
         let expected: Refraction<Checked> = Refraction {
@@ -140,10 +141,10 @@ mod tests {
     #[test]
     fn out_of_bounds_refraction_sph_returns_err() {
         let sph = -40.5f32;
-        let refraction: Result<Refraction, RefBoundsError> =
+        let refraction: Result<Refraction, RefractionBoundsError> =
             Sca::new(sph, Some(-0.25), Some(30)).unwrap().try_into();
 
-        assert_eq!(refraction, Err(RefBoundsError::Sph(sph)))
+        assert_eq!(refraction, Err(RefractionBoundsError::Sph(sph)))
     }
 
     #[test]
