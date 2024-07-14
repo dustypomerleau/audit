@@ -40,11 +40,11 @@ pub enum Focus {
 /// A specific model of IOL
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Iol {
-    // todo: I would eventually prefer for this to be an enum, with IOL models explicitly allowed.
-    pub company: String,
     pub model: String,
     pub name: String,
+    pub company: String,
     pub focus: Focus,
+    // you could use an enum instead of a bool here, but I'm not convinced of the advantages
     pub toric: bool,
 }
 
