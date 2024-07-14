@@ -10,13 +10,13 @@ use crate::{
     va::{AfterVaSet, BeforeVaSet, FarVa, NearVa, OpVa, Va},
 };
 use chrono::NaiveDate;
-use edgedb_derive::Queryable;
+// use edgedb_derive::Queryable;
 use serde::{de, Deserialize, Serialize};
 use std::{io::Error, path::Path};
 use thiserror::Error;
 
 /// A flattened version of the [`Case`](crate::case::Case) struct for use in database queries
-#[derive(Debug, Deserialize, PartialEq, Queryable, Serialize)]
+#[derive(Debug, Deserialize, PartialEq, Serialize)]
 pub struct FlatCase {
     // todo: should Surgeon and Iol details be removed from FlatCase?
     pub surgeon_email: Option<String>,
