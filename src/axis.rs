@@ -1,3 +1,4 @@
+#[cfg(feature = "ssr")] use edgedb_tokio::Queryable;
 use serde::{Deserialize, Serialize};
 
 /// A bounds-checked generic axis between 0° and 179°. This is used for the axis of
