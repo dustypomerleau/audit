@@ -52,7 +52,6 @@ pub struct Iol {
 /// power chosen for this patient.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpIol<Bounds = Unchecked> {
-    /// An optional string, provided by the surgeon, to name/describe the IOL.
     pub iol: Iol,
     pub se: f32,
     pub cyl: Option<Cyl>,
