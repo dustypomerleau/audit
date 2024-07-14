@@ -125,14 +125,14 @@ mod tests {
     use crate::{axis::Axis, sca::RawSca};
 
     // todo: replace this function with an implementation of Mock(all)
-    fn iol() -> Option<Iol> {
-        Some(Iol {
+    fn iol() -> Iol {
+        Iol {
             company: "Johnson & Johnson (TECNIS)".to_string(),
             model: "ZXTxxx".to_string(),
             name: "Tecnis Symfony".to_string(),
             focus: Focus::Edof,
             toric: true,
-        })
+        }
     }
 
     #[test]

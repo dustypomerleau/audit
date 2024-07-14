@@ -115,6 +115,8 @@ pub enum Adverse {
 }
 
 /// A single surgical case. In the future, biometry values may be added.
+// todo: `pub struct RawCase`, where we derive Queryable, and then impl From<Case> for RawCase
+// and from RawCase for Case - that way only RawCase would need to work with edgedb
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Case {
     pub surgeon: Surgeon,
