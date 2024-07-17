@@ -1,4 +1,6 @@
+#[cfg(feature = "ssr")] use crate::db::DbCase;
 use crate::{
+    check::Checked,
     iol::{IolBoundsError, OpIol},
     refraction::{OpRefraction, RefractionBoundsError},
     sca::ScaBoundsError,
@@ -8,7 +10,7 @@ use crate::{
     va::{OpVa, VaBoundsError},
 };
 use chrono::NaiveDate;
-// use edgedb_derive::Queryable;
+#[cfg(feature = "ssr")] use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -93,7 +95,7 @@ impl From<VaBoundsError> for CaseError {
 
 /// The side of the patient's surgery.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-#[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub enum Side {
     Right,
     Left,
@@ -106,7 +108,7 @@ pub enum Side {
 /// vitrectomy was required). We are interested only in the relative outcomes of cases with adverse
 /// events versus those without.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-#[serde(rename_all = "lowercase")]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub enum Adverse {
     Rhexis,
     Pc,
@@ -115,8 +117,6 @@ pub enum Adverse {
 }
 
 /// A single surgical case. In the future, biometry values may be added.
-// todo: `pub struct RawCase`, where we derive Queryable, and then impl From<Case> for RawCase
-// and from RawCase for Case - that way only RawCase would need to work with edgedb
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Case {
     pub surgeon: Surgeon,
@@ -125,7 +125,7 @@ pub struct Case {
     pub urn: String,
     pub side: Side,
     /// The surgeon's intended refractive target, based on the formula of their choice.
-    pub target: Option<Target>,
+    pub target: Option<Target<Checked>>,
     pub date: NaiveDate,
     /// The institution where surgery was performed.
     pub site: Option<String>,
@@ -135,4 +135,13 @@ pub struct Case {
     pub adverse: Option<Adverse>,
     pub va: OpVa,
     pub refraction: OpRefraction,
+}
+
+#[cfg(feature = "ssr")]
+impl TryFrom<DbCase> for Case {
+    type Error = CaseError;
+
+    fn try_from(value: DbCase) -> Result<Self, Self::Error> {
+        todo!()
+    }
 }

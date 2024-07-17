@@ -7,10 +7,12 @@ use leptos_router::*;
 pub fn App() -> impl IntoView {
     // todo: We need to populate a surgeon struct at login and put it in a signal.
     // We can then directly access that signal to get things like their default SIA values.
-    // This also means we probably don't need a global cur_user in the DB - consider.
     // Alternatively, we could put the user in the URL
     // https://book.leptos.dev/15_global_state.html#global-state-management
-    // for auth: https://github.com/ramosbugs/oauth2-rs
+    //
+    // for auth:
+    // edgedb has an auth solution actually
+    // https://github.com/ramosbugs/oauth2-rs
     // or less tested: https://github.com/HeroicKatora/oxide-auth/tree/master
     // or using AWS cognito with axum sessions: https://www.youtube.com/watch?v=epX_Bzq1zxs
     // https://github.com/leptos-rs/leptos/tree/f84f1422f447f35adb917582c882ccbc4e1483a7/examples/session_auth_axum
@@ -59,3 +61,4 @@ fn HomePage() -> impl IntoView {
         <button on:click=on_click>"Click Me: " {count}</button>
     }
 }
+

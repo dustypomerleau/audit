@@ -10,6 +10,7 @@ pub mod axis;
 pub mod case;
 pub mod check;
 pub mod cyl;
+#[cfg(feature = "ssr")] pub mod db;
 pub mod error_template;
 #[cfg(feature = "ssr")] pub mod fileserv;
 pub mod iol;

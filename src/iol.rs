@@ -3,6 +3,7 @@ use crate::{
     cyl::{Cyl, CylPair},
     sca::{Sca, ScaMut},
 };
+#[cfg(feature = "ssr")] use edgedb_derive::Queryable;
 // use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
@@ -31,6 +32,7 @@ pub enum IolBoundsError {
 
 /// The class of [`Iol`] (monofocal, EDOF, multifocal)
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub enum Focus {
     Mono,
     Edof,
@@ -39,6 +41,7 @@ pub enum Focus {
 
 /// A specific model of IOL
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Iol {
     pub model: String,
     pub name: String,

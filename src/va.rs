@@ -1,3 +1,4 @@
+#[cfg(feature = "ssr")] use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -33,6 +34,7 @@ pub struct NearVa(pub Va);
 ///
 /// The [`Va`] is assumed to be a distance visual acuity, unless wrapped by [`NearVa`].
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Va {
     pub num: f32,
     pub den: f32,
@@ -69,6 +71,7 @@ impl Va {
 /// A collection of visual acuities from before surgery. We use separate structs for [`BeforeVaSet`]
 /// and [`AfterVaSet`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct BeforeVaSet {
     pub best_far: Va,
 }
