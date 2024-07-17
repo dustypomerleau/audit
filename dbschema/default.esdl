@@ -22,6 +22,19 @@ global cur_user: uuid;
     }
 
     scalar type Focus extending enum<Mono, Edof, Multi>;
+
+    scalar type Formula extending enum<
+        Barrett,
+        BarrettTrueK,
+        Haigis,
+        HofferQ,
+        Holladay1,
+        Holladay2,
+        Kane,
+        Olsen,
+        SrkT
+    >;
+
     scalar type Side extending enum<Right, Left>;
 
 ### abstract objects
@@ -97,16 +110,10 @@ global cur_user: uuid;
 
     type FarVa extending SoftCreate, Va {}
 
-    type Formula extending SoftCreate {
-        required name: str { constraint exclusive; }
-        # use a boolean here, rather than an enum like in Rust code
-        required thick_lens: bool;
-    }
-
     type Iol extending SoftCreate {
-        required company: str;
         required model: str { constraint exclusive; }
         required name: str;
+        required company: str;
         required focus: Focus { default := Focus.Mono; }
         required toric: bool { default := false; }
         required multi constants: Constant;
@@ -163,7 +170,6 @@ global cur_user: uuid;
         first_name: str;
         last_name: str;
         site: str;
-        handed: Side;
         sia: SurgeonSia;
         multi cases := .<surgeon[is Cas];
     }
