@@ -2,7 +2,7 @@ use crate::{
     case::{Adverse, Case, Side},
     iol::Iol,
     target::Constant,
-    va::{BeforeVaSet, Va},
+    va::{BeforeVa, OpVa, Va},
 };
 use chrono::NaiveDate;
 use edgedb_tokio::Queryable;
@@ -44,16 +44,10 @@ pub struct DbOpIol {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
-pub struct DbAfterVaSet {
+pub struct DbAfterVa {
     pub best_far: Option<Va>,
     pub raw_far: Va,
     pub raw_near: Option<Va>,
-}
-
-#[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
-pub struct DbOpVa {
-    pub before: BeforeVaSet,
-    pub after: DbAfterVaSet,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
@@ -84,7 +78,7 @@ pub struct DbCase {
     pub sia: Option<DbCyl>,
     pub iol: Option<DbOpIol>,
     pub adverse: Option<Adverse>,
-    pub va: DbOpVa,
+    pub va: OpVa,
     pub refraction: DbOpRefraction,
 }
 
@@ -93,3 +87,106 @@ impl From<Case> for DbCase {
         todo!()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{iol::Focus, target::Formula, va::AfterVa};
+    use chrono::NaiveDate;
+
+    fn case() -> DbCase {
+        DbCase {
+            surgeon: DbSurgeon {
+                email: "test@test.com".to_string(),
+                first_name: Some("Paul".to_string()),
+                last_name: Some("Johnson".to_string()),
+                site: None,
+                sia: Some(DbSurgeonSia {
+                    right: DbCyl {
+                        power: 0.1,
+                        axis: 100,
+                    },
+                    left: DbCyl {
+                        power: 0.1,
+                        axis: 100,
+                    },
+                }),
+            },
+
+            urn: "123".to_string(),
+            side: Side::Right,
+
+            target: Some(DbTarget {
+                constant: Some(Constant {
+                    value: 119.36,
+                    formula: Formula::Barrett,
+                }),
+                se: -0.12,
+                cyl: Some(DbCyl {
+                    power: 0.28,
+                    axis: 90,
+                }),
+            }),
+
+            date: NaiveDate::from_ymd_opt(2024, 7, 10).unwrap(),
+            site: Some("RMH".to_string()),
+            sia: None,
+
+            iol: Some(DbOpIol {
+                iol: Iol {
+                    model: "zxt100".to_string(),
+                    name: "Symfony".to_string(),
+                    company: "Johnson and Johnson".to_string(),
+                    focus: Focus::Edof,
+                    toric: true,
+                },
+
+                se: 24.5,
+                cyl: Some(DbCyl {
+                    power: 1.0,
+                    axis: 90,
+                }),
+            }),
+
+            adverse: None,
+
+            va: OpVa {
+                before: BeforeVa {
+                    best: Va {
+                        num: 6.0,
+                        den: 12.0,
+                    },
+                    raw: None,
+                },
+                after: AfterVa {
+                    best: Some(Va { num: 6.0, den: 5.0 }),
+                    raw: Va { num: 6.0, den: 6.0 },
+                },
+            },
+
+            refraction: DbOpRefraction {
+                before: DbRefraction {
+                    sph: -8.25,
+                    cyl: Some(DbCyl {
+                        power: 0.5,
+                        axis: 180,
+                    }),
+                },
+                after: DbRefraction {
+                    sph: -0.25,
+                    cyl: Some(DbCyl {
+                        power: 0.25,
+                        axis: 90,
+                    }),
+                },
+            },
+        }
+    }
+
+    #[test]
+    fn inserts_a_case() {
+        let case = case();
+        todo!()
+    }
+}
+

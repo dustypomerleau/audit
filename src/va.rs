@@ -22,10 +22,6 @@ pub enum VaBoundsError {
     NoPair(VaPair),
 }
 
-/// A wrapper type, to ensure that near visual acuities are only compared to other near acuities.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct NearVa(pub Va);
-
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  
 ///
@@ -58,38 +54,37 @@ impl Va {
     pub fn try_new(num: Option<f32>, den: Option<f32>) -> Result<Option<Self>, VaBoundsError> {
         match (num, den) {
             (Some(num), Some(den)) => Some(Va::new(num, den)).transpose(),
-
             (None, None) => Ok(None),
-
-            (Some(_num), _) => Err(VaBoundsError::NoPair(VaPair::Denominator).into()),
-
-            (_, Some(_den)) => Err(VaBoundsError::NoPair(VaPair::Numerator).into()),
+            (Some(_num), _) => Err(VaBoundsError::NoPair(VaPair::Denominator)),
+            (_, Some(_den)) => Err(VaBoundsError::NoPair(VaPair::Numerator)),
         }
     }
 }
 
-/// A collection of visual acuities from before surgery. We use separate structs for [`BeforeVaSet`]
-/// and [`AfterVaSet`], because we enforce different mandatory fields for the two situations.
+/// A collection of visual acuities from before surgery. We use separate structs for [`BeforeVa`]
+/// and [`AfterVa`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "ssr", derive(Queryable))]
-pub struct BeforeVaSet {
-    pub best_far: Va,
+pub struct BeforeVa {
+    pub best: Va,
+    pub raw: Option<Va>,
 }
 
-/// A collection of visual acuities from after surgery. We use separate structs for [`BeforeVaSet`]
-/// and [`AfterVaSet`], because we enforce different mandatory fields for the two situations.
+/// A collection of visual acuities from after surgery. We use separate structs for [`BeforeVa`]
+/// and [`AfterVa`], because we enforce different mandatory fields for the two situations.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct AfterVaSet {
-    pub best_far: Option<Va>,
-    pub raw_far: Va,
-    pub raw_near: Option<NearVa>,
+#[cfg_attr(feature = "ssr", derive(Queryable))]
+pub struct AfterVa {
+    pub best: Option<Va>,
+    pub raw: Va,
 }
 
 /// The visual acuity sets from before and after a particular [`Case`](crate::case::Case).
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct OpVa {
-    pub before: BeforeVaSet,
-    pub after: AfterVaSet,
+    pub before: BeforeVa,
+    pub after: AfterVa,
 }
 
 #[cfg(test)]
@@ -119,3 +114,4 @@ mod tests {
         assert_eq!(va, Err(VaBoundsError::Den(den)))
     }
 }
+

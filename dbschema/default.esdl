@@ -51,11 +51,6 @@ global cur_user: uuid;
         }
     }
 
-    abstract type Va {
-        required num: float32 { constraint min_ex_value(0.0); constraint max_value(20.0); }
-        required den: float32 { constraint min_ex_value(0.0); }
-    }
-
 ### objects
 
     # # todo:
@@ -74,16 +69,14 @@ global cur_user: uuid;
     #     axis: Axis; # meridian
     # }
 
-    type AfterVaSet extending SoftCreate {
-        best_far: FarVa;
-        required raw_far: FarVa;
-        raw_near: NearVa;
+    type AfterVa extending SoftCreate {
+        best: Va;
+        required raw: Va;
     }
     
-    # raw_far has been removed from the Rust code. Probably easier to leave it here as optional than to add it back later.
-    type BeforeVaSet extending SoftCreate {
-        required best_far: FarVa;
-        raw_far: FarVa;
+    type BeforeVa extending SoftCreate {
+        required best: Va;
+        raw: Va;
     }
     
     # case is a reserved keyword
@@ -108,8 +101,6 @@ global cur_user: uuid;
         required formula: Formula;
     }
 
-    type FarVa extending SoftCreate, Va {}
-
     type Iol extending SoftCreate {
         required model: str { constraint exclusive; }
         required name: str;
@@ -122,8 +113,6 @@ global cur_user: uuid;
     type IolCyl extending Cyl, SoftCreate {
         constraint expression on (.power >= 1.0 and .power <= 20.0 and .power % 0.25 = 0.0);
     }
-
-    type NearVa extending SoftCreate, Va {}
 
     type OpIol extending SoftCreate {
         required iol: Iol;
@@ -143,8 +132,8 @@ global cur_user: uuid;
     }
     
     type OpVa extending SoftCreate {
-        required before: BeforeVaSet;
-        required after: AfterVaSet;
+        required before: BeforeVa;
+        required after: AfterVa;
     }
 
     type Refraction extending SoftCreate {
@@ -192,5 +181,10 @@ global cur_user: uuid;
 
     type TargetCyl extending Cyl, SoftCreate {
         constraint expression on (.power >= 0.0 and .power <= 6.0);
+    }
+
+    type Va extending SoftCreate {
+        required num: float32 { constraint min_ex_value(0.0); constraint max_value(20.0); }
+        required den: float32 { constraint min_ex_value(0.0); }
     }
 }
