@@ -2,7 +2,7 @@ use crate::{
     case::{Adverse, Case, Side},
     iol::Iol,
     target::Constant,
-    va::{BeforeVa, OpVa, Va},
+    va::OpVa,
 };
 use chrono::NaiveDate;
 use edgedb_tokio::Queryable;
@@ -41,13 +41,6 @@ pub struct DbOpIol {
     pub iol: Iol,
     pub se: f32,
     pub cyl: Option<DbCyl>,
-}
-
-#[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
-pub struct DbAfterVa {
-    pub best_far: Option<Va>,
-    pub raw_far: Va,
-    pub raw_near: Option<Va>,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
@@ -91,7 +84,11 @@ impl From<Case> for DbCase {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{iol::Focus, target::Formula, va::AfterVa};
+    use crate::{
+        iol::Focus,
+        target::Formula,
+        va::{AfterVa, BeforeVa},
+    };
     use chrono::NaiveDate;
 
     fn case() -> DbCase {
@@ -189,4 +186,3 @@ mod tests {
         todo!()
     }
 }
-

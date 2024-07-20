@@ -1,10 +1,9 @@
-use crate::app::App;
-use axum::response::Response as AxumResponse;
+use crate::routes::App;
 use axum::{
     body::Body,
     extract::State,
     http::{Request, Response, StatusCode},
-    response::IntoResponse,
+    response::{IntoResponse, Response as AxumResponse},
 };
 use leptos::*;
 use tower::ServiceExt;

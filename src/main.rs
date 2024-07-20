@@ -1,15 +1,16 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
+    use audit::{fileserv::file_and_error_handler, routes::App};
     use axum::Router;
-    use leptos::*;
+    use leptos::{get_configuration, logging};
     use leptos_axum::{generate_route_list, LeptosRoutes};
-    use audit::app::*;
-    use audit::fileserv::file_and_error_handler;
 
     // Setting get_configuration(None) means we'll be using cargo-leptos's env values
+    //
     // For deployment these variables are:
     // <https://github.com/leptos-rs/start-axum#executing-a-server-on-a-remote-machine-without-the-toolchain>
+    //
     // Alternately a file can be specified such as Some("Cargo.toml")
     // The file would need to be included with the executable when moved to deployment
     let conf = get_configuration(None).await.unwrap();
@@ -25,6 +26,7 @@ async fn main() {
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
     logging::log!("listening on http://{}", &addr);
+
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
@@ -36,3 +38,4 @@ pub fn main() {
     // unless we want this to work with e.g., Trunk for a purely client-side app
     // see lib.rs for hydration function instead
 }
+
