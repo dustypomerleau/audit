@@ -1,4 +1,154 @@
-body {
-	font-family: sans-serif;
-	text-align: center;
+@layer reset, base, components, overrides;
+
+:root {
+    --accent1: #a6e22e;
+    --accent2: #ff5522;
+    --accent3: #669def;
+    --background: #26292c;
+    --border: #798188;
+    --code: #e6d874;
+    --foreground: #f8f8f2;
+    --header: #d6d9db;
+    --marker: #f92672;
+    --title: #fd971f;
 }
+
+@layer overrides {
+}
+
+@layer components {
+    /* remove all scroll only in slides view */
+    .container {
+        height: 100vh;
+        overflow-y: hidden;
+    }
+}
+
+@layer base {
+    /* albert var latin */
+    @font-face {
+        font-family: Albert;
+        font-style: normal;
+        font-weight: 100 900;
+        font-display: swap;
+        src: url("/fonts/albertvar.woff2") format("woff2");
+    }
+
+    html {
+        font-family:
+            Albert,
+            ui-sans-serif,
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            Segoe UI,
+            Roboto,
+            Helvetica Neue,
+            Arial,
+            sans-serif,
+            Apple Color Emoji,
+            Segoe UI Emoji,
+            Segoe UI Symbol;
+    }
+
+    body {
+        background: var(--background);
+        color: var(--foreground);
+    }
+}
+
+@layer reset {
+    /* Box sizing rules */
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    /* Prevent font size inflation */
+    html {
+        -moz-text-size-adjust: none;
+        -webkit-text-size-adjust: none;
+        text-size-adjust: none;
+    }
+
+    /* Remove default margin in favour of better control in authored CSS */
+    body,
+    h1,
+    h2,
+    h3,
+    h4,
+    p,
+    figure,
+    blockquote,
+    dl,
+    dd {
+        /* margin-block-end: 0; */
+        margin: 0; /* dp change to remove all margin and padding */
+        padding: 0; /* dp change to remove all margin and padding */
+    }
+
+    /* Remove list styles on ul, ol elements with a list role, which suggests default styling will be removed */
+    ul[role="list"],
+    ol[role="list"] {
+        list-style: none;
+    }
+
+    /* Set core body defaults */
+    body {
+        min-height: 100vh;
+        line-height: 1.5;
+    }
+
+    /* Set shorter line heights on headings and interactive elements */
+    h1,
+    h2,
+    h3,
+    h4,
+    button,
+    input,
+    label {
+        line-height: 1.1;
+    }
+
+    /* Balance text wrapping on headings */
+    h1,
+    h2,
+    h3,
+    h4 {
+        text-wrap: balance;
+    }
+
+    /* A elements that don't have a class get default styles */
+    a:not([class]) {
+        text-decoration-skip-ink: auto;
+        color: currentColor;
+    }
+
+    /* Make images easier to work with */
+    img,
+    picture {
+        max-width: 100%;
+        display: block;
+    }
+
+    /* Inherit fonts for inputs and buttons */
+    input,
+    button,
+    textarea,
+    select {
+        font-family: inherit;
+        font-size: inherit;
+    }
+
+    /* Make sure textareas without a rows attribute are not tiny */
+    textarea:not([rows]) {
+        min-height: 10em;
+    }
+
+    /* Anything that has been anchored to should have extra scroll margin */
+    :target {
+        scroll-margin-block: 5ex;
+    }
+}
+
