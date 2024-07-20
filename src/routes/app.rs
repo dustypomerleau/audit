@@ -1,4 +1,4 @@
-use crate::routes::{AppError, ErrorTemplate, Login};
+use crate::routes::{AppError, ErrorTemplate, SignIn};
 #[allow(unused_imports)] use leptos::{component, template, view, Errors, IntoView};
 use leptos_meta::{provide_meta_context, Stylesheet, Title};
 use leptos_router::{Route, Router, Routes};
@@ -38,7 +38,7 @@ pub fn App() -> impl IntoView {
         }>
             <main>
                 <Routes>
-                    <Route path="" view=Login />
+                    <Route path="" view=SignIn />
                 </Routes>
             </main>
         </Router>

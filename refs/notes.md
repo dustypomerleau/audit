@@ -1,5 +1,13 @@
 # Notes
 
+## Routes
+
+- sign in
+- register
+- add case
+- list all cases
+- view and generate reports
+
 ## Auth
 
 Consider [EdgeDB Auth](https://docs.edgedb.com/guides/auth)

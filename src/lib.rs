@@ -13,6 +13,7 @@ pub mod cyl;
 #[cfg(feature = "ssr")] pub mod db;
 #[cfg(feature = "ssr")] pub mod fileserv;
 pub mod iol;
+pub mod plots;
 pub mod refraction;
 pub mod routes;
 pub mod sca;
