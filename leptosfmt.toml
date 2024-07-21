@@ -1,0 +1,6 @@
+# https://github.com/bram209/leptosfmt/blob/main/docs/configuration.md
+attr_value_brace_style = "Always"
+indentation_style = "Spaces"
+macro_names = ["leptos::view", "view"]
+max_width = 100
+newline_style = "Unix"
