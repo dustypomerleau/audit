@@ -1,4 +1,4 @@
-use crate::routes::{AppError, ErrorTemplate, SignIn};
+use crate::routes::{Add, AppError, ErrorTemplate, List, Register, Report, SignIn};
 #[allow(unused_imports)] use leptos::{component, template, view, Errors, IntoView};
 use leptos_meta::{provide_meta_context, Stylesheet, Title};
 use leptos_router::{Route, Router, Routes};
@@ -24,21 +24,21 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        // id=leptos means cargo-leptos will hot-reload this stylesheet
         <Stylesheet id="leptos" href="/pkg/audit.css"/>
         <Title text="Cataract audit"/>
 
         <Router fallback=|| {
             let mut outside_errors = Errors::default();
             outside_errors.insert_with_default_key(AppError::NotFound);
-            view! {
-                <ErrorTemplate outside_errors/>
-            }
-            .into_view()
+            view! { <ErrorTemplate outside_errors/> }.into_view()
         }>
             <main>
                 <Routes>
-                    <Route path="" view=SignIn />
+                    <Route path="" view=SignIn/>
+                    <Route path="/add" view=Add/>
+                    <Route path="/list" view=List/>
+                    <Route path="/register" view=Register/>
+                    <Route path="/report" view=Report/>
                 </Routes>
             </main>
         </Router>
