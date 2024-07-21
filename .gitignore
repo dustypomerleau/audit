@@ -10,4 +10,5 @@ pkg
 end2end/playwright-report/
 node_modules/
 playwright/.cache/
+refs/scratch*
 test-results/
