@@ -3,7 +3,8 @@
 async fn main() {
     use audit::{fileserv::file_and_error_handler, routes::App};
     use axum::Router;
-    use leptos::{get_configuration, logging};
+    use edgedb_tokio::create_client;
+    use leptos::{get_configuration, logging, provide_context};
     use leptos_axum::{generate_route_list, LeptosRoutes};
 
     // Setting get_configuration(None) means we'll be using cargo-leptos's env values
@@ -17,10 +18,17 @@ async fn main() {
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
+    let client = create_client().await.expect("DB client to be initialized");
 
-    // build our application with a route
+    // regarding using context to pass the DB client:
+    // https://book.leptos.dev/server/26_extractors.html#axum-state
     let app = Router::new()
-        .leptos_routes(&leptos_options, routes, App)
+        .leptos_routes_with_context(
+            &leptos_options,
+            routes,
+            move || provide_context(client.clone()),
+            App,
+        )
         .fallback(file_and_error_handler)
         .with_state(leptos_options);
 
@@ -38,4 +46,3 @@ pub fn main() {
     // unless we want this to work with e.g., Trunk for a purely client-side app
     // see lib.rs for hydration function instead
 }
-
