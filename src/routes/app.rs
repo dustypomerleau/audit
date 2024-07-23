@@ -24,21 +24,21 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
-        <Stylesheet id="leptos" href="/pkg/audit.css"/>
-        <Title text="Cataract audit"/>
+        <Stylesheet id="leptos" href="/pkg/audit.css" />
+        <Title text="Cataract audit" />
 
         <Router fallback=|| {
             let mut outside_errors = Errors::default();
             outside_errors.insert_with_default_key(AppError::NotFound);
-            view! { <ErrorTemplate outside_errors/> }.into_view()
+            view! { <ErrorTemplate outside_errors /> }.into_view()
         }>
             <main>
                 <Routes>
-                    <Route path="" view=SignIn/>
-                    <Route path="/add" view=Add/>
-                    <Route path="/list" view=List/>
-                    <Route path="/register" view=Register/>
-                    <Route path="/report" view=Report/>
+                    <Route path="" view=SignIn />
+                    <Route path="/add" view=Add />
+                    <Route path="/list" view=List />
+                    <Route path="/register" view=Register />
+                    <Route path="/report" view=Report />
                 </Routes>
             </main>
         </Router>
