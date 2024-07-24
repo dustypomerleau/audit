@@ -34,8 +34,9 @@ mod tests {
     #[test]
     fn out_of_bounds_sia_power_returns_err() {
         let power = 2.1;
-        let sia = Sia::new(power, Axis(100));
+        let axis = Axis::new(100).unwrap();
+        let sia = Sia::new(power, axis);
 
-        assert_eq!(sia, Err(SiaBoundsError::Sia(power)))
+        assert_eq!(sia, Err(SiaBoundsError::Sia(power)));
     }
 }

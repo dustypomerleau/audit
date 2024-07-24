@@ -1,5 +1,5 @@
 use crate::{
-    check::{BoundsCheck, Checked, Unchecked},
+    bounds_check::{BoundsCheck, Checked, Unchecked},
     cyl::Cyl,
     sca::{Sca, ScaMut},
 };
@@ -137,62 +137,46 @@ impl Target<Unchecked> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::axis::Axis;
 
     // todo: replace with a randomized TargetFormula using Mock(all)
     fn iol_constant() -> Option<Constant> {
         Some(Constant {
             value: 119.36,
-            formula: Formula::Thick(Thick::Kane),
+            formula: Formula::Kane,
         })
-    }
-
-    #[test]
-    fn makes_new_formula() {
-        let formula = Formula::new_from_str("Barrett True K").unwrap();
-        assert_eq!(formula, Formula::Thick(Thick::BarrettTrueK))
-    }
-
-    #[test]
-    fn unknown_formula_returns_err() {
-        let formula = Formula::new_from_str("Awesome Formula");
-        assert_eq!(
-            formula,
-            Err(TargetBoundsError::Formula("Awesome Formula".to_string()))
-        )
     }
 
     #[test]
     fn makes_new_target() {
         let target = Target::new(
-            Some(iol_constant()),
+            iol_constant(),
             -0.15,
             Some(Cyl {
                 power: 0.22,
-                axis: Axis(82),
+                axis: Axis::new(82).unwrap(),
             }),
         )
         .check();
-
-        println!(std::any::type_name(target));
     }
 
     #[test]
     fn out_of_bounds_target_se_returns_err() {
         let constant = iol_constant();
         let se = -12.5;
-        let cyl = Cyl::new(0.22, 82);
-        let target = Target::new(constant, se, cyl);
+        let cyl = Cyl::new(0.22, 82).unwrap();
+        let target = Target::new(constant, se, Some(cyl)).check();
 
-        assert_eq!(target, Err(TargetBoundsError::Se(se)))
+        assert_eq!(target, Err(TargetBoundsError::Se(se)));
     }
 
     #[test]
     fn out_of_bounds_target_cyl_power_returns_err() {
         let constant = iol_constant();
-        let se = -12.5;
-        let cyl = Cyl::new(7.1, 82);
-        let target = Target::new(constant, se, cyl);
+        let se = -0.18;
+        let cyl = Cyl::new(7.1, 82).unwrap();
+        let target = Target::new(constant, se, Some(cyl)).check();
 
-        assert_eq!(target, Err(TargetBoundsError::Cyl(cyl)))
+        assert_eq!(target, Err(TargetBoundsError::Cyl(cyl.power)));
     }
 }

@@ -1,7 +1,13 @@
 // https://stackoverflow.com/questions/54048500/convert-literal-to-associated-type-in-generic-struct-implementation
 // https://stackoverflow.com/questions/54504026/how-do-i-provide-an-implementation-of-a-generic-struct-in-rust
 
-use crate::cyl::{Cyl, CylPair};
+use crate::{
+    bounds_check::Unchecked,
+    cyl::{Cyl, CylPair},
+    refraction::Refraction,
+    target::{Constant, Target},
+};
+use std::marker::PhantomData;
 use thiserror::Error;
 
 /// The error type for an invalid [`Sca`].
@@ -62,5 +68,22 @@ impl RawSca {
         };
 
         Ok(Self { sph, cyl })
+    }
+
+    pub fn into_refraction(&self) -> Refraction<Unchecked> {
+        Refraction {
+            sph: self.sph(),
+            cyl: self.cyl(),
+            bounds: PhantomData,
+        }
+    }
+
+    pub fn into_target(&self, constant: Option<Constant>) -> Target<Unchecked> {
+        Target {
+            constant,
+            se: self.sph(),
+            cyl: self.cyl(),
+            bounds: PhantomData,
+        }
     }
 }

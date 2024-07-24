@@ -22,7 +22,7 @@ impl Default for Cyl {
     fn default() -> Self {
         Cyl {
             power: 0.0,
-            axis: Axis(0),
+            axis: Axis::new(0).expect("default axis to be created"),
         }
     }
 }
@@ -52,15 +52,16 @@ mod tests {
             cyl,
             Ok(Cyl {
                 power: 2.75,
-                axis: Axis(30)
+                axis: Axis::new(30).unwrap()
             })
-        )
+        );
     }
 
     #[test]
     fn out_of_bounds_cyl_axis_returns_err() {
         let axis = 180i32;
         let cyl = Cyl::new(6.0, axis);
-        assert_eq!(cyl, Err(ScaBoundsError::Axis(axis)))
+
+        assert_eq!(cyl, Err(ScaBoundsError::Axis(axis)));
     }
 }

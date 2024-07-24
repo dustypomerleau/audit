@@ -95,7 +95,7 @@ mod tests {
     fn makes_new_va() {
         let va = Va::new(6.0, 7.5).unwrap();
 
-        assert_eq!(va, Va { num: 6.0, den: 7.5 })
+        assert_eq!(va, Va { num: 6.0, den: 7.5 });
     }
 
     #[test]
@@ -103,7 +103,7 @@ mod tests {
         let num = 21.2;
         let va = Va::new(num, 9.0);
 
-        assert_eq!(va, Err(VaBoundsError::Num(num)))
+        assert_eq!(va, Err(VaBoundsError::Num(num)));
     }
 
     #[test]
@@ -111,7 +111,6 @@ mod tests {
         let den = -1.2;
         let va = Va::new(6.0, den);
 
-        assert_eq!(va, Err(VaBoundsError::Den(den)))
+        assert_eq!(va, Err(VaBoundsError::Den(den)));
     }
 }
-

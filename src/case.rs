@@ -1,6 +1,6 @@
 #[cfg(feature = "ssr")] use crate::db::DbCase;
 use crate::{
-    check::Checked,
+    bounds_check::Checked,
     iol::{IolBoundsError, OpIol},
     refraction::{OpRefraction, RefractionBoundsError},
     sca::ScaBoundsError,

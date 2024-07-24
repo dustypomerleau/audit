@@ -6,8 +6,8 @@
 mod refs;
 
 pub mod axis;
+pub mod bounds_check;
 pub mod case;
-pub mod check;
 pub mod components;
 pub mod cyl;
 #[cfg(feature = "ssr")] pub mod db;

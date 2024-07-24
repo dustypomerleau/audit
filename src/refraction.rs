@@ -1,5 +1,5 @@
 use crate::{
-    check::{BoundsCheck, Checked, Unchecked},
+    bounds_check::{BoundsCheck, Checked, Unchecked},
     cyl::Cyl,
     sca::{Sca, ScaMut},
 };
@@ -24,9 +24,9 @@ pub enum RefractionBoundsError {
 /// A patient's subjective refraction.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Refraction<Bounds = Unchecked> {
-    sph: f32,
-    cyl: Option<Cyl>,
-    bounds: PhantomData<Bounds>,
+    pub sph: f32,
+    pub cyl: Option<Cyl>,
+    pub bounds: PhantomData<Bounds>,
 }
 
 // Reading values is allowed in both the `Unchecked` and `Checked` variants...
@@ -82,6 +82,14 @@ impl ScaMut for Refraction<Unchecked> {
     }
 }
 
+impl TryFrom<Refraction<Unchecked>> for Refraction<Checked> {
+    type Error = RefractionBoundsError;
+
+    fn try_from(value: Refraction<Unchecked>) -> Result<Self, Self::Error> {
+        value.check()
+    }
+}
+
 impl Refraction<Unchecked> {
     pub fn new(sph: f32, cyl: Option<Cyl>) -> Self {
         Refraction {
@@ -89,14 +97,6 @@ impl Refraction<Unchecked> {
             cyl,
             bounds: PhantomData,
         }
-    }
-}
-
-impl TryFrom<Refraction<Unchecked>> for Refraction<Checked> {
-    type Error = RefractionBoundsError;
-
-    fn try_from(value: Refraction<Unchecked>) -> Result<Self, Self::Error> {
-        value.check()
     }
 }
 
@@ -111,26 +111,26 @@ pub struct OpRefraction {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::axis::Axis;
+    use crate::{axis::Axis, sca::RawSca};
 
     #[test]
-    fn refraction_implements_try_from_sca() {
-        let unchecked: Refraction<Unchecked> = Refraction {
+    fn check_succeeds_on_in_bounds_refraction() {
+        let unchecked = Refraction::<Unchecked> {
             sph: -3.25,
             cyl: Some(Cyl {
                 power: -0.75,
-                axis: Axis(100),
+                axis: Axis::new(100).unwrap(),
             }),
             bounds: PhantomData,
         };
 
-        let output: Refraction<Checked> = unchecked.try_into().unwrap();
+        let output = unchecked.check().unwrap();
 
-        let expected: Refraction<Checked> = Refraction {
+        let expected = Refraction::<Checked> {
             sph: -3.25,
             cyl: Some(Cyl {
                 power: -0.75,
-                axis: Axis(100),
+                axis: Axis::new(100).unwrap(),
             }),
             bounds: PhantomData,
         };
@@ -139,38 +139,46 @@ mod tests {
     }
 
     #[test]
-    fn out_of_bounds_refraction_sph_returns_err() {
+    fn out_of_bounds_refraction_sph_fails_check() {
         let sph = -40.5f32;
-        let refraction: Result<Refraction, RefractionBoundsError> =
-            Sca::new(sph, Some(-0.25), Some(30)).unwrap().try_into();
+        let refraction = RawSca::new(sph, Some(-0.25), Some(30))
+            .unwrap()
+            .into_refraction()
+            .check();
 
-        assert_eq!(refraction, Err(RefractionBoundsError::Sph(sph)))
+        assert_eq!(refraction, Err(RefractionBoundsError::Sph(sph)));
     }
 
     #[test]
-    fn nonzero_rem_refraction_sph_returns_err() {
+    fn nonzero_rem_refraction_sph_fails_check() {
         let sph = -10.2f32;
-        let refraction: Result<Refraction, RefBoundsError> =
-            Sca::new(sph, Some(-0.25), Some(30)).unwrap().try_into();
+        let refraction = RawSca::new(sph, Some(-0.25), Some(30))
+            .unwrap()
+            .into_refraction()
+            .check();
 
-        assert_eq!(refraction, Err(RefBoundsError::Sph(sph)))
+        assert_eq!(refraction, Err(RefractionBoundsError::Sph(sph)));
     }
 
     #[test]
-    fn out_of_bounds_refraction_cyl_power_returns_err() {
+    fn out_of_bounds_refraction_cyl_power_fails_check() {
         let cyl = -12.25f32;
-        let refraction: Result<Refraction, RefBoundsError> =
-            Sca::new(3.5, Some(cyl), Some(160)).unwrap().try_into();
+        let refraction = RawSca::new(3.5, Some(cyl), Some(160))
+            .unwrap()
+            .into_refraction()
+            .check();
 
-        assert_eq!(refraction, Err(RefBoundsError::Cyl(cyl)))
+        assert_eq!(refraction, Err(RefractionBoundsError::Cyl(cyl)));
     }
 
     #[test]
-    fn nonzero_rem_refraction_cyl_power_returns_err() {
+    fn nonzero_rem_refraction_cyl_power_fails_check() {
         let cyl = -0.6f32;
-        let refraction: Result<Refraction, RefBoundsError> =
-            Sca::new(3.5, Some(cyl), Some(160)).unwrap().try_into();
+        let refraction = RawSca::new(3.5, Some(cyl), Some(160))
+            .unwrap()
+            .into_refraction()
+            .check();
 
-        assert_eq!(refraction, Err(RefBoundsError::Cyl(cyl)))
+        assert_eq!(refraction, Err(RefractionBoundsError::Cyl(cyl)));
     }
 }

@@ -1,5 +1,5 @@
 use crate::{
-    check::{BoundsCheck, Checked, Unchecked},
+    bounds_check::{BoundsCheck, Checked, Unchecked},
     cyl::{Cyl, CylPair},
     sca::{Sca, ScaMut},
 };
@@ -150,7 +150,7 @@ mod tests {
                 se: 24.25,
                 cyl: Some(Cyl {
                     power: 3.0,
-                    axis: Axis(12)
+                    axis: Axis::new(12).unwrap(),
                 }),
                 bounds: PhantomData
             }
@@ -164,7 +164,7 @@ mod tests {
         let sca = RawSca::new(100.25, Some(3.0), Some(12)).unwrap();
         let checked = OpIol::new(iol(), sca).check();
 
-        assert_eq!(checked, Err(IolBoundsError::Se(sca.sph())))
+        assert_eq!(checked, Err(IolBoundsError::Se(sca.sph())));
     }
 
     #[test]
@@ -172,24 +172,24 @@ mod tests {
         let sca = RawSca::new(10.35, Some(3.0), Some(12)).unwrap();
         let opiol = OpIol::new(iol(), sca).check();
 
-        assert_eq!(opiol, Err(IolBoundsError::Se(sca.sph())))
+        assert_eq!(opiol, Err(IolBoundsError::Se(sca.sph())));
     }
 
     #[test]
     fn out_of_bounds_iol_cyl_power_returns_err() {
         let sca = RawSca::new(18.5, Some(31.0), Some(170)).unwrap();
-        let cyl = sca.cyl().unwrap().power;
+        let cyl = sca.cyl().unwrap();
         let opiol = OpIol::new(iol(), sca).check();
 
-        assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl)))
+        assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl.power)));
     }
 
     #[test]
     fn nonzero_rem_iol_cyl_power_returns_err() {
         let sca = RawSca::new(28.5, Some(2.06), Some(170)).unwrap();
-        let cyl = sca.cyl().unwrap().power;
+        let cyl = sca.cyl().unwrap();
         let opiol = OpIol::new(iol(), sca).check();
 
-        assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl)))
+        assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl.power)));
     }
 }
