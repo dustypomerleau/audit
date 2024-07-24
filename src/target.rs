@@ -123,8 +123,9 @@ impl ScaMut for Target<Unchecked> {
 }
 
 impl Target<Unchecked> {
-    /// Create a new [`Target`] without bounds checking.
-    // todo: all `new()` functions should take the RawSca first by convention.
+    /// Create a new [`Target`] from a generic [`Sca`]. At initialization, the values are not yet
+    /// bounds-checked. We allow [`ScaMut`] methods only on the [`Unchecked`] variant (meaning,
+    /// before bounds-checking).
     pub fn new<T: Sca>(sca: T, constant: Option<Constant>) -> Self {
         Self {
             constant,

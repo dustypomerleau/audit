@@ -38,6 +38,7 @@ pub struct Va {
 
 impl Va {
     /// Creates a new [`Va`] with bounds checking.
+    // todo: what would be the implications of moving to a `Va<Checked>` model
     pub fn new(num: f32, den: f32) -> Result<Self, VaBoundsError> {
         if (0.0..=20.0).contains(&num) && num > 0.0 {
             if den > 0.0 {
