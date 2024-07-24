@@ -76,7 +76,7 @@ pub struct DbCase {
 }
 
 impl From<Case> for DbCase {
-    fn from(value: Case) -> Self {
+    fn from(case: Case) -> Self {
         todo!()
     }
 }

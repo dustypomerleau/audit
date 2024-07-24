@@ -120,8 +120,7 @@ pub enum Adverse {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Case {
     pub surgeon: Surgeon,
-    /// A unique value provided by the surgeon, such that deanonymization may only be performed by
-    /// the surgeon.
+    /// A unique value that allows (only) the surgeon to deanonymize the case.
     pub urn: String,
     pub side: Side,
     /// The surgeon's intended refractive target, based on the formula of their choice.
@@ -129,7 +128,8 @@ pub struct Case {
     pub date: NaiveDate,
     /// The institution where surgery was performed.
     pub site: Option<String>,
-    // If no SIA is provided at the case level, the surgeon's defaults will be used.
+    /// An [`Sia`] specific to this case. If no SIA is provided at the case level, the surgeon
+    /// defaults will be used.
     pub sia: Option<Sia>,
     pub iol: Option<OpIol>,
     pub adverse: Option<Adverse>,
@@ -141,7 +141,7 @@ pub struct Case {
 impl TryFrom<DbCase> for Case {
     type Error = CaseError;
 
-    fn try_from(value: DbCase) -> Result<Self, Self::Error> {
+    fn try_from(dbcase: DbCase) -> Result<Self, Self::Error> {
         todo!()
     }
 }

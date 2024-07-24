@@ -124,11 +124,12 @@ impl ScaMut for Target<Unchecked> {
 
 impl Target<Unchecked> {
     /// Create a new [`Target`] without bounds checking.
-    pub fn new(constant: Option<Constant>, se: f32, cyl: Option<Cyl>) -> Self {
+    // todo: all `new()` functions should take the RawSca first by convention.
+    pub fn new<T: Sca>(sca: T, constant: Option<Constant>) -> Self {
         Self {
             constant,
-            se,
-            cyl,
+            se: sca.sph(),
+            cyl: sca.cyl(),
             bounds: PhantomData,
         }
     }
@@ -137,7 +138,7 @@ impl Target<Unchecked> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::axis::Axis;
+    use crate::{axis::Axis, sca::RawSca};
 
     // todo: replace with a randomized TargetFormula using Mock(all)
     fn iol_constant() -> Option<Constant> {
@@ -149,34 +150,25 @@ mod tests {
 
     #[test]
     fn makes_new_target() {
-        let _target = Target::new(
-            iol_constant(),
-            -0.15,
-            Some(Cyl {
-                power: 0.22,
-                axis: Axis::new(82).unwrap(),
-            }),
-        )
-        .check();
+        let sca = RawSca::new(-0.15, Some(0.22), Some(82)).unwrap();
+        let _target = Target::new(sca, iol_constant()).check().unwrap();
     }
 
     #[test]
-    fn out_of_bounds_target_se_returns_err() {
-        let constant = iol_constant();
+    fn out_of_bounds_target_se_fails_check() {
         let se = -12.5;
-        let cyl = Cyl::new(0.22, 82).unwrap();
-        let target = Target::new(constant, se, Some(cyl)).check();
+        let sca = RawSca::new(se, Some(0.22), Some(82)).unwrap();
+        let target = Target::new(sca, iol_constant()).check();
 
         assert_eq!(target, Err(TargetBoundsError::Se(se)));
     }
 
     #[test]
-    fn out_of_bounds_target_cyl_power_returns_err() {
-        let constant = iol_constant();
-        let se = -0.18;
-        let cyl = Cyl::new(7.1, 82).unwrap();
-        let target = Target::new(constant, se, Some(cyl)).check();
+    fn out_of_bounds_target_cyl_power_fails_check() {
+        let power = 7.1;
+        let sca = RawSca::new(-0.18, Some(power), Some(82)).unwrap();
+        let target = Target::new(sca, iol_constant()).check();
 
-        assert_eq!(target, Err(TargetBoundsError::Cyl(cyl.power)));
+        assert_eq!(target, Err(TargetBoundsError::Cyl(power)));
     }
 }

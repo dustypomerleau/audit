@@ -21,7 +21,8 @@ pub enum RefractionBoundsError {
     Cyl(f32),
 }
 
-/// A patient's subjective refraction.
+/// A patient's subjective refraction. At initialization, the values are not yet bounds-checked. We
+/// allow [`ScaMut`] methods only on the [`Unchecked`] variant (meaning, before bounds-checking).
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Refraction<Bounds = Unchecked> {
     pub sph: f32,
@@ -29,7 +30,6 @@ pub struct Refraction<Bounds = Unchecked> {
     pub bounds: PhantomData<Bounds>,
 }
 
-// Reading values is allowed in both the `Unchecked` and `Checked` variants...
 impl<Bounds> Sca for Refraction<Bounds> {
     fn sph(&self) -> f32 {
         self.sph
@@ -68,8 +68,6 @@ impl BoundsCheck for Refraction<Unchecked> {
     }
 }
 
-// ...but writing to values is only allowed in `Unchecked`, essentially rendering `Checked`
-// immutable once instantiated.
 impl ScaMut for Refraction<Unchecked> {
     fn set_sph(mut self, sph: f32) -> Self {
         self.sph = sph;
@@ -82,26 +80,28 @@ impl ScaMut for Refraction<Unchecked> {
     }
 }
 
-impl TryFrom<Refraction<Unchecked>> for Refraction<Checked> {
-    type Error = RefractionBoundsError;
-
-    fn try_from(value: Refraction<Unchecked>) -> Result<Self, Self::Error> {
-        value.check()
-    }
-}
-
 impl Refraction<Unchecked> {
-    pub fn new(sph: f32, cyl: Option<Cyl>) -> Self {
+    /// Create a new [`Refraction`] from a generic [`Sca`]. At initialization, the values are not
+    /// yet bounds-checked. We allow [`ScaMut`] methods only on the [`Unchecked`] variant
+    /// (meaning, before bounds-checking).
+    pub fn new<T: Sca>(sca: T) -> Self {
         Refraction {
-            sph,
-            cyl,
+            sph: sca.sph(),
+            cyl: sca.cyl(),
             bounds: PhantomData,
         }
     }
 }
 
-impl Refraction<Checked> {}
+impl TryFrom<Refraction<Unchecked>> for Refraction<Checked> {
+    type Error = RefractionBoundsError;
 
+    fn try_from(refraction: Refraction<Unchecked>) -> Result<Self, Self::Error> {
+        refraction.check()
+    }
+}
+
+/// The preoperative and postoperative refractions for a given [`Case`](crate::case::Case).
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpRefraction {
     pub before: Refraction<Checked>,

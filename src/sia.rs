@@ -1,4 +1,4 @@
-use crate::axis::Axis;
+use crate::{axis::Axis, cyl::Cyl};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -16,8 +16,19 @@ pub struct Sia {
     axis: Axis,
 }
 
+impl TryFrom<Cyl> for Sia {
+    type Error = SiaBoundsError;
+
+    fn try_from(cyl: Cyl) -> Result<Self, Self::Error> {
+        Self::new(cyl)
+    }
+}
+
 impl Sia {
-    pub fn new(power: f32, axis: Axis) -> Result<Self, SiaBoundsError> {
+    /// Create a new bounds-checked [`Sia`] from a generic [`Cyl`].
+    pub fn new(cyl: Cyl) -> Result<Self, SiaBoundsError> {
+        let Cyl { power, axis } = cyl;
+
         if (0.0..=2.0).contains(&power) {
             Ok(Self { power, axis })
         } else {
@@ -34,8 +45,8 @@ mod tests {
     #[test]
     fn out_of_bounds_sia_power_returns_err() {
         let power = 2.1;
-        let axis = Axis::new(100).unwrap();
-        let sia = Sia::new(power, axis);
+        let cyl = Cyl::new(power, 100).unwrap();
+        let sia = Sia::new(cyl);
 
         assert_eq!(sia, Err(SiaBoundsError::Sia(power)));
     }

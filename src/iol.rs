@@ -30,7 +30,7 @@ pub enum IolBoundsError {
     Iol,
 }
 
-/// The class of [`Iol`] (monofocal, EDOF, multifocal)
+/// The class of [`Iol`] (monofocal, EDOF, multifocal).
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "ssr", derive(Queryable))]
 pub enum Focus {
@@ -39,7 +39,7 @@ pub enum Focus {
     Multi,
 }
 
-/// A specific model of IOL
+/// A specific model of IOL.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Iol {
@@ -111,8 +111,19 @@ impl ScaMut for OpIol<Unchecked> {
     }
 }
 
+impl TryFrom<OpIol<Unchecked>> for OpIol<Checked> {
+    type Error = IolBoundsError;
+
+    fn try_from(opiol: OpIol<Unchecked>) -> Result<Self, Self::Error> {
+        opiol.check()
+    }
+}
+
 impl OpIol<Unchecked> {
-    pub fn new<T: Sca>(iol: Iol, sca: T) -> Self {
+    /// Create a new [`OpIol`] from a generic [`Sca`]. At initialization, the values are not yet
+    /// bounds-checked. We allow [`ScaMut`] methods only on the [`Unchecked`] variant (meaning,
+    /// before bounds-checking).
+    pub fn new<T: Sca>(sca: T, iol: Iol) -> Self {
         Self {
             iol,
             se: sca.sph(),
@@ -141,7 +152,7 @@ mod tests {
     #[test]
     fn makes_new_opiol() {
         let sca = RawSca::new(24.25, Some(3.0), Some(12)).unwrap();
-        let checked = OpIol::new(iol(), sca).check().unwrap();
+        let checked = OpIol::new(sca, iol()).check().unwrap();
 
         assert_eq!(
             checked,
@@ -161,35 +172,38 @@ mod tests {
     fn out_of_bounds_iol_se_returns_err() {
         // todo: randomize the out of bounds values on all failing tests
         // (Axis, Cyl, Iol, Refraction, Sca, Sia, Target, Va)
-        let sca = RawSca::new(100.25, Some(3.0), Some(12)).unwrap();
-        let checked = OpIol::new(iol(), sca).check();
+        let se = 100.25;
+        let sca = RawSca::new(se, Some(3.0), Some(12)).unwrap();
+        let checked = OpIol::new(sca, iol()).check();
 
-        assert_eq!(checked, Err(IolBoundsError::Se(sca.sph())));
+        assert_eq!(checked, Err(IolBoundsError::Se(se)));
     }
 
     #[test]
     fn nonzero_rem_iol_se_returns_err() {
-        let sca = RawSca::new(10.35, Some(3.0), Some(12)).unwrap();
-        let opiol = OpIol::new(iol(), sca).check();
+        let se = 10.35;
+        let sca = RawSca::new(se, Some(3.0), Some(12)).unwrap();
+        let opiol = OpIol::new(sca, iol()).check();
 
         assert_eq!(opiol, Err(IolBoundsError::Se(sca.sph())));
     }
 
     #[test]
     fn out_of_bounds_iol_cyl_power_returns_err() {
-        let sca = RawSca::new(18.5, Some(31.0), Some(170)).unwrap();
-        let cyl = sca.cyl().unwrap();
-        let opiol = OpIol::new(iol(), sca).check();
+        let power = 31.0;
+        let sca = RawSca::new(18.5, Some(power), Some(170)).unwrap();
+        let opiol = OpIol::new(sca, iol()).check();
 
-        assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl.power)));
+        assert_eq!(opiol, Err(IolBoundsError::Cyl(power)));
     }
 
     #[test]
     fn nonzero_rem_iol_cyl_power_returns_err() {
-        let sca = RawSca::new(28.5, Some(2.06), Some(170)).unwrap();
+        let power = 2.06;
+        let sca = RawSca::new(28.5, Some(power), Some(170)).unwrap();
         let cyl = sca.cyl().unwrap();
-        let opiol = OpIol::new(iol(), sca).check();
+        let opiol = OpIol::new(sca, iol()).check();
 
-        assert_eq!(opiol, Err(IolBoundsError::Cyl(cyl.power)));
+        assert_eq!(opiol, Err(IolBoundsError::Cyl(power)));
     }
 }
