@@ -149,7 +149,7 @@ mod tests {
 
     #[test]
     fn makes_new_target() {
-        let target = Target::new(
+        let _target = Target::new(
             iol_constant(),
             -0.15,
             Some(Cyl {
