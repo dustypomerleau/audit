@@ -136,7 +136,7 @@ impl OpIol<Unchecked> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{axis::Axis, sca::RawSca};
+    use crate::sca::RawSca;
 
     // todo: replace this function with an implementation of Mock(all)
     fn iol() -> Iol {
@@ -161,7 +161,7 @@ mod tests {
                 se: 24.25,
                 cyl: Some(Cyl {
                     power: 3.0,
-                    axis: Axis::new(12).unwrap(),
+                    axis: 12,
                 }),
                 bounds: PhantomData
             }
@@ -183,27 +183,26 @@ mod tests {
     fn nonzero_rem_iol_se_returns_err() {
         let se = 10.35;
         let sca = RawSca::new(se, Some(3.0), Some(12)).unwrap();
-        let opiol = OpIol::new(sca, iol()).check();
+        let checked = OpIol::new(sca, iol()).check();
 
-        assert_eq!(opiol, Err(IolBoundsError::Se(sca.sph())));
+        assert_eq!(checked, Err(IolBoundsError::Se(sca.sph())));
     }
 
     #[test]
     fn out_of_bounds_iol_cyl_power_returns_err() {
         let power = 31.0;
         let sca = RawSca::new(18.5, Some(power), Some(170)).unwrap();
-        let opiol = OpIol::new(sca, iol()).check();
+        let checked = OpIol::new(sca, iol()).check();
 
-        assert_eq!(opiol, Err(IolBoundsError::Cyl(power)));
+        assert_eq!(checked, Err(IolBoundsError::Cyl(power)));
     }
 
     #[test]
     fn nonzero_rem_iol_cyl_power_returns_err() {
         let power = 2.06;
         let sca = RawSca::new(28.5, Some(power), Some(170)).unwrap();
-        let cyl = sca.cyl().unwrap();
-        let opiol = OpIol::new(sca, iol()).check();
+        let checked = OpIol::new(sca, iol()).check();
 
-        assert_eq!(opiol, Err(IolBoundsError::Cyl(power)));
+        assert_eq!(checked, Err(IolBoundsError::Cyl(power)));
     }
 }

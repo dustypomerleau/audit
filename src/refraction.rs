@@ -111,7 +111,7 @@ pub struct OpRefraction {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{axis::Axis, sca::RawSca};
+    use crate::sca::RawSca;
 
     #[test]
     fn check_succeeds_on_in_bounds_refraction() {
@@ -119,7 +119,7 @@ mod tests {
             sph: -3.25,
             cyl: Some(Cyl {
                 power: -0.75,
-                axis: Axis::new(100).unwrap(),
+                axis: 100,
             }),
             bounds: PhantomData,
         };
@@ -130,7 +130,7 @@ mod tests {
             sph: -3.25,
             cyl: Some(Cyl {
                 power: -0.75,
-                axis: Axis::new(100).unwrap(),
+                axis: 100,
             }),
             bounds: PhantomData,
         };

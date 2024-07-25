@@ -139,7 +139,7 @@ impl Target<Unchecked> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{axis::Axis, sca::RawSca};
+    use crate::sca::RawSca;
 
     // todo: replace with a randomized TargetFormula using Mock(all)
     fn iol_constant() -> Option<Constant> {

@@ -18,7 +18,7 @@ pub enum ScaBoundsError {
     NoPair(CylPair),
 
     #[error("cylinder axis must be an integer value between 0° and 179° (supplied value: {0})")]
-    Axis(i32),
+    Axis(u32),
 }
 
 /// A type that wraps a sphere and a cylinder.
@@ -30,7 +30,7 @@ pub trait Sca {
 }
 
 /// A type that has mutable access to a wrapped sphere and cylinder.
-pub trait ScaMut {
+pub trait ScaMut: Sca {
     /// Set the value of the wrapped sphere (or spherical equivalent).
     fn set_sph(self, sph: f32) -> Self;
     /// Set the value of the wrapped [`Cyl`].
@@ -68,8 +68,8 @@ impl ScaMut for RawSca {
 }
 
 impl RawSca {
-    /// Construct a new [`RawSca`], with bounds checking on the [`Axis`](crate::axis::Axis).
-    pub fn new(sph: f32, power: Option<f32>, axis: Option<i32>) -> Result<Self, ScaBoundsError> {
+    /// Construct a new [`RawSca`], with bounds checking on the [`axis`](Cyl::axis).
+    pub fn new(sph: f32, power: Option<f32>, axis: Option<u32>) -> Result<Self, ScaBoundsError> {
         let cyl = match (power, axis) {
             (Some(power), Some(axis)) => Some(Cyl::new(power, axis)?),
             (None, None) => None,

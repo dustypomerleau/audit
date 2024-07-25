@@ -5,7 +5,6 @@
 // for RA support only
 mod refs;
 
-pub mod axis;
 pub mod bounds_check;
 pub mod case;
 pub mod components;

@@ -38,7 +38,8 @@ pub struct Va {
 
 impl Va {
     /// Creates a new [`Va`] with bounds checking.
-    // todo: what would be the implications of moving to a `Va<Checked>` model
+    // todo: what would be the implications of moving to a `Va<Checked>` model - it would be more
+    // consistent, but what headaches would it cause? Probably lots...
     pub fn new(num: f32, den: f32) -> Result<Self, VaBoundsError> {
         if (0.0..=20.0).contains(&num) && num > 0.0 {
             if den > 0.0 {
@@ -52,6 +53,7 @@ impl Va {
     }
 
     /// Creates a new [`Va`] from optional values, with bounds checking.
+    // todo: just call this `new()` for consistency with all the other methods returning result
     pub fn try_new(num: Option<f32>, den: Option<f32>) -> Result<Option<Self>, VaBoundsError> {
         match (num, den) {
             (Some(num), Some(den)) => Some(Va::new(num, den)).transpose(),

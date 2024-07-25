@@ -1,4 +1,4 @@
-use crate::{axis::Axis, cyl::Cyl};
+use crate::cyl::Cyl;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -9,11 +9,14 @@ pub enum SiaBoundsError {
     Sia(f32),
 }
 
-/// A surgically-induced astigmatism.
+/// A surgically-induced astigmatism. The purist would prefer using
+/// `meridian` rather than `axis` for [`Sia`] and biometric Ks, but on balance I've
+/// decided that the cognitive overhead of using both terms in the code is higher than the cognitive
+/// overhead of knowing when `axis` actually refers to a meridian.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Sia {
     power: f32,
-    axis: Axis,
+    axis: u32,
 }
 
 impl TryFrom<Cyl> for Sia {
@@ -40,7 +43,12 @@ impl Sia {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::axis::Axis;
+
+    #[test]
+    fn makes_new_sia() {
+        let cyl = Cyl::new(0.1, 100).unwrap();
+        Sia::new(cyl).unwrap();
+    }
 
     #[test]
     fn out_of_bounds_sia_power_returns_err() {
