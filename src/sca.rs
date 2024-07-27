@@ -24,7 +24,7 @@ pub enum ScaBoundsError {
 /// A type that wraps a sphere and a cylinder.
 pub trait Sca {
     /// Return the spherical value from a [`Sca`].
-    fn sph(&self) -> f32;
+    fn sph(&self) -> i32;
     /// Return the [`Cyl`] from a [`Sca`].
     fn cyl(&self) -> Option<Cyl>;
 }
@@ -32,7 +32,7 @@ pub trait Sca {
 /// A type that has mutable access to a wrapped sphere and cylinder.
 pub trait ScaMut: Sca {
     /// Set the value of the wrapped sphere (or spherical equivalent).
-    fn set_sph(self, sph: f32) -> Self;
+    fn set_sph(self, sph: i32) -> Self;
     /// Set the value of the wrapped [`Cyl`].
     fn set_cyl(self, cyl: Option<Cyl>) -> Self;
 }
@@ -69,15 +69,8 @@ impl ScaMut for RawSca {
 
 impl RawSca {
     /// Construct a new [`RawSca`], with bounds checking on the [`axis`](Cyl::axis).
-    pub fn new(sph: f32, power: Option<f32>, axis: Option<u32>) -> Result<Self, ScaBoundsError> {
-        let cyl = match (power, axis) {
-            (Some(power), Some(axis)) => Some(Cyl::new(power, axis)?),
-            (None, None) => None,
-            (_, None) => return Err(ScaBoundsError::NoPair(CylPair::Axis)),
-            (None, _) => return Err(ScaBoundsError::NoPair(CylPair::Power)),
-        };
-
-        Ok(Self { sph, cyl })
+    pub fn new(sph: i32, cyl: Option<Cyl>) -> Self {
+        Self { sph, cyl }
     }
 
     /// Convert a [`RawSca`] into a [`Refraction`].

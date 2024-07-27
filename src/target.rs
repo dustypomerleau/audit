@@ -51,11 +51,12 @@ pub enum Formula {
 
 /// The combination of formula and IOL constant used to calculate the [`Target`] for a
 /// [`Case`](crate::case::Case). The default constant for the case's IOL/formula pair is used,
-/// unless explicitly overridden by the surgeon.
+/// unless explicitly overridden by the surgeon. As with other values, we store `value * 100` as an
+/// integer, rather than a float.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Constant {
-    pub value: f32,
+    pub value: u32,
     pub formula: Formula,
 }
 
@@ -63,13 +64,13 @@ pub struct Constant {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Target<Bounds = Unchecked> {
     pub constant: Option<Constant>,
-    pub se: f32,
+    pub se: i32,
     pub cyl: Option<Cyl>,
     pub bounds: PhantomData<Bounds>,
 }
 
 impl<Bounds> Sca for Target<Bounds> {
-    fn sph(&self) -> f32 {
+    fn sph(&self) -> i32 {
         self.se
     }
 
@@ -87,7 +88,7 @@ impl BoundsCheck for Target<Unchecked> {
             constant, se, cyl, ..
         } = self;
 
-        if (-6.0..=2.0).contains(&se) {
+        if (-600..=200).contains(&se) {
             let cyl = if let Some(Cyl { power, .. }) = cyl {
                 if (0.0..=6.0).contains(&power) {
                     cyl

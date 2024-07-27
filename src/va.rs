@@ -28,18 +28,19 @@ pub enum VaBoundsError {
 /// The type of vision chart is left to the surgeon's discretion, but is presumed to be a Snellen,
 /// ETDRS, or similar chart that provides fractional equivalents.
 ///
-/// The [`Va`] is assumed to be a distance visual acuity, unless wrapped by [`NearVa`].
+/// Values are represented as `((entered float) * 100) as u32`, and stored in the DB as `i32` with
+/// constraints. This makes the representation consistent with [`Cyl`](crate::cyl::Cyl),
+/// [`Iol`](crate::iol::Iol), [`Refraction`](crate::refraction::Refraction), and
+/// [`Target`](crate::target::Target).
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Va {
-    pub num: f32,
-    pub den: f32,
+    pub num: u32,
+    pub den: u32,
 }
 
 impl Va {
     /// Creates a new [`Va`] with bounds checking.
-    // todo: what would be the implications of moving to a `Va<Checked>` model - it would be more
-    // consistent, but what headaches would it cause? Probably lots...
     pub fn new(num: f32, den: f32) -> Result<Self, VaBoundsError> {
         if (0.0..=20.0).contains(&num) && num > 0.0 {
             if den > 0.0 {
@@ -49,17 +50,6 @@ impl Va {
             }
         } else {
             Err(VaBoundsError::Num(num))
-        }
-    }
-
-    /// Creates a new [`Va`] from optional values, with bounds checking.
-    // todo: just call this `new()` for consistency with all the other methods returning result
-    pub fn try_new(num: Option<f32>, den: Option<f32>) -> Result<Option<Self>, VaBoundsError> {
-        match (num, den) {
-            (Some(num), Some(den)) => Some(Va::new(num, den)).transpose(),
-            (None, None) => Ok(None),
-            (Some(_num), _) => Err(VaBoundsError::NoPair(VaPair::Denominator)),
-            (_, Some(_den)) => Err(VaBoundsError::NoPair(VaPair::Numerator)),
         }
     }
 }

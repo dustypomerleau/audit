@@ -25,13 +25,13 @@ pub enum RefractionBoundsError {
 /// allow [`ScaMut`] methods only on the [`Unchecked`] variant (meaning, before bounds-checking).
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Refraction<Bounds = Unchecked> {
-    pub sph: f32,
+    pub sph: i32,
     pub cyl: Option<Cyl>,
     pub bounds: PhantomData<Bounds>,
 }
 
 impl<Bounds> Sca for Refraction<Bounds> {
-    fn sph(&self) -> f32 {
+    fn sph(&self) -> i32 {
         self.sph
     }
 
@@ -52,9 +52,9 @@ impl BoundsCheck for Refraction<Unchecked> {
             ..self
         };
 
-        if (-20.0..=20.0).contains(&sph) && sph % 0.25 == 0.0 {
+        if (-2000..=2000).contains(&sph) && sph % 25 == 0.0 {
             if let Some(Cyl { power, .. }) = cyl {
-                if (-10.0..=10.0).contains(&power) && power % 0.25 == 0.0 {
+                if (-1000..=1000).contains(&power) && power % 25 == 0.0 {
                     Ok(checked)
                 } else {
                     Err(RefractionBoundsError::Cyl(power))
@@ -116,9 +116,9 @@ mod tests {
     #[test]
     fn check_succeeds_on_in_bounds_refraction() {
         let unchecked = Refraction::<Unchecked> {
-            sph: -3.25,
+            sph: -325,
             cyl: Some(Cyl {
-                power: -0.75,
+                power: -075,
                 axis: 100,
             }),
             bounds: PhantomData,
@@ -127,9 +127,9 @@ mod tests {
         let output = unchecked.check().unwrap();
 
         let expected = Refraction::<Checked> {
-            sph: -3.25,
+            sph: -325,
             cyl: Some(Cyl {
-                power: -0.75,
+                power: -075,
                 axis: 100,
             }),
             bounds: PhantomData,
@@ -140,8 +140,8 @@ mod tests {
 
     #[test]
     fn out_of_bounds_refraction_sph_fails_check() {
-        let sph = -40.5f32;
-        let refraction = RawSca::new(sph, Some(-0.25), Some(30))
+        let sph = -4050;
+        let refraction = RawSca::new(sph, Some(-025), Some(30))
             .unwrap()
             .into_refraction()
             .check();
@@ -151,8 +151,8 @@ mod tests {
 
     #[test]
     fn nonzero_rem_refraction_sph_fails_check() {
-        let sph = -10.2f32;
-        let refraction = RawSca::new(sph, Some(-0.25), Some(30))
+        let sph = -1020;
+        let refraction = RawSca::new(sph, Some(-025), Some(30))
             .unwrap()
             .into_refraction()
             .check();
@@ -162,8 +162,8 @@ mod tests {
 
     #[test]
     fn out_of_bounds_refraction_cyl_power_fails_check() {
-        let cyl = -12.25f32;
-        let refraction = RawSca::new(3.5, Some(cyl), Some(160))
+        let cyl = -1225;
+        let refraction = RawSca::new(350, Some(cyl), Some(160))
             .unwrap()
             .into_refraction()
             .check();
@@ -173,8 +173,8 @@ mod tests {
 
     #[test]
     fn nonzero_rem_refraction_cyl_power_fails_check() {
-        let cyl = -0.6f32;
-        let refraction = RawSca::new(3.5, Some(cyl), Some(160))
+        let cyl = -060;
+        let refraction = RawSca::new(350, Some(cyl), Some(160))
             .unwrap()
             .into_refraction()
             .check();

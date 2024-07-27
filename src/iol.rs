@@ -56,7 +56,7 @@ pub struct Iol {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct OpIol<Bounds = Unchecked> {
     pub iol: Iol,
-    pub se: f32,
+    pub se: i32,
     pub cyl: Option<Cyl>,
     pub bounds: PhantomData<Bounds>,
 }
@@ -73,9 +73,9 @@ impl BoundsCheck for OpIol<Unchecked> {
             ..self
         };
 
-        if (-20.0..=60.0).contains(&se) && se % 0.25 == 0.0 {
+        if (-2000..=6000).contains(&se) && se % 25 == 0.0 {
             if let Some(Cyl { power, .. }) = cyl {
-                if (1.0..=20.0).contains(&power) && power % 0.25 == 0.0 {
+                if (100..=2000).contains(&power) && power % 25 == 0.0 {
                     Ok(checked)
                 } else {
                     Err(IolBoundsError::Cyl(power))
@@ -90,7 +90,7 @@ impl BoundsCheck for OpIol<Unchecked> {
 }
 
 impl<Bounds> Sca for OpIol<Bounds> {
-    fn sph(&self) -> f32 {
+    fn sph(&self) -> i32 {
         self.se
     }
 
@@ -100,7 +100,7 @@ impl<Bounds> Sca for OpIol<Bounds> {
 }
 
 impl ScaMut for OpIol<Unchecked> {
-    fn set_sph(mut self, sph: f32) -> Self {
+    fn set_sph(mut self, sph: i32) -> Self {
         self.se = sph;
         self
     }
@@ -151,16 +151,16 @@ mod tests {
 
     #[test]
     fn makes_new_opiol() {
-        let sca = RawSca::new(24.25, Some(3.0), Some(12)).unwrap();
+        let sca = RawSca::new(2425, Cyl::new(300, 12).ok());
         let checked = OpIol::new(sca, iol()).check().unwrap();
 
         assert_eq!(
             checked,
             OpIol::<Checked> {
                 iol: iol(),
-                se: 24.25,
+                se: 2425,
                 cyl: Some(Cyl {
-                    power: 3.0,
+                    power: 300,
                     axis: 12,
                 }),
                 bounds: PhantomData
@@ -172,8 +172,8 @@ mod tests {
     fn out_of_bounds_iol_se_returns_err() {
         // todo: randomize the out of bounds values on all failing tests
         // (Axis, Cyl, Iol, Refraction, Sca, Sia, Target, Va)
-        let se = 100.25;
-        let sca = RawSca::new(se, Some(3.0), Some(12)).unwrap();
+        let se = 10025;
+        let sca = RawSca::new(se, Cyl::new(300, 12).ok());
         let checked = OpIol::new(sca, iol()).check();
 
         assert_eq!(checked, Err(IolBoundsError::Se(se)));

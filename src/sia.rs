@@ -6,7 +6,7 @@ use thiserror::Error;
 #[derive(Debug, Error, PartialEq)]
 pub enum SiaBoundsError {
     #[error("SIA must be a value between 0 D and 2 D (supplied value: {0})")]
-    Sia(f32),
+    Sia(i32),
 }
 
 /// A surgically-induced astigmatism. The purist would prefer using
@@ -15,8 +15,8 @@ pub enum SiaBoundsError {
 /// overhead of knowing when `axis` actually refers to a meridian.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Sia {
-    power: f32,
-    axis: u32,
+    pub power: i32,
+    pub axis: u32,
 }
 
 impl TryFrom<Cyl> for Sia {
@@ -32,7 +32,7 @@ impl Sia {
     pub fn new(cyl: Cyl) -> Result<Self, SiaBoundsError> {
         let Cyl { power, axis } = cyl;
 
-        if (0.0..=2.0).contains(&power) {
+        if (0..=200).contains(&power) {
             Ok(Self { power, axis })
         } else {
             Err(SiaBoundsError::Sia(power))
