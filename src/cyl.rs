@@ -32,6 +32,22 @@ impl Cyl {
             Err(ScaBoundsError::Axis(axis))
         }
     }
+
+    /// Update a [`Cyl`] with a new [`power`](Cyl::power).
+    pub fn set_power(mut self, power: i32) -> Self {
+        self.power = power;
+        self
+    }
+
+    /// Update a [`Cyl`] with a new [`axis`](Cyl::axis).
+    pub fn set_axis(mut self, axis: u32) -> Result<Self, ScaBoundsError> {
+        if axis < 180 {
+            self.axis = axis;
+            Ok(self)
+        } else {
+            Err(ScaBoundsError::Axis(axis))
+        }
+    }
 }
 
 #[cfg(test)]
