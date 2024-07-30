@@ -131,7 +131,7 @@ pub struct Case {
     /// An [`Sia`] specific to this case. If no SIA is provided at the case level, the surgeon
     /// defaults will be used.
     pub sia: Option<Sia>,
-    pub iol: Option<OpIol>,
+    pub iol: Option<OpIol<Checked>>,
     pub adverse: Option<Adverse>,
     pub va: OpVa,
     pub refraction: OpRefraction,
