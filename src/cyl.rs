@@ -13,19 +13,12 @@ pub enum CylPair {
 /// we constrain the axis field when constructing a [`Cyl`]. The fields have been left public for
 /// purposes of pattern-matching, but [`Cyl::new()`] should be used when instantiating a new
 /// [`Cyl`], in order to take advantage of bounds checking on the [`axis`](Cyl::axis).
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Cyl {
     /// Cylinder power in `hm^-1`.
     pub power: i32,
     /// Axis in degrees.
     pub axis: u32,
-}
-
-// When we call `unwrap_or_default()`, we always want a value, so replace None with 0s.
-impl Default for Cyl {
-    fn default() -> Self {
-        Cyl { power: 0, axis: 0 }
-    }
 }
 
 impl Cyl {
