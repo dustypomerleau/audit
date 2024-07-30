@@ -5,6 +5,11 @@
 /// The [`audit`](self) library provides tools for analyzing and plotting the results of cataract
 /// surgery. Powers that would typically be represented in diopters (1 m e-1) (refractions, IOLs,
 /// refractive targets) are instead represented in centidiopters (1 hm^-1) to allow integer math.
+///
+/// By convention, we use leading zeros for values less than 100 centidiopters, as a reminder that
+/// their diopter representations are < 1. This means that most representations of power values
+/// will be either 3 or 4 digits.
+//
 // for RA support only
 mod refs;
 
