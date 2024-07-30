@@ -1,11 +1,10 @@
-/// The [`audit`](self) library provides tools for analyzing and plotting the results of cataract
-/// surgery. Powers that would typically be represented in diopters (1 m e-1) (refractions, IOLs, refractive
-/// targets) are instead represented in centidiopters (1 hm^-1) to allow integer math.
-
 // Allows using existing fields to change from MyType<Zst1> to MyType<Zst2> without
 // repeating all of them.
 #![feature(type_changing_struct_update)]
 
+/// The [`audit`](self) library provides tools for analyzing and plotting the results of cataract
+/// surgery. Powers that would typically be represented in diopters (1 m e-1) (refractions, IOLs,
+/// refractive targets) are instead represented in centidiopters (1 hm^-1) to allow integer math.
 // for RA support only
 mod refs;
 
