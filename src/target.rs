@@ -15,12 +15,12 @@ pub enum TargetBoundsError {
     Formula(String),
 
     #[error(
-        "target spherical equivalent must be a value between -6 D and +2 D (supplied value: {0})"
+        "target spherical equivalent must be a value between -600 and +200 cD (supplied value: {0})"
     )]
-    Se(f32),
+    Se(i32),
 
-    #[error("target cylinder power must be a value between 0 D and +6 D (supplied value: {0})")]
-    Cyl(f32),
+    #[error("target cylinder power must be a value between 0 and 600 cD (supplied value: {0})")]
+    Cyl(i32),
 
     #[error("target constant requires both an IOL and a value, but the {0:?} was not supplied")]
     NoPair(ConstantPair),
@@ -54,7 +54,6 @@ pub enum Formula {
 /// unless explicitly overridden by the surgeon. As with other values, we store `value * 100` as an
 /// integer, rather than a float.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
-#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Constant {
     pub value: u32,
     pub formula: Formula,
@@ -90,7 +89,7 @@ impl BoundsCheck for Target<Unchecked> {
 
         if (-600..=200).contains(&se) {
             let cyl = if let Some(Cyl { power, .. }) = cyl {
-                if (0.0..=6.0).contains(&power) {
+                if (0..=600).contains(&power) {
                     cyl
                 } else {
                     return Err(TargetBoundsError::Cyl(power));
@@ -112,7 +111,7 @@ impl BoundsCheck for Target<Unchecked> {
 }
 
 impl ScaMut for Target<Unchecked> {
-    fn set_sph(mut self, sph: f32) -> Self {
+    fn set_sph(mut self, sph: i32) -> Self {
         self.se = sph;
         self
     }

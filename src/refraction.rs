@@ -13,12 +13,12 @@ pub enum RefractionBoundsError {
     #[error(
         "refraction spherical power must be a value between -20 D and +20 D (supplied value: {0})"
     )]
-    Sph(f32),
+    Sph(i32),
 
     #[error(
         "refraction cylinder power must be a value between -10 D and +10 D (supplied value: {0})"
     )]
-    Cyl(f32),
+    Cyl(i32),
 }
 
 /// A patient's subjective refraction. At initialization, the values are not yet bounds-checked. We
@@ -52,9 +52,9 @@ impl BoundsCheck for Refraction<Unchecked> {
             ..self
         };
 
-        if (-2000..=2000).contains(&sph) && sph % 25 == 0.0 {
+        if (-2000..=2000).contains(&sph) && sph % 25 == 0 {
             if let Some(Cyl { power, .. }) = cyl {
-                if (-1000..=1000).contains(&power) && power % 25 == 0.0 {
+                if (-1000..=1000).contains(&power) && power % 25 == 0 {
                     Ok(checked)
                 } else {
                     Err(RefractionBoundsError::Cyl(power))
@@ -69,7 +69,7 @@ impl BoundsCheck for Refraction<Unchecked> {
 }
 
 impl ScaMut for Refraction<Unchecked> {
-    fn set_sph(mut self, sph: f32) -> Self {
+    fn set_sph(mut self, sph: i32) -> Self {
         self.sph = sph;
         self
     }

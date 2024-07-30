@@ -18,13 +18,13 @@ pub enum IolBoundsError {
     #[error("IOL cylinder must have both a power and an axis but the {0:?} was not supplied")]
     NoPair(CylPair),
 
-    #[error("IOL spherical equivalent must be a multiple of 0.25 D between -20 D and +60 D (supplied value: {0})")]
-    Se(f32),
+    #[error("IOL spherical equivalent must be a multiple of 25 cD between -2000 and +6000 (supplied value: {0})")]
+    Se(i32),
 
     #[error(
-        "IOL cylinder must be a multiple of 0.25 D between +1 D and +20 D (supplied value: {0})"
+        "IOL cylinder must be a multiple of 25 cD between +100 and +2000 (supplied value: {0})"
     )]
-    Cyl(f32),
+    Cyl(i32),
 
     #[error("incomplete IOL: IOL description must contain a model, name, focus (monofocal, EDOF, multifocal), and toric (true/false)")]
     Iol,
@@ -73,9 +73,9 @@ impl BoundsCheck for OpIol<Unchecked> {
             ..self
         };
 
-        if (-2000..=6000).contains(&se) && se % 25 == 0.0 {
+        if (-2000..=6000).contains(&se) && se % 25 == 0 {
             if let Some(Cyl { power, .. }) = cyl {
-                if (100..=2000).contains(&power) && power % 25 == 0.0 {
+                if (100..=2000).contains(&power) && power % 25 == 0 {
                     Ok(checked)
                 } else {
                     Err(IolBoundsError::Cyl(power))
@@ -172,7 +172,7 @@ mod tests {
     fn out_of_bounds_iol_se_returns_err() {
         // todo: randomize the out of bounds values on all failing tests
         // (Axis, Cyl, Iol, Refraction, Sca, Sia, Target, Va)
-        let se = 10025;
+        let se = 10025u32;
         let sca = RawSca::new(se, Cyl::new(300, 12).ok());
         let checked = OpIol::new(sca, iol()).check();
 
@@ -181,8 +181,8 @@ mod tests {
 
     #[test]
     fn nonzero_rem_iol_se_returns_err() {
-        let se = 10.35;
-        let sca = RawSca::new(se, Some(3.0), Some(12)).unwrap();
+        let se = 1035u32;
+        let sca = RawSca::new(se, Cyl::new(300, 12).ok());
         let checked = OpIol::new(sca, iol()).check();
 
         assert_eq!(checked, Err(IolBoundsError::Se(sca.sph())));
@@ -190,8 +190,8 @@ mod tests {
 
     #[test]
     fn out_of_bounds_iol_cyl_power_returns_err() {
-        let power = 31.0;
-        let sca = RawSca::new(18.5, Some(power), Some(170)).unwrap();
+        let power = 3100u32;
+        let sca = RawSca::new(1850, Cyl::new(power, 170));
         let checked = OpIol::new(sca, iol()).check();
 
         assert_eq!(checked, Err(IolBoundsError::Cyl(power)));
@@ -199,8 +199,8 @@ mod tests {
 
     #[test]
     fn nonzero_rem_iol_cyl_power_returns_err() {
-        let power = 2.06;
-        let sca = RawSca::new(28.5, Some(power), Some(170)).unwrap();
+        let power = 206;
+        let sca = RawSca::new(2850, Cyl::new(power, 90));
         let checked = OpIol::new(sca, iol()).check();
 
         assert_eq!(checked, Err(IolBoundsError::Cyl(power)));

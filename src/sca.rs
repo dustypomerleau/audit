@@ -25,6 +25,7 @@ pub enum ScaBoundsError {
 pub trait Sca {
     /// Return the spherical value from a [`Sca`].
     fn sph(&self) -> i32;
+
     /// Return the [`Cyl`] from a [`Sca`].
     fn cyl(&self) -> Option<Cyl>;
 }
@@ -33,6 +34,7 @@ pub trait Sca {
 pub trait ScaMut: Sca {
     /// Set the value of the wrapped sphere (or spherical equivalent).
     fn set_sph(self, sph: i32) -> Self;
+
     /// Set the value of the wrapped [`Cyl`].
     fn set_cyl(self, cyl: Option<Cyl>) -> Self;
 }
@@ -41,12 +43,12 @@ pub trait ScaMut: Sca {
 /// apply bounds checking and return a more specific type.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct RawSca {
-    pub sph: f32,
+    pub sph: i32,
     pub cyl: Option<Cyl>,
 }
 
 impl Sca for RawSca {
-    fn sph(&self) -> f32 {
+    fn sph(&self) -> i32 {
         self.sph
     }
 
@@ -56,7 +58,7 @@ impl Sca for RawSca {
 }
 
 impl ScaMut for RawSca {
-    fn set_sph(mut self, sph: f32) -> Self {
+    fn set_sph(mut self, sph: i32) -> Self {
         self.sph = sph;
         self
     }
