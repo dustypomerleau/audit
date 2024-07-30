@@ -1,21 +1,39 @@
 use crate::{
+    bounds_check::Checked,
     case::{Adverse, Case, Side},
-    iol::Iol,
-    surgeon::Surgeon,
-    target::Constant,
-    va::OpVa,
+    cyl::Cyl,
+    iol::{Iol, OpIol},
+    refraction::{OpRefraction, Refraction},
+    sia::Sia,
+    surgeon::{Surgeon, SurgeonSia},
+    target::{Constant, Formula, Target},
+    va::{AfterVa, BeforeVa, OpVa, Va},
 };
 use chrono::NaiveDate;
 use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 
-// todo: impl From<NormalType> for DbType, and then just call those in the impl From<Case> for
-// DbCase
+pub fn opt_into<T, U: From<T>>(from: Option<T>) -> Option<U> {
+    if let Some(t) = from {
+        Some(t.into())
+    } else {
+        None
+    }
+}
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub struct DbAfterVa {
     pub best: Option<DbVa>,
     pub raw: DbVa,
+}
+
+impl From<AfterVa> for DbAfterVa {
+    fn from(va: AfterVa) -> Self {
+        Self {
+            best: opt_into(va.best),
+            raw: va.raw.into(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
@@ -24,19 +42,23 @@ pub struct DbBeforeVa {
     pub raw: Option<DbVa>,
 }
 
+impl From<BeforeVa> for DbBeforeVa {
+    fn from(va: BeforeVa) -> Self {
+        Self {
+            best: va.best.into(),
+            raw: opt_into(va.raw),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub struct DbCase {
     pub surgeon: DbSurgeon,
-    /// A unique value provided by the surgeon, such that deanonymization may only be performed by
-    /// the surgeon.
     pub urn: String,
     pub side: Side,
-    /// The surgeon's intended refractive target, based on the formula of their choice.
     pub target: Option<DbTarget>,
     pub date: NaiveDate,
-    /// The institution where surgery was performed.
     pub site: Option<String>,
-    // If no SIA is provided at the case level, the surgeon's defaults will be used.
     pub sia: Option<DbSia>,
     pub iol: Option<DbOpIol>,
     pub adverse: Option<Adverse>,
@@ -60,87 +82,33 @@ impl From<Case> for DbCase {
             refraction,
         } = case;
 
-        let target = if let Some(target) = target {
-            Some(DbTarget {
-                constant: target.constant,
-                se: target.se,
-                cyl: if let Some(cyl) = target.cyl {
-                    Some(DbCyl {
-                        power: cyl.power,
-                        axis: cyl.axis as i32,
-                    })
-                } else {
-                    None
-                },
-            })
-        } else {
-            None
-        };
-
-        let sia = if let Some(sia) = sia {
-            Some(DbSia {
-                power: sia.power,
-                axis: sia.axis as i32,
-            })
-        } else {
-            None
-        };
-
-        let iol = if let Some(iol) = iol {
-            Some(DbOpIol {
-                iol: iol.iol,
-                se: iol.se,
-                cyl: if let Some(cyl) = iol.cyl {
-                    Some(DbCyl {
-                        power: cyl.power,
-                        axis: cyl.axis as i32,
-                    })
-                } else {
-                    None
-                },
-            })
-        } else {
-            None
-        };
-
-        let refraction = DbOpRefraction {
-            before: DbRefraction {
-                sph: refraction.before.sph,
-                cyl: if let Some(cyl) = refraction.before.cyl {
-                    Some(DbCyl {
-                        power: cyl.power,
-                        axis: cyl.axis as i32,
-                    })
-                } else {
-                    None
-                },
-            },
-            after: DbRefraction {
-                sph: refraction.after.sph,
-                cyl: if let Some(cyl) = refraction.after.cyl {
-                    Some(DbCyl {
-                        power: cyl.power,
-                        axis: cyl.axis as i32,
-                    })
-                } else {
-                    None
-                },
-            },
-        };
-
-        DbCase {
-            // todo: do this pattern for all fields
+        Self {
             surgeon: surgeon.into(),
             urn,
             side,
-            target,
+            target: opt_into(target),
             date,
             site,
-            sia,
-            iol,
+            sia: opt_into(sia),
+            iol: opt_into(iol),
             adverse,
-            va,
-            refraction,
+            va: va.into(),
+            refraction: refraction.into(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
+pub struct DbConstant {
+    pub value: i32,
+    pub formula: Formula,
+}
+
+impl From<Constant> for DbConstant {
+    fn from(constant: Constant) -> Self {
+        Self {
+            value: constant.value as i32,
+            formula: constant.formula,
         }
     }
 }
@@ -151,11 +119,32 @@ pub struct DbCyl {
     axis: i32,
 }
 
+impl From<Cyl> for DbCyl {
+    fn from(cyl: Cyl) -> Self {
+        Self {
+            power: cyl.power,
+            axis: cyl.axis as i32,
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub struct DbOpIol {
     pub iol: Iol,
     pub se: i32,
     pub cyl: Option<DbCyl>,
+}
+
+impl From<OpIol<Checked>> for DbOpIol {
+    fn from(iol: OpIol<Checked>) -> Self {
+        let OpIol { iol, se, cyl, .. } = iol;
+
+        Self {
+            iol,
+            se,
+            cyl: opt_into(cyl),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
@@ -164,10 +153,28 @@ pub struct DbOpRefraction {
     after: DbRefraction,
 }
 
+impl From<OpRefraction> for DbOpRefraction {
+    fn from(refraction: OpRefraction) -> Self {
+        Self {
+            before: refraction.before.into(),
+            after: refraction.after.into(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub struct DbOpVa {
     pub before: DbBeforeVa,
     pub after: DbAfterVa,
+}
+
+impl From<OpVa> for DbOpVa {
+    fn from(va: OpVa) -> Self {
+        Self {
+            before: va.before.into(),
+            after: va.after.into(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
@@ -176,10 +183,28 @@ pub struct DbRefraction {
     cyl: Option<DbCyl>,
 }
 
+impl From<Refraction<Checked>> for DbRefraction {
+    fn from(refraction: Refraction<Checked>) -> Self {
+        Self {
+            sph: refraction.sph,
+            cyl: opt_into(refraction.cyl),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub struct DbSia {
     power: i32,
     axis: i32,
+}
+
+impl From<Sia> for DbSia {
+    fn from(sia: Sia) -> Self {
+        Self {
+            power: sia.power,
+            axis: sia.axis as i32,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
@@ -193,26 +218,12 @@ pub struct DbSurgeon {
 
 impl From<Surgeon> for DbSurgeon {
     fn from(surgeon: Surgeon) -> Self {
-        DbSurgeon {
+        Self {
             email: surgeon.email,
             first_name: surgeon.first_name,
             last_name: surgeon.last_name,
             site: surgeon.site,
-
-            sia: if let Some(sia) = surgeon.sia {
-                Some(DbSurgeonSia {
-                    right: DbSia {
-                        power: sia.right.power,
-                        axis: sia.right.axis as i32,
-                    },
-                    left: DbSia {
-                        power: sia.left.power,
-                        axis: sia.left.axis as i32,
-                    },
-                })
-            } else {
-                None
-            },
+            sia: opt_into(surgeon.sia),
         }
     }
 }
@@ -223,17 +234,50 @@ pub struct DbSurgeonSia {
     pub left: DbSia,
 }
 
+// are impls like this needed? since all of the values already implement into?
+impl From<SurgeonSia> for DbSurgeonSia {
+    fn from(sia: SurgeonSia) -> Self {
+        Self {
+            right: sia.right.into(),
+            left: sia.left.into(),
+        }
+    }
+}
+
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub struct DbTarget {
-    pub constant: Option<Constant>,
+    pub constant: Option<DbConstant>,
     pub se: i32,
     pub cyl: Option<DbCyl>,
+}
+
+impl From<Target<Checked>> for DbTarget {
+    fn from(target: Target<Checked>) -> Self {
+        let Target {
+            constant, se, cyl, ..
+        } = target;
+
+        Self {
+            constant: opt_into(constant),
+            se,
+            cyl: opt_into(cyl),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Queryable, Serialize)]
 pub struct DbVa {
     num: i32,
     den: i32,
+}
+
+impl From<Va> for DbVa {
+    fn from(va: Va) -> Self {
+        Self {
+            num: va.num as i32,
+            den: va.den as i32,
+        }
+    }
 }
 
 #[cfg(test)]
