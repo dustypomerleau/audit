@@ -49,6 +49,15 @@ pub enum Formula {
     SrkT,
 }
 
+impl Formula {
+    pub fn is_thick(&self) -> bool {
+        match self {
+            Self::Barrett | Self::BarrettTrueK | Self::Holladay2 | Self::Olsen => true,
+            _ => false,
+        }
+    }
+}
+
 /// The combination of formula and IOL constant used to calculate the [`Target`] for a
 /// [`Case`](crate::case::Case). The default constant for the case's IOL/formula pair is used,
 /// unless explicitly overridden by the surgeon. As with other values, we store `value * 100` as an
