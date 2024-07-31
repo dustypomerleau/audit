@@ -64,7 +64,7 @@ impl Formula {
 /// integer, rather than a float.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Constant {
-    pub value: u32,
+    pub value: i32,
     pub formula: Formula,
 }
 
