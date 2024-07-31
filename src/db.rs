@@ -298,11 +298,11 @@ mod tests {
                 last_name: Some("Johnson".to_string()),
                 site: None,
                 sia: Some(DbSurgeonSia {
-                    right: DbCyl {
+                    right: DbSia {
                         power: 010,
                         axis: 100,
                     },
-                    left: DbCyl {
+                    left: DbSia {
                         power: 010,
                         axis: 100,
                     },
@@ -313,7 +313,7 @@ mod tests {
             side: Side::Right,
 
             target: Some(DbTarget {
-                constant: Some(Constant {
+                constant: Some(DbConstant {
                     value: 11936,
                     formula: Formula::Barrett,
                 }),
@@ -346,17 +346,17 @@ mod tests {
 
             adverse: None,
 
-            va: OpVa {
-                before: BeforeVa {
+            va: DbOpVa {
+                before: DbBeforeVa {
                     best: Va {
-                        num: 6.0,
-                        den: 12.0,
+                        num: 600,
+                        den: 1200,
                     },
                     raw: None,
                 },
-                after: AfterVa {
-                    best: Some(Va { num: 6.0, den: 5.0 }),
-                    raw: Va { num: 6.0, den: 6.0 },
+                after: DbAfterVa {
+                    best: Some(Va { num: 600, den: 500 }),
+                    raw: Va { num: 600, den: 600 },
                 },
             },
 
@@ -381,7 +381,6 @@ mod tests {
 
     #[test]
     fn inserts_a_case() {
-        let case = case();
         todo!()
     }
 }
