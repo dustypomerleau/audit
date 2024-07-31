@@ -5,7 +5,7 @@ module default {
 
 ### globals
 
-global cur_user: uuid;
+global cur_surgeon: uuid;
 
 ### scalars
 
@@ -40,7 +40,7 @@ global cur_user: uuid;
 ### abstract objects
 
     abstract type Cyl {
-        required power: float32;
+        required power: int32;
         required axis: Axis;
     }
 
@@ -97,7 +97,7 @@ global cur_user: uuid;
 
     type Constant extending SoftCreate {
         # unconstrained for now (barrett factor -2.0-5.0, Kane A 110-125)
-        required value: float32;
+        required value: int32;
         required formula: Formula;
     }
 
@@ -111,16 +111,16 @@ global cur_user: uuid;
     }
 
     type IolCyl extending Cyl, SoftCreate {
-        constraint expression on (.power >= 1.0 and .power <= 20.0 and .power % 0.25 = 0.0);
+        constraint expression on (.power >= 100 and .power <= 2000 and .power % 25 = 0);
     }
 
     type OpIol extending SoftCreate {
         required iol: Iol;
 
-        required se: float32 { 
-            constraint min_value(-20.0);
-            constraint max_value(60.0);
-            constraint expression on (__subject__ % 0.25 = 0.0);
+        required se: int32 { 
+            constraint min_value(-2000);
+            constraint max_value(6000);
+            constraint expression on (__subject__ % 25 = 0);
         }
 
         cyl: IolCyl;
@@ -137,21 +137,21 @@ global cur_user: uuid;
     }
 
     type Refraction extending SoftCreate {
-        required sph: float32 { 
-            constraint min_value(-20.0);
-            constraint max_value(20.0);
-            constraint expression on (__subject__ % 0.25 = 0.0);
+        required sph: int32 { 
+            constraint min_value(-2000);
+            constraint max_value(2000);
+            constraint expression on (__subject__ % 25 = 0);
         }
 
         cyl: RefractionCyl;
     }
 
     type RefractionCyl extending Cyl, SoftCreate {
-        constraint expression on (.power >= -10.0 and .power <= 10.0 and .power % 0.25 = 0.0);
+        constraint expression on (.power >= -1000 and .power <= 1000 and .power % 25 = 0);
     }
 
     type Sia extending Cyl, SoftCreate {
-        constraint expression on (.power >= 0.0 and .power <= 2.0);
+        constraint expression on (.power >= 0 and .power <= 200);
     }
 
     type Surgeon extending SoftCreate {
@@ -171,20 +171,20 @@ global cur_user: uuid;
     type Target extending SoftCreate {
         constant: Constant;
         
-        required se: float32 {
-            constraint min_value(-6.0);
-            constraint max_value(2.0);
+        required se: int32 {
+            constraint min_value(-600);
+            constraint max_value(200);
         }
 
         cyl: TargetCyl;
     }
 
     type TargetCyl extending Cyl, SoftCreate {
-        constraint expression on (.power >= 0.0 and .power <= 6.0);
+        constraint expression on (.power >= 0 and .power <= 600);
     }
 
     type Va extending SoftCreate {
-        required num: float32 { constraint min_ex_value(0.0); constraint max_value(20.0); }
-        required den: float32 { constraint min_ex_value(0.0); }
+        required num: int32 { constraint min_value(0); constraint max_value(2000); }
+        required den: int32 { constraint min_ex_value(0); }
     }
 }
