@@ -4,6 +4,7 @@
 use crate::{
     bounds_check::Unchecked,
     cyl::{Cyl, CylPair},
+    iol::{Iol, OpIol},
     refraction::Refraction,
     target::{Constant, Target},
 };
@@ -73,6 +74,16 @@ impl RawSca {
     /// Construct a new [`RawSca`], with bounds checking on the [`axis`](Cyl::axis).
     pub fn new(sph: i32, cyl: Option<Cyl>) -> Self {
         Self { sph, cyl }
+    }
+
+    /// Convert a [`RawSca`] into an [`OpIol`](crate::iol::OpIol).
+    pub fn into_opiol(&self, iol: Iol) -> OpIol<Unchecked> {
+        OpIol {
+            iol,
+            se: self.sph,
+            cyl: self.cyl,
+            bounds: PhantomData,
+        }
     }
 
     /// Convert a [`RawSca`] into a [`Refraction`].
