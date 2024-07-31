@@ -161,6 +161,21 @@ mod tests {
     use std::marker::PhantomData;
     #[cfg(feature = "ssr")] use tokio::test;
 
+    #[cfg(feature = "ssr")]
+    #[tokio::test]
+    async fn inserts_a_case() {
+        let client = edgedb_tokio::create_client()
+            .await
+            .expect("DB client to be initialized");
+
+        let result = client
+            .query("select 1 + 1", &())
+            .await
+            .unwrap()
+            .iter()
+            .map(|res| println!("{res:?}"));
+    }
+
     fn case() -> Case {
         Case {
             surgeon: Surgeon {

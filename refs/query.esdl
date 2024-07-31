@@ -55,3 +55,29 @@ insert Cas {
         insert OpRefraction { before := before_ref, after := after_ref, }
     )),
 };
+
+# https://docs.edgedb.com/database/edgeql/insert#conflicts
+with 
+    sia := (select (insert SurgeonSia {
+        right := (select (insert Sia {
+            power := <int32>100,
+            axis := <int32>95
+        } unless conflict on ((.power, .axis)) else (select Sia))),
+        left := (select (insert Sia {
+            power := <int32>100,
+            axis := <int32>95
+        } unless conflict on ((.power, .axis)) else (select Sia))),
+    })),
+
+    site := (select (insert Site {
+        name := "RMH"
+    } unless conflict))
+insert Surgeon {
+    email := "tom@tom.com",
+    first_name := "tom",
+    last_name := "surname",
+    site := site,
+    sia := sia 
+} unless conflict on .email
+else (select Surgeon);
+
