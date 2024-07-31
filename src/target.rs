@@ -153,7 +153,7 @@ mod tests {
     // todo: replace with a randomized TargetFormula using Mock(all)
     fn iol_constant() -> Option<Constant> {
         Some(Constant {
-            value: 119.36,
+            value: 11936,
             formula: Formula::Kane,
         })
     }

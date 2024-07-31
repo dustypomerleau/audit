@@ -46,13 +46,13 @@ mod tests {
 
     #[test]
     fn makes_new_sia() {
-        let cyl = Cyl::new(0.1, 100).unwrap();
+        let cyl = Cyl::new(010, 100).unwrap();
         Sia::new(cyl).unwrap();
     }
 
     #[test]
     fn out_of_bounds_sia_power_returns_err() {
-        let power = 2.1;
+        let power = 210;
         let cyl = Cyl::new(power, 100).unwrap();
         let sia = Sia::new(cyl);
 

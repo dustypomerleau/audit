@@ -172,7 +172,7 @@ mod tests {
     fn out_of_bounds_iol_se_returns_err() {
         // todo: randomize the out of bounds values on all failing tests
         // (Axis, Cyl, Iol, Refraction, Sca, Sia, Target, Va)
-        let se = 10025u32;
+        let se = 10025;
         let sca = RawSca::new(se, Cyl::new(300, 12).ok());
         let checked = OpIol::new(sca, iol()).check();
 
@@ -181,7 +181,7 @@ mod tests {
 
     #[test]
     fn nonzero_rem_iol_se_returns_err() {
-        let se = 1035u32;
+        let se = 1035;
         let sca = RawSca::new(se, Cyl::new(300, 12).ok());
         let checked = OpIol::new(sca, iol()).check();
 
@@ -190,8 +190,8 @@ mod tests {
 
     #[test]
     fn out_of_bounds_iol_cyl_power_returns_err() {
-        let power = 3100u32;
-        let sca = RawSca::new(1850, Cyl::new(power, 170));
+        let power = 3100;
+        let sca = RawSca::new(1850, Cyl::new(power, 170).ok());
         let checked = OpIol::new(sca, iol()).check();
 
         assert_eq!(checked, Err(IolBoundsError::Cyl(power)));
@@ -200,7 +200,7 @@ mod tests {
     #[test]
     fn nonzero_rem_iol_cyl_power_returns_err() {
         let power = 206;
-        let sca = RawSca::new(2850, Cyl::new(power, 90));
+        let sca = RawSca::new(2850, Cyl::new(power, 90).ok());
         let checked = OpIol::new(sca, iol()).check();
 
         assert_eq!(checked, Err(IolBoundsError::Cyl(power)));
