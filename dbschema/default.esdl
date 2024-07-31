@@ -87,18 +87,20 @@ global cur_surgeon: uuid;
         # biometry: Biometry # eventually
         target: Target;
         required date: cal::local_date;
-        site: str; # if present, overrides surgeon default
+        site: Site; # if present, overrides surgeon default
         sia: Sia; # if present, overrides surgeon default
         iol: OpIol;
         adverse: Adverse;
         required va: OpVa;
         required refraction: OpRefraction;
+        constraint exclusive on ((.urn, .side));
     }
 
     type Constant extending SoftCreate {
-        # unconstrained for now (barrett factor -2.0-5.0, Kane A 110-125)
+        # unconstrained for now (barrett factor -2.0-5.0 (-200 to 500), Kane A 110-125 (11000 to 12500))
         required value: int32;
         required formula: Formula;
+        constraint exclusive on ((.value, .formula));
     }
 
     type Iol extending SoftCreate {
@@ -112,6 +114,7 @@ global cur_surgeon: uuid;
 
     type IolCyl extending Cyl, SoftCreate {
         constraint expression on (.power >= 100 and .power <= 2000 and .power % 25 = 0);
+        constraint exclusive on ((.power, .axis));
     }
 
     type OpIol extending SoftCreate {
@@ -124,6 +127,8 @@ global cur_surgeon: uuid;
         }
 
         cyl: IolCyl;
+
+        constraint exclusive on ((.iol, .se, .cyl));
     }
 
     type OpRefraction extending SoftCreate {
@@ -144,21 +149,29 @@ global cur_surgeon: uuid;
         }
 
         cyl: RefractionCyl;
+
+        constraint exclusive on ((.sph, .cyl));
     }
 
     type RefractionCyl extending Cyl, SoftCreate {
         constraint expression on (.power >= -1000 and .power <= 1000 and .power % 25 = 0);
+        constraint exclusive on ((.power, .axis));
     }
 
     type Sia extending Cyl, SoftCreate {
         constraint expression on (.power >= 0 and .power <= 200);
+        constraint exclusive on ((.power, .axis));
+    }
+
+    type Site extending SoftCreate {
+        required name: str { constraint exclusive; }
     }
 
     type Surgeon extending SoftCreate {
         required email: EmailType { constraint exclusive; }
         first_name: str;
         last_name: str;
-        site: str;
+        site: Site;
         sia: SurgeonSia;
         multi cases := .<surgeon[is Cas];
     }
@@ -177,14 +190,18 @@ global cur_surgeon: uuid;
         }
 
         cyl: TargetCyl;
+
+        constraint exclusive on ((.constant, .se, .cyl));
     }
 
     type TargetCyl extending Cyl, SoftCreate {
         constraint expression on (.power >= 0 and .power <= 600);
+        constraint exclusive on ((.power, .axis));
     }
 
     type Va extending SoftCreate {
         required num: int32 { constraint min_value(0); constraint max_value(2000); }
         required den: int32 { constraint min_ex_value(0); }
+        constraint exclusive on ((.num, .den));
     }
 }
