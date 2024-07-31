@@ -78,8 +78,8 @@ impl RawSca {
     /// Convert a [`RawSca`] into a [`Refraction`].
     pub fn into_refraction(&self) -> Refraction<Unchecked> {
         Refraction {
-            sph: self.sph(),
-            cyl: self.cyl(),
+            sph: self.sph,
+            cyl: self.cyl,
             bounds: PhantomData,
         }
     }
@@ -88,8 +88,8 @@ impl RawSca {
     pub fn into_target(&self, constant: Option<Constant>) -> Target<Unchecked> {
         Target {
             constant,
-            se: self.sph(),
-            cyl: self.cyl(),
+            se: self.sph,
+            cyl: self.cyl,
             bounds: PhantomData,
         }
     }
