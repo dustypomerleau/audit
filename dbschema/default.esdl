@@ -5,7 +5,8 @@ module default {
 
 ### globals
 
-global cur_surgeon: uuid;
+global cur_surgeon_id: uuid;
+global cur_surgeon := (select Surgeon filter .id = global cur_surgeon_id);
 
 ### scalars
 
