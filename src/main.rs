@@ -28,6 +28,14 @@ async fn main() {
     // todo: we need a function to get the currently logged-in user's email when we create the
     // client
     // Figure out auth first, then this will flow naturally during the sign in
+    // https://docs.rs/leptos_router/latest/leptos_router/fn.ProtectedRoute.html
+    // https://docs.rs/oauth2/latest/oauth2/
+    // https://docs.edgedb.com/guides/auth
+    // https://www.shuttle.rs/blog/2024/02/13/clerk-in-rust
+    //
+    // plan: sign-in page is the landing page
+    // sign-in has a link to register
+    // register has a form, where you enter your details first, and then select your oauth provider
     let client = client.with_globals(&Globals {
         cur_surgeon_email: "temporarily_hardcoded@email.com",
     });

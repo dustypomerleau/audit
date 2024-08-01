@@ -1,6 +1,10 @@
 # __source__ references the current object
 # __subject__ references the current value
 
+### extensions
+
+using extension auth;
+
 module default {
 
 ### globals

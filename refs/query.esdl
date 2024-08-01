@@ -56,8 +56,14 @@ insert Cas {
     )),
 };
 
+# ---
+
+# setting global:
+set global cur_surgeon_id := (select Surgeon.id filter Surgeon.email = "tom@tom.com" limit 1);
+
 # https://docs.edgedb.com/database/edgeql/insert#conflicts
 with 
+    surgeon := 
     sia := (select (insert SurgeonSia {
         right := (select (insert Sia {
             power := <int32>100,
