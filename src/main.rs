@@ -3,9 +3,14 @@
 async fn main() {
     use audit::{fileserv::file_and_error_handler, routes::App};
     use axum::Router;
-    use edgedb_tokio::create_client;
+    use edgedb_tokio::{create_client, GlobalsDelta};
     use leptos::{get_configuration, logging, provide_context};
     use leptos_axum::{generate_route_list, LeptosRoutes};
+
+    #[derive(GlobalsDelta)]
+    pub struct Globals<'a> {
+        cur_surgeon_email: &'a str,
+    }
 
     // Setting get_configuration(None) means we'll be using cargo-leptos's env values
     //
@@ -19,6 +24,13 @@ async fn main() {
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
     let client = create_client().await.expect("DB client to be initialized");
+
+    // todo: we need a function to get the currently logged-in user's email when we create the
+    // client
+    // Figure out auth first, then this will flow naturally during the sign in
+    let client = client.with_globals(&Globals {
+        cur_surgeon_email: "temporarily_hardcoded@email.com",
+    });
 
     // regarding using context to pass the DB client:
     // https://book.leptos.dev/server/26_extractors.html#axum-state
