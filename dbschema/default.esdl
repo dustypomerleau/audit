@@ -5,8 +5,8 @@ module default {
 
 ### globals
 
-global cur_surgeon_id: uuid;
-global cur_surgeon := (select Surgeon filter .id = global cur_surgeon_id);
+global cur_surgeon_email: str;
+global cur_surgeon := (select Surgeon filter .email = global cur_surgeon_email);
 
 ### scalars
 
