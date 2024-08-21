@@ -1,4 +1,11 @@
+# Multiple steps are required to get leptosfmt working correctly:
+# 1. `rustfmt.toml` must contain the `edition` key
+# 2. `rust-analyzer.toml` must contain the override command invoking `leptosfmt`
+# 3. `leptosfmt.toml` must contain your preferred settings
+#
+# Available options:
 # https://github.com/bram209/leptosfmt/blob/main/docs/configuration.md
+
 attr_value_brace_style = "Always"
 indentation_style = "Spaces"
 macro_names = ["leptos::view", "view"]
