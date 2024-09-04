@@ -9,8 +9,9 @@ module default {
 
 ### globals
 
-global cur_surgeon_email: str;
-global cur_surgeon := (select Surgeon filter .email = global cur_surgeon_email);
+global cur_surgeon := (assert_single(
+    (select Surgeon filter .identity = global ext::auth::ClientTokenIdentity)
+));
 
 ### scalars
 
@@ -83,22 +84,31 @@ global cur_surgeon := (select Surgeon filter .email = global cur_surgeon_email);
         required best: Va;
         raw: Va;
     }
+
+    # todo: actually, extending Cas probably won't work, as you really want a separate object that others can access - create a field that holds a Cas instead
+    type SurgeonCas extending Cas {
+        required surgeon: Surgeon;
+        required urn: str;
+        site: Site; # if present, overrides surgeon default
+        iol: OpIol;
+        constraint exclusive on ((.surgeon, .urn, .side));
+
+        access policy surgeon_full_access
+            allow all using (.surgeon ?= global cur_surgeon) {
+                errmessage := "Only the surgeon has access to their cases."
+            };
+    }
     
     # case is a reserved keyword
     type Cas extending SoftCreate {
-        required surgeon: Surgeon;
-        required urn: str;
         required side: Side;
         # biometry: Biometry # eventually
         target: Target;
-        required date: cal::local_date;
-        site: Site; # if present, overrides surgeon default
+        required date: cal::local_date; # todo: date here or SurgeonCas?
         sia: Sia; # if present, overrides surgeon default
-        iol: OpIol;
         adverse: Adverse;
         required va: OpVa;
         required refraction: OpRefraction;
-        constraint exclusive on ((.surgeon, .urn, .side));
     }
 
     type Constant extending SoftCreate {
@@ -166,6 +176,7 @@ global cur_surgeon := (select Surgeon filter .email = global cur_surgeon_email);
 
     type Surgeon extending SoftCreate {
         required email: EmailType { constraint exclusive; }
+        required identity: ext::auth::Identity;
         first_name: str;
         last_name: str;
         site: Site;
