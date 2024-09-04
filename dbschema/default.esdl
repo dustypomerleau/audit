@@ -27,6 +27,7 @@ global cur_surgeon := (assert_single(
         constraint regexp("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$");
     }
 
+    # todo: should we have a separate category for diffractive EDOF?
     scalar type Focus extending enum<Mono, Edof, Multi>;
 
     scalar type Formula extending enum<
@@ -85,26 +86,12 @@ global cur_surgeon := (assert_single(
         raw: Va;
     }
 
-    # todo: actually, extending Cas probably won't work, as you really want a separate object that others can access - create a field that holds a Cas instead
-    type SurgeonCas extending Cas {
-        required surgeon: Surgeon;
-        required urn: str;
-        site: Site; # if present, overrides surgeon default
-        iol: OpIol;
-        constraint exclusive on ((.surgeon, .urn, .side));
-
-        access policy surgeon_full_access
-            allow all using (.surgeon ?= global cur_surgeon) {
-                errmessage := "Only the surgeon has access to their cases."
-            };
-    }
-    
     # case is a reserved keyword
     type Cas extending SoftCreate {
         required side: Side;
         # biometry: Biometry # eventually
         target: Target;
-        required date: cal::local_date; # todo: date here or SurgeonCas?
+        required date: cal::local_date;
         sia: Sia; # if present, overrides surgeon default
         adverse: Adverse;
         required va: OpVa;
@@ -175,13 +162,27 @@ global cur_surgeon := (assert_single(
     }
 
     type Surgeon extending SoftCreate {
-        required email: EmailType { constraint exclusive; }
         required identity: ext::auth::Identity;
+        required email: EmailType { constraint exclusive; }
         first_name: str;
         last_name: str;
         site: Site;
         sia: SurgeonSia;
-        multi cases := .<surgeon[is Cas];
+        multi cases := .<surgeon[is SurgeonCas];
+    }
+
+    type SurgeonCas extending SoftCreate {
+        required surgeon: Surgeon;
+        required urn: str;
+        site: Site; # if present, overrides surgeon default
+        iol: OpIol;
+        cas: Cas { constraint exclusive; }
+        
+        # When creating a plot, the surgeon access their own `SurgeonCas`es (which are restricted) but accesses others' `Cas`es (which are unrestricted) for comparison.
+        access policy surgeon_full_access
+            allow all using (.surgeon ?= global cur_surgeon) {
+                errmessage := "Only the surgeon has access to their cases."
+            };
     }
 
     type SurgeonSia extending SoftCreate {
