@@ -43,6 +43,50 @@
     });
 }
 
+# todo: start with the dockerfile in leptos docs:
+# https://book.leptos.dev/deployment/ssr.html
+# then use nix example below, from:
+# https://dev.to/johnreillymurray/rust-environment-and-docker-build-with-nix-flakes-19c1
+# to nixify it
+
+# outputs = { self, nixpkgs, flake-utils, rust-overlay, ... }:
+#     flake-utils.lib.eachDefaultSystem (system:
+#       let
+#         overlays = [ (import rust-overlay) ];
+#         pkgs = import nixpkgs { inherit system overlays; };
+#         rustVersion = pkgs.rust-bin.stable.latest.default;
+#
+#         rustPlatform = pkgs.makeRustPlatform {
+#           cargo = rustVersion;
+#           rustc = rustVersion;
+#         };
+#
+#         myRustBuild = rustPlatform.buildRustPackage {
+#           pname =
+#             "rust_nix_blog"; # make this what ever your cargo.toml package.name is
+#           version = "0.1.0";
+#           src = ./.; # the folder with the cargo.toml
+#
+#           cargoLock.lockFile = ./Cargo.lock;
+#         };
+#
+#         dockerImage = pkgs.dockerTools.buildImage {
+#           name = "rust-nix-blog";
+#           config = { Cmd = [ "${myRustBuild}/bin/rust_nix_blog" ]; };
+#         };
+#
+#       in {
+#         packages = {
+#           rustPackage = myRustBuild;
+#           docker = dockerImage;
+#         };
+#         defaultPackage = dockerImage;
+#         devShell = pkgs.mkShell {
+#           buildInputs =
+#             [ (rustVersion.override { extensions = [ "rust-src" ]; }) ];
+#         };
+#       });
+
 # see: https://crane.dev/local_development.html 
 
 # {
