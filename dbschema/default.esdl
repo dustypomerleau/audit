@@ -174,9 +174,9 @@ global cur_surgeon := (assert_single(
     type SurgeonCas extending SoftCreate {
         required surgeon: Surgeon;
         required urn: str;
+        required cas: Cas { constraint exclusive; }
         site: Site; # if present, overrides surgeon default
         iol: OpIol;
-        cas: Cas { constraint exclusive; }
         
         # When creating a plot, the surgeon access their own `SurgeonCas`es (which are restricted) but accesses others' `Cas`es (which are unrestricted) for comparison.
         access policy surgeon_full_access
