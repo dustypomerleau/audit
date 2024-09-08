@@ -182,6 +182,17 @@ mod tests {
             ..
         } = case();
 
+        let (target_constant, target_se, target_cyl) = if let Some(target) = target {
+            Target {
+                constant,
+                se,
+                cyl,
+                ..
+            } = target;
+        };
+
+        let args = (urn, side, target_constant, target_se, target_cyl);
+
         let result = client
             .query("select 1 + 1", &())
             .await
