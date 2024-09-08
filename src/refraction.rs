@@ -11,12 +11,12 @@ use thiserror::Error;
 #[derive(Debug, Error, PartialEq)]
 pub enum RefractionBoundsError {
     #[error(
-        "refraction spherical power must be a value between -20 D and +20 D (supplied value: {0})"
+        "refraction spherical power must be a value between -2000 and +2000 (supplied value: {0})"
     )]
     Sph(i32),
 
     #[error(
-        "refraction cylinder power must be a value between -10 D and +10 D (supplied value: {0})"
+        "refraction cylinder power must be a value between -1000 and +1000 (supplied value: {0})"
     )]
     Cyl(i32),
 }
