@@ -36,6 +36,8 @@ async fn main() {
     // plan: sign-in page is the landing page
     // sign-in has a link to register
     // register has a form, where you enter your details first, and then select your oauth provider
+    // todo: I think with edgedb auth extension, you will no longer need to supply any
+    // globals, because the identity is held by the auth extension
     let client = client.with_globals(&Globals {
         cur_surgeon_email: "temporarily_hardcoded@email.com",
     });

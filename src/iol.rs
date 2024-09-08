@@ -4,7 +4,6 @@ use crate::{
     sca::{Sca, ScaMut},
 };
 #[cfg(feature = "ssr")] use edgedb_derive::Queryable;
-// use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
 use thiserror::Error;
