@@ -17,6 +17,6 @@ pub struct Surgeon {
     pub email: String,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
-    pub site: Option<String>,
+    pub sites: Option<Vec<String>>,
     pub sia: Option<SurgeonSia>,
 }

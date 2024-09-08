@@ -88,11 +88,12 @@ global cur_surgeon := (assert_single(
 
     # case is a reserved keyword
     type Cas extending SoftCreate {
-        required side: Side;
         # biometry: Biometry # eventually
+        required side: Side;
         target: Target;
         required date: cal::local_date;
         sia: Sia; # if present, overrides surgeon default
+        opiol: OpIol;
         adverse: Adverse;
         required va: OpVa;
         required refraction: OpRefraction;
@@ -104,6 +105,7 @@ global cur_surgeon := (assert_single(
         required formula: Formula;
     }
 
+    # The IOLs are provided by the DB, including default constants.
     type Iol extending SoftCreate {
         required model: str { constraint exclusive; }
         required name: str;
@@ -166,9 +168,10 @@ global cur_surgeon := (assert_single(
         required email: EmailType { constraint exclusive; }
         first_name: str;
         last_name: str;
-        site: Site;
         sia: SurgeonSia;
+        multi sites: Site;
         multi cases := .<surgeon[is SurgeonCas];
+        multi constants := .<surgeon[is SurgeonConstant];
     }
 
     type SurgeonCas extending SoftCreate {
@@ -176,7 +179,6 @@ global cur_surgeon := (assert_single(
         required urn: str;
         required cas: Cas { constraint exclusive; }
         site: Site; # if present, overrides surgeon default
-        iol: OpIol;
         
         # When creating a plot, the surgeon access their own `SurgeonCas`es (which are 
         # restricted) but accesses others' `Cas`es (which are unrestricted) for comparison.
@@ -184,6 +186,12 @@ global cur_surgeon := (assert_single(
             allow all using (.surgeon ?= global cur_surgeon) {
                 errmessage := "Only the surgeon has access to their cases."
             };
+    }
+
+    type SurgeonConstant extending SoftCreate {
+        required surgeon: Surgeon;
+        required iol: Iol;
+        required constant: Constant;
     }
 
     type SurgeonSia extending SoftCreate {
