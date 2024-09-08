@@ -178,7 +178,8 @@ global cur_surgeon := (assert_single(
         site: Site; # if present, overrides surgeon default
         iol: OpIol;
         
-        # When creating a plot, the surgeon access their own `SurgeonCas`es (which are restricted) but accesses others' `Cas`es (which are unrestricted) for comparison.
+        # When creating a plot, the surgeon access their own `SurgeonCas`es (which are 
+        # restricted) but accesses others' `Cas`es (which are unrestricted) for comparison.
         access policy surgeon_full_access
             allow all using (.surgeon ?= global cur_surgeon) {
                 errmessage := "Only the surgeon has access to their cases."
