@@ -168,6 +168,20 @@ mod tests {
             .await
             .expect("DB client to be initialized");
 
+        let Case {
+            urn,
+            side,
+            target,
+            date,
+            site,
+            sia,
+            iol,
+            adverse,
+            va,
+            refraction,
+            ..
+        } = case();
+
         let result = client
             .query("select 1 + 1", &())
             .await
