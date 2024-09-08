@@ -1,4 +1,5 @@
 use crate::sca::ScaBoundsError;
+#[cfg(feature = "ssr")] use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
 
 /// A missing cylinder component (for use by error types).
@@ -14,6 +15,7 @@ pub enum CylPair {
 /// purposes of pattern-matching, but [`Cyl::new()`] should be used when instantiating a new
 /// [`Cyl`], in order to take advantage of bounds checking on the [`axis`](Cyl::axis).
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Cyl {
     /// Cylinder power in `hm^-1`.
     pub power: i32,
