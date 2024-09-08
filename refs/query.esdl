@@ -1,8 +1,11 @@
 # todo: how do we surface errors to the app on insert, for example if there is already a surgeon with that email and we try to insert it?
 # in practice we need to design the query to check first and then link if it's already there, insert if it's not
 
-# insert a new Cas
+# insert a new SurgeonCas
 with
+    surgeon := global cur_surgeon,
+    urn := 
+
     before_va := (select (insert Va { num := <float32>6.0, den := <float32>12.0 })),
     after_va := (select (insert Va { num := <float32>6.0, den := <float32>6.0 })),
     before_ref := (select(

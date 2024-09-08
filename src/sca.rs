@@ -19,7 +19,7 @@ pub enum ScaBoundsError {
     NoPair(CylPair),
 
     #[error("cylinder axis must be an integer value between 0° and 179° (supplied value: {0})")]
-    Axis(u32),
+    Axis(i32),
 }
 
 /// A type that wraps a sphere and a cylinder.

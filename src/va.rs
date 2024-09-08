@@ -12,10 +12,10 @@ pub enum VaPair {
 #[derive(Debug, Error, PartialEq)]
 pub enum VaBoundsError {
     #[error("Va numerator must be between 100 and 2000. {0} was supplied")]
-    Num(u32),
+    Num(i32),
 
     #[error("Va denominator must be > 0. {0} was supplied")]
-    Den(u32),
+    Den(i32),
 
     #[error("visual acuity must have both a numerator and a denominator. {0:?} was not supplied.")]
     NoPair(VaPair),
@@ -27,14 +27,14 @@ pub enum VaBoundsError {
 /// The type of vision chart is left to the surgeon's discretion, but is presumed to be a Snellen,
 /// ETDRS, or similar chart that provides fractional equivalents.
 ///
-/// Values are represented as `((entered float) * 100) as u32`, and stored in the DB as `i32` with
+/// Values are represented as `((entered float) * 100) as i32`, and stored in the DB as `i32` with
 /// constraints. This makes the representation consistent with [`Cyl`](crate::cyl::Cyl),
 /// [`Iol`](crate::iol::Iol), [`Refraction`](crate::refraction::Refraction), and
 /// [`Target`](crate::target::Target).
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Va {
-    pub num: u32,
-    pub den: u32,
+    pub num: i32,
+    pub den: i32,
 }
 
 impl Default for Va {
@@ -45,8 +45,8 @@ impl Default for Va {
 
 impl Va {
     /// Creates a new [`Va`] with bounds checking.
-    pub fn new(num: u32, den: u32) -> Result<Self, VaBoundsError> {
-        if num < 2000 {
+    pub fn new(num: i32, den: i32) -> Result<Self, VaBoundsError> {
+        if (0..=2000).contains(&num) {
             if den > 0 {
                 Ok(Self { num, den })
             } else {
@@ -102,7 +102,7 @@ mod tests {
 
     #[test]
     fn zero_va_denominator_returns_err() {
-        let den = 0u32;
+        let den = 0;
         let va = Va::new(600, den);
 
         assert_eq!(va, Err(VaBoundsError::Den(den)));

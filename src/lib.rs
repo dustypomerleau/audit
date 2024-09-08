@@ -17,7 +17,6 @@ pub mod bounds_check;
 pub mod case;
 pub mod components;
 pub mod cyl;
-#[cfg(feature = "ssr")] pub mod db;
 #[cfg(feature = "ssr")] pub mod fileserv;
 pub mod iol;
 pub mod plots;

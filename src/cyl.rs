@@ -18,15 +18,15 @@ pub struct Cyl {
     /// Cylinder power in `hm^-1`.
     pub power: i32,
     /// Axis in degrees.
-    pub axis: u32,
+    pub axis: i32,
 }
 
 impl Cyl {
     /// Create a new [`Cyl`], with bounds checking on the [`axis`](Cyl::axis). The
     /// [`power`](Cyl::power) is unconstrained until the [`Cyl`] is wrapped by a more specific
     /// type.
-    pub fn new(power: i32, axis: u32) -> Result<Self, ScaBoundsError> {
-        if axis < 180 {
+    pub fn new(power: i32, axis: i32) -> Result<Self, ScaBoundsError> {
+        if (0..=179).contains(&axis) {
             Ok(Self { power, axis })
         } else {
             Err(ScaBoundsError::Axis(axis))
@@ -40,8 +40,8 @@ impl Cyl {
     }
 
     /// Update a [`Cyl`] with a new [`axis`](Cyl::axis).
-    pub fn set_axis(mut self, axis: u32) -> Result<Self, ScaBoundsError> {
-        if axis < 180 {
+    pub fn set_axis(mut self, axis: i32) -> Result<Self, ScaBoundsError> {
+        if (0..=179).contains(&axis) {
             self.axis = axis;
             Ok(self)
         } else {

@@ -16,7 +16,7 @@ pub enum SiaBoundsError {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Sia {
     pub power: i32,
-    pub axis: u32,
+    pub axis: i32,
 }
 
 impl TryFrom<Cyl> for Sia {
