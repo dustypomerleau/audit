@@ -13,6 +13,7 @@
 // for RA support only
 mod refs;
 
+pub mod auth;
 pub mod bounds_check;
 pub mod case;
 pub mod components;
