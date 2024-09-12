@@ -2,11 +2,11 @@
 // https://stackoverflow.com/questions/54504026/how-do-i-provide-an-implementation-of-a-generic-struct-in-rust
 
 use crate::{
-    bounds_check::Unchecked,
+    bounds_check::{BoundsCheck, Checked, Unchecked},
     cyl::{Cyl, CylPair},
-    iol::{Iol, OpIol},
-    refraction::Refraction,
-    target::{Constant, Target},
+    iol::{Iol, IolBoundsError, OpIol},
+    refraction::{Refraction, RefractionBoundsError},
+    target::{Constant, Target, TargetBoundsError},
 };
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
@@ -71,13 +71,24 @@ impl ScaMut for RawSca {
 }
 
 impl RawSca {
-    /// Construct a new [`RawSca`], with bounds checking on the [`axis`](Cyl::axis).
+    /// Construct a new [`RawSca`].
     pub fn new(sph: i32, cyl: Option<Cyl>) -> Self {
         Self { sph, cyl }
     }
 
-    /// Convert a [`RawSca`] into an [`OpIol`](crate::iol::OpIol).
-    pub fn into_opiol(&self, iol: Iol) -> OpIol<Unchecked> {
+    /// Convert a [`RawSca`] into an [`OpIol<Checked>`], with required bounds checking.
+    pub fn into_opiol(&self, iol: Iol) -> Result<OpIol<Checked>, IolBoundsError> {
+        OpIol {
+            iol,
+            se: self.sph,
+            cyl: self.cyl,
+            bounds: PhantomData,
+        }
+        .check()
+    }
+
+    /// Convert a [`RawSca`] into an [`OpIol<Unchecked>`], without bounds checking.
+    pub fn into_opiol_unchecked(&self, iol: Iol) -> OpIol<Unchecked> {
         OpIol {
             iol,
             se: self.sph,
@@ -86,8 +97,18 @@ impl RawSca {
         }
     }
 
-    /// Convert a [`RawSca`] into a [`Refraction`].
-    pub fn into_refraction(&self) -> Refraction<Unchecked> {
+    /// Convert a [`RawSca`] into a [`Refraction<Checked>`], with required bounds checking.
+    pub fn into_refraction(&self) -> Result<Refraction<Checked>, RefractionBoundsError> {
+        Refraction {
+            sph: self.sph,
+            cyl: self.cyl,
+            bounds: PhantomData,
+        }
+        .check()
+    }
+
+    /// Convert a [`RawSca`] into a [`Refraction<Unchecked>`], without bounds checking.
+    pub fn into_refraction_unchecked(&self) -> Refraction<Unchecked> {
         Refraction {
             sph: self.sph,
             cyl: self.cyl,
@@ -95,8 +116,22 @@ impl RawSca {
         }
     }
 
-    /// Convert a [`RawSca`] into a [`Target`].
-    pub fn into_target(&self, constant: Option<Constant>) -> Target<Unchecked> {
+    /// Convert a [`RawSca`] into a [`Target<Checked>`], with required bounds checking.
+    pub fn into_target(
+        &self,
+        constant: Option<Constant>,
+    ) -> Result<Target<Checked>, TargetBoundsError> {
+        Target {
+            constant,
+            se: self.sph,
+            cyl: self.cyl,
+            bounds: PhantomData,
+        }
+        .check()
+    }
+
+    /// Convert a [`RawSca`] into a [`Target<Unchecked>`], without bounds checking.
+    pub fn into_target_unchecked(&self, constant: Option<Constant>) -> Target<Unchecked> {
         Target {
             constant,
             se: self.sph,
