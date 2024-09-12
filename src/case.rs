@@ -1,11 +1,10 @@
-#[cfg(feature = "ssr")] use crate::db::DbCase;
 use crate::{
     bounds_check::Checked,
     iol::{IolBoundsError, OpIol},
     refraction::{OpRefraction, RefractionBoundsError},
     sca::ScaBoundsError,
     sia::{Sia, SiaBoundsError},
-    surgeon::Surgeon,
+    surgeon::{Email, Surgeon},
     target::{Target, TargetBoundsError},
     va::{OpVa, VaBoundsError},
 };
@@ -137,15 +136,6 @@ pub struct Case {
     pub refraction: OpRefraction,
 }
 
-#[cfg(feature = "ssr")]
-impl TryFrom<DbCase> for Case {
-    type Error = CaseError;
-
-    fn try_from(dbcase: DbCase) -> Result<Self, Self::Error> {
-        todo!()
-    }
-}
-
 mod tests {
     use super::*;
     use crate::{
@@ -204,10 +194,10 @@ mod tests {
     fn case() -> Case {
         Case {
             surgeon: Surgeon {
-                email: "email@email.com".to_string(),
+                email: Email::new("email@email.com").unwrap(),
                 first_name: Some("john".to_string()),
                 last_name: Some("smith".to_string()),
-                site: None,
+                sites: None,
                 sia: Some(SurgeonSia {
                     right: Sia {
                         power: 010,
