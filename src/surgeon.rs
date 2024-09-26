@@ -16,7 +16,7 @@ impl Email {
         let email = Self(email.to_string());
 
         match email.validate() {
-            Ok(()) => Ok(email),
+            Ok(_) => Ok(email),
             Err(e) => Err(EmailValidationError(e)),
         }
     }
