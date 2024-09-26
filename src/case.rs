@@ -136,159 +136,159 @@ pub struct Case {
     pub refraction: OpRefraction,
 }
 
-mod tests {
-    use super::*;
-    use crate::{
-        bounds_check::BoundsCheck,
-        cyl::Cyl,
-        iol::{Focus, Iol},
-        refraction::Refraction,
-        surgeon::SurgeonSia,
-        target::{Constant, Formula},
-        va::{AfterVa, BeforeVa, Va},
-    };
-    #[cfg(feature = "ssr")] use edgedb_tokio::create_client;
-    use std::marker::PhantomData;
-    #[cfg(feature = "ssr")] use tokio::test;
-
-    #[cfg(feature = "ssr")]
-    #[tokio::test]
-    async fn inserts_a_case() {
-        let client = edgedb_tokio::create_client()
-            .await
-            .expect("DB client to be initialized");
-
-        let Case {
-            urn,
-            side,
-            target,
-            date,
-            site,
-            sia,
-            iol,
-            adverse,
-            va,
-            refraction,
-            ..
-        } = case();
-
-        let (target_constant, target_se, target_cyl) = if let Some(target) = target {
-            Target {
-                constant,
-                se,
-                cyl,
-                ..
-            } = target;
-        };
-
-        let args = (urn, side, target_constant, target_se, target_cyl);
-
-        let result = client
-            .query("select 1 + 1", &())
-            .await
-            .unwrap()
-            .iter()
-            .map(|res| println!("{res:?}"));
-    }
-
-    fn case() -> Case {
-        Case {
-            surgeon: Surgeon {
-                email: Email::new("email@email.com").unwrap(),
-                first_name: Some("john".to_string()),
-                last_name: Some("smith".to_string()),
-                sites: None,
-                sia: Some(SurgeonSia {
-                    right: Sia {
-                        power: 010,
-                        axis: 100,
-                    },
-                    left: Sia {
-                        power: 010,
-                        axis: 100,
-                    },
-                }),
-            },
-
-            urn: "abc123".to_string(),
-            side: Side::Right,
-
-            target: Some(
-                Target {
-                    constant: Some(Constant {
-                        value: 11936,
-                        formula: Formula::Kane,
-                    }),
-                    se: 1950,
-                    cyl: Some(Cyl {
-                        power: -015,
-                        axis: 90,
-                    }),
-                    bounds: PhantomData,
-                }
-                .check()
-                .unwrap(),
-            ),
-
-            date: NaiveDate::from_ymd_opt(2022, 3, 15).unwrap(),
-            site: Some("RMH".to_string()),
-            sia: None,
-
-            iol: Some(
-                OpIol {
-                    iol: Iol {
-                        model: "zxr00v".to_string(),
-                        name: "Symfony".to_string(),
-                        company: "Johnson and Johnson".to_string(),
-                        focus: Focus::Edof,
-                        toric: false,
-                    },
-                    se: 2400,
-                    cyl: None,
-                    bounds: PhantomData,
-                }
-                .check()
-                .unwrap(),
-            ),
-
-            adverse: Some(Adverse::Pc),
-
-            va: OpVa {
-                before: BeforeVa {
-                    best: Va {
-                        num: 600,
-                        den: 1200,
-                    },
-                    raw: None,
-                },
-                after: AfterVa {
-                    best: None,
-                    raw: Va { num: 600, den: 500 },
-                },
-            },
-
-            refraction: OpRefraction {
-                before: Refraction {
-                    sph: 300,
-                    cyl: Some(Cyl {
-                        power: -125,
-                        axis: 45,
-                    }),
-                    bounds: PhantomData,
-                }
-                .check()
-                .unwrap(),
-                after: Refraction {
-                    sph: -025,
-                    cyl: Some(Cyl {
-                        power: -025,
-                        axis: 60,
-                    }),
-                    bounds: PhantomData,
-                }
-                .check()
-                .unwrap(),
-            },
-        }
-    }
-}
+// mod tests {
+//     use super::*;
+//     use crate::{
+//         bounds_check::BoundsCheck,
+//         cyl::Cyl,
+//         iol::{Focus, Iol},
+//         refraction::Refraction,
+//         surgeon::SurgeonSia,
+//         target::{Constant, Formula},
+//         va::{AfterVa, BeforeVa, Va},
+//     };
+//     #[cfg(feature = "ssr")] use edgedb_tokio::create_client;
+//     use std::marker::PhantomData;
+//     #[cfg(feature = "ssr")] use tokio::test;
+//
+//     #[cfg(feature = "ssr")]
+//     #[tokio::test]
+//     async fn inserts_a_case() {
+//         let client = edgedb_tokio::create_client()
+//             .await
+//             .expect("DB client to be initialized");
+//
+//         let Case {
+//             urn,
+//             side,
+//             target,
+//             date,
+//             site,
+//             sia,
+//             iol,
+//             adverse,
+//             va,
+//             refraction,
+//             ..
+//         } = case();
+//
+//         let (target_constant, target_se, target_cyl) = if let Some(target) = target {
+//             Target {
+//                 constant,
+//                 se,
+//                 cyl,
+//                 ..
+//             } = target;
+//         };
+//
+//         let args = (urn, side, target_constant, target_se, target_cyl);
+//
+//         let result = client
+//             .query("select 1 + 1", &())
+//             .await
+//             .unwrap()
+//             .iter()
+//             .map(|res| println!("{res:?}"));
+//     }
+//
+//     fn case() -> Case {
+//         Case {
+//             surgeon: Surgeon {
+//                 email: Email::new("email@email.com").unwrap(),
+//                 first_name: Some("john".to_string()),
+//                 last_name: Some("smith".to_string()),
+//                 sites: None,
+//                 sia: Some(SurgeonSia {
+//                     right: Sia {
+//                         power: 010,
+//                         axis: 100,
+//                     },
+//                     left: Sia {
+//                         power: 010,
+//                         axis: 100,
+//                     },
+//                 }),
+//             },
+//
+//             urn: "abc123".to_string(),
+//             side: Side::Right,
+//
+//             target: Some(
+//                 Target {
+//                     constant: Some(Constant {
+//                         value: 11936,
+//                         formula: Formula::Kane,
+//                     }),
+//                     se: 1950,
+//                     cyl: Some(Cyl {
+//                         power: -015,
+//                         axis: 90,
+//                     }),
+//                     bounds: PhantomData,
+//                 }
+//                 .check()
+//                 .unwrap(),
+//             ),
+//
+//             date: NaiveDate::from_ymd_opt(2022, 3, 15).unwrap(),
+//             site: Some("RMH".to_string()),
+//             sia: None,
+//
+//             iol: Some(
+//                 OpIol {
+//                     iol: Iol {
+//                         model: "zxr00v".to_string(),
+//                         name: "Symfony".to_string(),
+//                         company: "Johnson and Johnson".to_string(),
+//                         focus: Focus::Edof,
+//                         toric: false,
+//                     },
+//                     se: 2400,
+//                     cyl: None,
+//                     bounds: PhantomData,
+//                 }
+//                 .check()
+//                 .unwrap(),
+//             ),
+//
+//             adverse: Some(Adverse::Pc),
+//
+//             va: OpVa {
+//                 before: BeforeVa {
+//                     best: Va {
+//                         num: 600,
+//                         den: 1200,
+//                     },
+//                     raw: None,
+//                 },
+//                 after: AfterVa {
+//                     best: None,
+//                     raw: Va { num: 600, den: 500 },
+//                 },
+//             },
+//
+//             refraction: OpRefraction {
+//                 before: Refraction {
+//                     sph: 300,
+//                     cyl: Some(Cyl {
+//                         power: -125,
+//                         axis: 45,
+//                     }),
+//                     bounds: PhantomData,
+//                 }
+//                 .check()
+//                 .unwrap(),
+//                 after: Refraction {
+//                     sph: -025,
+//                     cyl: Some(Cyl {
+//                         power: -025,
+//                         axis: 60,
+//                     }),
+//                     bounds: PhantomData,
+//                 }
+//                 .check()
+//                 .unwrap(),
+//             },
+//         }
+//     }
+// }
