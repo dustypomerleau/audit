@@ -11,7 +11,7 @@
 /// will be either 3 or 4 digits.
 //
 // for RA support only
-mod refs;
+pub mod refs;
 
 pub mod auth;
 pub mod bounds_check;
