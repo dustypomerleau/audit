@@ -1,8 +1,3 @@
-#![allow(dead_code)]
-
-// use crate::case::Case;
-// use edgedb_protocol::{model::Uuid, named_args, value::Value};
-
 #[cfg(test)]
 mod tests {
     use crate::{
@@ -141,6 +136,12 @@ mod tests {
         };
 
         let case = sample_case();
+
+        // target_constant_value
+        // target_constant_formula
+        // target_se
+        // target_cyl_power
+        // target_cyl_axis
 
         // todo:
         // - [x] test named args on the simple example of Sia
