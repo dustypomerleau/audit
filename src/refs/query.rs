@@ -17,9 +17,13 @@ mod tests {
         va::{AfterVa, BeforeVa, OpVa, Va},
     };
     use chrono::NaiveDate;
-    use edgedb_protocol::{named_args, value::Value, QueryResult};
+    use edgedb_protocol::{
+        named_args,
+        value::{EnumValue, Value},
+        QueryResult,
+    };
     use edgedb_tokio::create_client;
-    use std::marker::PhantomData;
+    use std::{fmt, marker::PhantomData, sync::Arc};
     use tokio::test;
 
     fn sample_case() -> Case {
@@ -136,9 +140,13 @@ mod tests {
             axis: 100,
         };
 
+        let case = sample_case();
+
         // todo:
         // - [x] test named args on the simple example of Sia
-        // - [ ] write a larger query to insert a full Cas
+        // - [ ] write a larger query to insert a full Cas: (you don't need to assign all
+        // the intermediate `with` statements, just use dot notation off the incoming
+        // `Case`, as you did with `Sia` below).
         //
         // Within components, the client will be provided via:
         // let client = expect_context::<Client>();
@@ -146,6 +154,7 @@ mod tests {
         let query = "insert Sia { power := <int32>$sia_power, axis := <int32>$sia_axis };";
 
         let args = named_args! {
+            "side" => Value::Enum(EnumValue::from(format!("{}", case.side).as_str())),
             "sia_power" => Value::Int32(sia.power),
             "sia_axis" => Value::Int32(sia.axis)
         };

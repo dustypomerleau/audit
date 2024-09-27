@@ -11,6 +11,7 @@ use crate::{
 use chrono::NaiveDate;
 #[cfg(feature = "ssr")] use edgedb_derive::Queryable;
 use serde::{Deserialize, Serialize};
+use std::fmt::{write, Display};
 use thiserror::Error;
 
 /// A wrapper for any type of bounds error on numeric types.
@@ -100,6 +101,16 @@ pub enum Side {
     Left,
 }
 
+// Implementing Display is necessary for enums to impl Into<edgedb_protocol::Value>
+impl Display for Side {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Right => write!(f, "Right"),
+            Self::Left => write!(f, "Left"),
+        }
+    }
+}
+
 /// An adverse intraoperative event. Classification is at the surgeon's discretion, and only one
 /// option can be selected. For example, a wrap around split in the rhexis opens the PC, but in the
 /// surgeon's view it may be essentially a rhexis complication. For our purposes, we aren't
@@ -113,6 +124,17 @@ pub enum Adverse {
     Pc,
     Zonule,
     Other,
+}
+
+impl Display for Adverse {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Rhexis => write!(f, "Rhexis"),
+            Self::Pc => write!(f, "Pc"),
+            Self::Zonule => write!(f, "Zonule"),
+            Self::Other => write!(f, "Other"),
+        }
+    }
 }
 
 /// A single surgical case. In the future, biometry values may be added.
