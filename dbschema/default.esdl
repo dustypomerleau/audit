@@ -91,7 +91,7 @@ global cur_surgeon := (assert_single(
         # biometry: Biometry # eventually
         required side: Side;
         target: Target;
-        required date: cal::local_date;
+        required year: int32 { default := <int32>datetime_get(datetime_current(), "year"); }
         sia: Sia; # if present, overrides surgeon default
         opiol: OpIol;
         adverse: Adverse;
@@ -177,6 +177,7 @@ global cur_surgeon := (assert_single(
     type SurgeonCas extending SoftCreate {
         required surgeon: Surgeon;
         required urn: str;
+        required date: cal::local_date;
         required cas: Cas { constraint exclusive; }
         site: Site; # if present, overrides surgeon default
         
