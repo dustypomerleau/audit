@@ -154,6 +154,7 @@ mod tests {
         let query = "insert Sia { power := <int32>$sia_power, axis := <int32>$sia_axis };";
 
         let args = named_args! {
+            "urn" => Value::Str(case.urn),
             "side" => Value::Enum(EnumValue::from(case.side.to_string().as_str())),
             "sia_power" => Value::Int32(sia.power),
             "sia_axis" => Value::Int32(sia.axis)
