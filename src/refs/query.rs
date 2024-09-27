@@ -34,11 +34,11 @@ mod tests {
                 ]),
                 sia: Some(SurgeonSia {
                     right: Sia {
-                        power: 010,
+                        power: 10,
                         axis: 100,
                     },
                     left: Sia {
-                        power: 010,
+                        power: 10,
                         axis: 100,
                     },
                 }),
@@ -53,9 +53,9 @@ mod tests {
                         value: 11936,
                         formula: Formula::Kane,
                     }),
-                    se: 1950,
+                    se: -12,
                     cyl: Some(Cyl {
-                        power: -015,
+                        power: 15,
                         axis: 90,
                     }),
                     bounds: PhantomData,
