@@ -56,6 +56,8 @@ pub struct Iol {
 pub struct OpIol<Bounds = Unchecked> {
     pub iol: Iol,
     pub se: i32,
+    // todo: cyl power is actually determined by the model, why would the surgeon enter
+    // this manually? Should they only have the axis?
     pub cyl: Option<Cyl>,
     pub bounds: PhantomData<Bounds>,
 }
