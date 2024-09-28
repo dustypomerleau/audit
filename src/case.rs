@@ -4,7 +4,7 @@ use crate::{
     refraction::{OpRefraction, RefractionBoundsError},
     sca::ScaBoundsError,
     sia::{Sia, SiaBoundsError},
-    surgeon::{Email, Surgeon},
+    surgeon::Email,
     target::{Target, TargetBoundsError},
     va::{OpVa, VaBoundsError},
 };
@@ -140,12 +140,6 @@ impl Display for Adverse {
 /// A single surgical case. In the future, biometry values may be added.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Case {
-    // todo: perhaps the `Case` doesn't need to contain the `Surgeon`, as you will always
-    // get the `Surgeon` from the DB global based on auth
-    // However, you need to store default SIA, site information, so maybe keep it
-    // keep in mind though, you only need the default SIA when you pull things out of the DB,
-    // not during insertion
-    pub surgeon: Surgeon,
     /// A unique value that allows (only) the surgeon to deanonymize the case.
     pub urn: String,
     pub side: Side,
