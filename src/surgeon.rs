@@ -1,6 +1,7 @@
 use crate::sia::Sia;
 use garde::Validate;
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -10,6 +11,12 @@ pub struct EmailValidationError(garde::Report);
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize, Validate)]
 #[garde(transparent)]
 pub struct Email(#[garde(email)] String);
+
+impl Display for Email {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.fmt(f)
+    }
+}
 
 impl Email {
     pub fn new(email: &str) -> Result<Self, EmailValidationError> {
@@ -36,6 +43,34 @@ pub struct Surgeon {
     pub email: Email,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
-    pub sites: Option<Vec<String>>,
+    pub default_site: Option<String>,
     pub sia: Option<SurgeonSia>,
+}
+
+#[cfg(test)]
+mod tests {
+    fn sample_surgeon() -> Surgeon {
+        Surgeon {
+            email: Email::new("email@email.com").unwrap(),
+            first_name: Some("john".to_string()),
+            last_name: Some("smith".to_string()),
+            sites: Some(vec![
+                "Royal Melbourne Hospital".to_string(),
+                "Manningham Private Hospital".to_string(),
+            ]),
+            sia: Some(SurgeonSia {
+                right: Sia {
+                    power: 10,
+                    axis: 100,
+                },
+                left: Sia {
+                    power: 10,
+                    axis: 100,
+                },
+            }),
+        }
+    }
+
+    #[tokio::test]
+    async fn inserts_surgeon() {}
 }
