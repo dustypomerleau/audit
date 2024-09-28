@@ -353,3 +353,17 @@ insert SurgeonCas {
     site := site
 };
 
+---
+
+insert Surgeon {
+    email := {email},
+    first_name := {first_name},
+    last_name := {last_name},
+    sites := site,
+    sia := sia 
+} unless conflict on .email;
+
+insert Surgeon {
+    email := "surgeon3@gmail.com",
+    default_site := (select (insert Site { name := "Royal Melbourne Hospital (Parkville, AUS)" } unless conflict))
+};

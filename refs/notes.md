@@ -12,6 +12,12 @@
 
 Consider [EdgeDB Auth](https://docs.edgedb.com/guides/auth)
 
+5:32 PM]brennanxyz: Any good examples for creating a custom User object with a linked ext::auth::Identity on the /signup endpoint request? I get the code back on a successful signup, wondering what the best method is to go directly from a successful Identity creation to initializing a custom User... or is this accomplished within the schema?
+[5:32 PM]
+APP
+Needle: Thread automatically created by brennanxyz in ⁠auth
+[11:37 PM]Scott Trinh: Once you do the PKCE code exchange, the response from the server includes the new identity_id which you can use to insert your new User object linking to the identity.
+
 ## Types
 
 ### Separating Far and Near values
