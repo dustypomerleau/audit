@@ -20,29 +20,10 @@ mod tests {
     use edgedb_tokio::create_client;
     use std::{fmt, marker::PhantomData, sync::Arc};
     use tokio::test;
+    use tracing::Value;
 
     fn sample_case() -> Case {
         Case {
-            surgeon: Surgeon {
-                email: Email::new("email@email.com").unwrap(),
-                first_name: Some("john".to_string()),
-                last_name: Some("smith".to_string()),
-                sites: Some(vec![
-                    "Royal Melbourne Hospital".to_string(),
-                    "Manningham Private Hospital".to_string(),
-                ]),
-                sia: Some(SurgeonSia {
-                    right: Sia {
-                        power: 10,
-                        axis: 100,
-                    },
-                    left: Sia {
-                        power: 10,
-                        axis: 100,
-                    },
-                }),
-            },
-
             urn: "abc123".to_string(),
             side: Side::Right,
 
@@ -142,6 +123,8 @@ mod tests {
         // target_se
         // target_cyl_power
         // target_cyl_axis
+        // todo: you need logic so that the named args are only used if Case::target.is_some()
+        // try wrapping each Option in ValueOpt and just passing it as is
 
         // todo:
         // - [x] test named args on the simple example of Sia
@@ -153,6 +136,20 @@ mod tests {
         // let client = expect_context::<Client>();
         let client = create_client().await.expect("DB client to be created");
         let query = "insert Sia { power := <int32>$sia_power, axis := <int32>$sia_axis };";
+
+        let target = case.target.unwrap_or(Value::Nothing);
+
+        Target {
+            constant,
+            se,
+            cyl,
+            ..
+        } = target;
+
+        let constant = match constant {
+            Some(constant) => constant,
+            None => Value::Nothing
+        };
 
         let args = named_args! {
             "urn" => Value::Str(case.urn),
