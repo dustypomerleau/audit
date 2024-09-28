@@ -27,7 +27,6 @@ global cur_surgeon := (assert_single(
         constraint regexp("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$");
     }
 
-    # todo: should we have a separate category for diffractive EDOF?
     scalar type Focus extending enum<Mono, Edof, Multi>;
 
     scalar type Formula extending enum<
@@ -92,7 +91,7 @@ global cur_surgeon := (assert_single(
         required side: Side;
         target: Target;
         required year: int32 { default := <int32>datetime_get(datetime_current(), "year"); }
-        sia: Sia; # if present, overrides surgeon default
+        sia: Sia; # form can prepopulate Surgeon.sia (todo: make required and default to inserting Sia of 0?
         opiol: OpIol;
         adverse: Adverse;
         required va: OpVa;
@@ -169,9 +168,9 @@ global cur_surgeon := (assert_single(
         first_name: str;
         last_name: str;
         sia: SurgeonSia;
-        multi sites: Site;
-        multi cases := .<surgeon[is SurgeonCas];
-        multi constants := .<surgeon[is SurgeonConstant];
+        default_site: Site;
+        cases := .<surgeon[is SurgeonCas];
+        constants := .<surgeon[is SurgeonConstant];
     }
 
     type SurgeonCas extending SoftCreate {
@@ -179,7 +178,7 @@ global cur_surgeon := (assert_single(
         required urn: str;
         required date: cal::local_date;
         required cas: Cas { constraint exclusive; }
-        site: Site; # if present, overrides surgeon default
+        site: Site; # form can prepopulate Surgeon.default_site
         
         # When creating a plot, the surgeon access their own `SurgeonCas`es (which are 
         # restricted) but accesses others' `Cas`es (which are unrestricted) for comparison.
