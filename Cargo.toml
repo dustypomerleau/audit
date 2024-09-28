@@ -25,13 +25,14 @@ serde = { version = "1", features = ["derive"] }
 sha2 = { version = "0.10", default-features = false }
 thiserror = "1"
 tokio = { version = "1", features = ["macros", "rt-multi-thread"], optional = true }
-tower = { version = "0.4", optional = true } # waiting on Leptos to upgrade to 0.5
+tower = { version = "0.4", optional = true, features = [
+  "util",
+] } # waiting on Leptos to upgrade to 0.5
 tower-http = { version = "0.5", features = [
   "fs",
 ], optional = true } # waiting on leptos to upgrade to 0.6
 tracing = { version = "0.1", optional = true }
 wasm-bindgen = "=0.2.93"
-# uuid = { version = "1", features = ["serde", "v4"] }
 
 [features]
 hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
