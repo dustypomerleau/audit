@@ -1,26 +1,25 @@
+use crate::{
+    bounds_check::{BoundsCheck, Unchecked},
+    case::{Adverse, Case, Side},
+    cyl::Cyl,
+    iol::{Focus, Iol, OpIol},
+    refraction::{OpRefraction, Refraction},
+    sia::Sia,
+    target::{Constant, Formula, Target},
+    va::{AfterVa, BeforeVa, OpVa, Va},
+};
+use chrono::NaiveDate;
+use edgedb_protocol::{
+    named_args,
+    value::{EnumValue, Value},
+    QueryResult,
+};
+use edgedb_tokio::create_client;
+use std::{fmt, marker::PhantomData, sync::Arc};
+
 #[cfg(test)]
 mod tests {
-    use crate::{
-        bounds_check::{BoundsCheck, Checked, Unchecked},
-        case::{Adverse, Case, Side},
-        cyl::Cyl,
-        iol::{Focus, Iol, OpIol},
-        refraction::{OpRefraction, Refraction},
-        sia::Sia,
-        surgeon::{Email, Surgeon, SurgeonSia},
-        target::{Constant, Formula, Target},
-        va::{AfterVa, BeforeVa, OpVa, Va},
-    };
-    use chrono::NaiveDate;
-    use edgedb_protocol::{
-        named_args,
-        value::{EnumValue, Value},
-        QueryResult,
-    };
-    use edgedb_tokio::create_client;
-    use std::{fmt, marker::PhantomData, sync::Arc};
-    use tokio::test;
-    use tracing::Value;
+    use super::*;
 
     fn sample_case() -> Case {
         Case {
@@ -96,9 +95,9 @@ mod tests {
                 .check()
                 .unwrap(),
                 after: Refraction::<Unchecked> {
-                    sph: -025,
+                    sph: -25,
                     cyl: Some(Cyl {
-                        power: -025,
+                        power: -25,
                         axis: 60,
                     }),
                     bounds: PhantomData,
@@ -139,16 +138,13 @@ mod tests {
 
         let target = case.target.unwrap_or(Value::Nothing);
 
-        Target {
-            constant,
-            se,
-            cyl,
-            ..
+        let Target {
+            constant, se, cyl, ..
         } = target;
 
         let constant = match constant {
             Some(constant) => constant,
-            None => Value::Nothing
+            None => Value::Nothing,
         };
 
         let args = named_args! {
@@ -161,8 +157,6 @@ mod tests {
         let res: Vec<Value> = client.query(query, &args).await.expect("query to succeed");
 
         println!("{res:?}");
-
-        ()
     }
 }
 

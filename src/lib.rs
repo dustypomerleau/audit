@@ -11,6 +11,7 @@
 /// will be either 3 or 4 digits.
 //
 // for RA support only
+#[cfg(feature = "ssr")]
 pub mod refs;
 
 pub mod auth;

@@ -20,7 +20,10 @@ async fn main() {
     let routes = generate_route_list(App);
     // getting the auth token requires something like:
     // https://docs.edgedb.com/guides/auth/email_password#retrieve-auth-token
-    // Which is still a todo:
+    // Which is still a todo
+    // todo: remove this - temporarily mock the auth token:
+    let auth_token = String::from("fake_token");
+
     let client = create_client()
         .await
         .expect("DB client to be initialized")
