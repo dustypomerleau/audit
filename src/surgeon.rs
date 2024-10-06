@@ -48,16 +48,16 @@ pub struct Surgeon {
 }
 
 #[cfg(test)]
+#[cfg(feature = "ssr")]
 mod tests {
+    use super::*;
+
     fn sample_surgeon() -> Surgeon {
         Surgeon {
             email: Email::new("email@email.com").unwrap(),
             first_name: Some("john".to_string()),
             last_name: Some("smith".to_string()),
-            sites: Some(vec![
-                "Royal Melbourne Hospital".to_string(),
-                "Manningham Private Hospital".to_string(),
-            ]),
+            default_site: Some("Royal Melbourne Hospital".to_string()),
             sia: Some(SurgeonSia {
                 right: Sia {
                     power: 10,
