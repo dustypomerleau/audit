@@ -8,6 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 axum = { version = "0.7", optional = true }
+# axum-extra = { version = "0.9", features = ["cookie", "typed-header"] }
 base64ct = { version = "1", features = ["alloc"] }
 chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"
