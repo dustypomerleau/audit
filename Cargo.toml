@@ -11,6 +11,7 @@ axum = { version = "0.7", optional = true }
 base64ct = { version = "1", features = ["alloc"] }
 chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"
+dotenv = "0.15"
 edgedb-derive = { version = "0.5", optional = true }
 edgedb-protocol = { version = "0.6", features = ["chrono"], optional = true }
 edgedb-tokio = { version = "0.5", optional = true }
