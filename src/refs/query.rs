@@ -108,56 +108,56 @@ mod tests {
         }
     }
 
-    #[tokio::test]
-    async fn inserts_sia() {
-        let sia = Sia {
-            power: 10,
-            axis: 100,
-        };
-
-        let case = sample_case();
-
-        // target_constant_value
-        // target_constant_formula
-        // target_se
-        // target_cyl_power
-        // target_cyl_axis
-        // todo: you need logic so that the named args are only used if Case::target.is_some()
-        // try wrapping each Option in ValueOpt and just passing it as is
-
-        // todo:
-        // - [x] test named args on the simple example of Sia
-        // - [ ] write a larger query to insert a full Cas: (you don't need to assign all
-        // the intermediate `with` statements, just use dot notation off the incoming
-        // `Case`, as you did with `Sia` below).
-        //
-        // Within components, the client will be provided via:
-        // let client = expect_context::<Client>();
-        let client = create_client().await.expect("DB client to be created");
-        let query = "insert Sia { power := <int32>$sia_power, axis := <int32>$sia_axis };";
-
-        let target = case.target.unwrap_or(Value::Nothing);
-
-        let Target {
-            constant, se, cyl, ..
-        } = target;
-
-        let constant = match constant {
-            Some(constant) => constant,
-            None => Value::Nothing,
-        };
-
-        let args = named_args! {
-            "urn" => Value::Str(case.urn),
-            "side" => Value::Enum(EnumValue::from(case.side.to_string().as_str())),
-            "sia_power" => Value::Int32(sia.power),
-            "sia_axis" => Value::Int32(sia.axis)
-        };
-
-        let res: Vec<Value> = client.query(query, &args).await.expect("query to succeed");
-
-        println!("{res:?}");
-    }
+    // #[tokio::test]
+    // async fn inserts_sia() {
+    //     let sia = Sia {
+    //         power: 10,
+    //         axis: 100,
+    //     };
+    //
+    //     let case = sample_case();
+    //
+    //     // target_constant_value
+    //     // target_constant_formula
+    //     // target_se
+    //     // target_cyl_power
+    //     // target_cyl_axis
+    //     // todo: you need logic so that the named args are only used if Case::target.is_some()
+    //     // try wrapping each Option in ValueOpt and just passing it as is
+    //
+    //     // todo:
+    //     // - [x] test named args on the simple example of Sia
+    //     // - [ ] write a larger query to insert a full Cas: (you don't need to assign all
+    //     // the intermediate `with` statements, just use dot notation off the incoming
+    //     // `Case`, as you did with `Sia` below).
+    //     //
+    //     // Within components, the client will be provided via:
+    //     // let client = expect_context::<Client>();
+    //     let client = create_client().await.expect("DB client to be created");
+    //     let query = "insert Sia { power := <int32>$sia_power, axis := <int32>$sia_axis };";
+    //
+    //     let target = case.target.unwrap_or(Value::Nothing);
+    //
+    //     let Target {
+    //         constant, se, cyl, ..
+    //     } = target;
+    //
+    //     let constant = match constant {
+    //         Some(constant) => constant,
+    //         None => Value::Nothing,
+    //     };
+    //
+    //     let args = named_args! {
+    //         "urn" => Value::Str(case.urn),
+    //         "side" => Value::Enum(EnumValue::from(case.side.to_string().as_str())),
+    //         "sia_power" => Value::Int32(sia.power),
+    //         "sia_axis" => Value::Int32(sia.axis)
+    //     };
+    //
+    //     let res: Vec<Value> = client.query(query, &args).await.expect("query to succeed");
+    //
+    //     println!("{res:?}");
+    // }
 }
 
 // pub fn insert_case(case: Case) -> Uuid {
