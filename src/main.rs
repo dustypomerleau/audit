@@ -1,11 +1,15 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use audit::{fileserv::file_and_error_handler, routes::App, surgeon::Surgeon};
+    use audit::{fileserv::file_and_error_handler, routes::App};
     use axum::Router;
+    use dotenv::dotenv;
     use edgedb_tokio::create_client;
     use leptos::{get_configuration, logging, provide_context};
     use leptos_axum::{generate_route_list, LeptosRoutes};
+
+    #[cfg(debug_assertions)]
+    dotenv().ok();
 
     // Setting get_configuration(None) means we'll be using cargo-leptos's env values
     //
