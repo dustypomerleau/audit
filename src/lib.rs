@@ -15,7 +15,6 @@
 #[cfg(feature = "ssr")]
 pub mod refs;
 
-#[cfg(feature = "ssr")] pub mod auth;
 pub mod bounds_check;
 pub mod case;
 pub mod components;
