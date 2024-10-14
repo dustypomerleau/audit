@@ -3,7 +3,7 @@
 async fn main() {
     use audit::{fileserv::file_and_error_handler, routes::App};
     use axum::Router;
-    use dotenv::dotenv;
+    use dotenvy::dotenv;
     use edgedb_tokio::create_client;
     use leptos::{get_configuration, logging, provide_context};
     use leptos_axum::{generate_route_list, LeptosRoutes};

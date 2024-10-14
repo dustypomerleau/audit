@@ -77,7 +77,7 @@ pub async fn handle_sign_in() -> Result<(), ServerFnError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use dotenv::dotenv;
+    use dotenvy::dotenv;
     use leptos::server;
 
     #[test]
