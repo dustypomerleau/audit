@@ -65,9 +65,28 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
 #[component]
 pub fn SignIn() -> impl IntoView {
     view! {
-        <button on:click=move |_| {
-            spawn_local(async { handle_sign_in().await.unwrap() });
-        }>"Sign in"</button>
+        <div style="flex">
+            <button on:click=move |_| {
+                spawn_local(async { handle_sign_in().await.unwrap() });
+            }>"Sign in"</button>
+
+            <a href="https://accounts.google.com">or create a new google account</a>
+        </div>
+    }
+}
+
+// #[server]
+// wip todo: chip away at this
+#[cfg(feature = "ssr")]
+pub async fn handle_callback() -> Result<(), ServerFnError> {
+    let response = expect_context::<ResponseOptions>();
+
+    if let Some(code) = response.0.clone().read().headers.get("code") {
+        log!("{code:?}");
+        Ok(())
+    } else {
+        log!("the code wasn't found in the header map");
+        Ok(())
     }
 }
 
