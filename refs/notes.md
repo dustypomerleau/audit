@@ -10,6 +10,17 @@
 
 ## Auth
 
+### redirect URIs
+
+Error 400: redirect_uri_mismatch
+
+You can't sign in to this app because it doesn't comply with Google's OAuth 2.0 policy.
+
+If you're the app developer, register the redirect URI in the Google Cloud Console.
+Request details: redirect_uri=http://localhost:10702/branch/dev/ext/auth/callback flowName=GeneralOAuthFlow
+
+---
+
 Consider [EdgeDB Auth](https://docs.edgedb.com/guides/auth)
 
 5:32 PM]brennanxyz: Any good examples for creating a custom User object with a linked ext::auth::Identity on the /signup endpoint request? I get the code back on a successful signup, wondering what the best method is to go directly from a successful Identity creation to initializing a custom User... or is this accomplished within the schema?
