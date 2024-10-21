@@ -10,11 +10,11 @@ use rand::{thread_rng, Rng};
 use sha2::{Digest, Sha256};
 use std::{env, sync::LazyLock};
 
-static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
+pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
     env::var("BASE_AUTH_URL").expect("base auth URL environment variable to be present")
 });
 
-static SERVER_PORT: LazyLock<String> = LazyLock::new(|| {
+pub static SERVER_PORT: LazyLock<String> = LazyLock::new(|| {
     env::var("SERVER_PORT").expect("server port environment variable to be present")
 });
 
@@ -52,6 +52,8 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
         HeaderValue::from_str(&format!("edgedb-pkce-verifier={verifier}"))?,
     );
 
+    log!("{response:?}");
+
     redirect(&format!(
         "{}/ui/signin?challenge={challenge}",
         &*BASE_AUTH_URL
@@ -60,6 +62,20 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
     log!("{response:?}");
 
     Ok(())
+}
+
+// wip todo: chip away at this
+#[server(endpoint = "/code")]
+pub async fn handle_callback() -> Result<(), ServerFnError> {
+    let response = expect_context::<ResponseOptions>();
+
+    if let Some(code) = response.0.clone().read().headers.get("code") {
+        log!("{code:?}");
+        Ok(())
+    } else {
+        log!("the code wasn't found in the header map");
+        Ok(())
+    }
 }
 
 #[component]
@@ -72,21 +88,6 @@ pub fn SignIn() -> impl IntoView {
 
             <a href="https://accounts.google.com">or create a new google account</a>
         </div>
-    }
-}
-
-// #[server]
-// wip todo: chip away at this
-#[cfg(feature = "ssr")]
-pub async fn handle_callback() -> Result<(), ServerFnError> {
-    let response = expect_context::<ResponseOptions>();
-
-    if let Some(code) = response.0.clone().read().headers.get("code") {
-        log!("{code:?}");
-        Ok(())
-    } else {
-        log!("the code wasn't found in the header map");
-        Ok(())
     }
 }
 

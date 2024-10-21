@@ -1,4 +1,6 @@
-use crate::routes::{Add, AppError, ErrorTemplate, List, Register, Report, SignIn};
+use crate::routes::{
+    sign_in::BASE_AUTH_URL, Add, AppError, ErrorTemplate, List, Register, Report, SignIn,
+};
 #[allow(unused_imports)] use leptos::{component, template, view, Errors, IntoView};
 use leptos_meta::{provide_meta_context, Stylesheet, Title};
 use leptos_router::{Route, Router, Routes};
