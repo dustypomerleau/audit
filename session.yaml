@@ -1,0 +1,15 @@
+session_name: audit
+windows:
+  - window_name: audit
+    panes:
+      - nvim src/lib.rs
+  - window_name: sh
+    focus: true
+    panes:
+      - jj status
+  - window_name: watch
+    panes:
+      - cargo leptos watch
+  - window_name: db
+    panes:
+      - edgedb
