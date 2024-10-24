@@ -1,9 +1,9 @@
 session_name: audit
 windows:
-  - window_name: audit
+  - window_name: nvim
     panes:
       - nvim src/lib.rs
-  - window_name: sh
+  - window_name: fish
     focus: true
     panes:
       - jj status
