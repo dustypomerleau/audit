@@ -38,6 +38,7 @@ pub fn generate_pkce() -> Pkce {
     }
 }
 
+// todo: this (and the callback) need to be blocking, see https://github.com/leptos-rs/leptos/issues/3147#issuecomment-2430892087
 #[server(endpoint = "/signin")]
 async fn handle_sign_in() -> Result<(), ServerFnError> {
     let Pkce {
