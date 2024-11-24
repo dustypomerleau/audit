@@ -18,7 +18,7 @@ edgedb-protocol = { version = "0.6", features = ["chrono"], optional = true }
 edgedb-tokio = { version = "0.5", optional = true }
 garde = { version = "0.20.0", features = ["derive", "email"] }
 http = "1"
-leptos = { version = "0.7.0-rc1", features = ["nightly"] }
+leptos = { version = "0.7.0-rc2", features = ["nightly"] }
 leptos_axum = { version = "0.6", optional = true }
 leptos_meta = { version = "0.6", features = ["nightly"] }
 leptos_router = { version = "0.6", features = ["nightly"] }
