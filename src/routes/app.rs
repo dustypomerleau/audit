@@ -1,9 +1,32 @@
-use crate::routes::{
-    sign_in::BASE_AUTH_URL, Add, AppError, ErrorTemplate, List, Register, Report, SignIn,
+use crate::routes::{sign_in::BASE_AUTH_URL, Add, List, Register, Report, SignIn};
+use leptos::prelude::{AutoReload, HydrationScripts, *};
+use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
+use leptos_router::{
+    components::{Route, Router, Routes},
+    StaticSegment,
 };
-#[allow(unused_imports)] use leptos::{component, template, view, Errors, IntoView};
-use leptos_meta::{provide_meta_context, Stylesheet, Title};
-use leptos_router::{Route, Router, Routes};
+
+pub fn shell(options: LeptosOptions) -> impl IntoView {
+    view! {
+        <!DOCTYPE html>
+        <html lang="en">
+            <head>
+                <meta charset="utf-8" />
+                <meta
+                    name="viewport"
+                    content="width=device-width, initial-scale=1, shrink-to-fit=no"
+                />
+                <meta name="description" content="Vic Eye cataract audit" />
+                <AutoReload options=options.clone() />
+                <HydrationScripts options />
+                <MetaTags />
+            </head>
+            <body>
+                <App />
+            </body>
+        </html>
+    }
+}
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -26,21 +49,18 @@ pub fn App() -> impl IntoView {
     provide_meta_context();
 
     view! {
+        <head></head>
         <Stylesheet id="leptos" href="/pkg/audit.css" />
         <Title text="Cataract audit" />
 
-        <Router fallback=|| {
-            let mut outside_errors = Errors::default();
-            outside_errors.insert_with_default_key(AppError::NotFound);
-            view! { <ErrorTemplate outside_errors /> }.into_view()
-        }>
+        <Router>
             <main>
-                <Routes>
-                    <Route path="" view=SignIn />
-                    <Route path="/add" view=Add />
-                    <Route path="/list" view=List />
-                    <Route path="/register" view=Register />
-                    <Route path="/report" view=Report />
+                <Routes fallback=|| "Page not found.".into_view()>
+                    <Route path=StaticSegment("") view=SignIn />
+                    <Route path=StaticSegment("add") view=Add />
+                    <Route path=StaticSegment("list") view=List />
+                    <Route path=StaticSegment("register") view=Register />
+                    <Route path=StaticSegment("report") view=Report />
                 </Routes>
             </main>
         </Router>

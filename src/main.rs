@@ -1,11 +1,14 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use audit::{fileserv::file_and_error_handler, routes::App};
+    use audit::routes::{shell, App};
     use axum::Router;
     use dotenvy::dotenv;
     use edgedb_tokio::create_client;
-    use leptos::{get_configuration, logging, provide_context};
+    use leptos::{
+        logging::log,
+        prelude::{get_configuration, provide_context},
+    };
     use leptos_axum::{generate_route_list, LeptosRoutes};
 
     #[cfg(debug_assertions)]
@@ -18,7 +21,7 @@ async fn main() {
     //
     // Alternately a file can be specified such as Some("Cargo.toml")
     // The file would need to be included with the executable when moved to deployment
-    let conf = get_configuration(None).await.unwrap();
+    let conf = get_configuration(None).unwrap();
     let leptos_options = conf.leptos_options;
     let addr = leptos_options.site_addr;
     let routes = generate_route_list(App);
@@ -52,11 +55,15 @@ async fn main() {
             move || provide_context(client.clone()),
             App,
         )
-        .fallback(file_and_error_handler)
+        // .fallback(file_and_error_handler)
+        // If you need to expand on the basic functionality in the provided file and
+        // error handler, uncomment the above fallback and update your custom code using
+        // the provided file_and_error_handler as a starting point.
+        .fallback(leptos_axum::file_and_error_handler(shell))
         .with_state(leptos_options);
 
     let listener = tokio::net::TcpListener::bind(&addr).await.unwrap();
-    logging::log!("listening on http://{}", &addr);
+    log!("listening on http://{}", &addr);
 
     axum::serve(listener, app.into_make_service())
         .await

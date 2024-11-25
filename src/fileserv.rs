@@ -5,7 +5,7 @@ use axum::{
     http::{Request, Response, StatusCode},
     response::{IntoResponse, Response as AxumResponse},
 };
-use leptos::*;
+use leptos::prelude::{LeptosOptions, Result};
 use tower::ServiceExt;
 use tower_http::services::ServeDir;
 

@@ -20,7 +20,7 @@ pub mod case;
 pub mod components;
 pub mod cyl;
 #[cfg(feature = "ssr")] pub mod db;
-#[cfg(feature = "ssr")] pub mod fileserv;
+// #[cfg(feature = "ssr")] pub mod fileserv;
 pub mod iol;
 pub mod plots;
 pub mod refraction;
@@ -37,5 +37,5 @@ pub fn hydrate() {
     use crate::routes::App;
 
     console_error_panic_hook::set_once();
-    leptos::mount_to_body(App);
+    leptos::mount::hydrate_body(App);
 }

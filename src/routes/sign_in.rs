@@ -2,11 +2,16 @@ use base64ct::{Base64UrlUnpadded, Encoding};
 use chrono::format;
 use http::{header, HeaderValue};
 use leptos::{
-    component, expect_context, logging::log, server, spawn_local, view, IntoView, ServerFnError,
+    logging::log,
+    prelude::{
+        component, expect_context, server, view, ElementChild, IntoView, OnAttribute, Result,
+        ServerFnError, StyleAttribute,
+    },
+    task::spawn_local,
 };
 #[cfg(feature = "ssr")] use leptos_axum::{redirect, ResponseOptions};
-use leptos_router::create_query_signal;
-use rand::{thread_rng, Rng};
+use leptos_router::hooks::query_signal;
+use rand::{thread_rng, Rng}; // todo re: wasm https://github.com/rust-random/rand/issues/991
 use sha2::{Digest, Sha256};
 use std::{env, sync::LazyLock};
 
