@@ -21,10 +21,10 @@ getrandom = { version = "0.2", features = [
   "js",
 ] } # see https://github.com/rust-random/rand/issues/991
 http = "1"
-leptos = { version = "0.7.1", features = ["nightly"] }
-leptos_axum = { version = "0.7.1", optional = true }
-leptos_meta = { version = "0.7.1" }
-leptos_router = { version = "0.7.1", features = ["nightly"] }
+leptos = { version = "0.7.2", features = ["nightly"] }
+leptos_axum = { version = "0.7.2", optional = true }
+leptos_meta = { version = "0.7.2" }
+leptos_router = { version = "0.7.2", features = ["nightly"] }
 rand = "0.8"
 serde = { version = "1", features = ["derive"] }
 sha2 = { version = "0.10", default-features = false }
@@ -42,10 +42,10 @@ wasm-bindgen = "=0.2.97"
 [features]
 hydrate = ["leptos/hydrate"]
 ssr = [
+  "dep:axum",
   "dep:edgedb-derive",
   "dep:edgedb-protocol",
   "dep:edgedb-tokio",
-  "dep:axum",
   "dep:tokio",
   "dep:tower",
   "dep:tower-http",
@@ -53,7 +53,6 @@ ssr = [
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",
-  "dep:tracing",
 ]
 
 # Defines a size-optimized profile for the WASM bundle in release mode
