@@ -1,20 +1,22 @@
-use base64ct::{Base64UrlUnpadded, Encoding};
+#[cfg(feature = "ssr")] use base64ct::{Base64UrlUnpadded, Encoding};
 use chrono::format;
-use http::{header, HeaderValue};
+#[cfg(feature = "ssr")] use http::{header, HeaderValue};
 use leptos::{
     logging::log,
     prelude::{
         component, expect_context, server, view, ElementChild, IntoView, OnAttribute, Result,
         ServerFnError, StyleAttribute,
     },
+    server::Resource,
     task::spawn_local,
 };
 #[cfg(feature = "ssr")] use leptos_axum::{redirect, ResponseOptions};
 use leptos_router::hooks::query_signal;
-use rand::{thread_rng, Rng}; // todo re: wasm https://github.com/rust-random/rand/issues/991
+#[cfg(feature = "ssr")] use rand::{thread_rng, Rng}; /* todo re: wasm https://github.com/rust-random/rand/issues/991 */
 use sha2::{Digest, Sha256};
 use std::{env, sync::LazyLock};
 
+// note: new API for dotenvy will arrive in v16 release
 pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
     env::var("BASE_AUTH_URL").expect("base auth URL environment variable to be present")
 });
@@ -29,6 +31,7 @@ pub struct Pkce {
     challenge: String,
 }
 
+#[cfg(feature = "ssr")]
 pub fn generate_pkce() -> Pkce {
     // 1. generate 32 random bytes and URL-encode it:
     let input: [u8; 32] = thread_rng().gen();
@@ -61,8 +64,9 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
     log!("{response:?}");
 
     redirect(&format!(
-        "{}/ui/signin?challenge={challenge}",
-        &*BASE_AUTH_URL
+        "/ui/signin?challenge={challenge}"
+        // "{}/ui/signin?challenge={challenge}",
+        // &*BASE_AUTH_URL
     ));
 
     log!("{response:?}");
@@ -88,8 +92,9 @@ pub async fn handle_callback() -> Result<(), ServerFnError> {
 pub fn SignIn() -> impl IntoView {
     view! {
         <div style="flex">
+
             <button on:click=move |_| {
-                spawn_local(async { handle_sign_in().await.unwrap() });
+                spawn_local(async move { handle_sign_in().await.unwrap() });
             }>"Sign in"</button>
 
             <a href="https://accounts.google.com">or create a new google account</a>
@@ -104,6 +109,7 @@ mod tests {
     use leptos::server;
 
     #[test]
+    #[cfg(feature = "ssr")]
     fn generates_pkce() {
         let pkce = generate_pkce();
 
@@ -122,6 +128,7 @@ mod tests {
     }
 
     #[test]
+    // #[ignore]
     fn test_env_vars() {
         dotenv().ok();
 
