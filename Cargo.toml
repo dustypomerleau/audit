@@ -9,7 +9,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 axum = { version = "0.7", optional = true }
 # axum-extra = { version = "0.9", features = ["cookie", "typed-header"] }
-base64ct = { version = "1", features = ["alloc"] }
+base64ct = { version = "1", features = ["alloc"], optional = true }
 chrono = { version = "0.4", features = ["serde"] }
 console_error_panic_hook = "0.1"
 dotenvy = "0.15"
@@ -43,13 +43,15 @@ wasm-bindgen = "=0.2.97"
 hydrate = ["leptos/hydrate"]
 ssr = [
   "dep:axum",
+  "dep:base64ct",
   "dep:edgedb-derive",
   "dep:edgedb-protocol",
   "dep:edgedb-tokio",
+  "dep:leptos_axum",
   "dep:tokio",
   "dep:tower",
   "dep:tower-http",
-  "dep:leptos_axum",
+  "dep:tracing",
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",
