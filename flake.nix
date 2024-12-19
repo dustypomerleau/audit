@@ -30,10 +30,15 @@
     flake-utils.lib.eachDefaultSystem (system: {
       packages.default =
         let
-          # crane says this is deprecated, but I haven't figured out exactly the syntax to replace it
-          # the recommendation is:
+          # crane says this is deprecated:
           # `crane.lib.${system}` is deprecated. please use `(crane.mkLib nixpkgs.legacyPackages.${system})` instead
-          craneLib = crane.lib.${system}.overrideToolchain fenix.packages.${system}.minimal.toolchain;
+          # craneLib = crane.lib.${system}.overrideToolchain fenix.packages.${system}.minimal.toolchain;
+          #
+          # the recommendation is:
+          craneLib =
+            (crane.mkLib nixpkgs.legacyPackages.${system}).overrideToolchain
+              fenix.packages.${system}.minimal.toolchain;
+
           pkgs = nixpkgs.legacyPackages.${system};
         in
         craneLib.buildPackage {
@@ -87,7 +92,7 @@
 #         };
 #       });
 
-# see: https://crane.dev/local_development.html 
+# see: https://crane.dev/local_development.html
 
 # {
 #   inputs = {
