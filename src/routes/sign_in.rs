@@ -64,9 +64,8 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
     log!("{response:?}");
 
     redirect(&format!(
-        "/ui/signin?challenge={challenge}"
-        // "{}/ui/signin?challenge={challenge}",
-        // &*BASE_AUTH_URL
+        "{}/ui/signin?challenge={challenge}",
+        &*BASE_AUTH_URL
     ));
 
     log!("{response:?}");
