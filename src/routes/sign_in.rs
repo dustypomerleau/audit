@@ -76,6 +76,16 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
 // wip todo: chip away at this
 #[server(endpoint = "/code")]
 pub async fn handle_callback() -> Result<(), ServerFnError> {
+    // 1. Google Oauth redirects to "/code"
+    // 2. get the code from the query string in the URL (?code=...)
+    // 3. get the value of `verifier` from the cookie
+    // 4. redirect to `format!({BASE_AUTH_URL}/token?code={code}&verifier={verifier})` (specifically
+    //    this is a GET that returns JSON)
+    // 5. save the JSON in the variable `auth_token`
+    // 6. set a cookie `edgedb-auth-token={auth_token}` (HttpOnly; Path=/; Secure; SameSite=Strict`
+    //    in the JS version)
+    // 7. redirect to "/add" or some dashboard and use the cookie to determine identity
+
     let response = expect_context::<ResponseOptions>();
 
     if let Some(code) = response.0.clone().read().headers.get("code") {

@@ -8,11 +8,15 @@ ext::auth::AuthConfig::token_time_to_live := <duration>"336 hours";
 
 # todo: change these to the actual values you'll put into:
 # `edgedb ui` > Auth > Providers > Login UI > redirect_to
+# note: the value of redirect_to in the Auth UI is the address in your application
+# where you want to end up after auth is complete.
+# The redirect for the callback function within the auth flow has to be set in the GCP console.
 configure current branch set
 ext::auth::AuthConfig::allowed_redirect_urls := {
     "https://audit.viceye.au",
     "https://localhost:3000",
     "http://localhost:3000",
+    "http://localhost:3000/code"
 };
 
 configure current branch set

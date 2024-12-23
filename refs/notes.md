@@ -19,6 +19,11 @@ You can't sign in to this app because it doesn't comply with Google's OAuth 2.0 
 If you're the app developer, register the redirect URI in the Google Cloud Console.
 Request details: redirect_uri=http://localhost:10702/branch/dev/ext/auth/callback flowName=GeneralOAuthFlow
 
+Redirects are all variations on this:
+
+Most recently http://localhost:10700/db/dev/ext/auth/callback
+You may need several variations on this, depending on the ports used in the real app.
+
 ---
 
 Consider [EdgeDB Auth](https://docs.edgedb.com/guides/auth)

@@ -38,6 +38,8 @@ pub fn App() -> impl IntoView {
     // Alternatively, we could put the user in the URL
     // https://book.leptos.dev/15_global_state.html#global-state-management
     //
+    // Keep in mind that we also have a DB global `cur_surgeon`.
+    // It may be possible to simply use that to populate a struct.
 
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
