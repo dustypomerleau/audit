@@ -76,7 +76,8 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
 // wip todo: chip away at this
 #[server(endpoint = "/code")]
 pub async fn handle_callback() -> Result<(), ServerFnError> {
-    // 1. Google Oauth redirects to "/code"
+    // 1. Google Oauth redirects to "/code" (not really sure it redirects here, but it needs to get
+    //    the stuff below and redirect again)
     // 2. get the code from the query string in the URL (?code=...)
     // 3. get the value of `verifier` from the cookie
     // 4. redirect to `format!({BASE_AUTH_URL}/token?code={code}&verifier={verifier})` (specifically
