@@ -7,37 +7,37 @@ version = "0.1.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-axum = { version = "0.7", optional = true }
+axum = { version = "0.7.9", optional = true }
 # axum-extra = { version = "0.9", features = ["cookie", "typed-header"] }
-base64ct = { version = "1", features = ["alloc"], optional = true }
-chrono = { version = "0.4", features = ["serde"] }
-console_error_panic_hook = "0.1"
-dotenvy = "0.15"
-edgedb-derive = { version = "0.5", optional = true }
-edgedb-protocol = { version = "0.6", features = ["chrono"], optional = true }
-edgedb-tokio = { version = "0.5", optional = true }
-garde = { version = "0.20.0", features = ["derive", "email"] }
-getrandom = { version = "0.2", features = [
+base64ct = { version = "1.6.0", features = ["alloc"], optional = true }
+chrono = { version = "0.4.39", features = ["serde"] }
+console_error_panic_hook = "0.1.7"
+dotenvy = "0.15.7"
+edgedb-derive = { version = "0.5.2", optional = true }
+edgedb-protocol = { version = "0.6.1", features = ["chrono"], optional = true }
+edgedb-tokio = { version = "0.5.1", optional = true }
+garde = { version = "0.21.0", features = ["derive", "email"] }
+getrandom = { version = "0.2.15", features = [
   "js",
-] } # see https://github.com/rust-random/rand/issues/991
-http = "1"
-leptos = { version = "0.7.2", features = ["nightly"] }
-leptos_axum = { version = "0.7.2", optional = true }
-leptos_meta = { version = "0.7.2" }
-leptos_router = { version = "0.7.2", features = ["nightly"] }
-rand = "0.8"
-serde = { version = "1", features = ["derive"] }
-sha2 = { version = "0.10", default-features = false }
-thiserror = "2"
-tokio = { version = "1", features = ["macros", "rt-multi-thread"], optional = true }
-tower = { version = "0.5", optional = true, features = [
+] } # see https://github.com/rust-random/rand/issues/991 NOTE: this may be fixed by leptos try with commented out
+http = "1.2.0"
+leptos = { version = "0.7.3", features = ["nightly"] }
+leptos_axum = { version = "0.7.3", optional = true }
+leptos_meta = { version = "0.7.3" }
+leptos_router = { version = "0.7.3", features = ["nightly"] }
+rand = "0.8.5"
+serde = { version = "1.0.217", features = ["derive"] }
+sha2 = { version = "0.10.8", default-features = false }
+thiserror = "2.0.10"
+tokio = { version = "1.43.0", features = ["macros", "rt-multi-thread"], optional = true }
+tower = { version = "0.5.2", optional = true, features = [
   "util",
 ] } # waiting on Leptos to upgrade to 0.5
-tower-http = { version = "0.6", features = [
+tower-http = { version = "0.6.2", features = [
   "fs",
 ], optional = true } # waiting on leptos to upgrade to 0.6
-tracing = { version = "0.1", optional = true }
-wasm-bindgen = "=0.2.97"
+tracing = { version = "0.1.41", optional = true }
+wasm-bindgen = "=0.2.99"
 
 [features]
 hydrate = ["leptos/hydrate"]
