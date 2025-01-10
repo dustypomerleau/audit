@@ -17,9 +17,6 @@ edgedb-derive = { version = "0.5.2", optional = true }
 edgedb-protocol = { version = "0.6.1", features = ["chrono"], optional = true }
 edgedb-tokio = { version = "0.5.1", optional = true }
 garde = { version = "0.21.0", features = ["derive", "email"] }
-getrandom = { version = "0.2.15", features = [
-  "js",
-] } # see https://github.com/rust-random/rand/issues/991 NOTE: this may be fixed by leptos try with commented out
 http = "1.2.0"
 leptos = { version = "0.7.3", features = ["nightly"] }
 leptos_axum = { version = "0.7.3", optional = true }
