@@ -25,12 +25,20 @@ pub static SERVER_PORT: LazyLock<String> = LazyLock::new(|| {
     env::var("SERVER_PORT").expect("server port environment variable to be present")
 });
 
+/// Holds the verifier/challenge pair that is used during site authentication. The challenge is
+/// passed via the URL, and the verifier is stored in a server-side cookie for access after the
+/// authentication flow is completed. Successful authentication returns a `code` param in the URL.
+/// Supplying the `code/verifier` pair in a `GET` request to the EdgeDB Auth token server will
+/// return an auth token in JSON format, and storing this JSON as a cookie will allow you to check
+/// authentication for access to protected routes.
 #[derive(Debug)]
 pub struct Pkce {
     verifier: String,
     challenge: String,
 }
 
+/// Generate a `verifier/challenge` pair for use in the authentication flow (see [`Pkce`] for
+/// details).
 #[cfg(feature = "ssr")]
 pub fn generate_pkce() -> Pkce {
     // 1. generate 32 random bytes and URL-encode it:
@@ -46,7 +54,8 @@ pub fn generate_pkce() -> Pkce {
     }
 }
 
-// todo: this (and the callback) need to be blocking, see https://github.com/leptos-rs/leptos/issues/3147#issuecomment-2430892087
+/// Server function that generates a [`Pkce`] struct, populates the URL param and the verifier
+/// cookie, and redirects to the OAuth flow.
 #[server(endpoint = "/signin")]
 async fn handle_sign_in() -> Result<(), ServerFnError> {
     let Pkce {
