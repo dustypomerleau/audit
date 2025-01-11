@@ -4,14 +4,14 @@ use chrono::format;
 use leptos::{
     logging::log,
     prelude::{
-        component, expect_context, server, view, ElementChild, IntoView, OnAttribute, Result,
-        ServerFnError, StyleAttribute,
+        component, expect_context, server, view, Await, ElementChild, IntoView, OnAttribute, Read,
+        Result, ServerFnError, StorageAccess, StyleAttribute,
     },
-    server::Resource,
+    server::{LocalResource, OnceResource, Resource},
     task::spawn_local,
 };
 #[cfg(feature = "ssr")] use leptos_axum::{redirect, ResponseOptions};
-use leptos_router::hooks::query_signal;
+use leptos_router::hooks::{query_signal, use_params_map};
 #[cfg(feature = "ssr")] use rand::{thread_rng, Rng}; /* todo re: wasm https://github.com/rust-random/rand/issues/991 */
 use sha2::{Digest, Sha256};
 use std::{env, sync::LazyLock};
@@ -65,8 +65,15 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
 
     let response = expect_context::<ResponseOptions>();
 
+    // I think this isn't working because the cookie needs to be set before the redirect?
+    // so you set the header but the response is never sent, can you set the header on the
+    // redirect?
     response.append_header(
         header::SET_COOKIE,
+        // Set-Cookie: edgedb-pkce-challenge=iu7xJZUZ_NUBGtKtm8EEZpMp1BkCzzBFk-tLisXZa1s; HttpOnly;
+        // SameSite=Strict; Secure
+        //
+        // copy above format, specifically that it needs to be http only
         HeaderValue::from_str(&format!("edgedb-pkce-verifier={verifier}"))?,
     );
 
@@ -82,9 +89,8 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
     Ok(())
 }
 
-// wip todo: chip away at this
-#[server(endpoint = "/code")]
-pub async fn handle_callback() -> Result<(), ServerFnError> {
+#[server]
+pub async fn handle_callback(code: String) -> Result<(), ServerFnError> {
     // 1. Google Oauth redirects to "/code" (not really sure it redirects here, but it needs to get
     //    the stuff below and redirect again)
     // 2. get the code from the query string in the URL (?code=...)
@@ -96,15 +102,40 @@ pub async fn handle_callback() -> Result<(), ServerFnError> {
     //    in the JS version)
     // 7. redirect to "/add" or some dashboard and use the cookie to determine identity
 
-    let response = expect_context::<ResponseOptions>();
+    let base_url = &*BASE_AUTH_URL;
 
-    if let Some(code) = response.0.clone().read().headers.get("code") {
-        log!("{code:?}");
-        Ok(())
-    } else {
-        log!("the code wasn't found in the header map");
-        Ok(())
-    }
+    let verifier = expect_context::<ResponseOptions>()
+        .0
+        .clone()
+        .read()
+        .headers
+        .get("edgedb-pkce-verifier")
+        .expect("verifier to be present in the header map")
+        .to_str()
+        .expect("`HeaderValue` to contain only ASCII characters")
+        .to_string();
+
+    let auth_token =
+        reqwest::get(&format!("{base_url}/token?code={code}&verifier={verifier}")).await?;
+
+    log!("{auth_token:?}");
+
+    redirect("https://google.com");
+
+    Ok(())
+}
+
+#[component]
+pub fn Code() -> impl IntoView {
+    // can i now go back to using a LocalResource? or to just using spawn_local?
+    let res = LocalResource::new(|| async move {
+        let code = use_params_map()
+            .read()
+            .get("code")
+            .expect("code to be present in the params map"); // currently panics here
+
+        handle_callback(code).await.unwrap()
+    });
 }
 
 #[component]
