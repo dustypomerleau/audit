@@ -26,7 +26,7 @@ pub static SERVER_PORT: LazyLock<String> = LazyLock::new(|| {
 });
 
 /// Holds the verifier/challenge pair that is used during site authentication. The challenge is
-/// passed via the URL, and the verifier is stored in a server-side cookie for access after the
+/// passed via the URL, and the verifier is stored in an HTTP-only cookie for access after the
 /// authentication flow is completed. Successful authentication returns a `code` param in the URL.
 /// Supplying the `code/verifier` pair in a `GET` request to the EdgeDB Auth token server will
 /// return an auth token in JSON format, and storing this JSON as a cookie will allow you to check
@@ -65,16 +65,26 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
 
     let response = expect_context::<ResponseOptions>();
 
-    // I think this isn't working because the cookie needs to be set before the redirect?
-    // so you set the header but the response is never sent, can you set the header on the
-    // redirect?
+    // todo: redirect is occurring before the cookie is set
+    // you likely want to use axum-extra for this
+    //
+    // example:
+    //
+    // use axum::{
+    //     http::header::SET_COOKIE,
+    //     response::{Headers, Html, IntoResponse},
+    // };
+    //
+    // async fn handler() -> impl IntoResponse {
+    //     let headers = Headers([(SET_COOKIE, "key=value")]);
+    //     let content = Html("<h1>Hello, World!</h1>");
+    //     (headers, content)
+    // }
     response.append_header(
         header::SET_COOKIE,
-        // Set-Cookie: edgedb-pkce-challenge=iu7xJZUZ_NUBGtKtm8EEZpMp1BkCzzBFk-tLisXZa1s; HttpOnly;
-        // SameSite=Strict; Secure
-        //
-        // copy above format, specifically that it needs to be http only
-        HeaderValue::from_str(&format!("edgedb-pkce-verifier={verifier}"))?,
+        HeaderValue::from_str(&format!(
+            "edgedb-pkce-verifier={verifier}; HttpOnly; SameSite=Strict; Secure;"
+        ))?,
     );
 
     log!("{response:?}");
@@ -84,22 +94,18 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
         &*BASE_AUTH_URL
     ));
 
-    log!("{response:?}");
-
     Ok(())
 }
 
 #[server]
 pub async fn handle_callback(code: String) -> Result<(), ServerFnError> {
-    // 1. Google Oauth redirects to "/code" (not really sure it redirects here, but it needs to get
-    //    the stuff below and redirect again)
+    // 1. Google Oauth redirects to the URL set in `edgedb ui` > Auth > Providers > `redirect_to`.
     // 2. get the code from the query string in the URL (?code=...)
     // 3. get the value of `verifier` from the cookie
     // 4. redirect to `format!({BASE_AUTH_URL}/token?code={code}&verifier={verifier})` (specifically
     //    this is a GET that returns JSON)
     // 5. save the JSON in the variable `auth_token`
-    // 6. set a cookie `edgedb-auth-token={auth_token}` (HttpOnly; Path=/; Secure; SameSite=Strict`
-    //    in the JS version)
+    // 6. set a cookie `edgedb-auth-token={auth_token}` (HttpOnly; Path=/; Secure; SameSite=Strict)
     // 7. redirect to "/add" or some dashboard and use the cookie to determine identity
 
     let base_url = &*BASE_AUTH_URL;
@@ -110,9 +116,9 @@ pub async fn handle_callback(code: String) -> Result<(), ServerFnError> {
         .read()
         .headers
         .get("edgedb-pkce-verifier")
-        .expect("verifier to be present in the header map")
+        .expect("expected verifier to be present in the header map")
         .to_str()
-        .expect("`HeaderValue` to contain only ASCII characters")
+        .expect("expected `HeaderValue` to contain only ASCII characters")
         .to_string();
 
     let auth_token =
@@ -120,6 +126,7 @@ pub async fn handle_callback(code: String) -> Result<(), ServerFnError> {
 
     log!("{auth_token:?}");
 
+    // todo: replace dummy redirect once auth flow is working
     redirect("https://google.com");
 
     Ok(())
@@ -127,12 +134,11 @@ pub async fn handle_callback(code: String) -> Result<(), ServerFnError> {
 
 #[component]
 pub fn Code() -> impl IntoView {
-    // can i now go back to using a LocalResource? or to just using spawn_local?
     let res = LocalResource::new(|| async move {
         let code = use_params_map()
             .read()
             .get("code")
-            .expect("code to be present in the params map"); // currently panics here
+            .expect("expected code to be present in the params map");
 
         handle_callback(code).await.unwrap()
     });
