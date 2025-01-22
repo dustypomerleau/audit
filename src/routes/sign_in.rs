@@ -65,25 +65,10 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
 
     let response = expect_context::<ResponseOptions>();
 
-    // todo: redirect is occurring before the cookie is set
-    // you likely want to use axum-extra for this
-    //
-    // example:
-    //
-    // use axum::{
-    //     http::header::SET_COOKIE,
-    //     response::{Headers, Html, IntoResponse},
-    // };
-    //
-    // async fn handler() -> impl IntoResponse {
-    //     let headers = Headers([(SET_COOKIE, "key=value")]);
-    //     let content = Html("<h1>Hello, World!</h1>");
-    //     (headers, content)
-    // }
     response.append_header(
         header::SET_COOKIE,
         HeaderValue::from_str(&format!(
-            "edgedb-pkce-verifier={verifier}; HttpOnly; SameSite=Strict; Secure;"
+            "edgedb-pkce-verifier={verifier}; HttpOnly; Path=/; SameSite=Strict; Secure;"
         ))?,
     );
 
