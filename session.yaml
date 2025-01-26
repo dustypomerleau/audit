@@ -13,3 +13,11 @@ windows:
   - window_name: db
     panes:
       - edgedb
+  - window_name: leptos
+    shell_command_before: cd ../er/leptos
+    panes:
+      - nvim leptos/src/lib.rs
+  - window_name: axum-extra
+    shell_command_before: cd ../er/axum
+    panes:
+      - nvim axum-extra/src/lib.rs
