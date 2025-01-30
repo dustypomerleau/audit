@@ -1,5 +1,5 @@
 [package]
-edition = "2021"
+edition = "2024"
 name = "audit"
 version = "0.1.0"
 
@@ -11,6 +11,7 @@ crate-type = ["cdylib", "rlib"]
 # gel-protocol = { version = "0.7.0", features = ["chrono"], optional = true }
 # gel-tokio = { version = "0.6.0", optional = true }
 axum = { version = "0.7.9", optional = true }
+# todo: axum-extra 0.10 depends on axum 0.8, so there is a conflict until you update
 axum-extra = { version = "0.10.0", features = ["cookie", "typed-header"] }
 base64ct = { version = "1.6.0", features = ["alloc"], optional = true }
 chrono = { version = "0.4.39", features = ["serde"] }
@@ -26,6 +27,7 @@ leptos_axum = { version = "0.7.4", optional = true }
 leptos_meta = { version = "0.7.4" }
 leptos_router = { version = "0.7.4", features = ["nightly"] }
 rand = "0.8.5"
+reactive_stores = "0.1.3"
 reqwest = { version = "0.12.12", features = ["blocking", "json"] }
 serde = { version = "1.0.217", features = ["derive"] }
 sha2 = { version = "0.10.8", default-features = false }

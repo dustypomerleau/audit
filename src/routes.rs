@@ -1,3 +1,7 @@
+// scratch file for testing cookie jar
+#[cfg(feature = "ssr")] mod trash;
+#[cfg(feature = "ssr")] pub use trash::*;
+
 mod add;
 mod app;
 // mod error;

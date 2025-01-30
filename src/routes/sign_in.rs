@@ -5,25 +5,49 @@ use leptos::{
     logging::log,
     prelude::{
         component, expect_context, server, view, Await, ElementChild, IntoView, OnAttribute, Read,
-        Result, ServerFnError, StorageAccess, StyleAttribute,
+        Result, ServerFnError, StorageAccess, StyleAttribute, Suspend, Suspense,
     },
     server::{LocalResource, OnceResource, Resource},
     task::spawn_local,
 };
 #[cfg(feature = "ssr")] use leptos_axum::{redirect, ResponseOptions};
-use leptos_router::hooks::{query_signal, use_params_map};
-#[cfg(feature = "ssr")] use rand::{thread_rng, Rng}; /* todo re: wasm https://github.com/rust-random/rand/issues/991 */
+use leptos_router::hooks::{query_signal, use_navigate, use_params_map, use_query_map};
+#[cfg(feature = "ssr")] use rand::{thread_rng, Rng};
+use serde::Deserialize;
+/* todo re: wasm https://github.com/rust-random/rand/issues/991 */
 use sha2::{Digest, Sha256};
 use std::{env, sync::LazyLock};
+use thiserror::Error;
 
 // note: new API for dotenvy will arrive in v16 release
 pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
-    env::var("BASE_AUTH_URL").expect("base auth URL environment variable to be present")
+    env::var("BASE_AUTH_URL").expect("expected BASE_AUTH_URL environment variable to be present")
 });
 
 pub static SERVER_PORT: LazyLock<String> = LazyLock::new(|| {
-    env::var("SERVER_PORT").expect("server port environment variable to be present")
+    env::var("SERVER_PORT").expect("expected SERVER_PORT environment variable to be present")
 });
+
+// #[derive(Debug, Deserialize, Error)]
+// pub enum AuthError {
+//     #[error("Invalid header value: {0:?}")]
+//     InvalidHeader(http::header::InvalidHeaderValue),
+//
+//     #[error("Reqwest error: {0:?}")]
+//     Reqwest(reqwest::Error),
+// }
+//
+// impl From<http::header::InvalidHeaderValue> for AuthError {
+//     fn from(err: http::header::InvalidHeaderValue) -> Self {
+//         Self::InvalidHeader(err)
+//     }
+// }
+//
+// impl From<reqwest::Error> for AuthError {
+//     fn from(err: reqwest::Error) -> Self {
+//         Self::Reqwest(err)
+//     }
+// }
 
 /// Holds the verifier/challenge pair that is used during site authentication. The challenge is
 /// passed via the URL, and the verifier is stored in an HTTP-only cookie for access after the
@@ -42,7 +66,7 @@ pub struct Pkce {
 #[cfg(feature = "ssr")]
 pub fn generate_pkce() -> Pkce {
     // 1. generate 32 random bytes and URL-encode it:
-    let input: [u8; 32] = thread_rng().gen();
+    let input: [u8; 32] = thread_rng().r#gen();
     let verifier = Base64UrlUnpadded::encode_string(&input);
     // 2. SHA256 hash the result, then URL-encode again:
     let hash = Sha256::new().chain_update(&verifier).finalize();
@@ -54,9 +78,10 @@ pub fn generate_pkce() -> Pkce {
     }
 }
 
-/// Server function that generates a [`Pkce`] struct, populates the URL param and the verifier
-/// cookie, and redirects to the OAuth flow.
-#[server(endpoint = "/signin")]
+/// Generate a [`Pkce`] challenge/verifier pair, populate the URL params with the
+/// challenge, and set a cookie with the verifier, redirecting to the OAuth
+/// provider.
+#[server]
 async fn handle_sign_in() -> Result<(), ServerFnError> {
     let Pkce {
         verifier,
@@ -68,11 +93,14 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
     response.append_header(
         header::SET_COOKIE,
         HeaderValue::from_str(&format!(
-            "edgedb-pkce-verifier={verifier}; HttpOnly; Path=/; SameSite=Strict; Secure;"
+            // "edgedb-pkce-verifier={verifier}; HttpOnly; Path=/; SameSite=Strict; Secure;"
+            // `Secure` is preventing the cookie from being sent over plain http during dev
+            // you need emulate https
+            "edgedb-pkce-verifier={verifier}; HttpOnly; Path=/;"
         ))?,
     );
 
-    log!("{response:?}");
+    dbg!(&response);
 
     redirect(&format!(
         "{}/ui/signin?challenge={challenge}",
@@ -82,51 +110,64 @@ async fn handle_sign_in() -> Result<(), ServerFnError> {
     Ok(())
 }
 
+/// Google OAuth redirects to the URL set in `edgedb ui` > Auth > Providers > `redirect_to`. That
+/// URL invokes this callback function, which needs to:
+///
+/// 1. retrieve the value of `code` from the URL query string
+/// 1. retrieve the value of `verifier` from the `edgedb-pkce-verifier` cookie
+/// t. make a GET request to `{BASE_AUTH_URL}/token?code={code}&verifier={verifier}`
+/// 1. save the returned JSON in the variable `auth_token`
+/// 1. set the `edgedb-auth-token` HTTP-only cookie to the value of `auth_token`
+/// 1. redirect to the surgeon's dashboard
 #[server]
-pub async fn handle_callback(code: String) -> Result<(), ServerFnError> {
-    // 1. Google Oauth redirects to the URL set in `edgedb ui` > Auth > Providers > `redirect_to`.
-    // 2. get the code from the query string in the URL (?code=...)
-    // 3. get the value of `verifier` from the cookie
-    // 4. redirect to `format!({BASE_AUTH_URL}/token?code={code}&verifier={verifier})` (specifically
-    //    this is a GET that returns JSON)
-    // 5. save the JSON in the variable `auth_token`
-    // 6. set a cookie `edgedb-auth-token={auth_token}` (HttpOnly; Path=/; Secure; SameSite=Strict)
-    // 7. redirect to "/add" or some dashboard and use the cookie to determine identity
+pub async fn handle_callback() -> Result<(), ServerFnError> {
+    #[derive(Debug, Deserialize)]
+    struct JsonWrapper(String);
 
-    let base_url = &*BASE_AUTH_URL;
+    let base_auth_url = &*BASE_AUTH_URL;
 
-    let verifier = expect_context::<ResponseOptions>()
+    let code = use_query_map().read().get("code").expect(
+        "expected the auth code to be present in the URL query string after successful OAuth flow",
+    );
+
+    let response = expect_context::<ResponseOptions>();
+
+    dbg!(&response); // headers are empty, therefore verifier get() panics
+
+    let verifier = response
         .0
         .clone()
         .read()
         .headers
         .get("edgedb-pkce-verifier")
-        .expect("expected verifier to be present in the header map")
+        .expect("expected the verifier cookie to be present in the header map")
         .to_str()
-        .expect("expected `HeaderValue` to contain only ASCII characters")
+        .expect(
+            "expected the `HeaderValue` of `edgedb-pkce-verifier` to contain only ASCII characters",
+        )
         .to_string();
 
-    let auth_token =
-        reqwest::get(&format!("{base_url}/token?code={code}&verifier={verifier}")).await?;
+    let url = format!("{base_auth_url}/token?code={code}&verifier={verifier}");
+    let auth_token = reqwest::get(url).await?.json::<JsonWrapper>().await?.0;
+    dbg!(&auth_token);
 
-    log!("{auth_token:?}");
+    response.append_header(
+        header::SET_COOKIE,
+        HeaderValue::from_str(&format!(
+            // "auth_token={auth_token}; HttpOnly; Path=/; SameSite=Strict; Secure;"
+            // same issue as above during dev
+            "auth_token={auth_token}; HttpOnly; Path=/;"
+        ))?,
+    );
 
-    // todo: replace dummy redirect once auth flow is working
-    redirect("https://google.com");
+    redirect("/add");
 
     Ok(())
 }
 
 #[component]
 pub fn Code() -> impl IntoView {
-    let res = LocalResource::new(|| async move {
-        let code = use_params_map()
-            .read()
-            .get("code")
-            .expect("expected code to be present in the params map");
-
-        handle_callback(code).await.unwrap()
-    });
+    view! { <Await future=handle_callback() blocking=true children=|_| () /> }
 }
 
 #[component]

@@ -193,6 +193,7 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "rand",
+ "reactive_stores",
  "reqwest",
  "serde",
  "sha2",

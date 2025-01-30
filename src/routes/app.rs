@@ -1,13 +1,20 @@
 use crate::routes::{Add, Code, List, Register, Report, SignIn};
+#[cfg(feature = "ssr")] use edgedb_tokio::create_client;
 use leptos::prelude::{
-    component, view, AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView,
-    LeptosOptions,
+    component, provide_context, view, AutoReload, ElementChild, GlobalAttributes, HydrationScripts,
+    IntoView, LeptosOptions,
 };
 use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
 use leptos_router::{
     components::{Route, Router, Routes},
     StaticSegment,
 };
+use reactive_stores::Store;
+
+// #[derive(Clone, Debug, Default, Store)]
+// pub struct GlobalState {
+//     db_client: Option<edgedb_tokio::Client>,
+// }
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -33,13 +40,9 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 
 #[component]
 pub fn App() -> impl IntoView {
-    // todo: We need to populate a surgeon struct at login and put it in a signal.
-    // We can then directly access that signal to get things like their default SIA values.
-    // Alternatively, we could put the user in the URL
-    // https://book.leptos.dev/15_global_state.html#global-state-management
-    //
-    // Keep in mind that we also have a DB global `cur_surgeon`.
-    // It may be possible to simply use that to populate a struct.
+    // Start by providing global state with a `None` DB client, and then create the client with
+    // correct globals after completing the auth flow.
+    // provide_context(Store::new(GlobalState::default()));
 
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
@@ -53,7 +56,7 @@ pub fn App() -> impl IntoView {
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=SignIn />
                     <Route path=StaticSegment("add") view=Add />
-                    <Route path=StaticSegment("code") view=Code />
+                    // <Route path=StaticSegment("code") view=Code />
                     <Route path=StaticSegment("list") view=List />
                     <Route path=StaticSegment("register") view=Register />
                     <Route path=StaticSegment("report") view=Report />
