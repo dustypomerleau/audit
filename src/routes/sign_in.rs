@@ -12,7 +12,7 @@ use leptos::{
 };
 #[cfg(feature = "ssr")] use leptos_axum::{redirect, ResponseOptions};
 use leptos_router::hooks::{query_signal, use_navigate, use_params_map, use_query_map};
-#[cfg(feature = "ssr")] use rand::{thread_rng, Rng};
+#[cfg(feature = "ssr")] use rand::{random, rng, Rng};
 use serde::Deserialize;
 /* todo re: wasm https://github.com/rust-random/rand/issues/991 */
 use sha2::{Digest, Sha256};
@@ -66,7 +66,7 @@ pub struct Pkce {
 #[cfg(feature = "ssr")]
 pub fn generate_pkce() -> Pkce {
     // 1. generate 32 random bytes and URL-encode it:
-    let input: [u8; 32] = thread_rng().r#gen();
+    let input: [u8; 32] = rng().random();
     let verifier = Base64UrlUnpadded::encode_string(&input);
     // 2. SHA256 hash the result, then URL-encode again:
     let hash = Sha256::new().chain_update(&verifier).finalize();
