@@ -27,7 +27,7 @@ leptos = { version = "0.7.5", features = ["nightly"] }
 leptos_axum = { version = "0.7.5", optional = true }
 leptos_meta = { version = "0.7.5" }
 leptos_router = { version = "0.7.5", features = ["nightly"] }
-rand = "0.9.0"
+rand = { version = "0.9.0", optional = true }
 reactive_stores = "0.1.5"
 reqwest = { version = "0.12.12", features = ["blocking", "json"] }
 serde = { version = "1.0.217", features = ["derive"] }
@@ -48,6 +48,7 @@ ssr = [
   "dep:edgedb-protocol",
   "dep:edgedb-tokio",
   "dep:leptos_axum",
+  "dep:rand",
   "dep:tokio",
   "dep:tower",
   "dep:tower-http",
