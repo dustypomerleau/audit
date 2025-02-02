@@ -12,8 +12,8 @@ crate-type = ["cdylib", "rlib"]
 # gel-tokio = { version = "0.6.0", optional = true }
 axum = { version = "0.7.9", optional = true }
 # todo: axum-extra 0.10 depends on axum 0.8, so waiting on leptos 0.8 to upgrade to 0.10
-axum-extra = { version = "0.9.6", features = ["cookie", "typed-header"] }
-axum-macros = "0.5.0"
+axum-extra = { version = "0.9.6", features = ["cookie", "typed-header"], optional = true }
+axum-macros = { version = "0.5.0", optional = true }
 base64ct = { version = "1.6.0", features = ["alloc"], optional = true }
 chrono = { version = "0.4.39", features = ["serde"] }
 console_error_panic_hook = "0.1.7"
@@ -31,10 +31,10 @@ rand = { version = "0.9.0", optional = true }
 reactive_stores = "0.1.5"
 reqwest = { version = "0.12.12", features = ["blocking", "json"] }
 serde = { version = "1.0.217", features = ["derive"] }
-sha2 = { version = "0.10.8", default-features = false }
+sha2 = { version = "0.10.8", default-features = false, optional = true }
 thiserror = "2.0.11"
 tokio = { version = "1.43.0", features = ["macros", "rt-multi-thread"], optional = true }
-tower = { version = "0.5.2", optional = true, features = ["util"] }
+tower = { version = "0.5.2", features = ["util"], optional = true }
 tower-http = { version = "0.6.2", features = ["fs"], optional = true }
 tracing = { version = "0.1.41", optional = true }
 wasm-bindgen = "=0.2.100"
@@ -43,12 +43,15 @@ wasm-bindgen = "=0.2.100"
 hydrate = ["leptos/hydrate"]
 ssr = [
   "dep:axum",
+  "dep:axum-extra",
+  "dep:axum-macros",
   "dep:base64ct",
   "dep:edgedb-derive",
   "dep:edgedb-protocol",
   "dep:edgedb-tokio",
   "dep:leptos_axum",
   "dep:rand",
+  "dep:sha2",
   "dep:tokio",
   "dep:tower",
   "dep:tower-http",
