@@ -15,7 +15,7 @@ use leptos_router::hooks::{query_signal, use_navigate, use_params_map, use_query
 #[cfg(feature = "ssr")] use rand::{random, rng, Rng};
 use serde::Deserialize;
 /* todo re: wasm https://github.com/rust-random/rand/issues/991 */
-use sha2::{Digest, Sha256};
+#[cfg(feature = "ssr")] use sha2::{Digest, Sha256};
 use std::{env, sync::LazyLock};
 use thiserror::Error;
 

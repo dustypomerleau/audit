@@ -50,6 +50,8 @@ pub async fn auth_code(
         return Err(AuthError::Err);
     };
 
+    dbg!(&verifier);
+
     Ok((jar, Redirect::to("/add")))
     //
     //     let client = create_client()
