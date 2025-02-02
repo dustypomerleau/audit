@@ -19,7 +19,7 @@ pub struct Params {
 
 #[derive(Debug, Error)]
 pub enum AuthError {
-    // todo
+    // todo: account for different error types
     #[error("an error")]
     Err,
 }
@@ -37,7 +37,7 @@ async fn handle_sign_in() -> Result<(), AuthError> {
 }
 
 #[debug_handler]
-pub async fn trash(
+pub async fn auth_code(
     Query(Params { code }): Query<Params>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {

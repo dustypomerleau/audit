@@ -1,7 +1,7 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use audit::routes::{shell, trash, App};
+    use audit::routes::{auth_code, shell, App};
     use axum::{routing::get, Router};
     use dotenvy::dotenv;
     use edgedb_tokio::create_client;
@@ -37,7 +37,7 @@ async fn main() {
     let app = Router::new()
         // This is just the standard Axum `Router`.
         // You can add plain Axum routes like so:
-        .route("/code", get(trash))
+        .route("/code", get(auth_code))
         //
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
