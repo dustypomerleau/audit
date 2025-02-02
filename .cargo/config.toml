@@ -1,0 +1,7 @@
+[profile.dev]
+debug = 0
+panic = "abort"
+split-debuginfo = "unpacked" # not relevant with debug = 0
+
+[profile.release]
+lto = "thin"
