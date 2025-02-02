@@ -4,7 +4,10 @@ use axum::{
     response::{IntoResponse, Redirect, Response},
 };
 use axum_extra::{
-    extract::{cookie::Cookie, CookieJar},
+    extract::{
+        cookie::{Cookie, Expiration, SameSite},
+        CookieJar,
+    },
     TypedHeader,
 };
 use axum_macros::debug_handler;
@@ -19,21 +22,30 @@ pub struct Params {
 
 #[derive(Debug, Error)]
 pub enum AuthError {
-    // todo: account for different error types
-    #[error("an error")]
-    Err,
+    #[error("unable to deserialize the response as JSON: {0:?}")]
+    Json(String),
+    #[error("did not receive a response from the token request: {0:?}")]
+    Request(String),
+    #[error("unable to get the PKCE verifier from the cookie jar")]
+    Verifier,
 }
 
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
         match self {
-            Self::Err => "Authentication error".into_response(),
+            Self::Json(err) => {
+                format!("Error: unable to deserialize the response as JSON: {err:?}")
+                    .into_response()
+            }
+            Self::Request(err) => {
+                format!("Error: did not receive a response from the token request: {err:?}")
+                    .into_response()
+            }
+            Self::Verifier => {
+                "Error: unable to get the PKCE verifier from the cookie jar".into_response()
+            }
         }
     }
-}
-
-async fn handle_sign_in() -> Result<(), AuthError> {
-    Ok(())
 }
 
 #[debug_handler]
@@ -41,37 +53,36 @@ pub async fn auth_code(
     Query(Params { code }): Query<Params>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {
-    #[derive(Debug, Deserialize)]
-    struct AuthToken {
-        auth_token: String,
-        identity_id: String,
-        provider_token: String,
-        provider_refresh_token: Option<String>,
-    };
-
+    dbg!(&code);
     let base_auth_url = &*BASE_AUTH_URL;
 
-    dbg!(&code);
-    dbg!(&jar);
-
-    let Some(verifier) = jar.get("edgedb-pkce-verifier") else {
-        return Err(AuthError::Err);
+    let verifier = if let Some(verifier) = jar.get("edgedb-pkce-verifier") {
+        verifier.value_trimmed()
+    } else {
+        return Err(AuthError::Verifier);
     };
-    dbg!(&verifier);
-
-    let (_, verifier) = verifier.name_value_trimmed();
     dbg!(&verifier);
 
     let url = format!("{base_auth_url}/token?code={code}&verifier={verifier}");
 
-    let auth_token = reqwest::get(url)
+    let token = reqwest::get(url)
         .await
-        // todo: impl error conversion to allow bubbling
-        .unwrap()
-        .json::<AuthToken>()
+        .map_err(|err| AuthError::Request(format!("{err:?}")))?
+        .json::<String>()
         .await
-        .unwrap();
-    dbg!(&auth_token);
+        .map_err(|err| AuthError::Json(format!("{err:?}")))?;
+    dbg!(&token);
+
+    let cookie = Cookie::build(("edgedb-auth-token", token))
+        .expires(None)
+        .http_only(true)
+        .path("/")
+        .same_site(SameSite::Strict)
+        .secure(true)
+        .build();
+
+    let jar = jar.add(cookie);
+    dbg!(&jar);
 
     Ok((jar, Redirect::to("/add")))
     //
