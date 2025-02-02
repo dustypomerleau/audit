@@ -1,9 +1,13 @@
 use super::BASE_AUTH_URL;
-use axum::{extract::Query, response::Redirect};
+use axum::{
+    extract::Query,
+    response::{IntoResponse, Redirect, Response},
+};
 use axum_extra::{
     extract::{cookie::Cookie, CookieJar},
     TypedHeader,
 };
+use axum_macros::debug_handler;
 use serde::Deserialize;
 use std::{collections::HashMap, error::Error};
 use thiserror::Error;
@@ -20,10 +24,19 @@ pub enum AuthError {
     Err,
 }
 
+impl IntoResponse for AuthError {
+    fn into_response(self) -> Response {
+        match self {
+            Self::Err => "Authentication error".into_response(),
+        }
+    }
+}
+
 async fn handle_sign_in() -> Result<(), AuthError> {
     Ok(())
 }
 
+#[debug_handler]
 pub async fn trash(
     Query(Params { code }): Query<Params>,
     jar: CookieJar,
