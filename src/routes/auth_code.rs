@@ -41,6 +41,14 @@ pub async fn auth_code(
     Query(Params { code }): Query<Params>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {
+    #[derive(Debug, Deserialize)]
+    struct AuthToken {
+        auth_token: String,
+        identity_id: String,
+        provider_token: String,
+        provider_refresh_token: Option<String>,
+    };
+
     let base_auth_url = &*BASE_AUTH_URL;
 
     dbg!(&code);
@@ -49,8 +57,21 @@ pub async fn auth_code(
     let Some(verifier) = jar.get("edgedb-pkce-verifier") else {
         return Err(AuthError::Err);
     };
-
     dbg!(&verifier);
+
+    let (_, verifier) = verifier.name_value_trimmed();
+    dbg!(&verifier);
+
+    let url = format!("{base_auth_url}/token?code={code}&verifier={verifier}");
+
+    let auth_token = reqwest::get(url)
+        .await
+        // todo: impl error conversion to allow bubbling
+        .unwrap()
+        .json::<AuthToken>()
+        .await
+        .unwrap();
+    dbg!(&auth_token);
 
     Ok((jar, Redirect::to("/add")))
     //

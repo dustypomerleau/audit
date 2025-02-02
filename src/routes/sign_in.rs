@@ -66,9 +66,14 @@ pub struct Pkce {
 #[cfg(feature = "ssr")]
 pub fn generate_pkce() -> Pkce {
     // 1. generate 32 random bytes and URL-encode it:
+
+    use base64ct::Base64Url;
     let input: [u8; 32] = rng().random();
+    dbg!(&input);
     let verifier = Base64UrlUnpadded::encode_string(&input);
     // 2. SHA256 hash the result, then URL-encode again:
+    // note: I tried this with the output of `Base64UrlUnpadded::encode_string()`, but it appears
+    // the hash should be of the padded output.
     let hash = Sha256::new().chain_update(&verifier).finalize();
     let challenge = Base64UrlUnpadded::encode_string(&hash);
 
@@ -81,6 +86,11 @@ pub fn generate_pkce() -> Pkce {
 /// Generate a [`Pkce`] challenge/verifier pair, populate the URL params with the
 /// challenge, and set a cookie with the verifier, redirecting to the OAuth
 /// provider.
+//
+// todo: after you get the auth flow working:
+// - rewrite this function as a plain axum route and use cookie jar
+// - add it to router in main
+// - change login button to a simple link that calls the route
 #[server]
 async fn handle_sign_in() -> Result<(), ServerFnError> {
     let Pkce {
