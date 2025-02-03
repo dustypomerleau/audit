@@ -68,7 +68,7 @@ pub async fn auth_code(
     let token = reqwest::get(url)
         .await
         .map_err(|err| AuthError::Request(format!("{err:?}")))?
-        .json::<String>()
+        .text()
         .await
         .map_err(|err| AuthError::Json(format!("{err:?}")))?;
     dbg!(&token);
