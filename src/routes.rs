@@ -1,7 +1,3 @@
-// scratch file for testing cookie jar
-#[cfg(feature = "ssr")] mod auth_code;
-#[cfg(feature = "ssr")] pub use auth_code::*;
-
 mod add;
 mod app;
 // mod error;

@@ -3,27 +3,25 @@
 #![feature(type_changing_struct_update)]
 #![cfg_attr(debug_assertions, allow(unused))]
 
-/// The [`audit`](self) library provides tools for analyzing and plotting the results of cataract
-/// surgery. Powers that would typically be represented in diopters (1 m e-1) (refractions, IOLs,
-/// refractive targets) are instead represented in centidiopters (1 hm^-1) to allow integer math.
-///
-/// By convention, we use leading zeros for values less than 100 centidiopters, as a reminder that
-/// their diopter representations are < 1. This means that most representations of power values
-/// will be either 3 or 4 digits.
-//
-// for RA support only
-#[cfg(feature = "ssr")]
-pub mod refs;
+//! The [`audit`](self) library provides tools for analyzing and plotting the results of cataract
+//! surgery. Powers that would typically be represented in diopters (1 m e-1) (refractions, IOLs,
+//! refractive targets) are instead represented in centidiopters (1 hm^-1) to allow integer math.
+//!
+//! By convention, we use leading zeros for values less than 100 centidiopters, as a reminder that
+//! their diopter representations are < 1. This means that most representations of power values
+//! will be either 3 or 4 digits.
 
+// #[cfg(feature = "ssr")] pub mod fileserv;
+#[cfg(feature = "ssr")] pub mod auth;
 pub mod bounds_check;
 pub mod case;
 pub mod components;
 pub mod cyl;
 #[cfg(feature = "ssr")] pub mod db;
-// #[cfg(feature = "ssr")] pub mod fileserv;
 pub mod iol;
 pub mod plots;
 pub mod refraction;
+#[cfg(feature = "ssr")] pub mod refs; // for RA support only
 pub mod routes;
 pub mod sca;
 pub mod sia;

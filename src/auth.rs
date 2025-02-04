@@ -3,25 +3,30 @@ use axum::{
     response::{IntoResponse, Redirect, Response},
 };
 use axum_extra::{
-    extract::{
-        cookie::{Cookie, Expiration, SameSite},
-        CookieJar,
-    },
     TypedHeader,
+    extract::{
+        CookieJar,
+        cookie::{Cookie, Expiration, SameSite},
+    },
 };
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
-use rand::{random, rng, Rng};
+use rand::{Rng, random, rng};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::{collections::HashMap, env, error::Error, sync::LazyLock};
 use thiserror::Error;
 
-#[derive(Deserialize)]
-pub struct Params {
-    code: String,
-}
+// note: new API for dotenvy will arrive in v16 release
+pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
+    env::var("BASE_AUTH_URL").expect("expected BASE_AUTH_URL environment variable to be present")
+});
 
+pub static SERVER_PORT: LazyLock<String> = LazyLock::new(|| {
+    env::var("SERVER_PORT").expect("expected SERVER_PORT environment variable to be present")
+});
+
+/// Possible failure modes during the code exchange of a PKCE flow.
 #[derive(Debug, Error)]
 pub enum AuthError {
     #[error("unable to deserialize the response as JSON: {0:?}")]
@@ -50,15 +55,6 @@ impl IntoResponse for AuthError {
     }
 }
 
-// note: new API for dotenvy will arrive in v16 release
-pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
-    env::var("BASE_AUTH_URL").expect("expected BASE_AUTH_URL environment variable to be present")
-});
-
-pub static SERVER_PORT: LazyLock<String> = LazyLock::new(|| {
-    env::var("SERVER_PORT").expect("expected SERVER_PORT environment variable to be present")
-});
-
 /// Holds the verifier/challenge pair that is used during site authentication. The challenge is
 /// passed via the URL, and the verifier is stored in an HTTP-only cookie for access after the
 /// authentication flow is completed. Successful authentication returns a `code` param in the URL.
@@ -76,11 +72,8 @@ pub struct Pkce {
 pub fn generate_pkce() -> Pkce {
     // 1. generate 32 random bytes and URL-encode it:
     let input: [u8; 32] = rng().random();
-    dbg!(&input);
     let verifier = Base64UrlUnpadded::encode_string(&input);
     // 2. SHA256 hash the result, then URL-encode again:
-    // note: I tried this with the output of `Base64UrlUnpadded::encode_string()`, but it appears
-    // the hash should be of the padded output.
     let hash = Sha256::new().chain_update(&verifier).finalize();
     let challenge = Base64UrlUnpadded::encode_string(&hash);
 
@@ -93,12 +86,7 @@ pub fn generate_pkce() -> Pkce {
 /// Generate a [`Pkce`] challenge/verifier pair, populate the URL params with the
 /// challenge, and set a cookie with the verifier, redirecting to the OAuth
 /// provider.
-//
-// todo: after you get the auth flow working:
-// - rewrite this function as a plain axum route and use cookie jar
-// - add it to router in main
-// - change login button to a simple link that calls the route
-async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), AuthError> {
+pub async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), AuthError> {
     let Pkce {
         challenge,
         verifier,
@@ -119,8 +107,14 @@ async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), AuthErr
     Ok((jar, Redirect::to(&url)))
 }
 
+/// A PKCE authentication code returned by the OAuth provider via URL query string.
+#[derive(Debug, Deserialize)]
+pub struct Params {
+    code: String,
+}
+
 #[debug_handler]
-pub async fn handle_auth_code(
+pub async fn handle_pkce_code(
     Query(Params { code }): Query<Params>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {

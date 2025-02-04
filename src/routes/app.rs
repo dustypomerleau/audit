@@ -1,13 +1,13 @@
-use crate::routes::{Add, Code, List, Register, Report, SignIn};
+use crate::routes::{Add, List, Register, Report, SignIn};
 #[cfg(feature = "ssr")] use edgedb_tokio::create_client;
 use leptos::prelude::{
-    component, provide_context, view, AutoReload, ElementChild, GlobalAttributes, HydrationScripts,
-    IntoView, LeptosOptions,
+    AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
+    component, provide_context, view,
 };
-use leptos_meta::{provide_meta_context, MetaTags, Stylesheet, Title};
+use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
 use leptos_router::{
-    components::{Route, Router, Routes},
     StaticSegment,
+    components::{Route, Router, Routes},
 };
 use reactive_stores::Store;
 
@@ -53,10 +53,11 @@ pub fn App() -> impl IntoView {
 
         <Router>
             <main>
+                // note: plain Axum server routes are not represented here,
+                // as they are added directly to the router in `src/main.rs`
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=SignIn />
                     <Route path=StaticSegment("add") view=Add />
-                    // <Route path=StaticSegment("code") view=Code />
                     <Route path=StaticSegment("list") view=List />
                     <Route path=StaticSegment("register") view=Register />
                     <Route path=StaticSegment("report") view=Report />

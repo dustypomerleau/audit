@@ -1,15 +1,18 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use audit::routes::{auth_code, shell, App};
-    use axum::{routing::get, Router};
+    use audit::{
+        auth::{handle_pkce_code, handle_sign_in},
+        routes::{App, shell},
+    };
+    use axum::{Router, routing::get};
     use dotenvy::dotenv;
     use edgedb_tokio::create_client;
     use leptos::{
         logging::log,
         prelude::{get_configuration, provide_context},
     };
-    use leptos_axum::{generate_route_list, LeptosRoutes};
+    use leptos_axum::{LeptosRoutes, generate_route_list};
 
     #[cfg(debug_assertions)]
     dotenv().ok();
@@ -28,17 +31,14 @@ async fn main() {
     let conf = get_configuration(None).unwrap();
     let addr = conf.leptos_options.site_addr;
     let leptos_options = conf.leptos_options;
-    // Generate the list of routes in your Leptos App
     let routes = generate_route_list(App);
 
     // We can't provide our DB client here via context, because we need to set auth globals when we
     // create the client, and that can only be done after auth is complete. So we will use a
     // reactive store instead.
     let app = Router::new()
-        // This is just the standard Axum `Router`.
-        // You can add plain Axum routes like so:
-        .route("/code", get(auth_code))
-        //
+        .route("/code", get(handle_pkce_code))
+        .route("/signin", get(handle_sign_in))
         .leptos_routes(&leptos_options, routes, {
             let leptos_options = leptos_options.clone();
             move || shell(leptos_options.clone())
