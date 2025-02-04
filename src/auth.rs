@@ -1,0 +1,164 @@
+use axum::{
+    extract::Query,
+    response::{IntoResponse, Redirect, Response},
+};
+use axum_extra::{
+    extract::{
+        cookie::{Cookie, Expiration, SameSite},
+        CookieJar,
+    },
+    TypedHeader,
+};
+use axum_macros::debug_handler;
+use base64ct::{Base64UrlUnpadded, Encoding};
+use rand::{random, rng, Rng};
+use serde::Deserialize;
+use sha2::{Digest, Sha256};
+use std::{collections::HashMap, env, error::Error, sync::LazyLock};
+use thiserror::Error;
+
+#[derive(Deserialize)]
+pub struct Params {
+    code: String,
+}
+
+#[derive(Debug, Error)]
+pub enum AuthError {
+    #[error("unable to deserialize the response as JSON: {0:?}")]
+    Json(String),
+    #[error("did not receive a response from the token request: {0:?}")]
+    Request(String),
+    #[error("unable to get the PKCE verifier from the cookie jar")]
+    Verifier,
+}
+
+impl IntoResponse for AuthError {
+    fn into_response(self) -> Response {
+        match self {
+            Self::Json(err) => {
+                format!("Error: unable to deserialize the response as JSON: {err:?}")
+                    .into_response()
+            }
+            Self::Request(err) => {
+                format!("Error: did not receive a response from the token request: {err:?}")
+                    .into_response()
+            }
+            Self::Verifier => {
+                "Error: unable to get the PKCE verifier from the cookie jar".into_response()
+            }
+        }
+    }
+}
+
+// note: new API for dotenvy will arrive in v16 release
+pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
+    env::var("BASE_AUTH_URL").expect("expected BASE_AUTH_URL environment variable to be present")
+});
+
+pub static SERVER_PORT: LazyLock<String> = LazyLock::new(|| {
+    env::var("SERVER_PORT").expect("expected SERVER_PORT environment variable to be present")
+});
+
+/// Holds the verifier/challenge pair that is used during site authentication. The challenge is
+/// passed via the URL, and the verifier is stored in an HTTP-only cookie for access after the
+/// authentication flow is completed. Successful authentication returns a `code` param in the URL.
+/// Supplying the `code/verifier` pair in a `GET` request to the EdgeDB Auth token server will
+/// return an auth token in JSON format, and storing this JSON as a cookie will allow you to check
+/// authentication for access to protected routes.
+#[derive(Debug)]
+pub struct Pkce {
+    verifier: String,
+    challenge: String,
+}
+
+/// Generate a `verifier/challenge` pair for use in the authentication flow (see [`Pkce`] for
+/// details).
+pub fn generate_pkce() -> Pkce {
+    // 1. generate 32 random bytes and URL-encode it:
+    let input: [u8; 32] = rng().random();
+    dbg!(&input);
+    let verifier = Base64UrlUnpadded::encode_string(&input);
+    // 2. SHA256 hash the result, then URL-encode again:
+    // note: I tried this with the output of `Base64UrlUnpadded::encode_string()`, but it appears
+    // the hash should be of the padded output.
+    let hash = Sha256::new().chain_update(&verifier).finalize();
+    let challenge = Base64UrlUnpadded::encode_string(&hash);
+
+    Pkce {
+        challenge,
+        verifier,
+    }
+}
+
+/// Generate a [`Pkce`] challenge/verifier pair, populate the URL params with the
+/// challenge, and set a cookie with the verifier, redirecting to the OAuth
+/// provider.
+//
+// todo: after you get the auth flow working:
+// - rewrite this function as a plain axum route and use cookie jar
+// - add it to router in main
+// - change login button to a simple link that calls the route
+async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), AuthError> {
+    let Pkce {
+        challenge,
+        verifier,
+    } = generate_pkce();
+
+    let base_auth_url = &*BASE_AUTH_URL;
+
+    let cookie = Cookie::build(("edgedb-pkce-verifier", verifier))
+        .expires(None)
+        .http_only(true)
+        .path("/")
+        .same_site(SameSite::Strict)
+        .secure(true)
+        .build();
+
+    let url = format!("{base_auth_url}/ui/signin?challenge={challenge}");
+
+    Ok((jar, Redirect::to(&url)))
+}
+
+#[debug_handler]
+pub async fn handle_auth_code(
+    Query(Params { code }): Query<Params>,
+    jar: CookieJar,
+) -> Result<(CookieJar, Redirect), AuthError> {
+    dbg!(&code);
+    let base_auth_url = &*BASE_AUTH_URL;
+
+    let verifier = if let Some(verifier) = jar.get("edgedb-pkce-verifier") {
+        verifier.value_trimmed()
+    } else {
+        return Err(AuthError::Verifier);
+    };
+    dbg!(&verifier);
+
+    let url = format!("{base_auth_url}/token?code={code}&verifier={verifier}");
+
+    let token = reqwest::get(url)
+        .await
+        .map_err(|err| AuthError::Request(format!("{err:?}")))?
+        .text()
+        .await
+        .map_err(|err| AuthError::Json(format!("{err:?}")))?;
+    dbg!(&token);
+
+    let cookie = Cookie::build(("edgedb-auth-token", token))
+        .expires(None)
+        .http_only(true)
+        .path("/")
+        .same_site(SameSite::Strict)
+        .secure(true)
+        .build();
+
+    let jar = jar.add(cookie);
+    dbg!(&jar);
+
+    Ok((jar, Redirect::to("/add")))
+    //
+    //     let client = create_client()
+    //         .await
+    //         .expect("expected the DB client to be initialized")
+    //         .with_globals_fn(|c| c.set("ext::auth::client_token", auth_token));
+}
