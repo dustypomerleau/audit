@@ -102,6 +102,7 @@ pub async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), Aut
         .secure(true)
         .build();
 
+    let jar = jar.add(cookie);
     let url = format!("{base_auth_url}/ui/signin?challenge={challenge}");
 
     Ok((jar, Redirect::to(&url)))
