@@ -22,10 +22,6 @@ pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
     env::var("BASE_AUTH_URL").expect("expected BASE_AUTH_URL environment variable to be present")
 });
 
-pub static SERVER_PORT: LazyLock<String> = LazyLock::new(|| {
-    env::var("SERVER_PORT").expect("expected SERVER_PORT environment variable to be present")
-});
-
 /// Possible failure modes during the code exchange of a PKCE flow.
 #[derive(Debug, Error)]
 pub enum AuthError {
