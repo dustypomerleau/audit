@@ -94,7 +94,8 @@ pub async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), Aut
         .expires(None)
         .http_only(true)
         .path("/")
-        .same_site(SameSite::Strict)
+        // `Lax` is required to send the cookie to the auth URL
+        .same_site(SameSite::Lax)
         .secure(true)
         .build();
 
