@@ -79,9 +79,10 @@ pub fn generate_pkce() -> Pkce {
     }
 }
 
-/// Generate a [`Pkce`] challenge/verifier pair, populate the URL params with the
-/// challenge, and set a cookie with the verifier, redirecting to the OAuth
+/// Step 1 of the auth flow: Generate a [`Pkce`] challenge/verifier pair, populate the URL params
+/// with the challenge, and set a cookie with the verifier, redirecting to the OAuth
 /// provider.
+#[debug_handler]
 pub async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), AuthError> {
     let Pkce {
         challenge,
@@ -111,6 +112,10 @@ pub struct Params {
     code: String,
 }
 
+/// Step 2 of the auth flow: After returning from successful authentication with the OAuth
+/// provider, use the code provided in the URL query params, along with the verifier you previously
+/// stored in a cookie, to request a Gel auth token from the Gel Auth JSON API. Storing the auth
+/// token as a cookie allows you to confirm the logged-in surgeon when accessing protected routes.
 #[debug_handler]
 pub async fn handle_pkce_code(
     Query(Params { code }): Query<Params>,
@@ -148,6 +153,8 @@ pub async fn handle_pkce_code(
     dbg!(&jar);
 
     Ok((jar, Redirect::to("/add")))
+
+    // todo: create a DB client with the auth token as a global, and place it in a reactive store
     //
     //     let client = create_client()
     //         .await
