@@ -23,7 +23,9 @@ use thiserror::Error;
 pub fn SignIn() -> impl IntoView {
     view! {
         <div style="flex">
-            <a href="/signin"></a>
+            <a href="/signin" rel="external">
+                sign in
+            </a>
             <a href="https://accounts.google.com">or create a new google account</a>
         </div>
     }
