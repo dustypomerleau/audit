@@ -11,11 +11,6 @@ use leptos_router::{
 };
 use reactive_stores::Store;
 
-// #[derive(Clone, Debug, Default, Store)]
-// pub struct GlobalState {
-//     db_client: Option<edgedb_tokio::Client>,
-// }
-
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
         <!DOCTYPE html>
@@ -40,10 +35,6 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 
 #[component]
 pub fn App() -> impl IntoView {
-    // Start by providing global state with a `None` DB client, and then create the client with
-    // correct globals after completing the auth flow.
-    // provide_context(Store::new(GlobalState::default()));
-
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
