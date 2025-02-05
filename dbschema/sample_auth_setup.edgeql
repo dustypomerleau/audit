@@ -43,3 +43,4 @@ insert ext::auth::GoogleOAuthProvider {
 # You will also need to enable the built-in UI at:
 # > Auth > Providers > Enable UI
 # and set the redirect URLs.
+# Full URLs are needed, including protocol, as you are basically coming from another site before the redirect.
