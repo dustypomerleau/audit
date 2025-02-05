@@ -161,3 +161,30 @@ pub async fn handle_pkce_code(
     //         .expect("expected the DB client to be initialized")
     //         .with_globals_fn(|c| c.set("ext::auth::client_token", auth_token));
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use dotenvy::dotenv;
+    use leptos::logging::log;
+
+    #[test]
+    #[cfg(feature = "ssr")]
+    fn generates_pkce() {
+        let pkce = generate_pkce();
+
+        log!(
+            "{pkce:?}, verifier length: {:?}, challenge length: {:?}",
+            pkce.verifier.len(),
+            pkce.challenge.len()
+        );
+
+        assert!(pkce.verifier.len() == pkce.challenge.len() && pkce.verifier.len() == 43);
+    }
+
+    #[test]
+    fn test_env_vars() {
+        dotenv().ok();
+        log!("base auth URL: {}", &*BASE_AUTH_URL,);
+    }
+}
