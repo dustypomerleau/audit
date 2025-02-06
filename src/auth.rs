@@ -108,7 +108,7 @@ pub async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), Aut
 
 /// A PKCE authentication code returned by the OAuth provider via URL query string.
 #[derive(Debug, Deserialize)]
-pub struct Params {
+pub struct PkceParams {
     code: String,
 }
 
@@ -118,7 +118,7 @@ pub struct Params {
 /// token as a cookie allows you to confirm the logged-in surgeon when accessing protected routes.
 #[debug_handler]
 pub async fn handle_pkce_code(
-    Query(Params { code }): Query<Params>,
+    Query(PkceParams { code }): Query<PkceParams>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {
     dbg!(&code);
