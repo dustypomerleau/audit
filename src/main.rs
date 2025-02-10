@@ -7,7 +7,6 @@ async fn main() {
     };
     use axum::{Router, routing::get};
     use dotenvy::dotenv;
-    use edgedb_tokio::create_client;
     use leptos::{
         logging::log,
         prelude::{get_configuration, provide_context},
@@ -32,6 +31,9 @@ async fn main() {
     let addr = conf.leptos_options.site_addr;
     let leptos_options = conf.leptos_options;
     let routes = generate_route_list(App);
+    let db_client = edgedb_tokio::create_client()
+        .await
+        .expect("expected the DB client to be initialized");
 
     // We can't provide our DB client here via context, because we need to set auth globals when we
     // create the client, and that can only be done after auth is complete. So we will use a

@@ -11,6 +11,8 @@ use axum_extra::{
 };
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
+use edgedb_tokio::Client;
+use leptos::prelude::expect_context;
 use rand::{Rng, random, rng};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
@@ -112,6 +114,14 @@ pub struct PkceParams {
     code: String,
 }
 
+#[derive(Debug, Deserialize)]
+struct AuthToken {
+    auth_token: String,
+    identity_id: String,
+    provider_token: String,
+    provider_refresh_token: Option<String>,
+}
+
 /// Step 2 of the auth flow: After returning from successful authentication with the OAuth
 /// provider, use the code provided in the URL query params, along with the verifier you previously
 /// stored in a cookie, to request a Gel auth token from the Gel Auth JSON API. Storing the auth
@@ -133,15 +143,18 @@ pub async fn handle_pkce_code(
 
     let url = format!("{base_auth_url}/token?code={code}&verifier={verifier}");
 
-    let token = reqwest::get(url)
+    let json_token = reqwest::get(url)
         .await
         .map_err(|err| AuthError::Request(format!("{err:?}")))?
         .text()
         .await
         .map_err(|err| AuthError::Json(format!("{err:?}")))?;
-    dbg!(&token);
+    dbg!(&json_token);
 
-    let cookie = Cookie::build(("edgedb-auth-token", token))
+    let auth_token: AuthToken =
+        serde_json::from_str(&json_token).map_err(|err| AuthError::Json(format!("{err:?}")))?;
+
+    let cookie = Cookie::build(("edgedb-auth-token", json_token))
         .expires(None)
         .http_only(true)
         .path("/")
@@ -155,6 +168,15 @@ pub async fn handle_pkce_code(
     Ok((jar, Redirect::to("/add")))
 
     // todo: create a DB client with the auth token as a global, and place it in a reactive store
+    //
+    // start by creating a client in main() that has no globals
+    // then provide it to all routes - not sure where
+    // then in this function use edgedb_tokio::client::with_globals_fn() to create a new client
+    // then use leptos::prelude::update_context() to replace the client
+    //
+    // alternatively, you can expect context to get the client }n the server fn or handler, and
+    // then use with_transaction_options or whatever to set the global for each specific query
+    // this just seems very redundant since there is always one and the same global we want to set.
     //
     //     let client = create_client()
     //         .await
