@@ -14,7 +14,6 @@ pkg
 /result
 
 *.xlsx
-/src/refs
 end2end/playwright-report/
 node_modules/
 playwright/.cache/

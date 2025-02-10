@@ -21,7 +21,6 @@ pub mod cyl;
 pub mod iol;
 pub mod plots;
 pub mod refraction;
-#[cfg(feature = "ssr")] pub mod refs; // for RA support only
 pub mod routes;
 pub mod sca;
 pub mod sia;
