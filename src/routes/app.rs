@@ -1,8 +1,11 @@
-use crate::routes::{Add, List, Register, Report, SignIn};
+use crate::{
+    routes::{Add, List, Register, Report, SignIn},
+    surgeon::Surgeon,
+};
 #[cfg(feature = "ssr")] use edgedb_tokio::create_client;
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
-    component, provide_context, view,
+    component, expect_context, provide_context, signal, view,
 };
 use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
 use leptos_router::{
@@ -10,6 +13,7 @@ use leptos_router::{
     components::{Route, Router, Routes},
 };
 use reactive_stores::Store;
+use serde_json::from_str;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -38,6 +42,24 @@ pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
+    // signal that is set by reading the edgedb-auth-token cookie
+    // derived signal that sets the current surgeon if the auth cookie is present
+    let (current_surgeon, set_current_surgeon) = signal::<Option<Surgeon>>(None);
+
+    // you may need an error boundary to avoid unwrapping here
+    // let json_token = response
+    //     .0
+    //     .read()
+    //     .headers
+    //     .get("edgedb-auth-token")
+    //     .unwrap()
+    //     .to_str()
+    //     .unwrap()
+    //     .to_owned();
+    //
+    // let surgeon: Option<Surgeon> = serde_json::from_str::<Surgeon>(&json_token).unwrap().into();
+
+    // todo: should the stylesheet and title be in the shell instead?
     view! {
         <Stylesheet id="leptos" href="/pkg/audit.css" />
         <Title text="Cataract audit" />

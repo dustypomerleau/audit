@@ -151,6 +151,7 @@ pub async fn handle_pkce_code(
         .map_err(|err| AuthError::Json(format!("{err:?}")))?;
     dbg!(&json_token);
 
+    // put this in a store
     let auth_token: AuthToken =
         serde_json::from_str(&json_token).map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
