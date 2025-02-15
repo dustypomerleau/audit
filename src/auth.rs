@@ -1,5 +1,6 @@
+use crate::{db, state::AppState};
 use axum::{
-    extract::Query,
+    extract::{Query, State},
     response::{IntoResponse, Redirect, Response},
 };
 use axum_extra::{
@@ -12,11 +13,16 @@ use axum_extra::{
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
 use edgedb_tokio::Client;
-use leptos::prelude::expect_context;
+use leptos::{config::LeptosOptions, prelude::expect_context};
 use rand::{Rng, random, rng};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
-use std::{collections::HashMap, env, error::Error, sync::LazyLock};
+use std::{
+    collections::HashMap,
+    env,
+    error::Error,
+    sync::{Arc, LazyLock, RwLock},
+};
 use thiserror::Error;
 
 // note: new API for dotenvy will arrive in v16 release
@@ -128,9 +134,17 @@ struct AuthToken {
 /// token as a cookie allows you to confirm the logged-in surgeon when accessing protected routes.
 #[debug_handler]
 pub async fn handle_pkce_code(
+    State(AppState { db, .. }): State<AppState>,
     Query(PkceParams { code }): Query<PkceParams>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {
+    //     todo: db client replacement
+    //
+    //     let client = create_client()
+    //         .await
+    //         .expect("DB client to be initialized")
+    //         .with_globals_fn(|c| c.set("ext::auth::client_token", auth_token));
+
     dbg!(&code);
     let base_auth_url = &*BASE_AUTH_URL;
 

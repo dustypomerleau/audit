@@ -59,11 +59,11 @@ pub fn App() -> impl IntoView {
     //
     // let surgeon: Option<Surgeon> = serde_json::from_str::<Surgeon>(&json_token).unwrap().into();
 
+    // todo: replace this once you get head tag issues fixed
+    // <Stylesheet id="leptos" href="/pkg/audit.css" />
+    // <Title text="Cataract audit" />
     // todo: should the stylesheet and title be in the shell instead?
     view! {
-        <Stylesheet id="leptos" href="/pkg/audit.css" />
-        <Title text="Cataract audit" />
-
         <Router>
             <main>
                 // note: plain Axum server routes are not represented here,
