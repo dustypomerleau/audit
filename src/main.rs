@@ -7,11 +7,8 @@ async fn main() {
         state::AppState,
     };
     use axum::{Router, routing::get};
-    use axum_macros::FromRef;
     use dotenvy::dotenv;
-    use edgedb_tokio::Client;
     use leptos::{
-        config::LeptosOptions,
         logging::log,
         prelude::{get_configuration, provide_context},
     };
