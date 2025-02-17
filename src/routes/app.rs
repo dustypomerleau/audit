@@ -29,9 +29,8 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
                 <AutoReload options=options.clone() />
                 <HydrationScripts options />
                 <MetaTags />
-                <Stylesheet id="leptos" href="/pkg/audit.css" />
-                <Title text="Cataract audit" />
             </head>
+
             <body>
                 <App />
             </body>
@@ -41,31 +40,15 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 
 #[component]
 pub fn App() -> impl IntoView {
-    // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
     // signal that is set by reading the edgedb-auth-token cookie
     // derived signal that sets the current surgeon if the auth cookie is present
     let (current_surgeon, set_current_surgeon) = signal::<Option<Surgeon>>(None);
 
-    // you may need an error boundary to avoid unwrapping here
-    // let json_token = response
-    //     .0
-    //     .read()
-    //     .headers
-    //     .get("edgedb-auth-token")
-    //     .unwrap()
-    //     .to_str()
-    //     .unwrap()
-    //     .to_owned();
-    //
-    // let surgeon: Option<Surgeon> = serde_json::from_str::<Surgeon>(&json_token).unwrap().into();
-
-    // todo: replace this once you get head tag issues fixed
-    // <Stylesheet id="leptos" href="/pkg/audit.css" />
-    // <Title text="Cataract audit" />
-    // todo: should the stylesheet and title be in the shell instead?
     view! {
+        <Stylesheet id="leptos" href="/pkg/audit.css" />
+        <Title text="Cataract audit" />
         <Router>
             <main>
                 // note: plain Axum server routes are not represented here,

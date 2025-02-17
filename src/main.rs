@@ -31,7 +31,7 @@ async fn main() {
     let db = Arc::new(RwLock::new(db_client));
 
     let app_state = AppState {
-        leptos_options,
+        leptos_options: leptos_options.clone(),
         db: Arc::clone(&db),
     };
 
@@ -45,7 +45,10 @@ async fn main() {
                 let app_state = app_state.clone();
                 move || provide_context(app_state.clone())
             },
-            App,
+            {
+                let leptos_options = leptos_options.clone();
+                move || shell(leptos_options.clone())
+            },
         )
         .fallback(leptos_axum::file_and_error_handler::<AppState, _>(shell))
         .with_state(app_state);
