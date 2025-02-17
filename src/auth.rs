@@ -12,7 +12,7 @@ use axum_extra::{
 };
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
-use edgedb_tokio::Client;
+use edgedb_tokio::{Client, create_client};
 use leptos::{config::LeptosOptions, prelude::expect_context};
 use rand::{Rng, random, rng};
 use serde::Deserialize;
@@ -37,6 +37,8 @@ pub enum AuthError {
     Json(String),
     #[error("did not receive a response from the token request: {0:?}")]
     Request(String),
+    #[error("unable to write the intended state: {0:?}")]
+    State(String),
     #[error("unable to get the PKCE verifier from the cookie jar")]
     Verifier,
 }
@@ -51,6 +53,9 @@ impl IntoResponse for AuthError {
             Self::Request(err) => {
                 format!("Error: did not receive a response from the token request: {err:?}")
                     .into_response()
+            }
+            Self::State(err) => {
+                format!("Error: unable to write the intended state: {err:?}").into_response()
             }
             Self::Verifier => {
                 "Error: unable to get the PKCE verifier from the cookie jar".into_response()
@@ -134,17 +139,10 @@ struct AuthToken {
 /// token as a cookie allows you to confirm the logged-in surgeon when accessing protected routes.
 #[debug_handler]
 pub async fn handle_pkce_code(
-    State(AppState { db, .. }): State<AppState>,
+    State(db): State<Arc<RwLock<Client>>>,
     Query(PkceParams { code }): Query<PkceParams>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {
-    //     todo: db client replacement
-    //
-    //     let client = create_client()
-    //         .await
-    //         .expect("DB client to be initialized")
-    //         .with_globals_fn(|c| c.set("ext::auth::client_token", auth_token));
-
     dbg!(&code);
     let base_auth_url = &*BASE_AUTH_URL;
 
@@ -165,9 +163,22 @@ pub async fn handle_pkce_code(
         .map_err(|err| AuthError::Json(format!("{err:?}")))?;
     dbg!(&json_token);
 
-    // put this in a store
-    let auth_token: AuthToken =
-        serde_json::from_str(&json_token).map_err(|err| AuthError::Json(format!("{err:?}")))?;
+    let db_with_globals = create_client()
+        .await
+        .expect("DB client to be initialized with globals")
+        .with_globals_fn(|c| c.set("ext::auth::client_token", json_token.to_owned()));
+
+    let mut db = db
+        .write()
+        .map_err(|err| AuthError::State(format!("{err:?}")))?;
+
+    // Update global state with the new DB client containing globals tied to the user's auth token:
+    *db = db_with_globals;
+    dbg!(&db);
+
+    // // put this in a store
+    // let auth_token: AuthToken =
+    //     serde_json::from_str(&json_token).map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
     let cookie = Cookie::build(("edgedb-auth-token", json_token))
         .expires(None)
@@ -181,22 +192,6 @@ pub async fn handle_pkce_code(
     dbg!(&jar);
 
     Ok((jar, Redirect::to("/add")))
-
-    // todo: create a DB client with the auth token as a global, and place it in a reactive store
-    //
-    // start by creating a client in main() that has no globals
-    // then provide it to all routes - not sure where
-    // then in this function use edgedb_tokio::client::with_globals_fn() to create a new client
-    // then use leptos::prelude::update_context() to replace the client
-    //
-    // alternatively, you can expect context to get the client }n the server fn or handler, and
-    // then use with_transaction_options or whatever to set the global for each specific query
-    // this just seems very redundant since there is always one and the same global we want to set.
-    //
-    //     let client = create_client()
-    //         .await
-    //         .expect("expected the DB client to be initialized")
-    //         .with_globals_fn(|c| c.set("ext::auth::client_token", auth_token));
 }
 
 #[cfg(test)]
