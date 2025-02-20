@@ -1,5 +1,5 @@
 use crate::sca::ScaBoundsError;
-#[cfg(feature = "ssr")] use edgedb_derive::Queryable;
+#[cfg(feature = "ssr")] use gel_derive::Queryable;
 use serde::{Deserialize, Serialize};
 
 /// A missing cylinder component (for use by error types).

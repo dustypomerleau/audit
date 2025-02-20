@@ -3,7 +3,7 @@ use crate::{
     cyl::{Cyl, CylPair},
     sca::{Sca, ScaMut},
 };
-#[cfg(feature = "ssr")] use edgedb_derive::Queryable;
+#[cfg(feature = "ssr")] use gel_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
 use thiserror::Error;
@@ -17,7 +17,9 @@ pub enum IolBoundsError {
     #[error("IOL cylinder must have both a power and an axis but the {0:?} was not supplied")]
     NoPair(CylPair),
 
-    #[error("IOL spherical equivalent must be a multiple of 25 cD between -2000 and +6000 (supplied value: {0})")]
+    #[error(
+        "IOL spherical equivalent must be a multiple of 25 cD between -2000 and +6000 (supplied value: {0})"
+    )]
     Se(i32),
 
     #[error(
@@ -25,7 +27,9 @@ pub enum IolBoundsError {
     )]
     Cyl(i32),
 
-    #[error("incomplete IOL: IOL description must contain a model, name, focus (monofocal, EDOF, multifocal), and toric (true/false)")]
+    #[error(
+        "incomplete IOL: IOL description must contain a model, name, focus (monofocal, EDOF, multifocal), and toric (true/false)"
+    )]
     Iol,
 }
 

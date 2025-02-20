@@ -8,10 +8,7 @@ async fn main() {
     };
     use axum::{Router, routing::get};
     use dotenvy::dotenv;
-    use leptos::{
-        logging::log,
-        prelude::{get_configuration, provide_context},
-    };
+    use leptos::{logging::log, prelude::get_configuration};
     use leptos_axum::{LeptosRoutes, generate_route_list};
     use std::sync::{Arc, RwLock};
 
@@ -24,7 +21,7 @@ async fn main() {
     let leptos_options = conf.leptos_options;
     let routes = generate_route_list(App);
 
-    let db_client = edgedb_tokio::create_client()
+    let db_client = gel_tokio::create_client()
         .await
         .expect("expected the DB client to be initialized");
 

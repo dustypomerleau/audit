@@ -9,9 +9,9 @@ use crate::{
     va::{OpVa, VaBoundsError},
 };
 use chrono::NaiveDate;
-#[cfg(feature = "ssr")] use edgedb_derive::Queryable;
+#[cfg(feature = "ssr")] use gel_derive::Queryable;
 use serde::{Deserialize, Serialize};
-use std::fmt::{write, Display};
+use std::fmt::{Display, write};
 use thiserror::Error;
 
 /// A wrapper for any type of bounds error on numeric types.
@@ -101,7 +101,7 @@ pub enum Side {
     Left,
 }
 
-// Implementing Display is necessary for enums to impl Into<edgedb_protocol::Value>
+// Implementing Display is necessary for enums to impl Into<gel_protocol::Value>
 impl Display for Side {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -169,14 +169,14 @@ pub struct Case {
 //         target::{Constant, Formula},
 //         va::{AfterVa, BeforeVa, Va},
 //     };
-//     #[cfg(feature = "ssr")] use edgedb_tokio::create_client;
+//     #[cfg(feature = "ssr")] use gel_tokio::create_client;
 //     use std::marker::PhantomData;
 //     #[cfg(feature = "ssr")] use tokio::test;
 //
 //     #[cfg(feature = "ssr")]
 //     #[tokio::test]
 //     async fn inserts_a_case() {
-//         let client = edgedb_tokio::create_client()
+//         let client = gel_tokio::create_client()
 //             .await
 //             .expect("DB client to be initialized");
 //

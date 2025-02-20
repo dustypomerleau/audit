@@ -12,7 +12,7 @@ use axum_extra::{
 };
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
-use edgedb_tokio::{Client, create_client};
+use gel_tokio::{Client, create_client};
 use leptos::{config::LeptosOptions, prelude::expect_context};
 use rand::{Rng, random, rng};
 use serde::Deserialize;
@@ -67,7 +67,7 @@ impl IntoResponse for AuthError {
 /// Holds the verifier/challenge pair that is used during site authentication. The challenge is
 /// passed via the URL, and the verifier is stored in an HTTP-only cookie for access after the
 /// authentication flow is completed. Successful authentication returns a `code` param in the URL.
-/// Supplying the `code/verifier` pair in a `GET` request to the EdgeDB Auth token server will
+/// Supplying the `code/verifier` pair in a `GET` request to the Gel Auth token server will
 /// return an auth token in JSON format, and storing this JSON as a cookie will allow you to check
 /// authentication for access to protected routes.
 #[derive(Debug)]
@@ -143,7 +143,6 @@ pub async fn handle_pkce_code(
     Query(PkceParams { code }): Query<PkceParams>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {
-    dbg!(&code);
     let base_auth_url = &*BASE_AUTH_URL;
 
     let verifier = if let Some(verifier) = jar.get("edgedb-pkce-verifier") {
@@ -151,7 +150,6 @@ pub async fn handle_pkce_code(
     } else {
         return Err(AuthError::Verifier);
     };
-    dbg!(&verifier);
 
     let url = format!("{base_auth_url}/token?code={code}&verifier={verifier}");
 
@@ -161,7 +159,6 @@ pub async fn handle_pkce_code(
         .text()
         .await
         .map_err(|err| AuthError::Json(format!("{err:?}")))?;
-    dbg!(&json_token);
 
     let db_with_globals = create_client()
         .await
@@ -174,7 +171,6 @@ pub async fn handle_pkce_code(
 
     // Update global state with the new DB client containing globals tied to the user's auth token:
     *db = db_with_globals;
-    dbg!(&db);
 
     // // put this in a store
     // let auth_token: AuthToken =
@@ -189,7 +185,6 @@ pub async fn handle_pkce_code(
         .build();
 
     let jar = jar.add(cookie);
-    dbg!(&jar);
 
     Ok((jar, Redirect::to("/add")))
 }

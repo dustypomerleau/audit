@@ -3,7 +3,7 @@ use crate::{
     cyl::Cyl,
     sca::{Sca, ScaMut},
 };
-#[cfg(feature = "ssr")] use edgedb_derive::Queryable;
+#[cfg(feature = "ssr")] use gel_derive::Queryable;
 use serde::{Deserialize, Serialize};
 use std::marker::PhantomData;
 use thiserror::Error;

@@ -6,7 +6,7 @@
 //     refraction::OpRefraction,
 //     va::OpVa,
 // };
-// #[cfg(feature = "ssr")] use edgedb_derive::Queryable;
+// #[cfg(feature = "ssr")] use gel_derive::Queryable;
 // use serde::{Deserialize, Serialize};
 //
 // // This whole thing is a fool's errand...

@@ -1,5 +1,5 @@
 use axum_macros::FromRef;
-use edgedb_tokio::{Client, create_client};
+use gel_tokio::{Client, create_client};
 use leptos::config::LeptosOptions;
 use std::sync::{Arc, RwLock};
 

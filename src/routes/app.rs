@@ -2,7 +2,6 @@ use crate::{
     routes::{Add, List, Register, Report, SignIn},
     surgeon::Surgeon,
 };
-#[cfg(feature = "ssr")] use edgedb_tokio::create_client;
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
     component, expect_context, provide_context, signal, view,
@@ -41,10 +40,6 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
 #[component]
 pub fn App() -> impl IntoView {
     provide_meta_context();
-
-    // signal that is set by reading the edgedb-auth-token cookie
-    // derived signal that sets the current surgeon if the auth cookie is present
-    let (current_surgeon, set_current_surgeon) = signal::<Option<Surgeon>>(None);
 
     view! {
         <Stylesheet id="leptos" href="/pkg/audit.css" />

@@ -15,7 +15,7 @@ pub async fn insert_surgeon(
         default_site,
         sia,
     }: Surgeon,
-) -> Result<(), edgedb_tokio::Error> {
+) -> Result<(), gel_tokio::Error> {
     let (first_name, last_name, default_site) = (
         first_name.unwrap_or("{}".to_string()),
         last_name.unwrap_or("{}".to_string()),
