@@ -118,7 +118,7 @@ mod tests {
         let unchecked = Refraction::<Unchecked> {
             sph: -325,
             cyl: Some(Cyl {
-                power: -075,
+                power: -75,
                 axis: 100,
             }),
             bounds: PhantomData,
@@ -129,7 +129,7 @@ mod tests {
         let expected = Refraction::<Checked> {
             sph: -325,
             cyl: Some(Cyl {
-                power: -075,
+                power: -75,
                 axis: 100,
             }),
             bounds: PhantomData,
@@ -141,7 +141,7 @@ mod tests {
     #[test]
     fn out_of_bounds_refraction_sph_fails_check() {
         let sph = -4050;
-        let refraction = RawSca::new(sph, Cyl::new(-025, 30).ok())
+        let refraction = RawSca::new(sph, Cyl::new(-25, 30).ok())
             .into_refraction_unchecked()
             .check();
 
@@ -151,7 +151,7 @@ mod tests {
     #[test]
     fn nonzero_rem_refraction_sph_fails_check() {
         let sph = -1020;
-        let refraction = RawSca::new(sph, Cyl::new(-025, 30).ok())
+        let refraction = RawSca::new(sph, Cyl::new(-25, 30).ok())
             .into_refraction_unchecked()
             .check();
 
@@ -170,7 +170,7 @@ mod tests {
 
     #[test]
     fn nonzero_rem_refraction_cyl_power_fails_check() {
-        let power = -060;
+        let power = -60;
         let refraction = RawSca::new(350, Cyl::new(power, 160).ok())
             .into_refraction_unchecked()
             .check();

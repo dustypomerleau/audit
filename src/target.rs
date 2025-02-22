@@ -51,10 +51,10 @@ pub enum Formula {
 
 impl Formula {
     pub fn is_thick(&self) -> bool {
-        match self {
-            Self::Barrett | Self::BarrettTrueK | Self::Holladay2 | Self::Olsen => true,
-            _ => false,
-        }
+        matches!(
+            self,
+            Self::Barrett | Self::BarrettTrueK | Self::Holladay2 | Self::Olsen
+        )
     }
 }
 
@@ -160,14 +160,14 @@ mod tests {
 
     #[test]
     fn makes_new_target() {
-        let sca = RawSca::new(-015, Cyl::new(022, 82).ok());
+        let sca = RawSca::new(-15, Cyl::new(22, 82).ok());
         let _target = Target::new(sca, iol_constant()).check().unwrap();
     }
 
     #[test]
     fn out_of_bounds_target_se_fails_check() {
         let se = -1250;
-        let sca = RawSca::new(se, Cyl::new(022, 82).ok());
+        let sca = RawSca::new(se, Cyl::new(22, 82).ok());
         let target = Target::new(sca, iol_constant()).check();
 
         assert_eq!(target, Err(TargetBoundsError::Se(se)));
@@ -176,7 +176,7 @@ mod tests {
     #[test]
     fn out_of_bounds_target_cyl_power_fails_check() {
         let power = 710;
-        let sca = RawSca::new(-018, Cyl::new(power, 82).ok());
+        let sca = RawSca::new(-18, Cyl::new(power, 82).ok());
         let target = Target::new(sca, iol_constant()).check();
 
         assert_eq!(target, Err(TargetBoundsError::Cyl(power)));

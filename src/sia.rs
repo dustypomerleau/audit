@@ -46,7 +46,7 @@ mod tests {
 
     #[test]
     fn makes_new_sia() {
-        let cyl = Cyl::new(010, 100).unwrap();
+        let cyl = Cyl::new(10, 100).unwrap();
         Sia::new(cyl).unwrap();
     }
 
