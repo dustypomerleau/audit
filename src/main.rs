@@ -30,6 +30,7 @@ async fn main() {
     let app_state = AppState {
         leptos_options: leptos_options.clone(),
         db: Arc::clone(&db),
+        surgeon: Arc::new(RwLock::new(None)),
     };
 
     let app = Router::new()

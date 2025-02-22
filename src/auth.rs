@@ -1,4 +1,4 @@
-use crate::{db, state::AppState};
+use crate::{db, state::AppState, surgeon};
 use axum::{
     extract::{Query, State},
     response::{IntoResponse, Redirect, Response},
@@ -12,6 +12,7 @@ use axum_extra::{
 };
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
+use gel_protocol::common::State;
 use gel_tokio::{Client, create_client};
 use leptos::{config::LeptosOptions, prelude::expect_context};
 use rand::{Rng, random, rng};
@@ -139,7 +140,7 @@ struct AuthToken {
 /// token as a cookie allows you to confirm the logged-in surgeon when accessing protected routes.
 #[debug_handler]
 pub async fn handle_pkce_code(
-    State(db): State<Arc<RwLock<Client>>>,
+    State(state): State<AppState>,
     Query(PkceParams { code }): Query<PkceParams>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {
@@ -165,12 +166,20 @@ pub async fn handle_pkce_code(
         .expect("DB client to be initialized with globals")
         .with_globals_fn(|c| c.set("ext::auth::client_token", json_token.to_owned()));
 
-    let mut db = db
+    let mut db = state
+        .db
         .write()
         .map_err(|err| AuthError::State(format!("{err:?}")))?;
 
     // Update global state with the new DB client containing globals tied to the user's auth token:
     *db = db_with_globals;
+
+    let mut surgeon = state
+        .surgeon
+        .write()
+        .map_err(|err| AuthError::State(format!("{err:?}")))?;
+
+    // get the surgeon in a query, or create a new surgeon
 
     // I had planned to put this in a store, but that likely gives client-side access that would
     // be a security risk. Defer this for now.
