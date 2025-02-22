@@ -2,6 +2,30 @@ use crate::{
     sia::Sia,
     surgeon::{Surgeon, SurgeonSia},
 };
+use axum::extract::State;
+use gel_tokio::Client;
+use std::sync::{Arc, RwLock};
+
+// what if we just:
+// get the id from the auth token
+// create a new surgeon with the id
+// check to see if that user already has an email
+// if they do, populate the `surgeon` in state and redirect to `add`
+// if they don't, redirect to the surgeon information form and collect their preferred email
+// along with all the other details
+pub async fn upsert_surgeon(
+    id: &str,
+    State(db): State<Arc<RwLock<Client>>>,
+) -> Result<Surgeon, gel_tokio::Error> {
+    // todo: create the upsert query, then call this in auth::
+    let query = format!("");
+
+    let db = Arc::clone(&db);
+    let client = db.read().unwrap();
+    let surgeon: Surgeon = client.query_required_single(query, &()).await?;
+
+    Ok(surgeon)
+}
 
 // todo: you probably want to create the Surgeon with only the email and identity, and then
 // after creating it, offer a form view to add the name, site, SIA.

@@ -1,4 +1,5 @@
 use crate::cyl::Cyl;
+#[cfg(feature = "ssr")] use gel_tokio::Queryable;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -14,6 +15,7 @@ pub enum SiaBoundsError {
 /// decided that the cognitive overhead of using both terms in the code is higher than the cognitive
 /// overhead of knowing when `axis` actually refers to a meridian.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Sia {
     pub power: i32,
     pub axis: i32,

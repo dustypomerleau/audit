@@ -4,14 +4,13 @@ use crate::{
     refraction::{OpRefraction, RefractionBoundsError},
     sca::ScaBoundsError,
     sia::{Sia, SiaBoundsError},
-    surgeon::Email,
     target::{Target, TargetBoundsError},
     va::{OpVa, VaBoundsError},
 };
 use chrono::NaiveDate;
 #[cfg(feature = "ssr")] use gel_derive::Queryable;
 use serde::{Deserialize, Serialize};
-use std::fmt::{Display, write};
+use std::fmt::Display;
 use thiserror::Error;
 
 /// A wrapper for any type of bounds error on numeric types.

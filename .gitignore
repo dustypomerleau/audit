@@ -16,4 +16,5 @@ pkg
 end2end/playwright-report/
 node_modules/
 playwright/.cache/
+scratch.edgeql
 test-results/

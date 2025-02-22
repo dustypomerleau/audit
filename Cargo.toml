@@ -35,6 +35,7 @@ tokio = { version = "1.43.0", features = ["macros", "rt-multi-thread"], optional
 tower = { version = "0.5.2", features = ["util"], optional = true }
 tower-http = { version = "0.6.2", features = ["fs"], optional = true }
 tracing = { version = "0.1.41", optional = true }
+uuid = { version = "1.14.0", features = ["serde"] }
 wasm-bindgen = "=0.2.100"
 
 [features]

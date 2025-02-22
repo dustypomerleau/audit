@@ -1,7 +1,5 @@
-// Allows using existing fields to change from MyType<Zst1> to MyType<Zst2> without
-// repeating all of them.
+#![feature(lock_value_accessors)]
 #![feature(type_changing_struct_update)]
-#![cfg_attr(debug_assertions, allow(unused))]
 
 //! The [`audit`](self) library provides tools for analyzing and plotting the results of cataract
 //! surgery. Powers that would typically be represented in diopters (1 m e-1) (refractions, IOLs,

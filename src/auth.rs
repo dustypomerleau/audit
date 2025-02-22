@@ -1,30 +1,24 @@
-use crate::{db, state::AppState, surgeon};
+use crate::{
+    state::{AppState, StatePoisonedError},
+    surgeon::Surgeon,
+};
 use axum::{
     extract::{Query, State},
     response::{IntoResponse, Redirect, Response},
 };
-use axum_extra::{
-    TypedHeader,
-    extract::{
-        CookieJar,
-        cookie::{Cookie, Expiration, SameSite},
-    },
+use axum_extra::extract::{
+    CookieJar,
+    cookie::{Cookie, SameSite},
 };
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
-use gel_protocol::common::State;
-use gel_tokio::{Client, create_client};
-use leptos::{config::LeptosOptions, prelude::expect_context};
-use rand::{Rng, random, rng};
+use gel_tokio::create_client;
+use rand::{Rng, rng};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
-use std::{
-    collections::HashMap,
-    env,
-    error::Error,
-    sync::{Arc, LazyLock, RwLock},
-};
+use std::{env, sync::LazyLock};
 use thiserror::Error;
+use uuid::Uuid;
 
 // note: new API for dotenvy will arrive in v16 release
 pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
@@ -38,8 +32,8 @@ pub enum AuthError {
     Json(String),
     #[error("did not receive a response from the token request: {0:?}")]
     Request(String),
-    #[error("unable to write the intended state: {0:?}")]
-    State(String),
+    #[error("unable to read or write the intended state: {0:?}")]
+    State(StatePoisonedError),
     #[error("unable to get the PKCE verifier from the cookie jar")]
     Verifier,
 }
@@ -56,7 +50,8 @@ impl IntoResponse for AuthError {
                     .into_response()
             }
             Self::State(err) => {
-                format!("Error: unable to write the intended state: {err:?}").into_response()
+                format!("Error: unable to read or write the intended state: {err:?}")
+                    .into_response()
             }
             Self::Verifier => {
                 "Error: unable to get the PKCE verifier from the cookie jar".into_response()
@@ -75,6 +70,23 @@ impl IntoResponse for AuthError {
 pub struct Pkce {
     verifier: String,
     challenge: String,
+}
+
+/// A PKCE authentication code returned by the OAuth provider via URL query string.
+#[derive(Debug, Deserialize)]
+pub struct PkceParams {
+    code: String,
+}
+
+/// A deserialization target for the JSON "edgedb-auth-token" cookie. Used primarily for holding
+/// the current surgeon's identity ID.
+#[allow(unused)]
+#[derive(Debug, Deserialize)]
+struct AuthToken {
+    auth_token: String,
+    identity_id: Uuid,
+    provider_token: String,
+    provider_refresh_token: Option<String>,
 }
 
 /// Generate a `verifier/challenge` pair for use in the authentication flow (see [`Pkce`] for
@@ -97,7 +109,7 @@ pub fn generate_pkce() -> Pkce {
 /// with the challenge, and set a cookie with the verifier, redirecting to the OAuth
 /// provider.
 #[debug_handler]
-pub async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), AuthError> {
+pub async fn handle_sign_in(jar: CookieJar) -> (CookieJar, Redirect) {
     let Pkce {
         challenge,
         verifier,
@@ -109,38 +121,23 @@ pub async fn handle_sign_in(jar: CookieJar) -> Result<(CookieJar, Redirect), Aut
         .expires(None)
         .http_only(true)
         .path("/")
-        // `Lax` is required to send the cookie to the auth URL
-        .same_site(SameSite::Lax)
+        .same_site(SameSite::Lax) // required to send the cookie to the auth URL
         .secure(true)
         .build();
 
     let jar = jar.add(cookie);
     let url = format!("{base_auth_url}/ui/signin?challenge={challenge}");
 
-    Ok((jar, Redirect::to(&url)))
-}
-
-/// A PKCE authentication code returned by the OAuth provider via URL query string.
-#[derive(Debug, Deserialize)]
-pub struct PkceParams {
-    code: String,
-}
-
-#[derive(Debug, Deserialize)]
-struct AuthToken {
-    auth_token: String,
-    identity_id: String,
-    provider_token: String,
-    provider_refresh_token: Option<String>,
+    (jar, Redirect::to(&url))
 }
 
 /// Step 2 of the auth flow: After returning from successful authentication with the OAuth
 /// provider, use the code provided in the URL query params, along with the verifier you previously
-/// stored in a cookie, to request a Gel auth token from the Gel Auth JSON API. Storing the auth
+/// stored in a cookie, to request an auth token from the Gel Auth JSON API. Storing the auth
 /// token as a cookie allows you to confirm the logged-in surgeon when accessing protected routes.
 #[debug_handler]
 pub async fn handle_pkce_code(
-    State(state): State<AppState>,
+    State(AppState { db, surgeon, .. }): State<AppState>,
     Query(PkceParams { code }): Query<PkceParams>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {
@@ -161,30 +158,16 @@ pub async fn handle_pkce_code(
         .await
         .map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
+    let auth_token: AuthToken =
+        serde_json::from_str(&json_token).map_err(|err| AuthError::Json(format!("{err:?}")))?;
+
     let db_with_globals = create_client()
         .await
         .expect("DB client to be initialized with globals")
-        .with_globals_fn(|c| c.set("ext::auth::client_token", json_token.to_owned()));
+        .with_globals_fn(|client| client.set("ext::auth::client_token", json_token.to_owned()));
 
-    let mut db = state
-        .db
-        .write()
-        .map_err(|err| AuthError::State(format!("{err:?}")))?;
-
-    // Update global state with the new DB client containing globals tied to the user's auth token:
-    *db = db_with_globals;
-
-    let mut surgeon = state
-        .surgeon
-        .write()
-        .map_err(|err| AuthError::State(format!("{err:?}")))?;
-
-    // get the surgeon in a query, or create a new surgeon
-
-    // I had planned to put this in a store, but that likely gives client-side access that would
-    // be a security risk. Defer this for now.
-    // let auth_token: AuthToken =
-    //     serde_json::from_str(&json_token).map_err(|err| AuthError::Json(format!("{err:?}")))?;
+    db.set(db_with_globals)
+        .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
 
     let cookie = Cookie::build(("edgedb-auth-token", json_token))
         .expires(None)
@@ -196,7 +179,52 @@ pub async fn handle_pkce_code(
 
     let jar = jar.add(cookie);
 
-    Ok((jar, Redirect::to("/add")))
+    let client = db
+        .get_cloned()
+        .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
+
+    let query = format!("select Surgeon filter .id = {};", auth_token.identity_id);
+
+    // If the `identity_id` of the `edgedb-auth-token` cookie matches the `id` of an existing
+    // `Surgeon` in the database, set that as the current surgeon in global state, and redirect
+    // to the form for adding a new `Case`. If there is no match, redirect to the sign up form,
+    // and create a new `Surgeon` in the database when that form is submitted.
+    if let Ok(query_surgeon) = client.query_required_single::<Surgeon, _>(query, &()).await {
+        surgeon
+            .clone()
+            .set(Some(query_surgeon))
+            .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
+
+        Ok((jar, Redirect::to("/add")))
+    } else {
+        Ok((jar, Redirect::to("/signup")))
+    }
+}
+
+/// This function is called when the current surgeon logs out, removing the auth token from the
+/// database client, deleting the auth token cookie, and removing the current
+/// [`Surgeon`](crate::surgeon::Surgeon) from global state.
+#[debug_handler]
+pub async fn handle_kill_session(
+    State(AppState { db, surgeon, .. }): State<AppState>,
+    jar: CookieJar,
+) -> Result<(CookieJar, Redirect), AuthError> {
+    // A dummy DB client, so that we can replace the `gel_tokio::Client` that contains
+    // surgeon-specific globals
+    let client = gel_tokio::create_client()
+        .await
+        .expect("expected DB client to be created");
+
+    db.set(client)
+        .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
+
+    surgeon
+        .set(None)
+        .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
+
+    let jar = jar.remove(Cookie::from("edgedb-auth-token"));
+
+    Ok((jar, Redirect::to("/")))
 }
 
 #[cfg(test)]

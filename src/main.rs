@@ -2,7 +2,7 @@
 #[tokio::main]
 async fn main() {
     use audit::{
-        auth::{handle_pkce_code, handle_sign_in},
+        auth::{handle_kill_session, handle_pkce_code, handle_sign_in},
         routes::{App, shell},
         state::AppState,
     };
@@ -35,6 +35,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/code", get(handle_pkce_code))
+        .route("/killsession", get(handle_kill_session))
         .route("/signin", get(handle_sign_in))
         .leptos_routes(&app_state, routes, {
             let leptos_options = leptos_options.clone();

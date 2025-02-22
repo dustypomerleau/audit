@@ -142,7 +142,7 @@ impl RawSca {
 }
 
 mod tests {
-    use super::*;
+    // use super::*;
 
     // todo: unit test RawSca creation, and possibly other methods.
 }

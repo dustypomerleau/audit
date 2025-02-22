@@ -1,18 +1,13 @@
-use crate::{
-    routes::{Add, List, Register, Report, SignIn},
-    surgeon::Surgeon,
-};
+use crate::routes::{Add, List, Register, Report, SignIn, SignUp};
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
-    component, expect_context, provide_context, signal, view,
+    component, view,
 };
 use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
 use leptos_router::{
     StaticSegment,
     components::{Route, Router, Routes},
 };
-use reactive_stores::Store;
-use serde_json::from_str;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {
@@ -54,6 +49,7 @@ pub fn App() -> impl IntoView {
                     <Route path=StaticSegment("list") view=List />
                     <Route path=StaticSegment("register") view=Register />
                     <Route path=StaticSegment("report") view=Report />
+                    <Route path=StaticSegment("signup") view=SignUp />
                 </Routes>
             </main>
         </Router>
