@@ -172,7 +172,8 @@ pub async fn handle_pkce_code(
     // Update global state with the new DB client containing globals tied to the user's auth token:
     *db = db_with_globals;
 
-    // // put this in a store
+    // I had planned to put this in a store, but that likely gives client-side access that would
+    // be a security risk. Defer this for now.
     // let auth_token: AuthToken =
     //     serde_json::from_str(&json_token).map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
