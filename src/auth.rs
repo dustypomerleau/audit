@@ -147,7 +147,7 @@ pub async fn handle_pkce_code(
     let base_auth_url = &*BASE_AUTH_URL;
 
     let verifier = if let Some(verifier) = jar.get("edgedb-pkce-verifier") {
-        verifier.value_trimmed()
+        verifier.value()
     } else {
         return Err(AuthError::Verifier);
     };
