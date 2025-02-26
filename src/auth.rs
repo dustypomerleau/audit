@@ -163,7 +163,7 @@ pub async fn handle_pkce_code(
 
     let db_with_globals = create_client()
         .await
-        .expect("DB client to be initialized with globals")
+        .expect("DB client to be initialized before adding globals")
         .with_globals_fn(|client| client.set("ext::auth::client_token", json_token.to_owned()));
 
     db.set(db_with_globals)
