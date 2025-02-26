@@ -60,6 +60,12 @@ impl IntoResponse for AuthError {
     }
 }
 
+impl From<StatePoisonedError> for AuthError {
+    fn from(err: StatePoisonedError) -> Self {
+        Self::State(err)
+    }
+}
+
 /// Holds the verifier/challenge pair that is used during site authentication. The challenge is
 /// passed via the URL, and the verifier is stored in an HTTP-only cookie for access after the
 /// authentication flow is completed. Successful authentication returns a `code` param in the URL.
@@ -172,7 +178,7 @@ pub async fn handle_pkce_code(
         .expect("DB client with globals to connect");
 
     db.set(db_with_globals)
-        .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
+        .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
     let cookie = Cookie::build(("edgedb-auth-token", json_token))
         .expires(None)
@@ -187,7 +193,7 @@ pub async fn handle_pkce_code(
 
     let client = db
         .get_cloned()
-        .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
+        .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
     let query = format!("select Surgeon filter .id = {};", auth_token.identity_id);
 
@@ -199,7 +205,7 @@ pub async fn handle_pkce_code(
         surgeon
             .clone()
             .set(Some(query_surgeon))
-            .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
+            .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
         Ok((jar, Redirect::to("/add")))
     } else {
@@ -222,11 +228,11 @@ pub async fn handle_kill_session(
         .expect("expected DB client to be created");
 
     db.set(client)
-        .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
+        .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
     surgeon
         .set(None)
-        .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
+        .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
     let jar = jar.remove(Cookie::from("edgedb-auth-token"));
 
