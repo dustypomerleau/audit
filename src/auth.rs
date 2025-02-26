@@ -177,7 +177,8 @@ pub async fn handle_pkce_code(
         .secure(true)
         .build();
 
-    let jar = jar.add(cookie);
+    // Add the new auth token cookie, and remove the verifier, which is no longer needed.
+    let jar = jar.add(cookie).remove(Cookie::from("edgedb-pkce-verifier"));
 
     let client = db
         .get_cloned()
