@@ -23,7 +23,7 @@ async fn main() {
 
     let db_client = gel_tokio::create_client()
         .await
-        .expect("expected the DB client to be initialized");
+        .expect("the DB client to be initialized");
 
     let db = Arc::new(RwLock::new(db_client));
 
