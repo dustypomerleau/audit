@@ -166,6 +166,11 @@ pub async fn handle_pkce_code(
         .expect("DB client to be initialized before adding globals")
         .with_globals_fn(|client| client.set("ext::auth::client_token", json_token.to_owned()));
 
+    db_with_globals
+        .ensure_connected()
+        .await
+        .expect("DB client with globals to connect");
+
     db.set(db_with_globals)
         .map_err(|err| AuthError::State(StatePoisonedError(format!("{err:?}"))))?;
 
