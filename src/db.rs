@@ -1,27 +1,42 @@
 use crate::{
     sia::Sia,
+    state::StatePoisonedError,
     surgeon::{Surgeon, SurgeonSia},
 };
 use axum::extract::State;
 use gel_tokio::Client;
 use std::sync::{Arc, RwLock};
+use thiserror::Error;
 
-// what if we just:
-// get the id from the auth token
-// create a new surgeon with the id
-// check to see if that user already has an email
-// if they do, populate the `surgeon` in state and redirect to `add`
-// if they don't, redirect to the surgeon information form and collect their preferred email
-// along with all the other details
+#[derive(Debug, Error)]
+pub enum DbError {
+    #[error("Gel error: {0:?}")]
+    Gel(gel_tokio::Error),
+    #[error("The DB operation couldn't be completed due to poisoned state: {0:?}")]
+    State(StatePoisonedError),
+}
+
+impl From<gel_tokio::Error> for DbError {
+    fn from(err: gel_tokio::Error) -> Self {
+        Self::Gel(err)
+    }
+}
+
+impl From<StatePoisonedError> for DbError {
+    fn from(err: StatePoisonedError) -> Self {
+        Self::State(err)
+    }
+}
+
 pub async fn upsert_surgeon(
     id: &str,
     State(db): State<Arc<RwLock<Client>>>,
-) -> Result<Surgeon, gel_tokio::Error> {
-    // todo: create the upsert query, then call this in auth::
-    let query = format!("");
+) -> Result<Surgeon, DbError> {
+    let client = db
+        .get_cloned()
+        .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
-    let db = Arc::clone(&db);
-    let client = db.read().unwrap();
+    let query = format!("");
     let surgeon: Surgeon = client.query_required_single(query, &()).await?;
 
     Ok(surgeon)

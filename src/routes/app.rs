@@ -1,4 +1,4 @@
-use crate::routes::{Add, List, Register, Report, SignIn, SignUp};
+use crate::routes::{Add, Landing, List, Register, Report, SignIn, SignUp, Terms};
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
     component, view,
@@ -44,12 +44,13 @@ pub fn App() -> impl IntoView {
                 // note: plain Axum server routes are not represented here,
                 // as they are added directly to the router in `src/main.rs`
                 <Routes fallback=|| "Page not found.".into_view()>
-                    <Route path=StaticSegment("") view=SignIn />
+                    <Route path=StaticSegment("") view=Landing />
+                    <Route path=StaticSegment("signin") view=SignIn />
                     <Route path=StaticSegment("add") view=Add />
                     <Route path=StaticSegment("list") view=List />
-                    <Route path=StaticSegment("register") view=Register />
                     <Route path=StaticSegment("report") view=Report />
                     <Route path=StaticSegment("signup") view=SignUp />
+                    <Route path=StaticSegment("terms") view=Terms />
                 </Routes>
             </main>
         </Router>
