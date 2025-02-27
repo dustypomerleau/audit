@@ -195,7 +195,10 @@ pub async fn handle_pkce_code(
         .get_cloned()
         .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
-    let query = format!("select Surgeon filter .id = {};", auth_token.identity_id);
+    let query = format!(
+        "select Surgeon filter .identity = {};",
+        auth_token.identity_id
+    );
 
     // If the `identity_id` of the `edgedb-auth-token` cookie matches the `id` of an existing
     // `Surgeon` in the database, set that as the current surgeon in global state, and redirect
