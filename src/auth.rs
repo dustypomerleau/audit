@@ -212,7 +212,7 @@ pub async fn handle_pkce_code(
 
         Ok((jar, Redirect::to("/add")))
     } else {
-        Ok((jar, Redirect::to("/signup")))
+        Ok((jar, Redirect::to("/terms")))
     }
 }
 
