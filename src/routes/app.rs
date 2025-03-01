@@ -1,4 +1,4 @@
-use crate::routes::{Add, Landing, List, Register, Report, SignIn, SignUp, Terms};
+use crate::routes::{Add, Landing, List, Report, SignIn, SignUp, Terms};
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
     component, view,
