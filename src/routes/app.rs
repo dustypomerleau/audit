@@ -1,4 +1,4 @@
-use crate::routes::{Add, Landing, List, Report, SignIn, SignUp, Terms};
+use crate::routes::{Add, Landing, List, Protected, Report, SignIn, SignUp, Terms};
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
     component, view,
@@ -51,6 +51,11 @@ pub fn App() -> impl IntoView {
                     <Route path=StaticSegment("report") view=Report />
                     <Route path=StaticSegment("signup") view=SignUp />
                     <Route path=StaticSegment("terms") view=Terms />
+                    <ParentRoute path={StaticSegment("protected")} view={Protected}>
+                        <Route path={StaticSegment("add")} view={Add} />
+                        <Route path={StaticSegment("list")} view={List} />
+                        <Route path={StaticSegment("report")} view={Report} />
+                    </ParentRoute>
                 </Routes>
             </main>
         </Router>
