@@ -1,12 +1,11 @@
 use crate::sia::Sia;
 use garde::Validate;
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
-use leptos::prelude::{ServerFnError, expect_context, server};
+#[cfg(feature = "ssr")] use leptos::prelude::expect_context;
+use leptos::prelude::{ServerFnError, server};
 use serde::{Deserialize, Serialize};
-use std::{
-    fmt::Display,
-    sync::{Arc, RwLock},
-};
+use std::fmt::Display;
+#[cfg(feature = "ssr")] use std::sync::{Arc, RwLock};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
