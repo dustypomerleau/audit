@@ -49,6 +49,7 @@ pub fn App() -> impl IntoView {
                         <Route path={StaticSegment("add")} view={Add} />
                         <Route path={StaticSegment("list")} view={List} />
                         <Route path={StaticSegment("report")} view={Report} />
+                        // <Route path=StaticSegment("") view=Fallback />
                     </ParentRoute>
                     <Route path={StaticSegment("signup")} view={SignUp} />
                     <Route path={StaticSegment("terms")} view={Terms} />
