@@ -44,6 +44,9 @@ pub struct SurgeonSia {
     pub left: Sia,
 }
 
+// todo: we need to add `terms`, do we need to account for all fields (meaning also include
+// auth identity)? If so, we may need to move back to the idea of using DbSurgeon, as we don't
+// want to pass the identity Uuid over the wire.
 /// A unique surgeon
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "ssr", derive(Queryable))]
