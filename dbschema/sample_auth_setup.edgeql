@@ -1,22 +1,22 @@
 # This file is basically everything in `auth_setup.edgeql` with the exception of secrets.
+# 
 # To run the setup script, pipe it into gel:
-# `cat my_script.gel | gel`
+# `cat my_script.edgeql | gel`
 
 # 14 days allowed session time
 configure current branch set
 ext::auth::AuthConfig::token_time_to_live := <duration>"336 hours";
 
-# todo: change these to the actual values you'll put into:
-# `gel ui` > Auth > Providers > Login UI > redirect_to
 # note: the value of redirect_to in the Auth UI is the address in your application
 # where you want to end up after auth is complete.
-# The redirect for the callback function within the auth flow has to be set in the GCP console.
+# 
+# The redirect for the callback function _within_ the auth flow has to be set in the GCP console.
 configure current branch set
 ext::auth::AuthConfig::allowed_redirect_urls := {
-    "https://audit.viceye.au",
-    "https://localhost:3000",
     "http://localhost:3000",
-    "http://localhost:3000/code"
+    "http://localhost:3000/code",
+    "https://audit.viceye.au",
+    "https://audit.viceye.au/code",
 };
 
 configure current branch set
@@ -32,7 +32,8 @@ insert ext::auth::GoogleOAuthProvider {
 };
 
 # After running this script, you still need to generate an auth signing key.
-# Run `gel ui`, go to > Auth > signing key, and refresh it.
+# Run `gel ui`, go to > Auth > Config > Auth signing key, and refresh it.
+# 
 # To set it to a specific value, you can use a command like:
 # 
 # CONFIGURE CURRENT BRANCH SET
@@ -41,6 +42,8 @@ insert ext::auth::GoogleOAuthProvider {
 # but it's much easier to let Gel generate this.
 
 # You will also need to enable the built-in UI at:
-# > Auth > Providers > Enable UI
+# > Auth > Providers/UI > Built-in Login UI
 # and set the redirect URLs.
 # Full URLs are needed, including protocol, as you are basically coming from another site before the redirect.
+# "http://localhost:3000/code" in dev
+# "https://audit.viceye.au/code" in prod

@@ -12,12 +12,8 @@ windows:
       - cargo leptos watch
   - window_name: db
     panes:
-      - edgedb
+      - gel
   - window_name: leptos
     shell_command_before: cd ../er/leptos
     panes:
       - nvim leptos/src/lib.rs
-  - window_name: axum-extra
-    shell_command_before: cd ../er/axum
-    panes:
-      - nvim axum-extra/src/lib.rs
