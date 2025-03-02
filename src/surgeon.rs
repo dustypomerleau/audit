@@ -1,10 +1,7 @@
 use crate::sia::Sia;
 use garde::Validate;
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
-use leptos::{
-    prelude::{ServerFnError, expect_context},
-    server,
-};
+use leptos::prelude::{ServerFnError, expect_context, server};
 use serde::{Deserialize, Serialize};
 use std::{
     fmt::Display,

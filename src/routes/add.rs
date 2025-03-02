@@ -1,4 +1,4 @@
-use leptos::{IntoView, component, html::ElementChild, view};
+use leptos::prelude::{ElementChild, IntoView, component, view};
 
 #[component]
 pub fn Add() -> impl IntoView {

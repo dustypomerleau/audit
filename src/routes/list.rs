@@ -1,4 +1,4 @@
-use leptos::{component, view, IntoView};
+use leptos::prelude::{IntoView, component, view};
 
 #[component]
 pub fn List() -> impl IntoView {

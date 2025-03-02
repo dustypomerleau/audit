@@ -1,7 +1,7 @@
 use crate::surgeon::Surgeon;
 use axum_macros::FromRef;
 use gel_tokio::Client;
-use leptos::config::LeptosOptions;
+use leptos::prelude::LeptosOptions;
 use std::sync::{Arc, RwLock};
 use thiserror::Error;
 
