@@ -4,8 +4,8 @@ mod app;
 mod landing;
 mod list;
 mod protected;
+mod register;
 mod report;
-mod sign_in;
 mod sign_up;
 mod terms;
 
@@ -15,7 +15,7 @@ pub use app::*;
 pub use landing::*;
 pub use list::*;
 pub use protected::*;
+pub use register::*;
 pub use report::*;
-pub use sign_in::*;
 pub use sign_up::*;
 pub use terms::*;

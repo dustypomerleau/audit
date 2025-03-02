@@ -1,7 +1,7 @@
 use leptos::prelude::{ElementChild, IntoView, StyleAttribute, component, view};
 
 #[component]
-pub fn SignIn() -> impl IntoView {
+pub fn Register() -> impl IntoView {
     view! {
         <div style={"flex"}>
             <a href={"/signin"} rel={"external"}>
