@@ -6,7 +6,7 @@
 # Available options:
 # https://github.com/bram209/leptosfmt/blob/main/docs/configuration.md
 
-attr_value_brace_style = "Always"
+attr_value_brace_style = "WhenRequired"
 indentation_style = "Spaces"
 macro_names = ["leptos::view", "view"]
 max_width = 100
