@@ -165,6 +165,7 @@ global cur_surgeon := (assert_single(
     type Surgeon extending SoftCreate {
         required identity: ext::auth::Identity;
         required email: EmailType { constraint exclusive; }
+        required terms: bool { default := false; }
         first_name: str;
         last_name: str;
         sia: SurgeonSia;
