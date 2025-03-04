@@ -85,7 +85,7 @@ mod tests {
     fn sample_surgeon() -> Surgeon {
         Surgeon {
             email: Email::new("email@email.com").unwrap().0,
-            terms: Utc.with_ymd_and_hms(2024, 05, 15, 20, 30, 40),
+            terms: Some(Utc.with_ymd_and_hms(2024, 5, 15, 20, 30, 40).unwrap()),
             first_name: Some("john".to_string()),
             last_name: Some("smith".to_string()),
             default_site: Some("Royal Melbourne Hospital".to_string()),
