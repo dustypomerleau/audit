@@ -49,6 +49,7 @@ pub async fn upsert_surgeon(
 pub async fn insert_surgeon(
     Surgeon {
         email,
+        terms,
         first_name,
         last_name,
         default_site,
