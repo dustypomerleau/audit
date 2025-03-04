@@ -1,12 +1,13 @@
-use crate::sia::Sia;
+use crate::{sia::Sia, state::StatePoisonedError};
 use chrono::{DateTime, Utc};
 use garde::Validate;
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
-#[cfg(feature = "ssr")] use leptos::prelude::expect_context;
-use leptos::prelude::{ServerFnError, server};
+use leptos::prelude::expect_context;
 use serde::{Deserialize, Serialize};
-use std::fmt::Display;
-#[cfg(feature = "ssr")] use std::sync::{Arc, RwLock};
+use std::{
+    fmt::Display,
+    sync::{Arc, RwLock},
+};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -62,15 +63,15 @@ pub struct Surgeon {
     pub sia: Option<SurgeonSia>,
 }
 
-#[server]
-pub async fn get_current_surgeon() -> Result<Option<Surgeon>, ServerFnError> {
+/// Return the current [`Surgeon`] from global context.
+pub async fn get_current_surgeon() -> Result<Option<Surgeon>, StatePoisonedError> {
     let surgeon = expect_context::<Arc<RwLock<Option<Surgeon>>>>().get_cloned()?;
     Ok(surgeon)
 }
 
-// using `Option<Surgeon>` as the arg allows clearing the value by setting `None`
-#[server]
-pub async fn set_current_surgeon(surgeon: Option<Surgeon>) -> Result<(), ServerFnError> {
+/// Set the value of the current [`Surgeon`] in global context. using `Option<Surgeon>` as the
+/// input parameter allows clearing the value by setting [`None`].
+pub async fn set_current_surgeon(surgeon: Option<Surgeon>) -> Result<(), StatePoisonedError> {
     expect_context::<Arc<RwLock<Option<Surgeon>>>>().set(surgeon)?;
     Ok(())
 }
