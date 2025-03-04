@@ -1,4 +1,5 @@
 use crate::sia::Sia;
+use chrono::{DateTime, Utc};
 use garde::Validate;
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
 #[cfg(feature = "ssr")] use leptos::prelude::expect_context;
@@ -51,8 +52,10 @@ pub struct SurgeonSia {
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Surgeon {
-    /// A unique, valid email.
+    /// A unique, valid email. See notes on [`Email`] to understand why we use a plain [`String`]
+    /// value here.
     pub email: String,
+    pub terms: Option<DateTime<Utc>>,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub default_site: Option<String>,
@@ -76,10 +79,12 @@ pub async fn set_current_surgeon(surgeon: Option<Surgeon>) -> Result<(), ServerF
 #[cfg(feature = "ssr")]
 mod tests {
     use super::*;
+    use chrono::TimeZone;
 
     fn sample_surgeon() -> Surgeon {
         Surgeon {
             email: Email::new("email@email.com").unwrap().0,
+            terms: Utc.with_ymd_and_hms(2024, 05, 15, 20, 30, 40),
             first_name: Some("john".to_string()),
             last_name: Some("smith".to_string()),
             default_site: Some("Royal Melbourne Hospital".to_string()),
