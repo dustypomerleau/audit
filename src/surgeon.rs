@@ -1,13 +1,14 @@
-use crate::{sia::Sia, state::StatePoisonedError};
+use crate::sia::Sia;
+#[cfg(feature = "ssr")] use crate::state::AppState;
 use chrono::{DateTime, Utc};
 use garde::Validate;
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
-use leptos::prelude::expect_context;
-use serde::{Deserialize, Serialize};
-use std::{
-    fmt::Display,
-    sync::{Arc, RwLock},
+use leptos::{
+    prelude::{ServerFnError, expect_context},
+    server,
 };
+use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -63,31 +64,35 @@ pub struct Surgeon {
     pub sia: Option<SurgeonSia>,
 }
 
-/// Return the current [`Surgeon`] from global context.
-pub async fn get_current_surgeon() -> Result<Option<Surgeon>, StatePoisonedError> {
-    let surgeon = expect_context::<Arc<RwLock<Option<Surgeon>>>>().get_cloned()?;
+/// Return the current [`Surgeon`] from global server context.
+#[server]
+pub async fn get_current_surgeon() -> Result<Option<Surgeon>, ServerFnError> {
+    let surgeon = expect_context::<AppState>().surgeon.get_cloned()?;
     Ok(surgeon)
 }
 
-/// Set the value of the current [`Surgeon`] in global context. using `Option<Surgeon>` as the
-/// input parameter allows clearing the value by setting [`None`].
-pub async fn set_current_surgeon(surgeon: Option<Surgeon>) -> Result<(), StatePoisonedError> {
-    expect_context::<Arc<RwLock<Option<Surgeon>>>>().set(surgeon)?;
+/// Set the value of the current [`Surgeon`] in global server context. using `Option<Surgeon>` as
+/// the input parameter allows clearing the value by setting [`None`].
+#[server]
+pub async fn set_current_surgeon(surgeon: Option<Surgeon>) -> Result<(), ServerFnError> {
+    expect_context::<AppState>().surgeon.set(surgeon)?;
     Ok(())
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::TimeZone;
+    // use chrono::TimeZone;
 
     fn sample_surgeon() -> Surgeon {
         Surgeon {
             email: Email::new("email@email.com").unwrap().0,
-            terms: Some(Utc.with_ymd_and_hms(2024, 5, 15, 20, 30, 40).unwrap()),
-            first_name: Some("john".to_string()),
-            last_name: Some("smith".to_string()),
-            default_site: Some("Royal Melbourne Hospital".to_string()),
+            // terms: Some(Utc.with_ymd_and_hms(2024, 5, 15, 20, 30, 40).unwrap()),
+            terms: None,
+            first_name: Some("sample_first_name".to_string()),
+            last_name: Some("sample_last_name".to_string()),
+            default_site: Some("sample_default_site".to_string()),
+
             sia: Some(SurgeonSia {
                 right: Sia {
                     power: 10,
@@ -100,7 +105,4 @@ mod tests {
             }),
         }
     }
-
-    #[tokio::test]
-    async fn inserts_surgeon() {}
 }

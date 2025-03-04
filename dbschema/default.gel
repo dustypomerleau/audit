@@ -9,6 +9,10 @@ module default {
 
 ### globals
 
+# todo: this global is a link to a Surgeon, not an ext::auth::Identity
+# and the global you set on your client in auth.rs is ext::auth::client_token (the JSON token), not the Surgeon or the ClientTokenIdentity
+# However, I suspect that the global ClientTokenIdentity is just a link to a particular ext::auth::Identity
+# It isn't possible to directly set this value, as it's computed, but assume that it matches the ext::auth::Identity that is the same as the identity on the JSON token you attached to the client
 global cur_surgeon := (assert_single(
     (select Surgeon filter .identity = global ext::auth::ClientTokenIdentity)
 ));
@@ -163,13 +167,14 @@ global cur_surgeon := (assert_single(
     }
 
     type Surgeon extending SoftCreate {
+        # should this be exclusive?
         required identity: ext::auth::Identity;
         required email: EmailType { constraint exclusive; }
         terms: datetime; # the date terms were agreed by the surgeon
         first_name: str;
         last_name: str;
-        sia: SurgeonSia;
         default_site: Site;
+        sia: SurgeonSia;
         cases := .<surgeon[is SurgeonCas];
         constants := .<surgeon[is SurgeonConstant];
     }

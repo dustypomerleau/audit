@@ -13,6 +13,7 @@ use axum_extra::extract::{
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
 use gel_tokio::create_client;
+use leptos::prelude::ServerFnError;
 use rand::{Rng, rng};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};
@@ -34,6 +35,8 @@ pub enum AuthError {
     Request(String),
     #[error("unable to read or write the intended state: {0:?}")]
     State(StatePoisonedError),
+    #[error("the auth token cookie is not present")]
+    Token,
     #[error("unable to get the PKCE verifier from the cookie jar")]
     Verifier,
 }
@@ -53,6 +56,7 @@ impl IntoResponse for AuthError {
                 format!("Error: unable to read or write the intended state: {err:?}")
                     .into_response()
             }
+            Self::Token => "Error: the auth token cookie is not present".into_response(),
             Self::Verifier => {
                 "Error: unable to get the PKCE verifier from the cookie jar".into_response()
             }
@@ -88,11 +92,11 @@ pub struct PkceParams {
 /// the current surgeon's identity ID.
 #[allow(unused)]
 #[derive(Debug, Deserialize)]
-struct AuthToken {
-    auth_token: String,
-    identity_id: Uuid,
-    provider_token: String,
-    provider_refresh_token: Option<String>,
+pub struct AuthToken {
+    pub auth_token: String,
+    pub identity_id: Uuid,
+    pub provider_token: String,
+    pub provider_refresh_token: Option<String>,
 }
 
 /// Generate a `verifier/challenge` pair for use in the authentication flow (see [`Pkce`] for
