@@ -77,7 +77,6 @@ pub async fn set_current_surgeon(surgeon: Option<Surgeon>) -> Result<(), StatePo
 }
 
 #[cfg(test)]
-#[cfg(feature = "ssr")]
 mod tests {
     use super::*;
     use chrono::TimeZone;
