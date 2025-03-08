@@ -12,13 +12,13 @@ axum = { version = "0.7.9", optional = true }
 axum-extra = { version = "0.9.6", features = ["cookie", "typed-header"], optional = true }
 axum-macros = { version = "0.5.0", optional = true }
 base64ct = { version = "1.6.0", features = ["alloc"], optional = true }
-chrono = { version = "0.4.39", features = ["serde"] }
+chrono = { version = "0.4.40", features = ["serde"] }
 console_error_panic_hook = "0.1.7"
 dotenvy = "0.15.7"
 garde = { version = "0.22.0", features = ["derive", "email"] }
 gel-derive = { version = "0.7.0", optional = true }
 gel-protocol = { version = "0.8.0", features = ["chrono"], optional = true }
-gel-tokio = { version = "0.9.3", optional = true }
+gel-tokio = { version = "0.9.6", optional = true }
 http = "1.2.0"
 leptos = { version = "0.7.7", features = ["nightly"] }
 leptos_axum = { version = "0.7.7", optional = true }
@@ -28,14 +28,14 @@ rand = { version = "0.9.0", optional = true }
 reactive_stores = "0.1.7"
 reqwest = { version = "0.12.12", features = ["blocking", "json"] }
 serde = { version = "1.0.218", features = ["derive"] }
-serde_json = "1.0.139"
+serde_json = "1.0.140"
 sha2 = { version = "0.10.8", default-features = false, optional = true }
-thiserror = "2.0.11"
-tokio = { version = "1.43.0", features = ["macros", "rt-multi-thread"], optional = true }
+thiserror = "2.0.12"
+tokio = { version = "1.44.0", features = ["macros", "rt-multi-thread"], optional = true }
 tower = { version = "0.5.2", features = ["util"], optional = true }
 tower-http = { version = "0.6.2", features = ["fs"], optional = true }
 tracing = { version = "0.1.41", optional = true }
-uuid = { version = "1.14.0", features = ["serde"] }
+uuid = { version = "1.15.1", features = ["serde"] }
 wasm-bindgen = "=0.2.100"
 
 [features]
