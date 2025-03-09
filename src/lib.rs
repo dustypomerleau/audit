@@ -16,6 +16,7 @@ pub mod case;
 pub mod components;
 pub mod cyl;
 #[cfg(feature = "ssr")] pub mod db;
+pub mod email;
 pub mod iol;
 pub mod plots;
 pub mod refraction;
