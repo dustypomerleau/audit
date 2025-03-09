@@ -88,7 +88,7 @@ pub struct PkceParams {
     code: String,
 }
 
-/// A deserialization target for the JSON "edgedb-auth-token" cookie. Used primarily for holding
+/// A deserialization target for the JSON "gel-auth-token" cookie. Used primarily for holding
 /// the current surgeon's identity ID.
 #[allow(unused)]
 #[derive(Debug, Deserialize)]
@@ -127,7 +127,7 @@ pub async fn handle_sign_in(jar: CookieJar) -> (CookieJar, Redirect) {
 
     let base_auth_url = &*BASE_AUTH_URL;
 
-    let cookie = Cookie::build(("edgedb-pkce-verifier", verifier))
+    let cookie = Cookie::build(("gel-pkce-verifier", verifier))
         .expires(None)
         .http_only(true)
         .path("/")
@@ -153,7 +153,7 @@ pub async fn handle_pkce_code(
 ) -> Result<(CookieJar, Redirect), AuthError> {
     let base_auth_url = &*BASE_AUTH_URL;
 
-    let verifier = if let Some(verifier) = jar.get("edgedb-pkce-verifier") {
+    let verifier = if let Some(verifier) = jar.get("gel-pkce-verifier") {
         verifier.value()
     } else {
         return Err(AuthError::Verifier);
@@ -184,7 +184,7 @@ pub async fn handle_pkce_code(
     db.set(db_with_globals)
         .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
-    let cookie = Cookie::build(("edgedb-auth-token", json_token))
+    let cookie = Cookie::build(("gel-auth-token", json_token))
         .expires(None)
         .http_only(true)
         .path("/")
@@ -193,7 +193,7 @@ pub async fn handle_pkce_code(
         .build();
 
     // Add the new auth token cookie, and remove the verifier, which is no longer needed.
-    let jar = jar.add(cookie).remove(Cookie::from("edgedb-pkce-verifier"));
+    let jar = jar.add(cookie).remove(Cookie::from("gel-pkce-verifier"));
 
     let client = db
         .get_cloned()
@@ -204,7 +204,7 @@ pub async fn handle_pkce_code(
         auth_token.identity_id
     );
 
-    // If the `identity_id` of the `edgedb-auth-token` cookie matches the `id` of an existing
+    // If the `identity_id` of the `gel-auth-token` cookie matches the `id` of an existing
     // `Surgeon` in the database, set that as the current surgeon in global state, and redirect
     // to the form for adding a new `Case`. If there is no match, redirect to the sign up form,
     // and create a new `Surgeon` in the database when that form is submitted.
@@ -241,7 +241,7 @@ pub async fn handle_kill_session(
         .set(None)
         .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
-    let jar = jar.remove(Cookie::from("edgedb-auth-token"));
+    let jar = jar.remove(Cookie::from("gel-auth-token"));
 
     Ok((jar, Redirect::to("/")))
 }

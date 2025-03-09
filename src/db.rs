@@ -75,7 +75,7 @@ pub async fn insert_surgeon(surgeon: Surgeon) -> Result<Uuid, ServerFnError> {
         .0
         .read()
         .headers
-        .get("edgedb-auth-token")
+        .get("gel-auth-token")
     {
         let auth_token: AuthToken = serde_json::from_str(header.to_str()?)?;
         &auth_token.identity_id.to_string()
