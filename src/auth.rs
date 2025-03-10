@@ -13,7 +13,6 @@ use axum_extra::extract::{
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
 use gel_tokio::create_client;
-use leptos::prelude::ServerFnError;
 use rand::{Rng, rng};
 use serde::Deserialize;
 use sha2::{Digest, Sha256};

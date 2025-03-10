@@ -1,5 +1,8 @@
-use crate::sia::Sia;
 #[cfg(feature = "ssr")] use crate::state::AppState;
+use crate::{
+    cyl::FormCyl,
+    sia::{Sia, SiaBoundsError},
+};
 use chrono::{DateTime, Utc};
 use garde::Validate;
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
@@ -37,6 +40,26 @@ impl Email {
             Err(e) => Err(EmailValidationError(e)),
         }
     }
+
+    pub fn inner(self) -> String {
+        self.0
+    }
+}
+
+/// An error type representing an invalid [`Surgeon`], typically as a result of invalid form input.
+#[derive(Debug, Error)]
+pub enum SurgeonError {
+    #[error("invalid email")]
+    Email(EmailValidationError),
+    #[error("invalid SIA")]
+    Sia(SiaBoundsError),
+}
+
+/// A proto-[`Sia`] representing the surgeon's form input at sign-up.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct FormSurgeonSia {
+    pub right: FormCyl,
+    pub left: FormCyl,
 }
 
 /// A surgeon's default [`Sia`] for right and left eyes
@@ -47,9 +70,29 @@ pub struct SurgeonSia {
     pub left: Sia,
 }
 
-// todo: we need to add `terms`, do we need to account for all fields (meaning also include
-// auth identity)? If so, we may need to move back to the idea of using DbSurgeon, as we don't
-// want to pass the identity Uuid over the wire.
+impl TryFrom<FormSurgeonSia> for SurgeonSia {
+    type Error = SiaBoundsError;
+
+    fn try_from(FormSurgeonSia { right, left }: FormSurgeonSia) -> Result<Self, Self::Error> {
+        let sia = SurgeonSia {
+            right: Sia::new(right.into())?,
+            left: Sia::new(left.into())?,
+        };
+
+        Ok(sia)
+    }
+}
+
+/// A proto-[`Surgeon`] representing the surgeon's form input at sign-up.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct FormSurgeon {
+    pub email: String,
+    pub first_name: Option<String>,
+    pub last_name: Option<String>,
+    pub default_site: Option<String>,
+    pub sia: Option<FormSurgeonSia>,
+}
+
 /// A unique surgeon
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "ssr", derive(Queryable))]
@@ -62,6 +105,39 @@ pub struct Surgeon {
     pub last_name: Option<String>,
     pub default_site: Option<String>,
     pub sia: Option<SurgeonSia>,
+}
+
+impl TryFrom<FormSurgeon> for Surgeon {
+    type Error = SurgeonError;
+
+    fn try_from(
+        FormSurgeon {
+            email,
+            first_name,
+            last_name,
+            default_site,
+            sia,
+        }: FormSurgeon,
+    ) -> Result<Self, Self::Error> {
+        let email = Email::new(&email).map_err(SurgeonError::Email)?.0;
+
+        let sia: Option<SurgeonSia> = if let Some(sia) = sia {
+            sia.try_into().ok()
+        } else {
+            None
+        };
+
+        let surgeon = Surgeon {
+            email,
+            terms: None,
+            first_name,
+            last_name,
+            default_site,
+            sia,
+        };
+
+        Ok(surgeon)
+    }
 }
 
 /// Return the current [`Surgeon`] from global server context.

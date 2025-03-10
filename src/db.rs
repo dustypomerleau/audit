@@ -1,16 +1,17 @@
+#[cfg(feature = "ssr")] use crate::auth::AuthToken;
+#[cfg(feature = "ssr")] use crate::state::AppState;
 use crate::{
-    auth::{AuthError, AuthToken},
     sia::Sia,
-    state::{AppState, StatePoisonedError},
-    surgeon::{Surgeon, SurgeonSia},
+    state::StatePoisonedError,
+    surgeon::{Email, FormSurgeon, FormSurgeonSia, Surgeon, SurgeonSia},
 };
-use axum::response::IntoResponse;
 use leptos::prelude::{ServerFnError, expect_context, server};
-use leptos_axum::ResponseOptions;
+#[cfg(feature = "ssr")] use leptos_axum::ResponseOptions;
 use thiserror::Error;
 use uuid::Uuid;
 
 #[derive(Debug, Error)]
+#[cfg(feature = "ssr")]
 pub enum DbError {
     #[error("Gel error: {0:?}")]
     Gel(gel_tokio::Error),
@@ -18,12 +19,14 @@ pub enum DbError {
     State(StatePoisonedError),
 }
 
+#[cfg(feature = "ssr")]
 impl From<gel_tokio::Error> for DbError {
     fn from(err: gel_tokio::Error) -> Self {
         Self::Gel(err)
     }
 }
 
+#[cfg(feature = "ssr")]
 impl From<StatePoisonedError> for DbError {
     fn from(err: StatePoisonedError) -> Self {
         Self::State(err)
@@ -31,15 +34,16 @@ impl From<StatePoisonedError> for DbError {
 }
 
 #[server]
-pub async fn insert_surgeon(surgeon: Surgeon) -> Result<Uuid, ServerFnError> {
-    let Surgeon {
+pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<Uuid, ServerFnError> {
+    let FormSurgeon {
         email,
         first_name,
         last_name,
         default_site,
         sia,
-        ..
     } = surgeon;
+
+    let email = Email::new(&email)?.inner();
 
     let (first_name, last_name, default_site) = (
         first_name.unwrap_or("{}".to_string()),
@@ -48,18 +52,20 @@ pub async fn insert_surgeon(surgeon: Surgeon) -> Result<Uuid, ServerFnError> {
     );
 
     let sia = match sia {
-        Some(SurgeonSia {
-            right:
-                Sia {
-                    power: right_power,
-                    axis: right_axis,
-                },
-            left:
-                Sia {
-                    power: left_power,
-                    axis: left_axis,
-                },
-        }) => {
+        Some(sia) => {
+            let SurgeonSia {
+                right:
+                    Sia {
+                        power: right_power,
+                        axis: right_axis,
+                    },
+                left:
+                    Sia {
+                        power: left_power,
+                        axis: left_axis,
+                    },
+            } = sia.try_into()?;
+
             format!(
                 "(select (insert SurgeonSia {{
                     right := (select (insert Sia {{ power := {right_power}, axis := {right_axis} }} )),
