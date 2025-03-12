@@ -54,6 +54,11 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<Uuid, ServerFnError>
         default_site.unwrap_or("{}".to_string()),
     );
 
+    let (sia_right_power, sia_left_power) = (
+        (sia_right_power * 100.0) as i32,
+        (sia_left_power * 100.0) as i32,
+    );
+
     let sia = format!(
         "(select (insert SurgeonSia {{ right := (select (insert Sia {{ power := {sia_right_power}, axis := {sia_right_axis} }} )), left := (select (insert Sia {{ power := {sia_left_power}, axis := {sia_left_axis} }} )) }} ))"
     );
