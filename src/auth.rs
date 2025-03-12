@@ -93,9 +93,10 @@ pub struct PkceParams {
 #[derive(Debug, Deserialize)]
 pub struct AuthToken {
     pub auth_token: String,
-    pub identity_id: Uuid,
+    pub identity_id: String,
     pub provider_token: String,
     pub provider_refresh_token: Option<String>,
+    pub provider_id_token: String,
 }
 
 /// Generate a `verifier/challenge` pair for use in the authentication flow (see [`Pkce`] for
