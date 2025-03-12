@@ -1,8 +1,5 @@
+use crate::sia::{Sia, SiaBoundsError};
 #[cfg(feature = "ssr")] use crate::state::AppState;
-use crate::{
-    cyl::FormCyl,
-    sia::{Sia, SiaBoundsError},
-};
 use chrono::{DateTime, Utc};
 use garde::Validate;
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
@@ -55,32 +52,12 @@ pub enum SurgeonError {
     Sia(SiaBoundsError),
 }
 
-/// A proto-[`Sia`] representing the surgeon's form input at sign-up.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct FormSurgeonSia {
-    pub right: FormCyl,
-    pub left: FormCyl,
-}
-
 /// A surgeon's default [`Sia`] for right and left eyes
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 #[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct SurgeonSia {
     pub right: Sia,
     pub left: Sia,
-}
-
-impl TryFrom<FormSurgeonSia> for SurgeonSia {
-    type Error = SiaBoundsError;
-
-    fn try_from(FormSurgeonSia { right, left }: FormSurgeonSia) -> Result<Self, Self::Error> {
-        let sia = SurgeonSia {
-            right: Sia::new(right.into())?,
-            left: Sia::new(left.into())?,
-        };
-
-        Ok(sia)
-    }
 }
 
 /// A proto-[`Surgeon`] representing the surgeon's form input at sign-up.
@@ -90,7 +67,10 @@ pub struct FormSurgeon {
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub default_site: Option<String>,
-    pub sia: Option<FormSurgeonSia>,
+    pub sia_right_power: f32,
+    pub sia_right_axis: i32,
+    pub sia_left_power: f32,
+    pub sia_left_axis: i32,
 }
 
 /// A unique surgeon
@@ -105,39 +85,6 @@ pub struct Surgeon {
     pub last_name: Option<String>,
     pub default_site: Option<String>,
     pub sia: Option<SurgeonSia>,
-}
-
-impl TryFrom<FormSurgeon> for Surgeon {
-    type Error = SurgeonError;
-
-    fn try_from(
-        FormSurgeon {
-            email,
-            first_name,
-            last_name,
-            default_site,
-            sia,
-        }: FormSurgeon,
-    ) -> Result<Self, Self::Error> {
-        let email = Email::new(&email).map_err(SurgeonError::Email)?.0;
-
-        let sia: Option<SurgeonSia> = if let Some(sia) = sia {
-            sia.try_into().ok()
-        } else {
-            None
-        };
-
-        let surgeon = Surgeon {
-            email,
-            terms: None,
-            first_name,
-            last_name,
-            default_site,
-            sia,
-        };
-
-        Ok(surgeon)
-    }
 }
 
 /// Return the current [`Surgeon`] from global server context.

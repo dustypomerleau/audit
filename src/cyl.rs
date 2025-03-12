@@ -9,13 +9,6 @@ pub enum CylPair {
     Axis,
 }
 
-/// A proto-[`Cyl`] representing the surgeon's form input at sign-up.
-#[derive(Clone, Debug, Deserialize, Serialize)]
-pub struct FormCyl {
-    pub power: f32,
-    pub axis: i32,
-}
-
 /// A generic cylinder type. The acceptable bounds of [`power`](Cyl::power) depend on the type of
 /// power being represented. Since the acceptable values of [`axis`](Cyl::axis) are always the same,
 /// we constrain the axis field when constructing a [`Cyl`]. The fields have been left public for
@@ -28,13 +21,6 @@ pub struct Cyl {
     pub power: i32,
     /// Axis in degrees.
     pub axis: i32,
-}
-
-impl From<FormCyl> for Cyl {
-    fn from(FormCyl { power, axis }: FormCyl) -> Self {
-        let power = (power * 100_f32) as i32;
-        Cyl { power, axis }
-    }
 }
 
 impl Cyl {

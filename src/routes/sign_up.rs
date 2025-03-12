@@ -36,20 +36,13 @@ pub fn SignUp() -> impl IntoView {
                     min=0
                     max=2
                     step=0.05
-                    name="surgeon[sia[right[power]]]"
+                    name="surgeon[sia_right_power]"
                     required
                 />
             </label>
             <label>
                 "SIA axis for right eyes (°)"
-                <input
-                    type="number"
-                    min=0
-                    max=179
-                    step=1
-                    name="surgeon[sia[right[axis]]]"
-                    required
-                />
+                <input type="number" min=0 max=179 step=1 name="surgeon[sia_right_axis]" required />
             </label>
             <label>
                 "SIA power for left eyes (D)"
@@ -58,22 +51,15 @@ pub fn SignUp() -> impl IntoView {
                     min=0
                     max=2
                     step=0.05
-                    name="surgeon[sia[left[power]]]"
+                    name="surgeon[sia_left_power]"
                     required
                 />
             </label>
             <label>
                 "SIA axis for left eyes (°)"
-                <input
-                    type="number"
-                    min=0
-                    max=179
-                    step=1
-                    name="surgeon[sia[left[axis]]]"
-                    required
-                />
+                <input type="number" min=0 max=179 step=1 name="surgeon[sia_left_axis]" required />
             </label>
-            <input type="submit" />
+            <input type="submit" value="Sign up" />
         </ActionForm>
     }
 }

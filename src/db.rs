@@ -3,7 +3,7 @@
 use crate::{
     sia::Sia,
     state::StatePoisonedError,
-    surgeon::{Email, FormSurgeon, FormSurgeonSia, Surgeon, SurgeonSia},
+    surgeon::{Email, FormSurgeon, SurgeonSia},
 };
 use leptos::prelude::{ServerFnError, expect_context, server};
 #[cfg(feature = "ssr")] use leptos_axum::ResponseOptions;
@@ -40,7 +40,10 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<Uuid, ServerFnError>
         first_name,
         last_name,
         default_site,
-        sia,
+        sia_right_power,
+        sia_right_axis,
+        sia_left_power,
+        sia_left_axis,
     } = surgeon;
 
     let email = Email::new(&email)?.inner();
@@ -51,31 +54,9 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<Uuid, ServerFnError>
         default_site.unwrap_or("{}".to_string()),
     );
 
-    let sia = match sia {
-        Some(sia) => {
-            let SurgeonSia {
-                right:
-                    Sia {
-                        power: right_power,
-                        axis: right_axis,
-                    },
-                left:
-                    Sia {
-                        power: left_power,
-                        axis: left_axis,
-                    },
-            } = sia.try_into()?;
-
-            format!(
-                "(select (insert SurgeonSia {{
-                    right := (select (insert Sia {{ power := {right_power}, axis := {right_axis} }} )),
-                    left := (select (insert Sia {{ power := {left_power}, axis := {left_axis} }} ))
-                }} ))"
-            )
-        }
-
-        None => "{}".to_string(),
-    };
+    let sia = format!(
+        "(select (insert SurgeonSia {{ right := (select (insert Sia {{ power := {sia_right_power}, axis := {sia_right_axis} }} )), left := (select (insert Sia {{ power := {sia_left_power}, axis := {sia_left_axis} }} )) }} ))"
+    );
 
     let identity = if let Some(header) = expect_context::<ResponseOptions>()
         .0
@@ -93,7 +74,7 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<Uuid, ServerFnError>
 
     let query = format!(
         "insert Surgeon {{
-            identity := {identity},
+            identity := {identity}
             email := {email},  
             first_name := {first_name},
             last_name := {last_name},
@@ -106,6 +87,7 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<Uuid, ServerFnError>
     // todo: handle an error on the insert immediately, rather than bubbling it up.
     // The main reason for failure would be a duplicate email.
     let surgeon_id = client.query_required_single::<Uuid, _>(query, &()).await?;
+    dbg!(surgeon_id);
     Ok(surgeon_id)
 }
 
