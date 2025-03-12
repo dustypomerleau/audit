@@ -23,14 +23,16 @@ pub fn SignUp() -> impl IntoView {
     view! {
         "sign up and complete your profile"
         <ActionForm action=insert_surgeon>
-            <label>"Email" <input type="email" name="surgeon[email]" required /></label>
+            <label>"Email*" <input type="email" name="surgeon[email]" required /></label>
             <label>"First Name" <input type="text" name="surgeon[first_name]" /></label>
             <label>"Last Name" <input type="text" name="surgeon[last_name]" /></label>
+            // todo: we need a datalist that populates a new default::Site if their site
+            // isn't already present.
             <label>
                 "Default Hospital/Site" <input type="text" name="surgeon[default_site]" />
             </label>
             <label>
-                "SIA power for right eyes (D)"
+                "SIA power for right eyes (D)*"
                 <input
                     type="number"
                     min=0
@@ -41,11 +43,11 @@ pub fn SignUp() -> impl IntoView {
                 />
             </label>
             <label>
-                "SIA axis for right eyes (°)"
+                "SIA axis for right eyes (°)*"
                 <input type="number" min=0 max=179 step=1 name="surgeon[sia_right_axis]" required />
             </label>
             <label>
-                "SIA power for left eyes (D)"
+                "SIA power for left eyes (D)*"
                 <input
                     type="number"
                     min=0
@@ -56,7 +58,7 @@ pub fn SignUp() -> impl IntoView {
                 />
             </label>
             <label>
-                "SIA axis for left eyes (°)"
+                "SIA axis for left eyes (°)*"
                 <input type="number" min=0 max=179 step=1 name="surgeon[sia_left_axis]" required />
             </label>
             <input type="submit" value="Sign up" />

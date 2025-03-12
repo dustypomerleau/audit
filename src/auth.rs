@@ -14,7 +14,7 @@ use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
 use gel_tokio::create_client;
 use rand::{Rng, rng};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{env, sync::LazyLock};
 use thiserror::Error;
@@ -90,10 +90,11 @@ pub struct PkceParams {
 /// A deserialization target for the JSON "gel-auth-token" cookie. Used primarily for holding
 /// the current surgeon's identity ID.
 #[allow(unused)]
-#[derive(Debug, Deserialize)]
-pub struct AuthToken {
+#[derive(Debug, Deserialize, Serialize)]
+pub struct AuthResponse {
+    /// A Base64 URL-encoded JWT, consisting of `.`-separated header, payload, and signature.
     pub auth_token: String,
-    pub identity_id: String,
+    pub identity_id: Uuid,
     pub provider_token: String,
     pub provider_refresh_token: Option<String>,
     pub provider_id_token: String,
@@ -161,20 +162,22 @@ pub async fn handle_pkce_code(
 
     let url = format!("{base_auth_url}/token?code={code}&verifier={verifier}");
 
-    let json_token = reqwest::get(url)
+    let response = reqwest::get(&url)
         .await
         .map_err(|err| AuthError::Request(format!("{err:?}")))?
         .text()
         .await
         .map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
-    let auth_token: AuthToken =
-        serde_json::from_str(&json_token).map_err(|err| AuthError::Json(format!("{err:?}")))?;
+    let response: AuthResponse =
+        serde_json::from_str(&response).map_err(|err| AuthError::Json(format!("{err:?}")))?;
+
+    let token = response.auth_token;
 
     let db_with_globals = create_client()
         .await
         .expect("DB client to be initialized before adding globals")
-        .with_globals_fn(|client| client.set("ext::auth::client_token", json_token.to_owned()));
+        .with_globals_fn(|client| client.set("ext::auth::client_token", &token));
 
     db_with_globals
         .ensure_connected()
@@ -184,7 +187,7 @@ pub async fn handle_pkce_code(
     db.set(db_with_globals)
         .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
-    let cookie = Cookie::build(("gel-auth-token", json_token))
+    let cookie = Cookie::build(("gel-auth-token", token))
         .expires(None)
         .http_only(true)
         .path("/")
@@ -199,12 +202,14 @@ pub async fn handle_pkce_code(
         .get_cloned()
         .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
+    // you may be able to simply do:
+    // `select Surgeon filter .identity = (select global ext::auth::ClientTokenIdentity);`
     let query = format!(
-        "select Surgeon filter .identity = {};",
-        auth_token.identity_id
+        r#"select Surgeon filter .identity = (select ext::auth::Identity filter .id = <uuid>"{}");"#,
+        response.identity_id
     );
 
-    // If the `identity_id` of the `gel-auth-token` cookie matches the `id` of an existing
+    // If the `identity_id` of the Gel Auth API response matches the `id` of an existing
     // `Surgeon` in the database, set that as the current surgeon in global state, and redirect
     // to the form for adding a new `Case`. If there is no match, redirect to the sign up form,
     // and create a new `Surgeon` in the database when that form is submitted.

@@ -167,8 +167,7 @@ global cur_surgeon := (assert_single(
     }
 
     type Surgeon extending SoftCreate {
-        # should this be exclusive?
-        required identity: ext::auth::Identity;
+        required identity: ext::auth::Identity { constraint exclusive; }
         required email: EmailType { constraint exclusive; }
         terms: datetime; # the date terms were agreed by the surgeon
         first_name: str;
