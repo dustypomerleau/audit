@@ -1,7 +1,7 @@
 #[cfg(feature = "ssr")] use crate::state::AppState;
 use crate::{
     state::StatePoisonedError,
-    surgeon::{Email, FormSurgeon, Surgeon},
+    surgeon::{Email, FormSurgeon, QuerySurgeon, Surgeon},
 };
 #[cfg(feature = "ssr")] use gel_protocol::value::Value;
 use leptos::prelude::{ServerFnError, StorageAccess, expect_context, server};
@@ -64,34 +64,45 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
     );
 
     let query = format!(
-        r#"insert Surgeon {{
-            identity := (select global ext::auth::ClientTokenIdentity),
-            email := "{email}",
-            first_name := {first_name},
-            last_name := {last_name},
+        r#"with QuerySurgeon := (
+            insert Surgeon {{
+                identity := (select global ext::auth::ClientTokenIdentity),
+                email := "{email}",
+                first_name := {first_name},
+                last_name := {last_name},
 
-            default_site := (select(insert Site {{
-                name := {default_site} 
-            }} unless conflict on .name else (select Site))),
+                default_site := (select(insert Site {{
+                    name := {default_site} 
+                }} unless conflict on .name else (select Site))),
 
-            sia := (select(insert SurgeonSia {{
-                right := (select(insert Sia {{
-                    power := {sia_right_power}, axis := {sia_right_axis}
-                }})),
-                left := (select(insert Sia {{
-                    power := {sia_left_power}, axis := {sia_left_axis}
+                sia := (select(insert SurgeonSia {{
+                    right := (select(insert Sia {{
+                        power := {sia_right_power}, axis := {sia_right_axis}
+                    }})),
+                    left := (select(insert Sia {{
+                        power := {sia_left_power}, axis := {sia_left_axis}
+                    }}))
                 }}))
-            }}))
-        }} unless conflict on .email;"#
+            }} unless conflict on .email else (select Surgeon)
+        )
+        select QuerySurgeon {{
+            email,
+            terms,
+            first_name,
+            last_name,
+            default_site: {{ name }},
+            sia: {{
+                right: {{ power, axis }},
+                left: {{ power, axis }}
+            }}
+        }};"#
     );
 
     let client = expect_context::<AppState>().db.get_cloned()?;
-    // todo: handle an error on the insert immediately, rather than bubbling it up.
-    // The main reason for failure would be a duplicate email.
-    // todo: derive Queryable on QuerySurgeon and use that here, then implement conversion methods,
-    // then do the same with Case
-    // alternatively, just look at the shape of Value and convert that to each type
-    let value = client.query_required_single::<Value, _>(query, &()).await?;
+
+    let value = client
+        .query_required_single::<QuerySurgeon, _>(query, &())
+        .await?; // remove `?` to get the details of the error
     dbg!(&value);
 
     Ok(())
