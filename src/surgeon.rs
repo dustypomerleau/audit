@@ -10,6 +10,7 @@ use leptos::{
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use thiserror::Error;
+use uuid::Uuid;
 
 #[derive(Debug, Error)]
 #[error("Email invalid: ({0:?})")]
@@ -73,13 +74,28 @@ pub struct FormSurgeon {
     pub sia_left_axis: i32,
 }
 
+#[cfg_attr(feature = "ssr", derive(Queryable))]
+#[derive(Debug)]
+pub struct Site {
+    name: String,
+}
+
+#[cfg_attr(feature = "ssr", derive(Queryable))]
+#[derive(Debug)]
+pub struct QuerySurgeon {
+    email: String,
+    terms: Option<DateTime<Utc>>,
+    first_name: Option<String>,
+    last_name: Option<String>,
+    default_site: Option<Site>,
+    sia: SurgeonSia,
+}
+
 /// A unique surgeon
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-#[cfg_attr(feature = "ssr", derive(Queryable))]
 pub struct Surgeon {
-    /// A unique, valid email. See notes on [`Email`] to understand why we use a plain [`String`]
-    /// value here.
-    pub email: String,
+    /// A unique, valid email.
+    pub email: Email,
     pub terms: Option<DateTime<Utc>>,
     pub first_name: Option<String>,
     pub last_name: Option<String>,

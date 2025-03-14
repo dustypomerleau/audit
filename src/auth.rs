@@ -213,11 +213,15 @@ pub async fn handle_pkce_code(
     // `Surgeon` in the database, set that as the current surgeon in global state, and redirect
     // to the form for adding a new `Case`. If there is no match, redirect to the sign up form,
     // and create a new `Surgeon` in the database when that form is submitted.
-    if let Ok(query_surgeon) = client.query_required_single::<Surgeon, _>(query, &()).await {
-        surgeon
-            .clone()
-            .set(Some(query_surgeon))
-            .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
+    //
+    // todo: we need to change the query above to simply use ext::auth::ClientTokenIdentity
+    // in the meantime patch this to get to signup:
+    if false {
+        // if let Ok(query_surgeon) = client.query_required_single::<Surgeon, _>(query, &()).await {
+        //     surgeon
+        //         .clone()
+        //         .set(Some(query_surgeon))
+        //         .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
         Ok((jar, Redirect::to("/add")))
     } else {
