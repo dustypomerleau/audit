@@ -1,6 +1,6 @@
 use crate::db::InsertSurgeon;
 use leptos::{
-    prelude::{ActionForm, ElementChild, IntoView, component, view},
+    prelude::{ActionForm, ElementChild, IntoView, StyleAttribute, component, view},
     server::ServerAction,
 };
 
@@ -21,47 +21,62 @@ pub fn SignUp() -> impl IntoView {
     let insert_surgeon = ServerAction::<InsertSurgeon>::new();
 
     view! {
-        "sign up and complete your profile"
         <ActionForm action=insert_surgeon>
-            <label>"Email*" <input type="email" name="surgeon[email]" required /></label>
-            <label>"First Name" <input type="text" name="surgeon[first_name]" /></label>
-            <label>"Last Name" <input type="text" name="surgeon[last_name]" /></label>
-            // todo: we need a datalist that populates a new default::Site if their site
-            // isn't already present.
-            <label>
-                "Default Hospital/Site" <input type="text" name="surgeon[default_site]" />
-            </label>
-            <label>
-                "SIA power for right eyes (D)*"
-                <input
-                    type="number"
-                    min=0
-                    max=2
-                    step=0.05
-                    name="surgeon[sia_right_power]"
-                    required
-                />
-            </label>
-            <label>
-                "SIA axis for right eyes (°)*"
-                <input type="number" min=0 max=179 step=1 name="surgeon[sia_right_axis]" required />
-            </label>
-            <label>
-                "SIA power for left eyes (D)*"
-                <input
-                    type="number"
-                    min=0
-                    max=2
-                    step=0.05
-                    name="surgeon[sia_left_power]"
-                    required
-                />
-            </label>
-            <label>
-                "SIA axis for left eyes (°)*"
-                <input type="number" min=0 max=179 step=1 name="surgeon[sia_left_axis]" required />
-            </label>
-            <input type="submit" value="Sign up" />
+            <div style="display: grid; grid-auto-columns: 1fr; grid-gap: 30px;">
+                "sign up and complete your profile (fields with * are required)"
+                <label>"Email*" <input type="email" name="surgeon[email]" required /></label>
+                <label>"First Name" <input type="text" name="surgeon[first_name]" /></label>
+                <label>"Last Name" <input type="text" name="surgeon[last_name]" /></label>
+                // todo: we need a datalist that populates a new default::Site if their site
+                // isn't already present.
+                <label>
+                    "Default Hospital/Site" <input type="text" name="surgeon[default_site]" />
+                </label>
+                <label>
+                    "SIA power for right eyes (D)*"
+                    <input
+                        type="number"
+                        min=0
+                        max=2
+                        step=0.05
+                        name="surgeon[sia_right_power]"
+                        required
+                    />
+                </label>
+                <label>
+                    "SIA axis for right eyes (°)*"
+                    <input
+                        type="number"
+                        min=0
+                        max=179
+                        step=1
+                        name="surgeon[sia_right_axis]"
+                        required
+                    />
+                </label>
+                <label>
+                    "SIA power for left eyes (D)*"
+                    <input
+                        type="number"
+                        min=0
+                        max=2
+                        step=0.05
+                        name="surgeon[sia_left_power]"
+                        required
+                    />
+                </label>
+                <label>
+                    "SIA axis for left eyes (°)*"
+                    <input
+                        type="number"
+                        min=0
+                        max=179
+                        step=1
+                        name="surgeon[sia_left_axis]"
+                        required
+                    />
+                </label> <input type="submit" value="Sign up" />
+            </div>
         </ActionForm>
     }
 }

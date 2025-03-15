@@ -1,4 +1,4 @@
-use crate::{components::Nav, surgeon::get_current_surgeon};
+use crate::{auth::get_authorized_surgeon, components::Nav};
 use leptos::prelude::{
     ElementChild, IntoAny, IntoView, OnceResource, Suspend, Suspense, component, provide_context,
     view,
@@ -7,7 +7,7 @@ use leptos_router::{components::Outlet, hooks::use_navigate};
 
 #[component]
 pub fn Protected() -> impl IntoView {
-    let surgeon_resource = OnceResource::new(get_current_surgeon());
+    let surgeon_resource = OnceResource::new(get_authorized_surgeon());
 
     view! {
         <Suspense fallback=move || {
@@ -29,13 +29,9 @@ pub fn Protected() -> impl IntoView {
                         ().into_any()
                     }
                 } else {
-                    view! {
-                        "You appear to be signed out. Would you like to "
-                        <a href="/signin" rel="external">
-                            "sign in?"
-                        </a>
-                    }
-                        .into_any()
+                    let navigate = use_navigate();
+                    navigate("/signin", Default::default());
+                    ().into_any()
                 }
             })}
         </Suspense>

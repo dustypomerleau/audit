@@ -10,7 +10,6 @@ use leptos::{
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use thiserror::Error;
-use uuid::Uuid;
 
 #[derive(Debug, Error)]
 #[error("Email invalid: ({0:?})")]
@@ -93,7 +92,10 @@ pub struct Surgeon {
     pub sia: Option<SurgeonSia>,
 }
 
-/// Return the current [`Surgeon`] from global server context.
+/// Return the current [`Surgeon`] from global server context. In practice, this function should
+/// rarely be needed, as accessing a protected route will call
+/// [`get_authorized_surgeon`](crate::auth::get_authorized_surgeon), which is then provided as
+/// client-side context.
 #[server]
 pub async fn get_current_surgeon() -> Result<Option<Surgeon>, ServerFnError> {
     let surgeon = expect_context::<AppState>().surgeon.get_cloned()?;
