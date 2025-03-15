@@ -75,31 +75,21 @@ pub struct FormSurgeon {
 }
 
 #[cfg_attr(feature = "ssr", derive(Queryable))]
-#[derive(Debug)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Site {
     name: String,
 }
 
-#[cfg_attr(feature = "ssr", derive(Queryable))]
-#[derive(Debug)]
-pub struct QuerySurgeon {
-    email: String,
-    terms: Option<DateTime<Utc>>,
-    first_name: Option<String>,
-    last_name: Option<String>,
-    default_site: Option<Site>,
-    sia: SurgeonSia,
-}
-
 /// A unique surgeon
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(Queryable))]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Surgeon {
     /// A unique, valid email.
-    pub email: Email,
+    pub email: String,
     pub terms: Option<DateTime<Utc>>,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
-    pub default_site: Option<String>,
+    pub default_site: Option<Site>,
     pub sia: Option<SurgeonSia>,
 }
 
