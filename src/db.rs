@@ -1,12 +1,10 @@
 #[cfg(feature = "ssr")] use crate::state::AppState;
 use crate::{
     state::StatePoisonedError,
-    surgeon::{Email, FormSurgeon, QuerySurgeon, Surgeon},
+    surgeon::{Email, FormSurgeon, Surgeon},
 };
-#[cfg(feature = "ssr")] use gel_protocol::value::Value;
-use leptos::prelude::{ServerFnError, StorageAccess, expect_context, server};
+use leptos::prelude::{ServerFnError, expect_context, server};
 use thiserror::Error;
-use uuid::Uuid;
 
 #[derive(Debug, Error)]
 #[cfg(feature = "ssr")]
@@ -39,6 +37,18 @@ fn some_or_empty(value: Option<String>) -> String {
     value.map_or("{}".to_string(), |s| format!(r#""{s}""#))
 }
 
+/// Takes a value in whole diopters (D) and returns an integer value of centidiopters for storing
+/// in the database.
+fn to_cd(diopters: f32) -> i32 {
+    (diopters * 100.0) as i32
+}
+
+/// Takes an integer value of centidiopters from the database and returns a float representing the
+/// value in diopters (D).
+fn to_d(centidiopters: i32) -> f32 {
+    (centidiopters as f32) / 100.0
+}
+
 #[server]
 pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
     let FormSurgeon {
@@ -54,14 +64,13 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
 
     let email = Email::new(&email)?.inner();
 
-    let first_name = some_or_empty(first_name);
-    let last_name = some_or_empty(last_name);
-    let default_site = some_or_empty(default_site);
-
-    let (sia_right_power, sia_left_power) = (
-        (sia_right_power * 100.0) as i32,
-        (sia_left_power * 100.0) as i32,
+    let (first_name, last_name, default_site) = (
+        some_or_empty(first_name),
+        some_or_empty(last_name),
+        some_or_empty(default_site),
     );
+
+    let (sia_right_power, sia_left_power) = (to_cd(sia_right_power), to_cd(sia_left_power));
 
     let query = format!(
         r#"with QuerySurgeon := (
@@ -100,10 +109,10 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
 
     let client = expect_context::<AppState>().db.get_cloned()?;
 
-    let value = client
-        .query_required_single::<QuerySurgeon, _>(query, &())
-        .await?; // remove `?` to get the details of the error
-    dbg!(&value);
+    let surgeon = client
+        .query_required_single::<Surgeon, _>(query, &())
+        .await?;
+    dbg!(&surgeon);
 
     Ok(())
 }
