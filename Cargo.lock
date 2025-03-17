@@ -956,6 +956,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "gel-dsn"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "65653315aa82ff89c805cd02276ae511b5929a1f7ffa466aeb9f4c874614240a"
+dependencies = [
+ "base64 0.22.1",
+ "crc16",
+ "derive_more",
+ "dirs",
+ "gel-auth",
+ "gel-errors",
+ "gel-stream",
+ "log",
+ "paste",
+ "percent-encoding",
+ "rustls-pemfile",
+ "rustls-pki-types",
+ "serde",
+ "serde_json",
+ "sha1",
+ "thiserror 2.0.12",
+ "url",
+ "whoami",
+]
+
+[[package]]
 name = "gel-errors"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -993,6 +1019,7 @@ dependencies = [
  "rustls-pki-types",
  "rustls-platform-verifier",
  "rustls-tokio-stream",
+ "serde",
  "socket2",
  "thiserror 2.0.12",
  "tokio",
@@ -1002,9 +1029,9 @@ dependencies = [
 
 [[package]]
 name = "gel-tokio"
-version = "0.9.6"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a25451634765d7e42a3c2cfb01498dd7f453caa22b9996387792d2ba89dd841"
+checksum = "3674b3bb31b7f5327e81a4d77352cbe158cb9489e126aa3ef8cb44e94e9174ea"
 dependencies = [
  "anyhow",
  "arc-swap",
@@ -1017,6 +1044,7 @@ dependencies = [
  "futures-util",
  "gel-auth",
  "gel-derive",
+ "gel-dsn",
  "gel-errors",
  "gel-protocol",
  "gel-stream",
@@ -3643,6 +3671,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasite"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b8dad83b4f25e74f184f64c43b150b91efe7647395b42289f38e50566d82855b"
+
+[[package]]
 name = "wasm-bindgen"
 version = "0.2.100"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3765,10 +3799,21 @@ dependencies = [
 ]
 
 [[package]]
-name = "widestring"
-version = "1.1.0"
+name = "whoami"
+version = "1.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7219d36b6eac893fa81e84ebe06485e7dcbb616177469b142df14f1f4deb1311"
+checksum = "372d5b87f58ec45c384ba03563b03544dc5fadc3983e434b286913f5b4a9bb6d"
+dependencies = [
+ "redox_syscall",
+ "wasite",
+ "web-sys",
+]
+
+[[package]]
+name = "widestring"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd7cf3379ca1aac9eea11fba24fd7e315d621f8dfe35c8d7d2be8b793726e07d"
 
 [[package]]
 name = "winapi-util"
