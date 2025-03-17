@@ -1,4 +1,4 @@
-use crate::{auth::get_authorized_surgeon, components::Nav};
+use crate::{components::Nav, db::get_authorized_surgeon};
 use leptos::prelude::{
     ElementChild, IntoAny, IntoView, OnceResource, Suspend, Suspense, component, provide_context,
     view,

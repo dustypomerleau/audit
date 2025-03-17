@@ -4,6 +4,7 @@ use crate::{
     surgeon::{Email, FormSurgeon, Surgeon},
 };
 use leptos::prelude::{ServerFnError, expect_context, server};
+#[cfg(feature = "ssr")] use leptos_axum::{ResponseOptions, redirect};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
