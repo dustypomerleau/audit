@@ -145,7 +145,7 @@ pub async fn handle_sign_in(jar: CookieJar) -> (CookieJar, Redirect) {
 /// token as a cookie allows you to confirm the logged-in surgeon when accessing protected routes.
 #[debug_handler]
 pub async fn handle_pkce_code(
-    State(AppState { db, surgeon, .. }): State<AppState>,
+    State(AppState { db, .. }): State<AppState>,
     Query(PkceParams { code }): Query<PkceParams>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AuthError> {
@@ -166,15 +166,16 @@ pub async fn handle_pkce_code(
         .await
         .map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
-    let response: AuthResponse =
-        serde_json::from_str(&response).map_err(|err| AuthError::Json(format!("{err:?}")))?;
-
-    let token = response.auth_token;
+    let AuthResponse {
+        auth_token,
+        identity_id,
+        ..
+    } = serde_json::from_str(&response).map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
     let db_with_globals = create_client()
         .await
         .expect("DB client to be initialized before adding globals")
-        .with_globals_fn(|client| client.set("ext::auth::client_token", &token));
+        .with_globals_fn(|client| client.set("ext::auth::client_token", &auth_token));
 
     db_with_globals
         .ensure_connected()
@@ -184,7 +185,7 @@ pub async fn handle_pkce_code(
     db.set(db_with_globals)
         .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
-    let cookie = Cookie::build(("gel-auth-token", token))
+    let cookie = Cookie::build(("gel-auth-token", auth_token))
         .expires(None)
         .http_only(true)
         .path("/")

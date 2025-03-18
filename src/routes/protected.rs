@@ -11,7 +11,7 @@ pub fn Protected() -> impl IntoView {
 
     view! {
         <Suspense fallback=move || {
-            view! { "Loading the current surgeon..." }
+            view! { "Checking authorization for the current surgeon..." }
         }>
             {move || Suspend::new(async move {
                 if let Ok(Some(surgeon)) = surgeon_resource.await {

@@ -1,4 +1,4 @@
-use crate::routes::{Add, Instructions, Landing, List, Protected, Report, SignUp, Terms};
+use crate::routes::{Add, Instructions, Landing, List, New, Protected, Report, SignUp, Terms};
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
     component, view,
@@ -42,9 +42,22 @@ pub fn App() -> impl IntoView {
         <Router>
             <main>
                 // note: plain Axum server routes are not represented here,
-                // as they are added directly to the router in `src/main.rs`
+                // as they are added directly to the router in `src/main.rs`.
+                //
+                // todo: you need 2 types of protected routes:
+                //
+                // 1. protected route that simply checks for a global
+                // ext::auth::ClientTokenIdentity. Failure redirects to "/signin".
+                //
+                // 2. protected route that checks for a Surgeon with .identity =
+                // ext::auth::ClientTokenIdentity (protects all the logged-in content).
+                // Failure redirects to "/signin".
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=Landing />
+                    <ParentRoute path=StaticSegment("new") view=New>
+                        <Route path=StaticSegment("signup") view=SignUp />
+                        <Route path=StaticSegment("terms") view=Terms />
+                    </ParentRoute>
                     <ParentRoute path=StaticSegment("protected") view=Protected>
                         // <Route path=StaticSegment("") view=Fallback />
                         <Route path=StaticSegment("add") view=Add />
@@ -53,8 +66,6 @@ pub fn App() -> impl IntoView {
                         <Route path=StaticSegment("list") view=List />
                         <Route path=StaticSegment("report") view=Report />
                     </ParentRoute>
-                    <Route path=StaticSegment("signup") view=SignUp />
-                    <Route path=StaticSegment("terms") view=Terms />
                 </Routes>
             </main>
         </Router>
