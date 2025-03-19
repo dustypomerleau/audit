@@ -228,8 +228,13 @@ select QuerySurgeon {{
         .await?;
     dbg!(&surgeon);
 
-    // todo: add the surgeon to global state here, and then load it as a resource and provide it in
-    // the client
+    // todo: match on the result of the inserted surgeon:
+    // if we are successful, set the surgeon in global server state and redirect to terms
+    // (you will need a server function on form submit when the terms are accepted, so that
+    // we set `Surgeon::terms` in the DB).
+    //
+    // if we fail on the insert, then something is likely wrong with the form validation - we'll
+    // have to figure out a way to surface those errors for diagnostics
 
     Ok(())
 }
