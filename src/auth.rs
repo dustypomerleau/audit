@@ -196,7 +196,7 @@ pub async fn handle_pkce_code(
     // Add the new auth token cookie, and remove the verifier, which is no longer needed.
     let jar = jar.add(cookie).remove(Cookie::from("gel-pkce-verifier"));
 
-    Ok((jar, Redirect::to("/add")))
+    Ok((jar, Redirect::to("/protected/add")))
 }
 
 /// This function is called when the current surgeon logs out, removing the auth token from the
