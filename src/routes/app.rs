@@ -1,4 +1,6 @@
-use crate::routes::{Add, Instructions, Landing, List, New, Protected, Report, SignUp, Terms};
+use crate::routes::{
+    Add, Gateway, Instructions, Landing, List, New, Protected, Report, SignUp, Terms,
+};
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
     component, view,
@@ -54,6 +56,7 @@ pub fn App() -> impl IntoView {
                 // Failure redirects to "/signin".
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=Landing />
+                    <Route path=StaticSegment("gateway") view=Gateway />
                     <ParentRoute path=StaticSegment("new") view=New>
                         <Route path=StaticSegment("signup") view=SignUp />
                         <Route path=StaticSegment("terms") view=Terms />

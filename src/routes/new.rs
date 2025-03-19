@@ -1,9 +1,7 @@
 use crate::db::is_signed_in;
 use leptos::{
-    IntoView, component,
-    prelude::{IntoAny, Suspend, Suspense},
+    prelude::{IntoAny, IntoView, Suspend, Suspense, component, view},
     server::OnceResource,
-    view,
 };
 use leptos_router::{components::Outlet, hooks::use_navigate};
 

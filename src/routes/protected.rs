@@ -16,6 +16,7 @@ pub fn Protected() -> impl IntoView {
             {move || Suspend::new(async move {
                 if let Ok(Some(surgeon)) = surgeon_resource.await {
                     if surgeon.terms.is_some() {
+                        dbg!(&surgeon);
                         provide_context(surgeon);
 
                         view! {

@@ -3,9 +3,10 @@ use crate::{
     state::StatePoisonedError,
     surgeon::{Email, FormSurgeon, Surgeon},
 };
+#[cfg(feature = "ssr")] use axum_extra::extract::{CookieJar, cookie::Cookie};
 #[cfg(feature = "ssr")] use gel_tokio::Client;
 use leptos::prelude::{ServerFnError, expect_context, server};
-#[cfg(feature = "ssr")] use leptos_axum::{ResponseOptions, redirect};
+#[cfg(feature = "ssr")] use leptos_axum::{extract, redirect};
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -63,17 +64,11 @@ pub async fn db() -> Result<Client, DbError> {
 
 #[server]
 pub async fn is_signed_in() -> Result<bool, ServerFnError> {
-    let auth_token = if let Some(auth_token) = expect_context::<ResponseOptions>()
-        .0
-        .read()
-        .headers
+    let auth_token = extract::<CookieJar>()
+        .await?
         .get("gel-auth-token")
-    {
-        auth_token.to_str().unwrap_or_default().to_string()
-    } else {
-        redirect("/signin");
-        "redirecting...".to_string()
-    };
+        .unwrap_or(&Cookie::new("gel-auth-token", "mock auth token"))
+        .to_string();
 
     let query = format!(r#"select "{auth_token}" = (select global ext::auth::client_token);"#);
 
@@ -89,17 +84,11 @@ pub async fn is_signed_in() -> Result<bool, ServerFnError> {
 
 #[server]
 pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> {
-    let auth_token = if let Some(auth_token) = expect_context::<ResponseOptions>()
-        .0
-        .read()
-        .headers
+    let auth_token = extract::<CookieJar>()
+        .await?
         .get("gel-auth-token")
-    {
-        auth_token.to_str().unwrap_or_default().to_string()
-    } else {
-        redirect("/signin");
-        "redirecting...".to_string()
-    };
+        .unwrap_or(&Cookie::new("gel-auth-token", "mock auth token"))
+        .to_string();
 
     // In this query, `signed_in` returns a bool that tells us whether the JWT in the
     // `gel-auth-token` cookie matches the JWT stored as a global on the DB client. This is our
