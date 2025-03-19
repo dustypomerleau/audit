@@ -222,19 +222,22 @@ select QuerySurgeon {{
         "#
     );
 
-    let surgeon = db()
+    if let Ok(surgeon) = db()
         .await?
         .query_required_single::<Surgeon, _>(query, &())
-        .await?;
-    dbg!(&surgeon);
-
-    // todo: match on the result of the inserted surgeon:
-    // if we are successful, set the surgeon in global server state and redirect to terms
-    // (you will need a server function on form submit when the terms are accepted, so that
-    // we set `Surgeon::terms` in the DB).
-    //
-    // if we fail on the insert, then something is likely wrong with the form validation - we'll
-    // have to figure out a way to surface those errors for diagnostics
+        .await
+    {
+        expect_context::<AppState>().surgeon.set(Some(surgeon))?;
+        redirect("/terms");
+    } else {
+        // if we fail on the insert, then either:
+        // 1. something is wrong with the form validation
+        // 2. the user already exists (email conflict)
+        //
+        // we'll have to figure out a way to surface those errors, but for now just restart the
+        // flow.
+        redirect("/signin");
+    }
 
     Ok(())
 }
