@@ -72,7 +72,7 @@ pub async fn is_signed_in() -> Result<bool, ServerFnError> {
         auth_token.to_str().unwrap_or_default().to_string()
     } else {
         redirect("/signin");
-        unreachable!()
+        "redirecting...".to_string()
     };
 
     let query = format!(r#"select "{auth_token}" = (select global ext::auth::client_token);"#);
@@ -98,7 +98,7 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> 
         auth_token.to_str().unwrap_or_default().to_string()
     } else {
         redirect("/signin");
-        unreachable!()
+        "redirecting...".to_string()
     };
 
     // In this query, `signed_in` returns a bool that tells us whether the JWT in the
