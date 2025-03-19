@@ -153,7 +153,7 @@ select QuerySurgeon if signed_in = true else {{}};
             .await?;
 
         if is_signed_in {
-            redirect("/signup");
+            redirect("/new/signup");
             Ok(None)
         } else {
             redirect("/signin");
@@ -228,7 +228,7 @@ select QuerySurgeon {{
         .await
     {
         expect_context::<AppState>().surgeon.set(Some(surgeon))?;
-        redirect("/terms");
+        redirect("/new/terms");
     } else {
         // if we fail on the insert, then either:
         // 1. something is wrong with the form validation

@@ -25,7 +25,7 @@ pub fn Protected() -> impl IntoView {
                             .into_any()
                     } else {
                         let navigate = use_navigate();
-                        navigate("/terms", Default::default());
+                        navigate("/new/terms", Default::default());
                         ().into_any()
                     }
                 } else {

@@ -11,7 +11,7 @@ pub fn SignUp() -> impl IntoView {
     // on submit:
     // 1. create a Surgeon (without a value for `terms:`)
     // 2. call an async function that sends a transactional email with info
-    // 3. redirect to /terms
+    // 3. redirect to /new/terms
 
     // ServerAction::<S>::new() creates an action that will call the server function S
     // let insert_surgeon = ServerAction::<InsertSurgeon>::new();
