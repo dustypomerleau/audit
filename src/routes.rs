@@ -8,6 +8,7 @@ mod list;
 mod new;
 mod protected;
 mod report;
+mod repro; // remove after successful repro
 mod sign_up;
 mod terms;
 
@@ -21,5 +22,6 @@ pub use list::*;
 pub use new::*;
 pub use protected::*;
 pub use report::*;
+pub use repro::*; // remove after successful repro
 pub use sign_up::*;
 pub use terms::*;

@@ -6,7 +6,9 @@ use crate::{
 #[cfg(feature = "ssr")] use axum_extra::extract::{CookieJar, cookie::Cookie};
 #[cfg(feature = "ssr")] use gel_tokio::Client;
 use leptos::prelude::{ServerFnError, expect_context, server};
+#[cfg(feature = "ssr")] use leptos_axum::ResponseOptions;
 #[cfg(feature = "ssr")] use leptos_axum::{extract, redirect};
+use std::any::Any;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -90,14 +92,19 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> 
         .unwrap_or(&Cookie::new("gel-auth-token", "mock auth token"))
         .to_string();
 
+    dbg!(&auth_token);
+
+    let response_options = expect_context::<ResponseOptions>();
+    dbg!(&response_options);
+
     // In this query, `signed_in` returns a bool that tells us whether the JWT in the
     // `gel-auth-token` cookie matches the JWT stored as a global on the DB client. This is our
     // first check that nothing is fundamentally wrong with the session.
     //
     // Then we check the `Identity` that matches that JWT, which is computed and stored as the
-    // global `ext::auth::ClientTokenIdentity`. If there is a `Surgeon` with the same identity, then
-    // we return the `Surgeon` object from the DB, so the frontend can share it as context. We also
-    // set the `surgeon` value in global server state to the returned `Surgeon`.
+    // global `ext::auth::ClientTokenIdentity`. If there is a `Surgeon` with the same identity,
+    // then we return the `Surgeon` object from the DB, so the frontend can share it as context.
+    // We also set the `surgeon` value in global server state to the returned `Surgeon`.
     //
     // If there isn't a matching `Surgeon`, then the surgeon still needs to complete the signup
     // flow. We just return an empty set, and respond to that on the frontend with a redirect to
@@ -130,10 +137,14 @@ select QuerySurgeon if signed_in = true else {{}};
         .query_required_single::<Option<Surgeon>, _>(surgeon_query, &())
         .await?;
 
+    dbg!(&surgeon);
+
     if surgeon.is_some() {
         expect_context::<AppState>().surgeon.set(surgeon.clone())?;
         Ok(surgeon)
     } else {
+        // todo: this is redundant because you already queried this above, so you can return a tuple
+        // instead of just a Surgeon and get this value from the one query
         let is_signed_in = client
             .query_required_single::<bool, _>(
                 format!(r#"select global ext::auth::client_token = "{auth_token}""#),

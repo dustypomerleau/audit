@@ -74,14 +74,14 @@ pub struct FormSurgeon {
 }
 
 #[cfg_attr(feature = "ssr", derive(Queryable))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Site {
     name: String,
 }
 
 /// A unique surgeon
 #[cfg_attr(feature = "ssr", derive(Queryable))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Surgeon {
     /// A unique, valid email.
     pub email: String,
