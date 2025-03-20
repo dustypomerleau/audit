@@ -7,6 +7,11 @@ use leptos_router::{components::Outlet, hooks::use_navigate};
 
 #[component]
 pub fn Protected() -> impl IntoView {
+    // resource call blows up with:
+    //
+    // thread 'tokio-runtime-worker' panicked at
+    // /Users/dn/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/js-sys-0.3.77/src/lib.rs:6063:
+    // 9: cannot access imported statics on non-wasm targets
     let surgeon_resource = OnceResource::new(get_authorized_surgeon());
 
     view! {
