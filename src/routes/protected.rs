@@ -1,18 +1,24 @@
-use crate::{components::Nav, db::get_authorized_surgeon};
-use leptos::prelude::{
-    ElementChild, IntoAny, IntoView, OnceResource, Suspend, Suspense, component, provide_context,
-    view,
+#[cfg(feature = "ssr")] use crate::db::db;
+#[cfg(feature = "ssr")] use crate::state::AppState;
+use crate::{components::Nav, surgeon::Surgeon};
+#[cfg(feature = "ssr")] use axum_extra::extract::{CookieJar, cookie::Cookie};
+#[cfg(feature = "ssr")] use gel_tokio::Queryable;
+use leptos::{
+    prelude::{
+        Get, IntoAny, IntoView, Resource, RwSignal, ServerFnError, Set, Suspend, Suspense,
+        component, expect_context, provide_context, server, view,
+    },
+    server::OnceResource,
 };
+#[cfg(feature = "ssr")] use leptos_axum::{extract, redirect};
 use leptos_router::{components::Outlet, hooks::use_navigate};
 
 #[component]
 pub fn Protected() -> impl IntoView {
-    // resource call blows up with:
-    //
-    // thread 'tokio-runtime-worker' panicked at
-    // /Users/dn/.cargo/registry/src/index.crates.io-1949cf8c6b5b557f/js-sys-0.3.77/src/lib.rs:6063:
-    // 9: cannot access imported statics on non-wasm targets
-    let surgeon_resource = OnceResource::new(get_authorized_surgeon());
+    let current_surgeon = RwSignal::<Option<Surgeon>>::new(None);
+
+    let surgeon_resource =
+        Resource::new(move || current_surgeon.get(), |_| get_authorized_surgeon());
 
     view! {
         <Suspense fallback=move || {
@@ -21,8 +27,8 @@ pub fn Protected() -> impl IntoView {
             {move || Suspend::new(async move {
                 if let Ok(Some(surgeon)) = surgeon_resource.await {
                     if surgeon.terms.is_some() {
-                        dbg!(&surgeon);
-                        provide_context(surgeon);
+                        current_surgeon.set(Some(surgeon));
+                        provide_context(current_surgeon);
 
                         view! {
                             <Nav />
@@ -31,7 +37,10 @@ pub fn Protected() -> impl IntoView {
                             .into_any()
                     } else {
                         let navigate = use_navigate();
-                        navigate("/new/terms", Default::default());
+                        navigate(
+                            &format!("/new/terms?email={}", surgeon.email),
+                            Default::default(),
+                        );
                         ().into_any()
                     }
                 } else {
@@ -41,5 +50,93 @@ pub fn Protected() -> impl IntoView {
                 }
             })}
         </Suspense>
+    }
+}
+
+#[server]
+pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> {
+    let auth_token = extract::<CookieJar>()
+        .await?
+        .get("gel-auth-token")
+        .unwrap_or(&Cookie::new(
+            "gel-auth-token",
+            "the unwrap on `gel-auth-token` failed because it was `None`",
+        ))
+        .value()
+        .to_string();
+    dbg!(&auth_token);
+
+    // In this query, `signed_in` returns a bool that tells us whether the JWT in the
+    // `gel-auth-token` cookie matches the JWT stored as a global on the DB client. This is our
+    // first check that nothing is fundamentally wrong with the session.
+    //
+    // Then we check the `Identity` that matches that JWT, which is computed and stored as the
+    // global `ext::auth::ClientTokenIdentity`. If there is a `Surgeon` with the same identity,
+    // then we return the `Surgeon` object from the DB, so the frontend can share it as context.
+    // We also set the `surgeon` value in global server state to the returned `Surgeon`.
+    //
+    // If there isn't a matching `Surgeon`, then the surgeon still needs to complete the signup
+    // flow. We just return an empty set, and respond to that with a redirect to the signup form and
+    // then the terms.
+    //
+    let surgeon_query = format!(
+        r#"
+with
+    signed_in := (select "{auth_token}" = (select global ext::auth::client_token)),
+    identity := (select global ext::auth::ClientTokenIdentity),
+
+    QuerySurgeon := (select Surgeon {{
+        email,
+        terms,
+        first_name,
+        last_name,
+        default_site: {{ name }},
+        sia: {{
+            right: {{ power, axis }},
+            left: {{ power, axis }}
+        }}
+    }} filter .identity = identity)
+
+select {{
+    signed_in := signed_in,
+    surgeon := QuerySurgeon if signed_in = true else {{}}
+}};
+        "#
+    );
+
+    #[derive(Debug, Queryable)]
+    struct SurgeonQuery {
+        signed_in: bool,
+        surgeon: Option<Surgeon>,
+    }
+
+    let client = db().await?;
+
+    let surgeon_result = client
+        .query_single::<SurgeonQuery, _>(surgeon_query, &())
+        .await;
+    dbg!(&surgeon_result);
+
+    match surgeon_result {
+        Ok(Some(SurgeonQuery {
+            signed_in: true,
+            surgeon: Some(surgeon),
+        })) => {
+            if surgeon.terms.is_some() {
+                expect_context::<AppState>()
+                    .surgeon
+                    .set(Some(surgeon.clone()))?;
+
+                Ok(Some(surgeon))
+            } else {
+                redirect(&format!("/new/terms?email={}", surgeon.email));
+                Ok(None)
+            }
+        }
+
+        _ => {
+            redirect("/signin");
+            Ok(None)
+        }
     }
 }

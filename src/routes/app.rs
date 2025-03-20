@@ -7,7 +7,7 @@ use leptos::prelude::{
 };
 use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
 use leptos_router::{
-    StaticSegment,
+    SsrMode, StaticSegment,
     components::{ParentRoute, Route, Router, Routes},
 };
 

@@ -166,11 +166,8 @@ pub async fn handle_pkce_code(
         .await
         .map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
-    let AuthResponse {
-        auth_token,
-        identity_id,
-        ..
-    } = serde_json::from_str(&response).map_err(|err| AuthError::Json(format!("{err:?}")))?;
+    let AuthResponse { auth_token, .. } =
+        serde_json::from_str(&response).map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
     let db_with_globals = create_client()
         .await
@@ -196,7 +193,7 @@ pub async fn handle_pkce_code(
     // Add the new auth token cookie, and remove the verifier, which is no longer needed.
     let jar = jar.add(cookie).remove(Cookie::from("gel-pkce-verifier"));
 
-    Ok((jar, Redirect::to("/protected/add")))
+    Ok((jar, Redirect::to("/gateway")))
 }
 
 /// This function is called when the current surgeon logs out, removing the auth token from the

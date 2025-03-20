@@ -74,14 +74,14 @@ pub struct FormSurgeon {
 }
 
 #[cfg_attr(feature = "ssr", derive(Queryable))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Site {
     name: String,
 }
 
 /// A unique surgeon
 #[cfg_attr(feature = "ssr", derive(Queryable))]
-#[derive(Clone, Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Surgeon {
     /// A unique, valid email.
     pub email: String,
@@ -122,7 +122,9 @@ mod tests {
             terms: None,
             first_name: Some("sample_first_name".to_string()),
             last_name: Some("sample_last_name".to_string()),
-            default_site: Some("sample_default_site".to_string()),
+            default_site: Some(Site {
+                name: "sample_site_name".to_string(),
+            }),
 
             sia: Some(SurgeonSia {
                 right: Sia {

@@ -63,95 +63,6 @@ pub async fn db() -> Result<Client, DbError> {
 }
 
 #[server]
-pub async fn is_signed_in() -> Result<bool, ServerFnError> {
-    let auth_token = extract::<CookieJar>()
-        .await?
-        .get("gel-auth-token")
-        .unwrap_or(&Cookie::new("gel-auth-token", "mock auth token"))
-        .to_string();
-
-    let query = format!(r#"select "{auth_token}" = (select global ext::auth::client_token);"#);
-
-    let has_auth_token = db()
-        .await?
-        .query_required_single::<bool, _>(query, &())
-        .await
-        // unwrap_or_default() works here, but for such an important check, be explicit.
-        .unwrap_or(false);
-
-    Ok(has_auth_token)
-}
-
-#[server]
-pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> {
-    let auth_token = extract::<CookieJar>()
-        .await?
-        .get("gel-auth-token")
-        .unwrap_or(&Cookie::new("gel-auth-token", "mock auth token"))
-        .to_string();
-
-    // In this query, `signed_in` returns a bool that tells us whether the JWT in the
-    // `gel-auth-token` cookie matches the JWT stored as a global on the DB client. This is our
-    // first check that nothing is fundamentally wrong with the session.
-    //
-    // Then we check the `Identity` that matches that JWT, which is computed and stored as the
-    // global `ext::auth::ClientTokenIdentity`. If there is a `Surgeon` with the same identity, then
-    // we return the `Surgeon` object from the DB, so the frontend can share it as context. We also
-    // set the `surgeon` value in global server state to the returned `Surgeon`.
-    //
-    // If there isn't a matching `Surgeon`, then the surgeon still needs to complete the signup
-    // flow. We just return an empty set, and respond to that on the frontend with a redirect to
-    // the signup form and then the terms.
-    let surgeon_query = format!(
-        r#"
-with
-    signed_in := (select global ext::auth::client_token = "{auth_token}"),
-    identity := (select global ext::auth::ClientTokenIdentity),
-
-    QuerySurgeon := (select Surgeon {{
-        email,
-        terms,
-        first_name,
-        last_name,
-        default_site: {{ name }},
-        sia: {{
-            right: {{ power, axis }},
-            left: {{ power, axis }}
-        }}
-    }} filter .identity = identity)
-
-select QuerySurgeon if signed_in = true else {{}};
-        "#
-    );
-
-    let client = db().await?;
-
-    let surgeon = client
-        .query_required_single::<Option<Surgeon>, _>(surgeon_query, &())
-        .await?;
-
-    if surgeon.is_some() {
-        expect_context::<AppState>().surgeon.set(surgeon.clone())?;
-        Ok(surgeon)
-    } else {
-        let is_signed_in = client
-            .query_required_single::<bool, _>(
-                format!(r#"select global ext::auth::client_token = "{auth_token}""#),
-                &(),
-            )
-            .await?;
-
-        if is_signed_in {
-            redirect("/new/signup");
-            Ok(None)
-        } else {
-            redirect("/signin");
-            Ok(None)
-        }
-    }
-}
-
-#[server]
 pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
     let FormSurgeon {
         email,
@@ -211,13 +122,18 @@ select QuerySurgeon {{
         "#
     );
 
+    // We use `query_required_single` in this case, because failure to return a Surgeon means our
+    // insert failed.
     if let Ok(surgeon) = db()
         .await?
         .query_required_single::<Surgeon, _>(query, &())
         .await
     {
-        expect_context::<AppState>().surgeon.set(Some(surgeon))?;
-        redirect("/new/terms");
+        expect_context::<AppState>()
+            .surgeon
+            .set(Some(surgeon.clone()))?;
+
+        redirect(&format!("/new/terms?email={}", surgeon.email));
     } else {
         // if we fail on the insert, then either:
         // 1. something is wrong with the form validation
