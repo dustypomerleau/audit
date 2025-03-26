@@ -26,6 +26,13 @@ pub fn Terms() -> impl IntoView {
     //   the right value for Surgeon::terms?)
     // 3. redirects to `/add`
 
+    // bookmark: todo: `db::insert_surgeon` is successfully inserting the surgeon and
+    // attempting to redirect here, but the view is not showing anything
+    // I think that means the problem is actually in `new.rs` with showing the `Outlet`.
+    // It's likely the same issue with getting the auth token when the redirect happens from
+    // the server. You can either solve it for real, or put the `terms` route outside of `new` - I
+    // actually favor the latter atm
+    // or maybe try your navigate() idea, with a route just for that purpose
     if let Ok(email_query) = use_query::<EmailQuery>().read().as_ref() {
         let email = email_query.email.clone();
         let accept_terms_action = ServerAction::<AcceptTerms>::new();

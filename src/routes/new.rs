@@ -14,9 +14,6 @@ pub fn New() -> impl IntoView {
         <Suspense fallback=move || {
             view! { "Checking the signin status..." }
         }>
-            // bookmark: todo: this redirect is happening even after a successful
-            // signin when the user is new. They should be able to click the new
-            // user link and get to this form
             {move || Suspend::new(async move {
                 if let Ok(true) = surgeon_resource.await {
                     view! { <Outlet /> }.into_any()
