@@ -44,6 +44,7 @@ pub fn Terms() -> impl IntoView {
     };
 }
 
+// todo: we need to update both the DB Surgeon and the server state
 #[server]
 pub async fn accept_terms(email: String) -> Result<(), ServerFnError> {
     let query = format!(

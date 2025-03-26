@@ -224,13 +224,6 @@ pub async fn handle_kill_session(
     Ok((jar, Redirect::to("/")))
 }
 
-// handles setting the current surgeon's properties to `terms: datetime_current()` in both state and
-// the DB
-#[debug_handler]
-pub async fn handle_agree() -> Result<Redirect, AuthError> {
-    todo!()
-}
-
 pub async fn get_jwt_cookie() -> Result<String, ServerFnError> {
     let auth_token = extract::<CookieJar>()
         .await?
