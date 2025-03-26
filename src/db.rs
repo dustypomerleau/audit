@@ -141,7 +141,7 @@ select QuerySurgeon {{
         //
         // we'll have to figure out a way to surface those errors, but for now just restart the
         // flow.
-        redirect("/signin");
+        redirect("/");
     }
 
     Ok(())

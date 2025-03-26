@@ -45,15 +45,6 @@ pub fn App() -> impl IntoView {
             <main>
                 // note: plain Axum server routes are not represented here,
                 // as they are added directly to the router in `src/main.rs`.
-                //
-                // todo: you need 2 types of protected routes:
-                //
-                // 1. protected route that simply checks for a global
-                // ext::auth::ClientTokenIdentity. Failure redirects to "/signin".
-                //
-                // 2. protected route that checks for a Surgeon with .identity =
-                // ext::auth::ClientTokenIdentity (protects all the logged-in content).
-                // Failure redirects to "/signin".
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=Landing />
                     <Route path=StaticSegment("gateway") view=Gateway />

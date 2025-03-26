@@ -45,7 +45,7 @@ pub fn Protected() -> impl IntoView {
                     }
                 } else {
                     let navigate = use_navigate();
-                    navigate("/signin", Default::default());
+                    navigate("/", Default::default());
                     ().into_any()
                 }
             })}
@@ -135,7 +135,7 @@ select {{
         }
 
         _ => {
-            redirect("/signin");
+            redirect("/");
             Ok(None)
         }
     }

@@ -20,7 +20,7 @@ pub fn New() -> impl IntoView {
                     view! { <Outlet /> }.into_any()
                 } else {
                     let navigate = use_navigate();
-                    navigate("/signin", Default::default());
+                    navigate("/", Default::default());
                     ().into_any()
                 }
             })}
