@@ -10,6 +10,8 @@ use axum_extra::extract::{
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
 use gel_tokio::create_client;
+use leptos::prelude::ServerFnError;
+use leptos_axum::extract;
 use rand::{Rng, rng};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -227,6 +229,21 @@ pub async fn handle_kill_session(
 #[debug_handler]
 pub async fn handle_agree() -> Result<Redirect, AuthError> {
     todo!()
+}
+
+pub async fn get_jwt_cookie() -> Result<String, ServerFnError> {
+    let auth_token = extract::<CookieJar>()
+        .await?
+        .get("gel-auth-token")
+        .unwrap_or(&Cookie::new(
+            "gel-auth-token",
+            "the unwrap on `gel-auth-token` failed because it was `None`",
+        ))
+        .value()
+        .to_string();
+    dbg!(&auth_token);
+
+    Ok(auth_token)
 }
 
 #[cfg(test)]

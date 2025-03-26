@@ -1,10 +1,9 @@
+#[cfg(feature = "ssr")] use crate::auth::get_jwt_cookie;
 #[cfg(feature = "ssr")] use crate::db::db;
-#[cfg(feature = "ssr")] use axum_extra::extract::{CookieJar, cookie::Cookie};
 use leptos::{
     prelude::{IntoAny, IntoView, ServerFnError, Suspend, Suspense, component, server, view},
     server::OnceResource,
 };
-#[cfg(feature = "ssr")] use leptos_axum::extract;
 use leptos_router::{components::Outlet, hooks::use_navigate};
 
 #[component]
@@ -15,6 +14,9 @@ pub fn New() -> impl IntoView {
         <Suspense fallback=move || {
             view! { "Checking the signin status..." }
         }>
+            // bookmark: todo: this redirect is happening even after a successful
+            // signin when the user is new. They should be able to click the new
+            // user link and get to this form
             {move || Suspend::new(async move {
                 if let Ok(true) = surgeon_resource.await {
                     view! { <Outlet /> }.into_any()
@@ -30,15 +32,7 @@ pub fn New() -> impl IntoView {
 
 #[server]
 pub async fn is_signed_in() -> Result<bool, ServerFnError> {
-    let auth_token = extract::<CookieJar>()
-        .await?
-        .get("gel-auth-token")
-        .unwrap_or(&Cookie::new(
-            "gel-auth-token",
-            "the unwrap on `gel-auth-token` failed because it was `None`",
-        ))
-        .to_string();
-    dbg!(&auth_token);
+    let auth_token = get_jwt_cookie().await?;
 
     let query = format!(r#"select "{auth_token}" = (select global ext::auth::client_token);"#);
 

@@ -1,16 +1,13 @@
+#[cfg(feature = "ssr")] use crate::auth::get_jwt_cookie;
 #[cfg(feature = "ssr")] use crate::db::db;
 #[cfg(feature = "ssr")] use crate::state::AppState;
 use crate::{components::Nav, surgeon::Surgeon};
-#[cfg(feature = "ssr")] use axum_extra::extract::{CookieJar, cookie::Cookie};
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
-use leptos::{
-    prelude::{
-        Get, IntoAny, IntoView, Resource, RwSignal, ServerFnError, Set, Suspend, Suspense,
-        component, expect_context, provide_context, server, view,
-    },
-    server::OnceResource,
+use leptos::prelude::{
+    Get, IntoAny, IntoView, Resource, RwSignal, ServerFnError, Set, Suspend, Suspense, component,
+    expect_context, provide_context, server, view,
 };
-#[cfg(feature = "ssr")] use leptos_axum::{extract, redirect};
+#[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::{components::Outlet, hooks::use_navigate};
 
 #[component]
@@ -55,16 +52,7 @@ pub fn Protected() -> impl IntoView {
 
 #[server]
 pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> {
-    let auth_token = extract::<CookieJar>()
-        .await?
-        .get("gel-auth-token")
-        .unwrap_or(&Cookie::new(
-            "gel-auth-token",
-            "the unwrap on `gel-auth-token` failed because it was `None`",
-        ))
-        .value()
-        .to_string();
-    dbg!(&auth_token);
+    let auth_token = get_jwt_cookie().await?;
 
     // In this query, `signed_in` returns a bool that tells us whether the JWT in the
     // `gel-auth-token` cookie matches the JWT stored as a global on the DB client. This is our
