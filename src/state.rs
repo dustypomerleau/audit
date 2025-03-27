@@ -1,6 +1,6 @@
 use crate::surgeon::Surgeon;
-#[cfg(feature = "ssr")] use axum_macros::FromRef;
-#[cfg(feature = "ssr")] use gel_tokio::Client;
+use axum_macros::FromRef;
+use gel_tokio::Client;
 use leptos::prelude::LeptosOptions;
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, PoisonError, RwLock};
@@ -16,7 +16,6 @@ impl<T> From<PoisonError<T>> for StatePoisonedError {
     }
 }
 
-#[cfg(feature = "ssr")]
 // `derive(FromRef)` is needed to make use of `leptos_axum`'s `extract_with_state()`
 #[derive(Clone, Debug, FromRef)]
 pub struct AppState {

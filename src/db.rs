@@ -1,8 +1,9 @@
+// todo: separate out all these configged functions into a module, and just config that
 #[cfg(feature = "ssr")] use crate::state::AppState;
-use crate::state::StatePoisonedError;
+#[cfg(feature = "ssr")] use crate::state::StatePoisonedError;
 #[cfg(feature = "ssr")] use gel_tokio::Client;
-use leptos::prelude::expect_context;
-use thiserror::Error;
+#[cfg(feature = "ssr")] use leptos::prelude::expect_context;
+#[cfg(feature = "ssr")] use thiserror::Error;
 
 #[derive(Debug, Error)]
 #[cfg(feature = "ssr")]

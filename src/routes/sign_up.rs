@@ -1,17 +1,15 @@
+use crate::surgeon::FormSurgeon;
+#[cfg(feature = "ssr")]
 use crate::{
     db::{db, some_or_empty, to_cd},
-    state::AppState,
-    surgeon::{Email, FormSurgeon, Surgeon},
+    surgeon::set_current_surgeon,
+    surgeon::{Email, Surgeon},
 };
-#[cfg(feature = "ssr")] use leptos::prelude::server;
-use leptos::{
-    prelude::{
-        ActionForm, ElementChild, IntoView, ServerFnError, StyleAttribute, component,
-        expect_context, view,
-    },
-    server::ServerAction,
+use leptos::prelude::{
+    ActionForm, ElementChild, IntoView, ServerAction, ServerFnError, StyleAttribute, component,
+    server, view,
 };
-use leptos_axum::redirect;
+#[cfg(feature = "ssr")] use leptos_axum::redirect;
 
 #[component]
 pub fn SignUp() -> impl IntoView {
@@ -157,11 +155,8 @@ select QuerySurgeon {{
         .query_required_single::<Surgeon, _>(query, &())
         .await
     {
-        expect_context::<AppState>()
-            .surgeon
-            .set(Some(surgeon.clone()))?;
-
-        redirect(&format!("/new/terms?email={}", surgeon.email));
+        set_current_surgeon(Some(surgeon)).await?;
+        redirect("/new/terms");
     } else {
         // if we fail on the insert, then either:
         // 1. something is wrong with the form validation

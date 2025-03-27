@@ -1,12 +1,9 @@
-#[cfg(feature = "ssr")] use crate::db::db;
-use crate::surgeon::Surgeon;
-use leptos::{
-    prelude::{
-        ElementChild, IntoAny, IntoView, OnAttribute, Read, ServerFnError, component, server, view,
-    },
-    server::ServerAction,
+#[cfg(feature = "ssr")] use crate::surgeon::Surgeon;
+#[cfg(feature = "ssr")] use crate::{db::db, surgeon::set_current_surgeon};
+use leptos::prelude::{
+    ElementChild, IntoView, OnAttribute, ServerAction, ServerFnError, component, server, view,
 };
-use leptos_router::hooks::{use_navigate, use_query};
+#[cfg(feature = "ssr")] use leptos_axum::redirect;
 
 #[component]
 pub fn Terms() -> impl IntoView {
@@ -35,9 +32,16 @@ update Surgeon filter .identity = (select global ext::auth::ClientTokenIdentity)
 set {{ terms := datetime_current() }};
     "#;
 
-    db().await?
+    if let Ok(surgeon) = db()
+        .await?
         .query_required_single::<Surgeon, _>(query, &())
-        .await?;
+        .await
+    {
+        set_current_surgeon(Some(surgeon)).await?;
+        redirect("/protected/add");
+    } else {
+        redirect("/");
+    }
 
     Ok(())
 }

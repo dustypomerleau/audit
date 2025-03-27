@@ -1,5 +1,4 @@
-#[cfg(feature = "ssr")] use crate::auth::get_jwt_cookie;
-#[cfg(feature = "ssr")] use crate::db::db;
+#[cfg(feature = "ssr")] use crate::{auth::get_jwt_cookie, db::db};
 use leptos::{
     prelude::{IntoAny, IntoView, ServerFnError, Suspend, Suspense, component, server, view},
     server::OnceResource,
