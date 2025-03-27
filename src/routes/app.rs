@@ -1,5 +1,5 @@
 use crate::routes::{
-    Add, Gateway, Instructions, Landing, List, New, Protected, Report, SignUp, Terms,
+    Add, Bounce, Gateway, Instructions, Landing, List, New, Protected, Report, SignUp, Terms,
 };
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
@@ -47,6 +47,7 @@ pub fn App() -> impl IntoView {
                 // as they are added directly to the router in `src/main.rs`.
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=Landing />
+                    <Route path=StaticSegment("bounce") view=Bounce />
                     <Route path=StaticSegment("gateway") view=Gateway />
                     <ParentRoute path=StaticSegment("new") view=New>
                         <Route path=StaticSegment("signup") view=SignUp />

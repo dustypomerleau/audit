@@ -1,6 +1,7 @@
 // mod error;
 mod add;
 mod app;
+mod bounce;
 mod gateway;
 mod instructions;
 mod landing;
@@ -14,6 +15,7 @@ mod terms;
 // pub use error::*;
 pub use add::*;
 pub use app::*;
+pub use bounce::*;
 pub use gateway::*;
 pub use instructions::*;
 pub use landing::*;
