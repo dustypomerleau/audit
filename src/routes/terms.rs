@@ -28,8 +28,21 @@ pub fn Terms() -> impl IntoView {
 #[server]
 pub async fn accept_terms() -> Result<(), ServerFnError> {
     let query = r#"
-update Surgeon filter .identity = (select global ext::auth::ClientTokenIdentity)
-set {{ terms := datetime_current() }};
+select (
+    update Surgeon
+    filter .identity = (select global ext::auth::ClientTokenIdentity)
+    set {{ terms := datetime_current() }}
+) {{
+    email,
+    terms,
+    first_name,
+    last_name,
+    default_site: {{ name }},
+    sia: {{
+        right: {{ power, axis}},
+        left: {{ power, axis }}
+    }}
+}};
     "#;
 
     if let Ok(surgeon) = db()

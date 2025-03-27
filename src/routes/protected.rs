@@ -66,13 +66,38 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> 
     // flow. We just return an empty set, and respond to that with a redirect to the signup form and
     // then the terms.
     //
+    // bookmark: todo:
+    // [src/routes/protected.rs:103:5] &surgeon_result = Err(
+    //     Error(
+    //         Inner {
+    //             code: 4278386176,
+    //             messages: [],
+    //             error: Some(
+    //                 FieldNumber {
+    //                     unexpected: 1,
+    //                     expected: 6,
+    //                 },
+    //             ),
+    //             headers: {},
+    //             fields: {
+    //                 (
+    //                     "capabilities",
+    //                     TypeId(0x8fa823c1d68ad04dfa75e7b1dc29a89e),
+    //                 ): Any { .. },
+    //             },
+    //         },
+    //     ),
+    // )
     let query = format!(
         r#"
 with
     signed_in := (select "{auth_token}" = (select global ext::auth::client_token)),
-    identity := (select global ext::auth::ClientTokenIdentity),
+    identity := (select global ext::auth::ClientTokenIdentity)
 
-    QuerySurgeon := (select Surgeon {{
+select {{
+    signed_in := signed_in,
+
+    surgeon := (select Surgeon {{
         email,
         terms,
         first_name,
@@ -83,10 +108,6 @@ with
             left: {{ power, axis }}
         }}
     }} filter .identity = identity)
-
-select {{
-    signed_in := signed_in,
-    surgeon := QuerySurgeon if signed_in = true else {{}}
 }};
         "#
     );
