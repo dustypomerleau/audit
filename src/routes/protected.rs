@@ -66,6 +66,28 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> 
     // flow. We just return an empty set, and respond to that with a redirect to the signup form and
     // then the terms.
     //
+    // bookmark: todo:
+    // [src/routes/protected.rs:103:5] &surgeon_result = Err(
+    //     Error(
+    //         Inner {
+    //             code: 4278386176,
+    //             messages: [],
+    //             error: Some(
+    //                 FieldNumber {
+    //                     unexpected: 1,
+    //                     expected: 6,
+    //                 },
+    //             ),
+    //             headers: {},
+    //             fields: {
+    //                 (
+    //                     "capabilities",
+    //                     TypeId(0x8fa823c1d68ad04dfa75e7b1dc29a89e),
+    //                 ): Any { .. },
+    //             },
+    //         },
+    //     ),
+    // )
     let query = format!(
         r#"
 with
