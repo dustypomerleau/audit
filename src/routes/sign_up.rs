@@ -1,8 +1,17 @@
-use crate::db::InsertSurgeon;
+use crate::{
+    db::{db, some_or_empty, to_cd},
+    state::AppState,
+    surgeon::{Email, FormSurgeon, Surgeon},
+};
+#[cfg(feature = "ssr")] use leptos::prelude::server;
 use leptos::{
-    prelude::{ActionForm, ElementChild, IntoView, StyleAttribute, component, view},
+    prelude::{
+        ActionForm, ElementChild, IntoView, ServerFnError, StyleAttribute, component,
+        expect_context, view,
+    },
     server::ServerAction,
 };
+use leptos_axum::redirect;
 
 #[component]
 pub fn SignUp() -> impl IntoView {
@@ -79,4 +88,89 @@ pub fn SignUp() -> impl IntoView {
             </div>
         </ActionForm>
     }
+}
+
+#[server]
+pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
+    let FormSurgeon {
+        email,
+        first_name,
+        last_name,
+        default_site,
+        sia_right_power,
+        sia_right_axis,
+        sia_left_power,
+        sia_left_axis,
+    } = surgeon;
+
+    let email = Email::new(&email)?.inner();
+
+    let (first_name, last_name, default_site) = (
+        some_or_empty(first_name),
+        some_or_empty(last_name),
+        some_or_empty(default_site),
+    );
+
+    let (sia_right_power, sia_left_power) = (to_cd(sia_right_power), to_cd(sia_left_power));
+
+    let query = format!(
+        r#"
+with QuerySurgeon := (
+    insert Surgeon {{
+        identity := (select global ext::auth::ClientTokenIdentity),
+        email := "{email}",
+        first_name := {first_name},
+        last_name := {last_name},
+
+        default_site := (select(insert Site {{
+            name := {default_site} 
+        }} unless conflict on .name else (select Site))),
+
+        sia := (select(insert SurgeonSia {{
+            right := (select(insert Sia {{
+                power := {sia_right_power}, axis := {sia_right_axis}
+            }})),
+            left := (select(insert Sia {{
+                power := {sia_left_power}, axis := {sia_left_axis}
+            }}))
+        }}))
+    }} unless conflict on .email else (select Surgeon)
+)
+select QuerySurgeon {{
+    email,
+    terms,
+    first_name,
+    last_name,
+    default_site: {{ name }},
+    sia: {{
+        right: {{ power, axis }},
+        left: {{ power, axis }}
+    }}
+}};
+        "#
+    );
+
+    // We use `query_required_single` in this case, because failure to return a Surgeon means our
+    // insert failed.
+    if let Ok(surgeon) = db()
+        .await?
+        .query_required_single::<Surgeon, _>(query, &())
+        .await
+    {
+        expect_context::<AppState>()
+            .surgeon
+            .set(Some(surgeon.clone()))?;
+
+        redirect(&format!("/new/terms?email={}", surgeon.email));
+    } else {
+        // if we fail on the insert, then either:
+        // 1. something is wrong with the form validation
+        // 2. the user already exists (email conflict)
+        //
+        // we'll have to figure out a way to surface those errors, but for now just restart the
+        // flow.
+        redirect("/");
+    }
+
+    Ok(())
 }
