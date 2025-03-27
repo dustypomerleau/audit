@@ -67,7 +67,7 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> 
     // flow. We just return an empty set, and respond to that with a redirect to the signup form and
     // then the terms.
     //
-    let surgeon_query = format!(
+    let query = format!(
         r#"
 with
     signed_in := (select "{auth_token}" = (select global ext::auth::client_token)),
@@ -100,9 +100,7 @@ select {{
 
     let client = db().await?;
 
-    let surgeon_result = client
-        .query_single::<SurgeonQuery, _>(surgeon_query, &())
-        .await;
+    let surgeon_result = client.query_single::<SurgeonQuery, _>(query, &()).await;
     dbg!(&surgeon_result);
 
     match surgeon_result {
