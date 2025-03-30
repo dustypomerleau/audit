@@ -2,9 +2,12 @@
 use crate::{components::Nav, surgeon::Surgeon};
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
 #[cfg(feature = "ssr")] use leptos::prelude::expect_context;
-use leptos::prelude::{
-    Get, IntoAny, IntoView, Resource, RwSignal, ServerFnError, Set, Suspend, Suspense, component,
-    provide_context, server, view,
+use leptos::{
+    prelude::{
+        IntoAny, IntoView, RwSignal, ServerFnError, Set, Suspend, Suspense, component,
+        provide_context, server, view,
+    },
+    server::OnceResource,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::{components::Outlet, hooks::use_navigate};
@@ -12,9 +15,7 @@ use leptos_router::{components::Outlet, hooks::use_navigate};
 #[component]
 pub fn Protected() -> impl IntoView {
     let current_surgeon = RwSignal::<Option<Surgeon>>::new(None);
-
-    let surgeon_resource =
-        Resource::new(move || current_surgeon.get(), |_| get_authorized_surgeon());
+    let surgeon_resource = OnceResource::new(get_authorized_surgeon());
 
     view! {
         <Suspense fallback=move || {
@@ -33,10 +34,7 @@ pub fn Protected() -> impl IntoView {
                             .into_any()
                     } else {
                         let navigate = use_navigate();
-                        navigate(
-                            &format!("/new/terms?email={}", surgeon.email),
-                            Default::default(),
-                        );
+                        navigate("/terms", Default::default());
                         ().into_any()
                     }
                 } else {
@@ -66,28 +64,8 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> 
     // flow. We just return an empty set, and respond to that with a redirect to the signup form and
     // then the terms.
     //
-    // bookmark: todo:
-    // [src/routes/protected.rs:103:5] &surgeon_result = Err(
-    //     Error(
-    //         Inner {
-    //             code: 4278386176,
-    //             messages: [],
-    //             error: Some(
-    //                 FieldNumber {
-    //                     unexpected: 1,
-    //                     expected: 6,
-    //                 },
-    //             ),
-    //             headers: {},
-    //             fields: {
-    //                 (
-    //                     "capabilities",
-    //                     TypeId(0x8fa823c1d68ad04dfa75e7b1dc29a89e),
-    //                 ): Any { .. },
-    //             },
-    //         },
-    //     ),
-    // )
+    // todo: consider whether you need to check signed_in at all, because if the user isn't signed
+    // in, then there would be no ClientTokenIdentity.
     let query = format!(
         r#"
 with
@@ -135,7 +113,7 @@ select {{
 
                 Ok(Some(surgeon))
             } else {
-                redirect(&format!("/new/terms?email={}", surgeon.email));
+                redirect("/terms");
                 Ok(None)
             }
         }

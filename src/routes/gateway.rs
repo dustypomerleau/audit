@@ -6,7 +6,7 @@ pub fn Gateway() -> impl IntoView {
         <div style="display: grid; gap: 20px;">
             <div>"Welcome to the gateway"</div>
             <a href="/protected/add">"Existing users"</a>
-            <a href="/new/signup">"New user sign up"</a>
+            <a href="/signup">"New user sign up"</a>
         </div>
     }
 }

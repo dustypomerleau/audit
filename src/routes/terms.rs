@@ -1,7 +1,8 @@
 #[cfg(feature = "ssr")] use crate::surgeon::Surgeon;
 #[cfg(feature = "ssr")] use crate::{db::db, surgeon::set_current_surgeon};
 use leptos::prelude::{
-    ElementChild, IntoView, OnAttribute, ServerAction, ServerFnError, component, server, view,
+    ElementChild, IntoView, OnAttribute, ServerAction, ServerFnError, StyleAttribute, component,
+    server, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 
@@ -16,15 +17,31 @@ pub fn Terms() -> impl IntoView {
     let accept_terms_action = ServerAction::<AcceptTerms>::new();
 
     view! {
-        "agree to the terms before proceeding"
-        <button on:click=move |_| {
-            accept_terms_action.dispatch(AcceptTerms {});
-        }></button>
+        "I'm just an ophthalmologist, like you. I am doing everything I can to ensure privacy and security, but I'm not a professional developer. Please agree to the terms before continuing:"
+        <ul>
+            <li>
+                "You agree to be honest. The data you enter should be accurate, and there should be"
+                <emph>"no selection bias"</emph>"."
+            </li>
+            <li>
+                "You accept that this is beta software. You will not hold me or the site liable for any data loss or privacy breach."
+            </li>
+        </ul>
+        <button
+            style="width: 10rem; height: 4rem"
+            on:click=move |_| {
+                accept_terms_action.dispatch(AcceptTerms {});
+            }
+        >
+            "Accept the terms"
+        </button>
     }
 }
 
 // todo: we need to update both the DB Surgeon and the server state
 // also, we were redirecting on the client if there was a problem, but easier to just do that here
+//
+// todo: this query won't match the Surgeon struct because you didn't get the fields
 #[server]
 pub async fn accept_terms() -> Result<(), ServerFnError> {
     let query = r#"

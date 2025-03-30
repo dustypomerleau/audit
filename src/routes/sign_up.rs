@@ -156,14 +156,18 @@ select QuerySurgeon {{
         .await
     {
         set_current_surgeon(Some(surgeon)).await?;
-        redirect("/new/terms");
+        redirect("/terms");
     } else {
-        // if we fail on the insert, then either:
+        // if we fail on the insert, then:
         // 1. something is wrong with the form validation
-        // 2. the user already exists (email conflict)
+        // 2. the user already exists (email conflict) - with the current query that will still
+        //    return a surgeon, but it will be the one that already existed in the DB
+        // 3. the user navigated directly to the signup page without first signing in (in this case,
+        //    there would be no `ext::auth::ClientTokenIdentity`)
         //
-        // we'll have to figure out a way to surface those errors, but for now just restart the
-        // flow.
+        // We'll have to figure out a way to surface those errors, but for now just restart the
+        // flow. It probably would help to redirect to a simple page that says "please sign in to
+        // continue," so that it's clear this isn't the same as the landing page.
         redirect("/");
     }
 

@@ -1,6 +1,4 @@
-use crate::routes::{
-    Add, Gateway, Instructions, Landing, List, New, Protected, Report, SignUp, Terms,
-};
+use crate::routes::{Add, Gateway, Instructions, Landing, List, Protected, Report, SignUp, Terms};
 use leptos::prelude::{
     AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
     component, view,
@@ -48,14 +46,11 @@ pub fn App() -> impl IntoView {
                 <Routes fallback=|| "Page not found.".into_view()>
                     <Route path=StaticSegment("") view=Landing />
                     <Route path=StaticSegment("gateway") view=Gateway />
-                    <ParentRoute path=StaticSegment("new") view=New>
-                        <Route path=StaticSegment("signup") view=SignUp />
-                        <Route path=StaticSegment("terms") view=Terms />
-                    </ParentRoute>
+                    <Route path=StaticSegment("signup") view=SignUp />
+                    <Route path=StaticSegment("terms") view=Terms />
                     <ParentRoute path=StaticSegment("protected") view=Protected>
-                        // <Route path=StaticSegment("") view=Fallback />
-                        <Route path=StaticSegment("add") view=Add />
                         // todo: consider making instructions a sidebar inside Add
+                        <Route path=StaticSegment("add") view=Add />
                         <Route path=StaticSegment("instructions") view=Instructions />
                         <Route path=StaticSegment("list") view=List />
                         <Route path=StaticSegment("report") view=Report />
