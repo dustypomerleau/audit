@@ -38,10 +38,6 @@ pub fn Terms() -> impl IntoView {
     }
 }
 
-// todo: we need to update both the DB Surgeon and the server state
-// also, we were redirecting on the client if there was a problem, but easier to just do that here
-//
-// bookmark: todo: there is syntax error in this query `missing }`
 #[server]
 pub async fn accept_terms() -> Result<(), ServerFnError> {
     let query = r#"
