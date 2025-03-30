@@ -41,32 +41,34 @@ pub fn Terms() -> impl IntoView {
 // todo: we need to update both the DB Surgeon and the server state
 // also, we were redirecting on the client if there was a problem, but easier to just do that here
 //
-// todo: this query won't match the Surgeon struct because you didn't get the fields
+// bookmark: todo: there is syntax error in this query `missing }`
 #[server]
 pub async fn accept_terms() -> Result<(), ServerFnError> {
     let query = r#"
 select (
     update Surgeon
     filter .identity = (select global ext::auth::ClientTokenIdentity)
-    set {{ terms := datetime_current() }}
-) {{
+    set { terms := datetime_current() }
+) {
     email,
     terms,
     first_name,
     last_name,
-    default_site: {{ name }},
-    sia: {{
-        right: {{ power, axis}},
-        left: {{ power, axis }}
-    }}
-}};
+    default_site: { name },
+    sia: {
+        right: { power, axis },
+        left: { power, axis }
+    }
+};
     "#;
 
-    if let Ok(surgeon) = db()
+    let query_result = db()
         .await?
         .query_required_single::<Surgeon, _>(query, &())
-        .await
-    {
+        .await;
+    dbg!(&query_result);
+
+    if let Ok(surgeon) = query_result {
         set_current_surgeon(Some(surgeon)).await?;
         redirect("/protected/add");
     } else {
