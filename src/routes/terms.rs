@@ -24,7 +24,7 @@ pub fn Terms() -> impl IntoView {
                 <emph>"no selection bias"</emph>"."
             </li>
             <li>
-                "You accept that this is beta software. You will not hold me or the site liable for any data loss or privacy breach."
+                "You accept that this is beta software. There will be bugs. You will not hold me or the site liable for any data loss or privacy breach."
             </li>
         </ul>
         <button
