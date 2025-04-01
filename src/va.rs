@@ -1,25 +1,10 @@
+use crate::{bounded::Bounded, case::BoundsError};
 use serde::{Deserialize, Serialize};
-use thiserror::Error;
+use std::range::RangeBounds;
 
-/// Required values in a fractional [`Va`]
-#[derive(Debug, PartialEq)]
-pub enum VaPair {
-    Numerator,
-    Denominator,
-}
-
-/// The error type for an invalid [`Va`]
-#[derive(Debug, Error, PartialEq)]
-pub enum VaBoundsError {
-    #[error("Va numerator must be between 100 and 2000. {0} was supplied")]
-    Num(i32),
-
-    #[error("Va denominator must be > 0. {0} was supplied")]
-    Den(i32),
-
-    #[error("visual acuity must have both a numerator and a denominator. {0:?} was not supplied.")]
-    NoPair(VaPair),
-}
+// Choosing not to use NonZeroU32 for VaDen, because it has a slightly different interface than all
+// our other bounded types.
+bounded!((VaDen, u32, 1..u32::MAX), (VaNum, u32, 0..=2000));
 
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  
@@ -31,36 +16,39 @@ pub enum VaBoundsError {
 /// constraints. This makes the representation consistent with [`Cyl`](crate::cyl::Cyl),
 /// [`Iol`](crate::iol::Iol), [`Refraction`](crate::refraction::Refraction), and
 /// [`Target`](crate::target::Target).
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Va {
-    pub num: i32,
-    pub den: i32,
+    pub num: VaNum,
+    pub den: VaDen,
 }
 
 impl Default for Va {
     fn default() -> Self {
-        Self { num: 600, den: 600 }
+        Self {
+            num: VaNum::new(600).unwrap(),
+            den: VaDen::new(600).unwrap(),
+        }
     }
 }
 
 impl Va {
     /// Creates a new [`Va`] with bounds checking.
-    pub fn new(num: i32, den: i32) -> Result<Self, VaBoundsError> {
-        if (0..=2000).contains(&num) {
-            if den > 0 {
-                Ok(Self { num, den })
-            } else {
-                Err(VaBoundsError::Den(den))
-            }
-        } else {
-            Err(VaBoundsError::Num(num))
-        }
+    pub fn new(num: VaNum, den: VaDen) -> Self {
+        Self { num, den }
+    }
+
+    pub fn num(&self) -> u32 {
+        self.num.inner()
+    }
+
+    pub fn den(&self) -> u32 {
+        self.den.inner()
     }
 }
 
 /// A collection of visual acuities from before surgery. We use separate structs for [`BeforeVa`]
 /// and [`AfterVa`], because we enforce different mandatory fields for the two situations.
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct BeforeVa {
     pub best: Va,
     pub raw: Option<Va>,
@@ -68,14 +56,14 @@ pub struct BeforeVa {
 
 /// A collection of visual acuities from after surgery. We use separate structs for [`BeforeVa`]
 /// and [`AfterVa`], because we enforce different mandatory fields for the two situations.
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct AfterVa {
     pub best: Option<Va>,
     pub raw: Va,
 }
 
 /// The visual acuity sets from before and after a particular [`Case`](crate::case::Case).
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct OpVa {
     pub before: BeforeVa,
     pub after: AfterVa,
@@ -87,24 +75,17 @@ mod tests {
 
     #[test]
     fn makes_new_va() {
-        let va = Va::new(600, 750).unwrap();
-
-        assert_eq!(va, Va { num: 600, den: 750 });
+        assert!(VaNum::new(600).is_ok());
+        assert!(VaDen::new(750).is_ok());
     }
 
     #[test]
     fn out_of_bounds_va_numerator_returns_err() {
-        let num = 2120;
-        let va = Va::new(num, 900);
-
-        assert_eq!(va, Err(VaBoundsError::Num(num)));
+        assert!(VaNum::new(2120).is_err());
     }
 
     #[test]
     fn zero_va_denominator_returns_err() {
-        let den = 0;
-        let va = Va::new(600, den);
-
-        assert_eq!(va, Err(VaBoundsError::Den(den)));
+        assert!(VaDen::new(0).is_err());
     }
 }

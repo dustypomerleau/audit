@@ -1,79 +1,38 @@
-use crate::sca::ScaBoundsError;
-#[cfg(feature = "ssr")] use gel_derive::Queryable;
+use crate::bounded::Bounded;
 use serde::{Deserialize, Serialize};
+use std::range::RangeBounds;
 
-/// A missing cylinder component (for use by error types).
-#[derive(Debug, PartialEq)]
-pub enum CylPair {
-    Power,
-    Axis,
+pub trait CylPower {}
+impl CylPower for i32 {}
+impl CylPower for u32 {}
+
+bounded!((Axis, u32, 0..=179));
+
+pub trait Cyl<T>
+where T: CylPower
+{
+    fn power(&self) -> T;
+    fn axis(&self) -> Axis;
 }
 
-/// A generic cylinder type. The acceptable bounds of [`power`](Cyl::power) depend on the type of
-/// power being represented. Since the acceptable values of [`axis`](Cyl::axis) are always the same,
-/// we constrain the axis field when constructing a [`Cyl`]. The fields have been left public for
-/// purposes of pattern-matching, but [`Cyl::new()`] should be used when instantiating a new
-/// [`Cyl`], in order to take advantage of bounds checking on the [`axis`](Cyl::axis).
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
-#[cfg_attr(feature = "ssr", derive(Queryable))]
-pub struct Cyl {
-    /// Cylinder power in `hm^-1`.
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+pub struct RawCyl {
     pub power: i32,
-    /// Axis in degrees.
-    pub axis: i32,
+    pub axis: Axis,
 }
 
-impl Cyl {
-    /// Create a new [`Cyl`], with bounds checking on the [`axis`](Cyl::axis). The
-    /// [`power`](Cyl::power) is unconstrained until the [`Cyl`] is wrapped by a more specific
-    /// type.
-    pub fn new(power: i32, axis: i32) -> Result<Self, ScaBoundsError> {
-        if (0..=179).contains(&axis) {
-            Ok(Self { power, axis })
-        } else {
-            Err(ScaBoundsError::Axis(axis))
-        }
+impl Cyl<i32> for RawCyl {
+    fn power(&self) -> i32 {
+        self.power
     }
 
-    /// Update a [`Cyl`] with a new [`power`](Cyl::power).
-    pub fn set_power(mut self, power: i32) -> Self {
-        self.power = power;
-        self
-    }
-
-    /// Update a [`Cyl`] with a new [`axis`](Cyl::axis).
-    pub fn set_axis(mut self, axis: i32) -> Result<Self, ScaBoundsError> {
-        if (0..=179).contains(&axis) {
-            self.axis = axis;
-            Ok(self)
-        } else {
-            Err(ScaBoundsError::Axis(axis))
-        }
+    fn axis(&self) -> Axis {
+        self.axis
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn makes_new_cyl() {
-        let cyl = Cyl::new(275, 30);
-
-        assert_eq!(
-            cyl,
-            Ok(Cyl {
-                power: 275,
-                axis: 30
-            })
-        );
-    }
-
-    #[test]
-    fn out_of_bounds_cyl_axis_returns_err() {
-        let axis = 180;
-        let cyl = Cyl::new(600, axis);
-
-        assert_eq!(cyl, Err(ScaBoundsError::Axis(axis)));
+impl RawCyl {
+    pub fn new(power: i32, axis: Axis) -> Self {
+        Self { power, axis }
     }
 }

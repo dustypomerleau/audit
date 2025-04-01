@@ -1,43 +1,63 @@
-// https://stackoverflow.com/questions/54048500/convert-literal-to-associated-type-in-generic-struct-implementation
-// https://stackoverflow.com/questions/54504026/how-do-i-provide-an-implementation-of-a-generic-struct-in-rust
-
 use crate::{
-    bounds_check::{BoundsCheck, Checked, Unchecked},
-    cyl::{Cyl, CylPair},
-    iol::{Iol, IolBoundsError, OpIol},
-    refraction::{Refraction, RefractionBoundsError},
-    target::{Constant, Target, TargetBoundsError},
+    case::BoundsError,
+    cyl::{Cyl, CylPower, RawCyl},
+    refraction::{RefCyl, RefSph, Refraction},
+    target::{Formula, Target, TargetCyl, TargetCylPower, TargetSe},
 };
 use serde::{Deserialize, Serialize};
-use std::marker::PhantomData;
-use thiserror::Error;
-
-/// The error type for an invalid [`Sca`].
-#[derive(Debug, Error, PartialEq)]
-pub enum ScaBoundsError {
-    #[error("cylinder must have both a power and an axis but the {0:?} was not supplied")]
-    NoPair(CylPair),
-
-    #[error("cylinder axis must be an integer value between 0° and 179° (supplied value: {0})")]
-    Axis(i32),
-}
 
 /// A type that wraps a sphere and a cylinder.
-pub trait Sca {
+pub trait Sca<T>
+where T: CylPower
+{
     /// Return the spherical value from a [`Sca`].
     fn sph(&self) -> i32;
 
     /// Return the [`Cyl`] from a [`Sca`].
-    fn cyl(&self) -> Option<Cyl>;
+    fn cyl(&self) -> Option<impl Cyl<T>>;
 }
 
-/// A type that has mutable access to a wrapped sphere and cylinder.
-pub trait ScaMut: Sca {
-    /// Set the value of the wrapped sphere (or spherical equivalent).
-    fn set_sph(self, sph: i32) -> Self;
+pub fn into_target<T, U>(
+    sca: U,
+    formula: Option<Formula>,
+    custom_constant: bool,
+) -> Result<Target, BoundsError>
+where
+    T: CylPower + Into<u32>,
+    U: Sca<T>,
+{
+    let cyl = if let Some(cyl) = sca.cyl() {
+        Some(TargetCyl {
+            power: TargetCylPower::new(cyl.power().into())?,
+            axis: cyl.axis(),
+        })
+    } else {
+        None
+    };
 
-    /// Set the value of the wrapped [`Cyl`].
-    fn set_cyl(self, cyl: Option<Cyl>) -> Self;
+    Ok(Target {
+        formula,
+        custom_constant,
+        se: TargetSe::new(sca.sph())?,
+        cyl,
+    })
+}
+
+pub fn into_refraction<T, U>(sca: U) -> Result<Refraction, BoundsError>
+where
+    T: CylPower + Into<i32>,
+    U: Sca<T>,
+{
+    let cyl = if let Some(cyl) = sca.cyl() {
+        Some(RefCyl::new(cyl.power().into(), cyl.axis())?)
+    } else {
+        None
+    };
+
+    Ok(Refraction {
+        sph: RefSph::new(sca.sph())?,
+        cyl,
+    })
 }
 
 /// A primitive type wrapping a sphere and a cylinder. Can be passed to [`Sca`] constructors that
@@ -45,104 +65,24 @@ pub trait ScaMut: Sca {
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
 pub struct RawSca {
     pub sph: i32,
-    pub cyl: Option<Cyl>,
+    pub cyl: Option<RawCyl>,
 }
 
-impl Sca for RawSca {
+impl Sca<i32> for RawSca {
     fn sph(&self) -> i32 {
         self.sph
     }
 
-    fn cyl(&self) -> Option<Cyl> {
+    fn cyl(&self) -> Option<impl Cyl<i32>> {
         self.cyl
-    }
-}
-
-impl ScaMut for RawSca {
-    fn set_sph(mut self, sph: i32) -> Self {
-        self.sph = sph;
-        self
-    }
-
-    fn set_cyl(mut self, cyl: Option<Cyl>) -> Self {
-        self.cyl = cyl;
-        self
     }
 }
 
 impl RawSca {
     /// Construct a new [`RawSca`].
-    pub fn new(sph: i32, cyl: Option<Cyl>) -> Self {
+    pub fn new(sph: i32, cyl: Option<RawCyl>) -> Self {
         Self { sph, cyl }
     }
-
-    /// Convert a [`RawSca`] into an [`OpIol<Checked>`], with required bounds checking.
-    pub fn into_opiol(&self, iol: Iol) -> Result<OpIol<Checked>, IolBoundsError> {
-        OpIol {
-            iol,
-            se: self.sph,
-            cyl: self.cyl,
-            bounds: PhantomData,
-        }
-        .check()
-    }
-
-    /// Convert a [`RawSca`] into an [`OpIol<Unchecked>`], without bounds checking.
-    pub fn into_opiol_unchecked(&self, iol: Iol) -> OpIol<Unchecked> {
-        OpIol {
-            iol,
-            se: self.sph,
-            cyl: self.cyl,
-            bounds: PhantomData,
-        }
-    }
-
-    /// Convert a [`RawSca`] into a [`Refraction<Checked>`], with required bounds checking.
-    pub fn into_refraction(&self) -> Result<Refraction<Checked>, RefractionBoundsError> {
-        Refraction {
-            sph: self.sph,
-            cyl: self.cyl,
-            bounds: PhantomData,
-        }
-        .check()
-    }
-
-    /// Convert a [`RawSca`] into a [`Refraction<Unchecked>`], without bounds checking.
-    pub fn into_refraction_unchecked(&self) -> Refraction<Unchecked> {
-        Refraction {
-            sph: self.sph,
-            cyl: self.cyl,
-            bounds: PhantomData,
-        }
-    }
-
-    /// Convert a [`RawSca`] into a [`Target<Checked>`], with required bounds checking.
-    pub fn into_target(
-        &self,
-        constant: Option<Constant>,
-    ) -> Result<Target<Checked>, TargetBoundsError> {
-        Target {
-            constant,
-            se: self.sph,
-            cyl: self.cyl,
-            bounds: PhantomData,
-        }
-        .check()
-    }
-
-    /// Convert a [`RawSca`] into a [`Target<Unchecked>`], without bounds checking.
-    pub fn into_target_unchecked(&self, constant: Option<Constant>) -> Target<Unchecked> {
-        Target {
-            constant,
-            se: self.sph,
-            cyl: self.cyl,
-            bounds: PhantomData,
-        }
-    }
 }
 
-mod tests {
-    // use super::*;
-
-    // todo: unit test RawSca creation, and possibly other methods.
-}
+mod tests {}

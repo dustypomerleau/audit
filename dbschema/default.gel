@@ -1,6 +1,10 @@
 # __source__ references the current object
 # __subject__ references the current value
 
+# The majority of values are converted from float to integer by multiplying
+# by 100 and truncating. Notable exceptions are Axis and Cct, which require
+# no conversion.
+
 ### extensions
 
 using extension auth;
@@ -9,47 +13,51 @@ module default {
 
 ### globals
 
-# todo: this global is a link to a Surgeon, not an ext::auth::Identity
-# and the global you set on your client in auth.rs is ext::auth::client_token (the JSON token), not the Surgeon or the ClientTokenIdentity
-# However, I suspect that the global ClientTokenIdentity is just a link to a particular ext::auth::Identity
-# It isn't possible to directly set this value, as it's computed, but assume that it matches the ext::auth::Identity that is the same as the identity on the JSON token you attached to the client
 global cur_surgeon := (assert_single(
     (select Surgeon filter .identity = global ext::auth::ClientTokenIdentity)
 ));
 
 ### scalars
 
+    scalar type Acd extending int32 { constraint min_value(0); constraint max_value(600); }
     scalar type Adverse extending enum<Rhexis, Pc, Zonule, Other>;
-    
-    scalar type Axis extending int32 {
-        constraint min_value(0);
-        constraint max_value(179);
-    }
+    scalar type Al extending int32 { constraint min_value(1200); constraint max_value(3800); }
+    scalar type Axis extending int32 { constraint min_value(0); constraint max_value(179); }
+    scalar type Cct extending int32 { constraint min_value(350); constraint max_value(650); }
 
     scalar type EmailType extending str {
-        # HTML5 allows dotless domains, but ICANN doesn't, so prohibit here
+        # HTML5 allows dotless domains, but ICANN doesn't, so this regex requires the dot.
         constraint regexp("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$");
     }
 
     scalar type Focus extending enum<Mono, Edof, Multi>;
 
     scalar type Formula extending enum<
+        AscrsKrs,
         Barrett,
         BarrettTrueK,
+        Evo,
         Haigis,
+        HaigisL,
+        HillRbf,
         HofferQ,
         Holladay1,
         Holladay2,
         Kane,
+        Okulix,
         Olsen,
-        SrkT
+        SrkT,
+        Other
     >;
 
+    scalar type Lt extending int32 { constraint min_value(200); constraint max_value(800); }
+    scalar type Main extending int32 { constraint min_value(100); constraint max_value(600); }
     scalar type Side extending enum<Right, Left>;
+    scalar type Wtw extending int32 { constraint min_value(800); constraint max_value(1400); }
 
 ### abstract objects
 
-    abstract type Cyl {
+    abstract type Cyl extending SoftCreate {
         required power: int32;
         required axis: Axis;
     }
@@ -63,21 +71,15 @@ global cur_surgeon := (assert_single(
 
 ### objects
 
-    # # todo:
-    # # you should probably be quite generous with the constraints here, just confirming that the order of magnitude is correct
-    # type Biometry extending SoftCreate {
-    #     flat_k: K; (30-65)
-    #     steep_k: K; (30-65)
-    #     al: (constrained) (kane uses 18-35, you can probably do like 10-40)
-    #     acd: (constrained) (1.5-5.0)
-    #     lt: (constrained) (2.5-8.0)
-    #     cct: (constrained) (350-650)
-    #     wtw: (constrained)
-    # }
-    # type K extending SoftCreate {
-    #     value: (constrained)
-    #     axis: Axis; # meridian
-    # }
+    type Biometry extending SoftCreate {
+        required al: Al;
+        required flat_k: K;
+        required steep_k: K;
+        required acd: Acd;
+        required lt: Lt;
+        cct: Cct;
+        wtw: Wtw;
+    }
 
     type AfterVa extending SoftCreate {
         best: Va;
@@ -90,36 +92,44 @@ global cur_surgeon := (assert_single(
     }
 
     # case is a reserved keyword
+    # todo: add sex here and in Rust types
     type Cas extending SoftCreate {
-        # biometry: Biometry # eventually
         required side: Side;
-        target: Target;
-        required year: int32 { default := <int32>datetime_get(datetime_current(), "year"); }
-        sia: Sia; # form can prepopulate Surgeon.sia (todo: make required and default to inserting Sia of 0?
+        biometry: Biometry;
+        required target: Target;
+
+        required year: int32 {
+            default := <int32>datetime_get(datetime_current(), "year");
+            constraint min_value(2000);
+            constraint max_value(2100);
+        }
+
+        sia: OpSia;
         opiol: OpIol;
         adverse: Adverse;
         required va: OpVa;
         required refraction: OpRefraction;
     }
 
-    type Constant extending SoftCreate {
-        # unconstrained for now (barrett factor -2.0-5.0 (-200 to 500), Kane A 110-125 (11000 to 12500))
-        required value: int32;
-        required formula: Formula;
-    }
-
-    # The IOLs are provided by the DB, including default constants.
     type Iol extending SoftCreate {
         required model: str { constraint exclusive; }
-        required name: str;
-        required company: str;
+        name: str;
+        company: str;
         required focus: Focus { default := Focus.Mono; }
         required toric: bool { default := false; }
-        required multi constants: Constant;
     }
 
-    type IolCyl extending Cyl, SoftCreate {
+    type IolCyl extending Cyl {
         constraint expression on (.power >= 100 and .power <= 2000 and .power % 25 = 0);
+    }
+
+    type K extending Cyl {
+        constraint expression on (.power >= 3000 and .power <= 6500);
+    }
+
+    type OpSia extending SoftCreate {
+        required main: Main;
+        required sia: Sia;
     }
 
     type OpIol extending SoftCreate {
@@ -154,11 +164,11 @@ global cur_surgeon := (assert_single(
         cyl: RefractionCyl;
     }
 
-    type RefractionCyl extending Cyl, SoftCreate {
+    type RefractionCyl extending Cyl {
         constraint expression on (.power >= -1000 and .power <= 1000 and .power % 25 = 0);
     }
 
-    type Sia extending Cyl, SoftCreate {
+    type Sia extending Cyl {
         constraint expression on (.power >= 0 and .power <= 200);
     }
 
@@ -172,11 +182,9 @@ global cur_surgeon := (assert_single(
         terms: datetime; # the date terms were agreed by the surgeon
         first_name: str;
         last_name: str;
-        default_site: Site;
+        defaults: SurgeonDefaults;
         sia: SurgeonSia;
-        default_constant: SurgeonConstant; 
-        cases := .<surgeon[is SurgeonCas];
-        constants := .<surgeon[is SurgeonConstant];
+        multi cases := .<surgeon[is SurgeonCas];
     }
 
     type SurgeonCas extending SoftCreate {
@@ -184,7 +192,7 @@ global cur_surgeon := (assert_single(
         required urn: str;
         required date: cal::local_date;
         required cas: Cas { constraint exclusive; }
-        site: Site; # form can prepopulate Surgeon.default_site
+        site: Site;
         
         # When creating a plot, the surgeon access their own `SurgeonCas`es (which are 
         # restricted) but accesses others' `Cas`es (which are unrestricted) for comparison.
@@ -194,10 +202,12 @@ global cur_surgeon := (assert_single(
             };
     }
 
-    type SurgeonConstant extending SoftCreate {
-        required surgeon: Surgeon;
-        required iol: Iol;
-        required constant: Constant;
+    type SurgeonDefaults extending SoftCreate {
+        site: Site;
+        iol: Iol;
+        formula: Formula;
+        required custom_constant: bool { default := false; }
+        main: Main;
     }
 
     type SurgeonSia extending SoftCreate {
@@ -206,7 +216,8 @@ global cur_surgeon := (assert_single(
     }
 
     type Target extending SoftCreate {
-        constant: Constant;
+        required formula: Formula;
+        required custom_constant: bool { default := false; }
         
         required se: int32 {
             constraint min_value(-600);
@@ -216,7 +227,7 @@ global cur_surgeon := (assert_single(
         cyl: TargetCyl;
     }
 
-    type TargetCyl extending Cyl, SoftCreate {
+    type TargetCyl extending Cyl {
         constraint expression on (.power >= 0 and .power <= 600);
     }
 

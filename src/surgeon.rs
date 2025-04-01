@@ -1,8 +1,12 @@
-use crate::sia::{Sia, SiaBoundsError};
 #[cfg(feature = "ssr")] use crate::state::AppState;
+use crate::{
+    case::{BoundsError, Main},
+    iol::Iol,
+    sia::{Sia, SiaBoundsError},
+    target::Formula,
+};
 use chrono::{DateTime, Utc};
 use garde::Validate;
-#[cfg(feature = "ssr")] use gel_tokio::Queryable;
 #[cfg(feature = "ssr")] use leptos::prelude::expect_context;
 use leptos::prelude::{ServerFnError, server};
 use serde::{Deserialize, Serialize};
@@ -16,7 +20,7 @@ pub struct EmailValidationError(garde::Report);
 /// A [`garde`]-checked valid email [`String`]. We could set the type of [`Surgeon::email`]
 /// to [`Email`], but this prevents deriving [`Queryable`], so instead we compromise, passing
 /// through the email type as validation, but keeping the value on [`Surgeon`] as a [`String`].
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize, Validate)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, Validate)]
 #[garde(transparent)]
 pub struct Email(#[garde(email)] String);
 
@@ -47,12 +51,11 @@ pub enum SurgeonError {
     #[error("invalid email")]
     Email(EmailValidationError),
     #[error("invalid SIA")]
-    Sia(SiaBoundsError),
+    Sia(BoundsError),
 }
 
 /// A surgeon's default [`Sia`] for right and left eyes
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-#[cfg_attr(feature = "ssr", derive(Queryable))]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct SurgeonSia {
     pub right: Sia,
     pub left: Sia,
@@ -65,28 +68,39 @@ pub struct FormSurgeon {
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub default_site: Option<String>,
+    pub default_iol: Option<String>,
+    pub default_formula: Option<String>,
+    pub custom_constant: Option<String>,
+    pub main: f32,
     pub sia_power: f32,
-    pub sia_right_axis: i32,
-    pub sia_left_axis: i32,
+    pub sia_right_axis: u32,
+    pub sia_left_axis: u32,
 }
 
-#[cfg_attr(feature = "ssr", derive(Queryable))]
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Site {
-    name: String,
+    pub name: String,
 }
 
 /// A unique surgeon
-#[cfg_attr(feature = "ssr", derive(Queryable))]
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Surgeon {
     /// A unique, valid email.
-    pub email: String,
+    pub email: Email,
     pub terms: Option<DateTime<Utc>>,
     pub first_name: Option<String>,
     pub last_name: Option<String>,
-    pub default_site: Option<Site>,
-    pub sia: Option<SurgeonSia>,
+    pub defaults: Option<SurgeonDefaults>,
+    pub sia: SurgeonSia,
+}
+
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+pub struct SurgeonDefaults {
+    site: Option<Site>,
+    iol: Option<Iol>,
+    formula: Option<Formula>,
+    custom_constant: bool,
+    main: Main,
 }
 
 /// Return the current [`Surgeon`] from global server context. In practice, this function should
@@ -108,31 +122,4 @@ pub async fn set_current_surgeon(surgeon: Option<Surgeon>) -> Result<(), ServerF
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    // use chrono::TimeZone;
-
-    fn sample_surgeon() -> Surgeon {
-        Surgeon {
-            email: Email::new("email@email.com").unwrap().0,
-            // terms: Some(Utc.with_ymd_and_hms(2024, 5, 15, 20, 30, 40).unwrap()),
-            terms: None,
-            first_name: Some("sample_first_name".to_string()),
-            last_name: Some("sample_last_name".to_string()),
-            default_site: Some(Site {
-                name: "sample_site_name".to_string(),
-            }),
-
-            sia: Some(SurgeonSia {
-                right: Sia {
-                    power: 10,
-                    axis: 100,
-                },
-                left: Sia {
-                    power: 10,
-                    axis: 100,
-                },
-            }),
-        }
-    }
-}
+mod tests {}

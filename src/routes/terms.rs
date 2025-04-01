@@ -50,7 +50,13 @@ select (
     terms,
     first_name,
     last_name,
-    default_site: { name },
+    defaults: {
+        site: { name },
+        iol: { model, name, company, focus, toric },
+        formula,
+        custom_constant,
+        main
+    },
     sia: {
         right: { power, axis },
         left: { power, axis }

@@ -3,6 +3,7 @@
 #[cfg(feature = "ssr")] use crate::state::StatePoisonedError;
 #[cfg(feature = "ssr")] use gel_tokio::Client;
 #[cfg(feature = "ssr")] use leptos::prelude::expect_context;
+use std::fmt::Display;
 #[cfg(feature = "ssr")] use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -38,24 +39,24 @@ pub async fn db() -> Result<Client, DbError> {
     Ok(client)
 }
 
-/// Handles the case where an inserted value is an [`Option`] containing a quoted [`String`]. If
+/// Handles the case where an inserted value is an [`Option`] containing a quoted string. If
 /// the value is `None`, we only interpolate our `{}` with a single set of quotes, as this would be
 /// unquoted in EdgeQL,  but if the value is `Some("string")`, we double the quotes, because the
 /// value must remain quoted in EdgeQL after interpolation.
-pub fn some_or_empty(value: Option<String>) -> String {
+pub fn some_or_empty<T: AsRef<str> + Display>(value: Option<T>) -> String {
     value.map_or("{}".to_string(), |s| format!(r#""{s}""#))
 }
 
-/// Takes a value in whole diopters (D) and returns an integer value of centidiopters for storing
-/// in the database.
-pub fn to_cd(diopters: f32) -> i32 {
-    (diopters * 100.0) as i32
+/// Takes a value as float, and returns a truncated integer representation for storing in the
+/// database.
+pub fn to_centi(value: f32) -> i32 {
+    // intentionally truncate, rather than rounding
+    (value * 100.0) as i32
 }
 
-/// Takes an integer value of centidiopters from the database and returns a float representing the
-/// value in diopters (D).
-pub fn to_d(centidiopters: i32) -> f32 {
-    (centidiopters as f32) / 100.0
+/// Takes an integer value from the database and returns a float representing the user-facing value.
+pub fn to_hecto(value: i32) -> f32 {
+    (value as f32) / 100.0
 }
 
 #[cfg(test)]
