@@ -228,9 +228,6 @@ pub async fn get_jwt_cookie() -> Result<String, ServerFnError> {
     let auth_token = extract::<CookieJar>()
         .await?
         .get("gel-auth-token")
-        // bookmark: todo: if you log out, and then try to navigate directly to a protected route,
-        // we panic with this cookie value and the non-wasm targets `navigate` error. Instead, we
-        // need to try and pass a closure that will redirect on the server
         .unwrap_or(&Cookie::new(
             "gel-auth-token",
             "the unwrap on `gel-auth-token` failed because it was `None`",

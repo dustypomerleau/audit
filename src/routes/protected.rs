@@ -2,15 +2,12 @@
 use crate::{components::Nav, surgeon::Surgeon};
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
 #[cfg(feature = "ssr")] use leptos::prelude::expect_context;
-use leptos::{
-    prelude::{
-        IntoAny, IntoView, RwSignal, ServerFnError, Set, Suspend, Suspense, component,
-        provide_context, server, view,
-    },
-    server::OnceResource,
+use leptos::prelude::{
+    ElementChild, IntoAny, IntoView, OnceResource, RwSignal, ServerFnError, Set, Suspend, Suspense,
+    component, provide_context, server, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
-use leptos_router::{components::Outlet, hooks::use_navigate};
+use leptos_router::components::Outlet;
 
 #[component]
 pub fn Protected() -> impl IntoView {
@@ -23,24 +20,23 @@ pub fn Protected() -> impl IntoView {
         }>
             {move || Suspend::new(async move {
                 if let Ok(Some(surgeon)) = surgeon_resource.await {
-                    if surgeon.terms.is_some() {
-                        current_surgeon.set(Some(surgeon));
-                        provide_context(current_surgeon);
+                    current_surgeon.set(Some(surgeon));
+                    provide_context(current_surgeon);
 
-                        view! {
-                            <Nav />
-                            <Outlet />
-                        }
-                            .into_any()
-                    } else {
-                        let navigate = use_navigate();
-                        navigate("/terms", Default::default());
-                        ().into_any()
+                    view! {
+                        <Nav />
+                        <Outlet />
                     }
+                        .into_any()
                 } else {
-                    let navigate = use_navigate();
-                    navigate("/", Default::default());
-                    ().into_any()
+                    view! {
+                        "Please "
+                        <a href="/signin" rel="external">
+                            "sign in"
+                        </a>
+                        " to proceed."
+                    }
+                        .into_any()
                 }
             })}
         </Suspense>
