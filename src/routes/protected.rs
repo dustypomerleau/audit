@@ -1,10 +1,13 @@
 #[cfg(feature = "ssr")] use crate::{auth::get_jwt_cookie, db::db, state::AppState};
-use crate::{components::Nav, surgeon::Surgeon};
+use crate::{
+    components::{Nav, SignedOut},
+    surgeon::Surgeon,
+};
 #[cfg(feature = "ssr")] use gel_tokio::Queryable;
 #[cfg(feature = "ssr")] use leptos::prelude::expect_context;
 use leptos::prelude::{
-    ElementChild, IntoAny, IntoView, OnceResource, RwSignal, ServerFnError, Set, Suspend, Suspense,
-    component, provide_context, server, view,
+    IntoAny, IntoView, OnceResource, RwSignal, ServerFnError, Set, Suspend, Suspense, component,
+    provide_context, server, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;
@@ -29,14 +32,7 @@ pub fn Protected() -> impl IntoView {
                     }
                         .into_any()
                 } else {
-                    view! {
-                        "Please "
-                        <a href="/signin" rel="external">
-                            "sign in"
-                        </a>
-                        " to proceed."
-                    }
-                        .into_any()
+                    view! { <SignedOut /> }.into_any()
                 }
             })}
         </Suspense>
@@ -114,8 +110,18 @@ select {{
             }
         }
 
+        // If a new user attempts to navigate directly to a protected route without
+        // completing sign-up, we will hit this path.
+        Ok(Some(SurgeonQuery {
+            signed_in: true,
+            surgeon: None,
+        })) => {
+            redirect("/signup");
+            Ok(None)
+        }
+
         _ => {
-            redirect("/");
+            redirect("/signedout");
             Ok(None)
         }
     }

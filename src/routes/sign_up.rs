@@ -165,10 +165,9 @@ select QuerySurgeon {{
         // 3. the user navigated directly to the signup page without first signing in (in this case,
         //    there would be no `ext::auth::ClientTokenIdentity`)
         //
-        // We'll have to figure out a way to surface those errors, but for now just restart the
-        // flow. It probably would help to redirect to a simple page that says "please sign in to
-        // continue," so that it's clear this isn't the same as the landing page.
-        redirect("/");
+        // We'll have to figure out a way to surface those errors, but for now just prompt the user
+        // to restart the flow.
+        redirect("/signedout");
     }
 
     Ok(())

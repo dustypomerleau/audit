@@ -68,7 +68,7 @@ select (
         set_current_surgeon(Some(surgeon)).await?;
         redirect("/protected/add");
     } else {
-        redirect("/");
+        redirect("/signedout");
     }
 
     Ok(())
