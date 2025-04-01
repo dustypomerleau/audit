@@ -194,7 +194,6 @@ pub async fn handle_pkce_code(
 
     // Add the new auth token cookie, and remove the verifier, which is no longer needed.
     let jar = jar.add(cookie).remove(Cookie::from("gel-pkce-verifier"));
-
     Ok((jar, Redirect::to("/gateway")))
 }
 
@@ -220,7 +219,6 @@ pub async fn handle_kill_session(
         .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
     let jar = jar.remove(Cookie::from("gel-auth-token"));
-
     Ok((jar, Redirect::to("/")))
 }
 
