@@ -148,13 +148,7 @@ select QuerySurgeon {{
         "#
     );
 
-    // We use `query_required_single` in this case, because failure to return a Surgeon means our
-    // insert failed.
-    if let Ok(surgeon) = db()
-        .await?
-        .query_required_single::<Surgeon, _>(query, &())
-        .await
-    {
+    if let Ok(Some(surgeon)) = db().await?.query_single::<Surgeon, _>(query, &()).await {
         set_current_surgeon(Some(surgeon)).await?;
         redirect("/terms");
     } else {

@@ -58,14 +58,12 @@ select (
 };
     "#;
 
-    let query_result = db()
-        .await?
-        .query_required_single::<Surgeon, _>(query, &())
-        .await;
+    let query_result = db().await?.query_single::<Surgeon, _>(query, &()).await;
     dbg!(&query_result);
 
-    if let Ok(surgeon) = query_result {
+    if let Ok(Some(surgeon)) = query_result {
         set_current_surgeon(Some(surgeon)).await?;
+        // todo: call an async function that sends a transactional email to the new user
         redirect("/protected/add");
     } else {
         redirect("/signedout");
