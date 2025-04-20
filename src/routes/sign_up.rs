@@ -40,15 +40,27 @@ pub fn SignUp() -> impl IntoView {
                     "Default Hospital/Site" <input type="text" name="surgeon[default_site]" />
                 </label>
                 <label>
-                    "SIA power for right eyes (D)*"
-                    <input
-                        type="number"
-                        min=0
-                        max=2
-                        step=0.05
-                        name="surgeon[sia_right_power]"
-                        required
-                    />
+                    // todo: populate this from the DB with all IOLs
+                    "Default IOL" <input list="iols" name="todo:" /> <datalist>
+                        <option value="SN60WF"></option>
+                        <option value="DETxxx"></option>
+                    </datalist>
+                </label>
+                <label>
+                    // todo: populate this from the DB with all formulas
+                    "Default formula" <input list="formulas" name="todo:" /> <datalist>
+                        <option value="Barrett"></option>
+                        <option value="Kane"></option>
+                    </datalist>
+                </label>
+                <label>
+                    // todo: populate this with the default constant from the DB
+                    "Default IOL constant"
+                    <input type="number" min=0 max=130 step=0.01 name="todo:" required />
+                </label>
+                <label>
+                    "SIA power (D)*"
+                    <input type="number" min=0 max=2 step=0.05 name="surgeon[sia_power]" required />
                 </label>
                 <label>
                     "SIA axis for right eyes (°)*"
@@ -58,17 +70,6 @@ pub fn SignUp() -> impl IntoView {
                         max=179
                         step=1
                         name="surgeon[sia_right_axis]"
-                        required
-                    />
-                </label>
-                <label>
-                    "SIA power for left eyes (D)*"
-                    <input
-                        type="number"
-                        min=0
-                        max=2
-                        step=0.05
-                        name="surgeon[sia_left_power]"
                         required
                     />
                 </label>
@@ -95,9 +96,8 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
         first_name,
         last_name,
         default_site,
-        sia_right_power,
+        sia_power,
         sia_right_axis,
-        sia_left_power,
         sia_left_axis,
     } = surgeon;
 
@@ -109,7 +109,7 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
         some_or_empty(default_site),
     );
 
-    let (sia_right_power, sia_left_power) = (to_cd(sia_right_power), to_cd(sia_left_power));
+    let sia_power = to_cd(sia_power);
 
     let query = format!(
         r#"
@@ -126,10 +126,10 @@ with QuerySurgeon := (
 
         sia := (select(insert SurgeonSia {{
             right := (select(insert Sia {{
-                power := {sia_right_power}, axis := {sia_right_axis}
+                power := {sia_power}, axis := {sia_right_axis}
             }})),
             left := (select(insert Sia {{
-                power := {sia_left_power}, axis := {sia_left_axis}
+                power := {sia_power}, axis := {sia_left_axis}
             }}))
         }}))
     }} unless conflict on .email else (select Surgeon)

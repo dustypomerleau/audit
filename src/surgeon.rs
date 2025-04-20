@@ -65,9 +65,8 @@ pub struct FormSurgeon {
     pub first_name: Option<String>,
     pub last_name: Option<String>,
     pub default_site: Option<String>,
-    pub sia_right_power: f32,
+    pub sia_power: f32,
     pub sia_right_axis: i32,
-    pub sia_left_power: f32,
     pub sia_left_axis: i32,
 }
 
