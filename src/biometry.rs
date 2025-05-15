@@ -36,7 +36,7 @@ impl K {
     }
 }
 
-// These fields are private to enforce the invariant that flat <= steep.
+// Safety: These fields are private to enforce the invariant that flat <= steep.
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Ks {
     flat: K,

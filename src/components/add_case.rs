@@ -32,87 +32,108 @@ pub fn AddCase() -> impl IntoView {
                 </label> <fieldset>
                     <legend>"Side"</legend>
                     <label>
-                        "Right"
-                        <input type="radio" value="right" name="case[side]" required checked />
+                        // todo: we need a signal holding this value to update the Sia
+                        "Right" <input type="radio" value="right" name="case[side]" required />
                     </label>
                     <label>
                         "Left"<input type="radio" value="left" name="case[side]" required />
                     </label>
                 </fieldset>
                 <label>
-                    // todo: prefill the surgeon's default formula
+                    "AL (12–38 mm)"
+                    <input type="number" min=12 max=38 step=0.01 name="case[al]" required />
+                </label>
+                <label>
+                    "K1 power (30–65 D)"
+                    <input type="number" min=30 max=65 step=0.01 name="case[k1_power]" required />
+                </label>
+                <label>
+                    "K1 axis (0–179°)"
+                    <input type="number" min=0 max=179 step=1 name="case[k1_axis]" required />
+                </label>
+                <label>
+                    "K2 power (30–65 D)"
+                    <input type="number" min=30 max=65 step=0.01 name="case[k2_power]" required />
+                </label>
+                <label>
+                    "K2 axis (0–179°)"
+                    <input type="number" min=0 max=179 step=1 name="case[k2_axis]" required />
+                </label>
+                <label>
+                    "ACD (0–6 mm)"
+                    <input type="number" min=0 max=6 step=0.01 name="case[acd]" required />
+                </label>
+                <label>
+                    "LT (2–8 mm)"
+                    <input type="number" min=2 max=8 step=0.01 name="case[lt]" required />
+                </label>
+                <label>
+                    "CCT (350–650 µm, optional)"
+                    <input type="number" min=350 max=650 step=1 name="case[cct]" />
+                </label>
+                <label>
+                    "WTW (8–14 mm, optional)"
+                    <input type="number" min=8 max=14 step=0.01 name="case[wtw]" />
+                </label>
+                <label>
                     // todo: populate the available formulas from the DB
-                    "Formula"
-                    <input list="formulas" value="Kane" name="case[target_constant_formula]" />
+                    // todo: prefill the surgeon's default formula
+                    "Formula" <input list="formulas" value="Kane" name="case[formula]" required />
                     <datalist id="formulas">
                         <option value="barrett">"Barrett"</option>
                         <option value="kane">"Kane"</option>
                     </datalist>
                 </label>
                 <label>
-                    "IOL constant"
-                    <input
-                        type="number"
-                        min=0
-                        max=130
-                        step=0.01
-                        name="case[target_constant_value]"
-                    />
+                    "Check here if you use a custom/optimized IOL constant with this formula"
+                    <input type="checkbox" name="case[custom_constant]" value="true" />
                 </label>
                 <label>
-                    "Target spherical equivalent (D)"
-                    <input
-                        type="number"
-                        min=-6
-                        max=2
-                        step=0.01
-                        value=0
-                        name="case[target_se]"
-                        required
-                    />
+                    "Target spherical equivalent (-6–2 D)"
+                    <input type="number" min=-6 max=2 step=0.01 name="case[target_se]" required />
                 </label>
                 <label>
-                    "Target cylinder power (D)"
-                    <input
-                        type="number"
-                        min=0
-                        max=6
-                        step=0.01
-                        value=0
-                        name="case[target_cyl_power]"
-                        required
-                    />
+                    "Target cylinder power (0–6 D, target cyl is optional but strongly encouraged)"
+                    <input type="number" min=0 max=6 step=0.01 name="case[target_cyl_power]" />
                 </label>
                 <label>
-                    "Target cylinder axis (°)"
-                    <input
-                        type="number"
-                        min=0
-                        max=179
-                        step=1
-                        value=0
-                        name="case[target_cyl_axis]"
-                        required
-                    />
-                </label> <label>"Date of surgery" <input type="date" name="case[date]" /></label>
-                <label>"Site" <input type="text" name="case[site]" /></label>
+                    "Target cylinder axis (0–179°)"
+                    <input type="number" min=0 max=179 step=1 name="case[target_cyl_axis]" />
+                </label>
+                <label>
+                    // interop
+                    "Date of surgery" <input type="date" name="case[date]" required />
+                </label>
+                <label>"Hospital/Site (optional)" <input type="text" name="case[site]" /></label>
+                <label>
+                    "Main incision size (1–6 mm)"
+                    <input type="number" min=1 max=6 step=0.05 name="case[main]" required />
+                </label>
                 <label>
                     "SIA power (D)"
-                    <input type="number" min=0 max=2 step=0.01 name="case[sia_power]" />
+                    <input type="number" min=0 max=2 step=0.01 name="case[sia_power]" required />
                 </label>
                 <label>
                     "SIA axis (°)"
-                    <input type="number" min=0 max=179 step=1 name="case[sia_axis]" />
+                    <input type="number" min=0 max=179 step=1 name="case[sia_axis]" required />
                 </label>
                 <label>
                     // todo: prefill the surgeon's default IOL
-                    "IOL model"<input list="iols" name="case[iol]" /><datalist id="iols">
-                        <option value="SN60WF (Alcon)"></option>
-                        <option value="DIUxxx, DIB00 (J&J)"></option>
+                    "IOL model"<input list="iols" name="case[iol]" required /><datalist id="iols">
+                        <option value="sn60wf">"SN60WF (Alcon)"</option>
+                        <option value="diuxxx">"DIUxxx, DIB00 (J&J)"</option>
                     </datalist>
-                </label> <fieldset>
+                </label>
+                <label>
+                    "IOL spherical equivalent (-20–60 D)"
+                    <input type="number" min=-20 max=60 step=0.25 name="case[iol_se]" required />
+                </label>
+                <label>
+                    // todo: hide this field using a signal if the model is nontoric
+                    "IOL axis (0–179°)"
+                    <input type="number" min=0 max=179 step=1 name="case[iol_axis]" />
+                </label>> <fieldset>
                     <legend>"Adverse event"</legend>
-                    // a label to show
                     <input type="radio" value="none" name="case[adverse]" required checked />
                     <input type="radio" value="rhexis" name="case[adverse]" required />
                     <input type="radio" value="pc" name="case[adverse]" required />
@@ -129,7 +150,7 @@ pub fn AddCase() -> impl IntoView {
                                 "Numerator"
                                 <input
                                     type="number"
-                                    min=1
+                                    min=0
                                     max=20
                                     step=1
                                     name="case[va_raw_before_num]"
@@ -151,10 +172,11 @@ pub fn AddCase() -> impl IntoView {
                                 "Numerator"
                                 <input
                                     type="number"
-                                    min=1
+                                    min=0
                                     max=20
                                     step=1
                                     name="case[va_best_before_num]"
+                                    required
                                 />
                             </label>
                             <label>
@@ -164,6 +186,7 @@ pub fn AddCase() -> impl IntoView {
                                     min=1
                                     step=0.1
                                     name="case[va_best_before_den]"
+                                    required
                                 />
                             </label>
                         </div>
@@ -176,15 +199,22 @@ pub fn AddCase() -> impl IntoView {
                                 "Numerator"
                                 <input
                                     type="number"
-                                    min=1
+                                    min=0
                                     max=20
                                     step=1
                                     name="case[va_raw_after_num]"
+                                    required
                                 />
                             </label>
                             <label>
                                 "Denominator"
-                                <input type="number" min=1 step=0.1 name="case[va_raw_after_den]" />
+                                <input
+                                    type="number"
+                                    min=1
+                                    step=0.1
+                                    name="case[va_raw_after_den]"
+                                    required
+                                />
                             </label>
                         </div>
                         <div>
@@ -193,7 +223,7 @@ pub fn AddCase() -> impl IntoView {
                                 "Numerator"
                                 <input
                                     type="number"
-                                    min=1
+                                    min=0
                                     max=20
                                     step=1
                                     name="case[va_best_after_num]"
@@ -223,6 +253,7 @@ pub fn AddCase() -> impl IntoView {
                                 max=20
                                 step=0.25
                                 name="case[ref_before_sph]"
+                                required
                             />
                         </label>
                         <label>
@@ -256,6 +287,7 @@ pub fn AddCase() -> impl IntoView {
                                 max=20
                                 step=0.25
                                 name="case[ref_after_sph]"
+                                required
                             />
                         </label>
                         <label>
@@ -285,83 +317,11 @@ pub fn AddCase() -> impl IntoView {
     }
 }
 
-// todo: modify this to insert a case
+// bookmark: todo: modify this to insert a case
 #[server]
 pub async fn insert_case(case: FormCase) -> Result<(), ServerFnError> {
-    // let FormSurgeon {
-    //     email,
-    //     first_name,
-    //     last_name,
-    //     default_site,
-    //     sia_right_power,
-    //     sia_right_axis,
-    //     sia_left_power,
-    //     sia_left_axis,
-    // } = surgeon;
-    //
-    // let email = Email::new(&email)?.inner();
-    //
-    // let (first_name, last_name, default_site) = (
-    //     some_or_empty(first_name),
-    //     some_or_empty(last_name),
-    //     some_or_empty(default_site),
-    // );
-    //
-    // let (sia_right_power, sia_left_power) = (to_cd(sia_right_power), to_cd(sia_left_power));
-
-    //     let query = format!(
-    //         r#"
-    // with QuerySurgeon := (
-    //     insert Surgeon {{
-    //         identity := (select global ext::auth::ClientTokenIdentity),
-    //         email := "{email}",
-    //         first_name := {first_name},
-    //         last_name := {last_name},
-    //
-    //         default_site := (select(insert Site {{
-    //             name := {default_site}
-    //         }} unless conflict on .name else (select Site))),
-    //
-    //         sia := (select(insert SurgeonSia {{
-    //             right := (select(insert Sia {{
-    //                 power := {sia_right_power}, axis := {sia_right_axis}
-    //             }})),
-    //             left := (select(insert Sia {{
-    //                 power := {sia_left_power}, axis := {sia_left_axis}
-    //             }}))
-    //         }}))
-    //     }} unless conflict on .email else (select Surgeon)
-    // )
-    // select QuerySurgeon {{
-    //     email,
-    //     terms,
-    //     first_name,
-    //     last_name,
-    //     default_site: {{ name }},
-    //     sia: {{
-    //         right: {{ power, axis }},
-    //         left: {{ power, axis }}
-    //     }}
-    // }};
-    //         "#
-    //     );
-    //
-    //     if let Ok(Some(surgeon)) = db().await?.query_single::<Surgeon, _>(query, &()).await {
-    //         set_current_surgeon(Some(surgeon)).await?;
-    //         redirect("/terms");
-    //     } else {
-    //         // if we fail on the insert, then:
-    //         // 1. something is wrong with the form validation
-    //         // 2. the user already exists (email conflict) - with the current query that will
-    // still         //    return a surgeon, but it will be the one that already existed in the
-    // DB         // 3. the user navigated directly to the signup page without first signing in
-    // (in this case,         //    there would be no `ext::auth::ClientTokenIdentity`)
-    //         //
-    //         // We'll have to figure out a way to surface those errors, but for now just restart
-    // the         // flow. It probably would help to redirect to a simple page that says
-    // "please sign in to         // continue," so that it's clear this isn't the same as the
-    // landing page.         redirect("/");
-    //     }
-
+    // first call into_surgeon_case(case)
+    // then pattern match all of the values in the SurgeonCase and assign to vars
+    // then insert the query unless conflict on urn/side for that surgeon specifically
     Ok(())
 }

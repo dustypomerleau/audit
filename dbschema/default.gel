@@ -19,11 +19,27 @@ global cur_surgeon := (assert_single(
 
 ### scalars
 
-    scalar type Acd extending int32 { constraint min_value(0); constraint max_value(600); }
+    scalar type Acd extending int32 {
+        constraint min_value(0);
+        constraint max_value(600);
+    }
+    
     scalar type Adverse extending enum<Rhexis, Pc, Zonule, Other>;
-    scalar type Al extending int32 { constraint min_value(1200); constraint max_value(3800); }
-    scalar type Axis extending int32 { constraint min_value(0); constraint max_value(179); }
-    scalar type Cct extending int32 { constraint min_value(350); constraint max_value(650); }
+    
+    scalar type Al extending int32 {
+        constraint min_value(1200);
+        constraint max_value(3800);
+    }
+    
+    scalar type Axis extending int32 {
+        constraint min_value(0);
+        constraint max_value(179);
+    }
+    
+    scalar type Cct extending int32 {
+        constraint min_value(350);
+        constraint max_value(650);
+    }
 
     scalar type EmailType extending str {
         # HTML5 allows dotless domains, but ICANN doesn't, so this regex requires the dot.
@@ -50,17 +66,75 @@ global cur_surgeon := (assert_single(
         Other
     >;
 
-    scalar type Lt extending int32 { constraint min_value(200); constraint max_value(800); }
-    scalar type Main extending int32 { constraint min_value(100); constraint max_value(600); }
+    scalar type IolSe extending int32 {
+        constraint min_value(-2000);
+        constraint max_value(6000);
+        constraint expression on (__subject__ % 25 = 0);
+    }
+
+    scalar type Kpower extending int32 {
+        constraint min_value(3000);
+        constraint max_value(6500);
+    }
+
+    scalar type Lt extending int32 {
+        constraint min_value(200);
+        constraint max_value(800);
+    }
+    
+    scalar type Main extending int32 {
+        constraint min_value(100);
+        constraint max_value(600);
+    }
+
+    scalar type RefCylPower extending int32 {
+        constraint min_value(-1000);
+        constraint max_value(1000);
+        constraint expression on (__subject__ % 25 = 0);
+    }
+
+    scalar type RefSph extending int32 {
+        constraint min_value(-2000);
+        constraint max_value(2000);
+        constraint expression on (__subject__ % 25 = 0);
+    }
+
+    scalar type SiaPower extending int32 {
+        constraint min_value(0);
+        constraint max_value(200);
+    }
+
     scalar type Side extending enum<Right, Left>;
-    scalar type Wtw extending int32 { constraint min_value(800); constraint max_value(1400); }
+
+    scalar type TargetCylPower extending int32 {
+        constraint min_value(0);
+        constraint max_value(600);
+    }
+    
+    scalar type TargetSe extending int32 {
+        constraint min_value(-600);
+        constraint max_value(200);
+    }
+
+    scalar type ToricPower extending int32 {
+        constraint min_value(100);
+        constraint max_value(2000);
+        constraint expression on (__subject__ % 25 = 0);
+    }
+
+    scalar type VaDen extending int32 { constraint min_value(1); }
+
+    scalar type VaNum extending int32 {
+        constraint min_value(0);
+        constraint max_value(2000);
+    }
+    
+    scalar type Wtw extending int32 {
+        constraint min_value(800);
+        constraint max_value(1400);
+    }
 
 ### abstract objects
-
-    abstract type Cyl extending SoftCreate {
-        required power: int32;
-        required axis: Axis;
-    }
 
     abstract type SoftCreate {
         required created_at: datetime {
@@ -73,8 +147,7 @@ global cur_surgeon := (assert_single(
 
     type Biometry extending SoftCreate {
         required al: Al;
-        required flat_k: K;
-        required steep_k: K;
+        required ks: Ks;
         required acd: Acd;
         required lt: Lt;
         cct: Cct;
@@ -92,7 +165,6 @@ global cur_surgeon := (assert_single(
     }
 
     # case is a reserved keyword
-    # todo: add sex here and in Rust types
     type Cas extending SoftCreate {
         required side: Side;
         biometry: Biometry;
@@ -104,8 +176,9 @@ global cur_surgeon := (assert_single(
             constraint max_value(2100);
         }
 
-        sia: OpSia;
-        opiol: OpIol;
+        main: Main;
+        sia: Sia;
+        iol: OpIol;
         adverse: Adverse;
         required va: OpVa;
         required refraction: OpRefraction;
@@ -116,32 +189,25 @@ global cur_surgeon := (assert_single(
         name: str;
         company: str;
         required focus: Focus { default := Focus.Mono; }
-        required toric: bool { default := false; }
+        toric: ToricPower;
     }
 
-    type IolCyl extending Cyl {
-        constraint expression on (.power >= 100 and .power <= 2000 and .power % 25 = 0);
+    type K extending SoftCreate {
+        required power: Kpower;
+        required axis: Axis;
     }
 
-    type K extending Cyl {
-        constraint expression on (.power >= 3000 and .power <= 6500);
-    }
-
-    type OpSia extending SoftCreate {
-        required main: Main;
-        required sia: Sia;
+    # Multi-hop constraint limitation prevents enforcing that .flat.power <= .steep.power,
+    # so this must be checked prior to insertion.
+    type Ks extending SoftCreate {
+        required flat: K;
+        required steep: K;
     }
 
     type OpIol extending SoftCreate {
         required iol: Iol;
-
-        required se: int32 { 
-            constraint min_value(-2000);
-            constraint max_value(6000);
-            constraint expression on (__subject__ % 25 = 0);
-        }
-
-        cyl: IolCyl;
+        required se: IolSe;
+        axis: Axis;
     }
 
     type OpRefraction extending SoftCreate {
@@ -154,22 +220,19 @@ global cur_surgeon := (assert_single(
         required after: AfterVa;
     }
 
+    type RefCyl extending SoftCreate {
+        required power: RefCylPower;
+        required axis: Axis;
+    }
+
     type Refraction extending SoftCreate {
-        required sph: int32 { 
-            constraint min_value(-2000);
-            constraint max_value(2000);
-            constraint expression on (__subject__ % 25 = 0);
-        }
-
-        cyl: RefractionCyl;
+        required sph: RefSph;
+        cyl: RefCyl;
     }
 
-    type RefractionCyl extending Cyl {
-        constraint expression on (.power >= -1000 and .power <= 1000 and .power % 25 = 0);
-    }
-
-    type Sia extending Cyl {
-        constraint expression on (.power >= 0 and .power <= 200);
+    type Sia extending SoftCreate {
+        required power: SiaPower;
+        required axis: Axis;
     }
 
     type Site extending SoftCreate {
@@ -191,8 +254,8 @@ global cur_surgeon := (assert_single(
         required surgeon: Surgeon;
         required urn: str;
         required date: cal::local_date;
-        required cas: Cas { constraint exclusive; }
         site: Site;
+        required cas: Cas { constraint exclusive; }
         
         # When creating a plot, the surgeon access their own `SurgeonCas`es (which are 
         # restricted) but accesses others' `Cas`es (which are unrestricted) for comparison.
@@ -216,23 +279,19 @@ global cur_surgeon := (assert_single(
     }
 
     type Target extending SoftCreate {
-        required formula: Formula;
+        formula: Formula;
         required custom_constant: bool { default := false; }
-        
-        required se: int32 {
-            constraint min_value(-600);
-            constraint max_value(200);
-        }
-
+        required se: TargetSe;
         cyl: TargetCyl;
     }
 
-    type TargetCyl extending Cyl {
-        constraint expression on (.power >= 0 and .power <= 600);
+    type TargetCyl extending SoftCreate {
+        required power: TargetCylPower;
+        required axis: Axis;
     }
 
     type Va extending SoftCreate {
-        required num: int32 { constraint min_value(0); constraint max_value(2000); }
-        required den: int32 { constraint min_ex_value(0); }
+        required num: VaNum;
+        required den: VaDen;
     }
 }

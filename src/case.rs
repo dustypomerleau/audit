@@ -128,10 +128,9 @@ pub struct FormCase {
     pub lt: f32,
     pub cct: Option<u32>,
     pub wtw: Option<u32>,
-    pub formula: String,       // prefill default
-    pub custom_constant: bool, // prefill default
+    pub formula: String, // prefill default
+    pub custom_constant: Option<String>,
     pub target_se: f32,
-    // cyl powers on target need to be optional because they may not have access to a toric formula
     pub target_cyl_power: Option<f32>,
     pub target_cyl_axis: Option<u32>,
     pub main: f32,         // prefill default
@@ -149,12 +148,12 @@ pub struct FormCase {
     pub va_best_after_den: Option<f32>,
     pub va_raw_after_num: u32, // prefill 6
     pub va_raw_after_den: f32,
-    pub ref_before_sph: f32,       // prefill 0
-    pub ref_before_cyl_power: f32, // prefill 0
-    pub ref_before_cyl_axis: u32,  // prefill 0
-    pub ref_after_sph: f32,        // prefill 0
-    pub ref_after_cyl_power: f32,  // prefill 0
-    pub ref_after_cyl_axis: u32,   // prefill 0
+    pub ref_before_sph: f32,
+    pub ref_before_cyl_power: Option<f32>,
+    pub ref_before_cyl_axis: Option<u32>,
+    pub ref_after_sph: f32,
+    pub ref_after_cyl_power: Option<f32>,
+    pub ref_after_cyl_axis: Option<u32>,
 }
 
 pub struct SurgeonCase {
@@ -264,7 +263,11 @@ impl FormCase {
 
         let target = Target {
             formula: Some(formula),
-            custom_constant,
+            custom_constant: if custom_constant == Some("true".to_string()) {
+                true
+            } else {
+                false
+            },
             se: TargetSe::new((target_se * 100.0) as i32)?,
             cyl: target_cyl,
         };
@@ -320,6 +323,7 @@ impl FormCase {
                         VaNum::new(num * 100)?,
                         VaDen::new((den * 100.0) as u32)?,
                     )),
+
                     _ => None,
                 },
             },
@@ -330,6 +334,7 @@ impl FormCase {
                         VaNum::new(num * 100)?,
                         VaDen::new((den * 100.0) as u32)?,
                     )),
+
                     _ => None,
                 },
 
@@ -340,27 +345,29 @@ impl FormCase {
             },
         };
 
+        let ref_before_raw_cyl = match (ref_before_cyl_power, ref_before_cyl_axis) {
+            (Some(power), Some(axis)) => {
+                Some(RawCyl::new((power * 100.0) as i32, Axis::new(axis)?))
+            }
+
+            _ => None,
+        };
+
+        let ref_after_raw_cyl = match (ref_after_cyl_power, ref_after_cyl_axis) {
+            (Some(power), Some(axis)) => {
+                Some(RawCyl::new((power * 100.0) as i32, Axis::new(axis)?))
+            }
+
+            _ => None,
+        };
+
         let refraction = OpRefraction {
             before: {
-                let sca = RawSca::new(
-                    (ref_before_sph * 100.0) as i32,
-                    Some(RawCyl::new(
-                        (ref_before_cyl_power * 100.0) as i32,
-                        Axis::new(ref_before_cyl_axis)?,
-                    )),
-                );
-
+                let sca = RawSca::new((ref_before_sph * 100.0) as i32, ref_before_raw_cyl);
                 into_refraction(sca)?
             },
             after: {
-                let sca = RawSca::new(
-                    (ref_after_sph * 100.0) as i32,
-                    Some(RawCyl::new(
-                        (ref_after_cyl_power * 100.0) as i32,
-                        Axis::new(ref_after_cyl_axis)?,
-                    )),
-                );
-
+                let sca = RawSca::new((ref_after_sph * 100.0) as i32, ref_after_raw_cyl);
                 into_refraction(sca)?
             },
         };
