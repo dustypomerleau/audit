@@ -181,15 +181,13 @@ select QuerySurgeon {{
         main
     }},
 
-    sia: {{
-        right: {{ power, axis }},
-        left: {{ power, axis }}
-    }}
+    sia: {{ right: {{ power, axis }}, left: {{ power, axis }} }}
 }};
         "#
     );
 
-    if let Ok(Some(surgeon)) = db().await?.query_single::<Surgeon, _>(query, &()).await {
+    if let Ok(Some(surgeon_json)) = db().await?.query_single_json(query, &()).await {
+        let surgeon = serde_json::from_str::<Surgeon>(surgeon_json.as_ref())?;
         set_current_surgeon(Some(surgeon)).await?;
         redirect("/terms");
     } else {
@@ -208,3 +206,33 @@ select QuerySurgeon {{
 
     Ok(())
 }
+
+// todo: run testing and check all permutations of login antics:
+//
+// A full list of possible scenarios:
+//
+// 1. The user is new, they click new user and sign up, accepting the terms
+// - create the user as you currently do
+//
+// 2. The user is new, they click existing user and try to sign in
+// - redirect to the sign up form and follow the usual new user flow through terms from there
+//
+// 3. The user is existing, they click existing and try to sign in
+// - proceed to the add case form as you currently do
+//
+// 4. The user is existing, they click new user and try to sign up
+//
+//   a. the email matches the email they used last time:
+//   - just ignore them, and redirect to the same flow as the existing users, checking terms, then
+//     on to add case.
+//
+//   b. the email doesn't match, but you don't want to update the user without informing them that
+//   they already have an account with a different email:
+//   - todo: add logic for this
+//
+// 5. The user is new, they click new user and try to sign up with an email that is already being
+//    used by a different user (most likely scenario is that this is actually the same user, but
+//    they have multiple Google accounts).
+//    - currently this results in a redirect to `signed/out` and does not create the user, which is
+//    harmless, but not very informative
+//    - similar to 4b, todo: add specific logic for this

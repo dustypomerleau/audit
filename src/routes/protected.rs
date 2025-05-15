@@ -1,9 +1,13 @@
-#[cfg(feature = "ssr")] use crate::{auth::get_jwt_cookie, db::db, state::AppState};
+#[cfg(feature = "ssr")]
+use crate::{
+    auth::get_jwt_cookie,
+    db::{DbError, db},
+    state::AppState,
+};
 use crate::{
     components::{Nav, SignedOut},
     surgeon::Surgeon,
 };
-#[cfg(feature = "ssr")] use gel_tokio::Queryable;
 #[cfg(feature = "ssr")] use leptos::prelude::expect_context;
 use leptos::prelude::{
     IntoAny, IntoView, OnceResource, RwSignal, ServerFnError, Set, Suspend, Suspense, component,
@@ -11,6 +15,7 @@ use leptos::prelude::{
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;
+use serde::{Deserialize, Serialize};
 
 #[component]
 pub fn Protected() -> impl IntoView {
@@ -75,47 +80,51 @@ select {{
         "#
     );
 
-    #[derive(Debug, Queryable)]
+    #[derive(Debug, Deserialize, Serialize)]
     struct SurgeonQuery {
         signed_in: bool,
         surgeon: Option<Surgeon>,
     }
 
-    let client = db().await?;
+    let query_result = db().await?.query_single_json(query, &()).await;
+    dbg!(&query_result);
 
-    let surgeon_result = client.query_single::<SurgeonQuery, _>(query, &()).await;
-    dbg!(&surgeon_result);
+    match query_result {
+        // todo: I think formula parsing may fail coming from json, we need to look at the json
+        // representation of a default::Formula that Gel produces
+        Ok(Some(json)) => match serde_json::from_str::<SurgeonQuery>(json.as_ref())? {
+            SurgeonQuery {
+                signed_in: true,
+                surgeon: Some(surgeon),
+            } => {
+                if surgeon.terms.is_some() {
+                    expect_context::<AppState>()
+                        .surgeon
+                        .set(Some(surgeon.clone()))?;
 
-    match surgeon_result {
-        Ok(Some(SurgeonQuery {
-            signed_in: true,
-            surgeon: Some(surgeon),
-        })) => {
-            if surgeon.terms.is_some() {
-                expect_context::<AppState>()
-                    .surgeon
-                    .set(Some(surgeon.clone()))?;
+                    Ok(Some(surgeon))
+                } else {
+                    redirect("/terms");
+                    Ok(None)
+                }
+            }
 
-                Ok(Some(surgeon))
-            } else {
-                redirect("/terms");
+            // If a new user attempts to navigate directly to a protected route without
+            // completing sign-up, we will hit this path.
+            SurgeonQuery {
+                signed_in: true,
+                surgeon: None,
+            } => {
+                redirect("/signup");
                 Ok(None)
             }
-        }
 
-        // If a new user attempts to navigate directly to a protected route without
-        // completing sign-up, we will hit this path.
-        Ok(Some(SurgeonQuery {
-            signed_in: true,
-            surgeon: None,
-        })) => {
-            redirect("/signup");
-            Ok(None)
-        }
+            _ => {
+                redirect("/signedout");
+                Ok(None)
+            }
+        },
 
-        _ => {
-            redirect("/signedout");
-            Ok(None)
-        }
+        _ => Err(DbError::Query(format!("{query_result:?}")).into()),
     }
 }

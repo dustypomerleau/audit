@@ -1,4 +1,4 @@
-use crate::{bounded::Bounded, case::BoundsError};
+use crate::bounded::Bounded;
 use serde::{Deserialize, Serialize};
 use std::range::RangeBounds;
 

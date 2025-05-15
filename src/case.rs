@@ -1,15 +1,17 @@
 use crate::{
-    biometry::{Acd, Al, Biometry, Cct, K, Kpower, Ks, Lt, Wtw},
-    bounded::Bounded,
+    biometry::Biometry, bounded::Bounded, iol::OpIol, refraction::OpRefraction, sia::Sia,
+    surgeon::Site, target::Target, va::OpVa,
+};
+#[cfg(feature = "ssr")]
+use crate::{
+    biometry::{Acd, Al, Cct, K, Kpower, Ks, Lt, Wtw},
     cyl::{Axis, RawCyl},
     db::{DbError, db},
-    iol::{Iol, IolSe, OpIol},
-    refraction::OpRefraction,
+    iol::{Iol, IolSe},
     sca::{RawSca, into_refraction},
-    sia::{Sia, SiaPower},
-    surgeon::Site,
-    target::{Formula, Target, TargetCyl, TargetCylPower, TargetSe},
-    va::{AfterVa, BeforeVa, OpVa, Va, VaDen, VaNum},
+    sia::SiaPower,
+    target::{Formula, TargetCyl, TargetCylPower, TargetSe},
+    va::{AfterVa, BeforeVa, Va, VaDen, VaNum},
 };
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
@@ -35,6 +37,7 @@ pub enum Required {
 pub struct BoundsError(pub String);
 
 /// The error type for a [`Case`] with missing fields or out of bounds values.
+#[cfg(feature = "ssr")]
 #[derive(Debug, Error)]
 pub enum CaseError {
     #[error("out of bounds value on a `Case`: {0:?}")]
@@ -47,6 +50,7 @@ pub enum CaseError {
     MissingField(Required),
 }
 
+#[cfg(feature = "ssr")]
 impl From<BoundsError> for CaseError {
     fn from(err: BoundsError) -> Self {
         Self::Bounds(BoundsError(format!("{err:?}")))
@@ -209,7 +213,7 @@ impl FormCase {
             ref_after_cyl_axis,
         } = self;
 
-        let site = site.and_then(|name| Some(Site { name }));
+        let site = site.map(|name| Site { name });
 
         let side = match side.as_str() {
             "right" => Side::Right,
@@ -263,11 +267,7 @@ impl FormCase {
 
         let target = Target {
             formula: Some(formula),
-            custom_constant: if custom_constant == Some("true".to_string()) {
-                true
-            } else {
-                false
-            },
+            custom_constant: custom_constant == Some("true".to_string()),
             se: TargetSe::new((target_se * 100.0) as i32)?,
             cyl: target_cyl,
         };
@@ -283,7 +283,7 @@ impl FormCase {
         // the datalist that the IOL is not listed, and have a DB option for that.
         let iol = if let Ok(Some(json)) = db()
             .await
-            .map_err(|err| CaseError::Db(err))?
+            .map_err(CaseError::Db)?
             .query_single_json(format!(r#"select Iol filter .model = "{iol_model}";"#), &())
             .await
         {

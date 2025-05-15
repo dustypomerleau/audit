@@ -1,14 +1,8 @@
 use crate::case::FormCase;
-#[cfg(feature = "ssr")]
-use crate::{
-    db::{db, some_or_empty, to_centi},
-    surgeon::set_current_surgeon,
-};
 use leptos::prelude::{
     ActionForm, ElementChild, IntoView, ServerAction, ServerFnError, StyleAttribute, component,
     server, view,
 };
-#[cfg(feature = "ssr")] use leptos_axum::redirect;
 
 #[component]
 pub fn AddCase() -> impl IntoView {
@@ -317,9 +311,9 @@ pub fn AddCase() -> impl IntoView {
     }
 }
 
-// bookmark: todo: modify this to insert a case
 #[server]
 pub async fn insert_case(case: FormCase) -> Result<(), ServerFnError> {
+    // bookmark:
     // first call into_surgeon_case(case)
     // then pattern match all of the values in the SurgeonCase and assign to vars
     // then insert the query unless conflict on urn/side for that surgeon specifically

@@ -1,6 +1,5 @@
 use crate::{
     bounded::Bounded,
-    case::BoundsError,
     cyl::{Axis, Cyl},
     sca::Sca,
 };

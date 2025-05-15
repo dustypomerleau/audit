@@ -2,7 +2,7 @@
 use crate::{
     case::{BoundsError, Main},
     iol::Iol,
-    sia::{Sia, SiaBoundsError},
+    sia::Sia,
     target::Formula,
 };
 use chrono::{DateTime, Utc};
@@ -17,9 +17,7 @@ use thiserror::Error;
 #[error("Email invalid: ({0:?})")]
 pub struct EmailValidationError(garde::Report);
 
-/// A [`garde`]-checked valid email [`String`]. We could set the type of [`Surgeon::email`]
-/// to [`Email`], but this prevents deriving [`Queryable`], so instead we compromise, passing
-/// through the email type as validation, but keeping the value on [`Surgeon`] as a [`String`].
+/// A [`garde`]-checked valid email [`String`].
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, Validate)]
 #[garde(transparent)]
 pub struct Email(#[garde(email)] String);

@@ -6,11 +6,14 @@
 use std::fmt::Display;
 #[cfg(feature = "ssr")] use thiserror::Error;
 
+// todo: I'm not liking the way Gel and Query are different errors here - just a temporary fix
 #[derive(Debug, Error)]
 #[cfg(feature = "ssr")]
 pub enum DbError {
     #[error("Gel error: {0:?}")]
     Gel(gel_tokio::Error),
+    #[error("failed Gel query: {0:?}")]
+    Query(String),
     #[error("The DB operation couldn't be completed due to poisoned state: {0:?}")]
     State(StatePoisonedError),
 }

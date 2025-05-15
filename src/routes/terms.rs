@@ -1,4 +1,3 @@
-#[cfg(feature = "ssr")] use crate::surgeon::Surgeon;
 #[cfg(feature = "ssr")] use crate::{db::db, surgeon::set_current_surgeon};
 use leptos::prelude::{
     ElementChild, IntoView, OnAttribute, ServerAction, ServerFnError, StyleAttribute, component,
@@ -40,6 +39,8 @@ pub fn Terms() -> impl IntoView {
 
 #[server]
 pub async fn accept_terms() -> Result<(), ServerFnError> {
+    // In theory, you could select only the terms field and update that, rather than replacing the
+    // entire Surgeon here, but that can be optimized later.
     let query = r#"
 select (
     update Surgeon
@@ -50,6 +51,7 @@ select (
     terms,
     first_name,
     last_name,
+
     defaults: {
         site: { name },
         iol: { model, name, company, focus, toric },
@@ -57,17 +59,13 @@ select (
         custom_constant,
         main
     },
-    sia: {
-        right: { power, axis },
-        left: { power, axis }
-    }
+
+    sia: { right: { power, axis }, left: { power, axis } }
 };
     "#;
 
-    let query_result = db().await?.query_single::<Surgeon, _>(query, &()).await;
-    dbg!(&query_result);
-
-    if let Ok(Some(surgeon)) = query_result {
+    if let Ok(Some(surgeon_json)) = db().await?.query_single_json(query, &()).await {
+        let surgeon = serde_json::from_str(surgeon_json.as_ref())?;
         set_current_surgeon(Some(surgeon)).await?;
         // todo: call an async function that sends a transactional email to the new user
         redirect("/protected/add");
