@@ -15,7 +15,7 @@ use leptos::prelude::{
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;
-use serde::{Deserialize, Serialize};
+#[cfg(feature = "ssr")] use serde::{Deserialize, Serialize};
 
 #[component]
 pub fn Protected() -> impl IntoView {
@@ -90,8 +90,6 @@ select {{
     dbg!(&query_result);
 
     match query_result {
-        // todo: I think formula parsing may fail coming from json, we need to look at the json
-        // representation of a default::Formula that Gel produces
         Ok(Some(json)) => match serde_json::from_str::<SurgeonQuery>(json.as_ref())? {
             SurgeonQuery {
                 signed_in: true,

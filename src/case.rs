@@ -120,9 +120,9 @@ pub struct Case {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct FormCase {
     pub urn: String,
-    pub date: NaiveDate,      // prefill today
+    pub date: String,         // prefill today
     pub site: Option<String>, // prefill default
-    pub side: String,
+    pub side: Side,
     pub al: f32,
     pub k1_power: f32,
     pub k1_axis: u32,
@@ -131,8 +131,8 @@ pub struct FormCase {
     pub acd: f32,
     pub lt: f32,
     pub cct: Option<u32>,
-    pub wtw: Option<u32>,
-    pub formula: String, // prefill default
+    pub wtw: Option<f32>,
+    pub formula: Formula, // prefill default
     pub custom_constant: Option<String>,
     pub target_se: f32,
     pub target_cyl_power: Option<f32>,
@@ -160,6 +160,7 @@ pub struct FormCase {
     pub ref_after_cyl_axis: Option<u32>,
 }
 
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct SurgeonCase {
     /// A unique value that allows (only) the surgeon to deanonymize the case.
     pub urn: String,
@@ -212,14 +213,12 @@ impl FormCase {
             ref_after_cyl_power,
             ref_after_cyl_axis,
         } = self;
+        dbg!(&date);
+
+        let date = NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
+            .map_err(|_| CaseError::MissingField(Required::Date))?;
 
         let site = site.map(|name| Site { name });
-
-        let side = match side.as_str() {
-            "right" => Side::Right,
-            "left" => Side::Left,
-            _ => unreachable!(),
-        };
 
         // intentionally truncate
         let biometry = Biometry {
@@ -231,30 +230,8 @@ impl FormCase {
             acd: Acd::new((acd * 100.0) as u32)?,
             lt: Lt::new((lt * 100.0) as u32)?,
             cct: cct.and_then(|cct| Cct::new(cct).ok()),
-            wtw: wtw.and_then(|wtw| Wtw::new(wtw).ok()),
+            wtw: wtw.and_then(|wtw| Wtw::new((wtw * 100.0) as u32).ok()),
         };
-
-        fn to_formula(formula: &str) -> Formula {
-            match formula {
-                "ascrskrs" => Formula::AscrsKrs,
-                "barrett" | "barretttoric" => Formula::Barrett,
-                "barretttruek" => Formula::BarrettTrueK,
-                "evo" => Formula::Evo,
-                "haigis" => Formula::Haigis,
-                "haigisl" => Formula::HaigisL,
-                "hillrbf" => Formula::HillRbf,
-                "hofferq" => Formula::HofferQ,
-                "holladay1" => Formula::Holladay1,
-                "holladay2" => Formula::Holladay2,
-                "kane" => Formula::Kane,
-                "okulix" => Formula::Okulix,
-                "olsen" => Formula::Olsen,
-                "srkt" => Formula::SrkT,
-                _ => Formula::Other,
-            }
-        }
-
-        let formula = to_formula(formula.as_str());
 
         let target_cyl = match (target_cyl_power, target_cyl_axis) {
             (Some(power), Some(axis)) => Some(TargetCyl::new(
@@ -284,9 +261,19 @@ impl FormCase {
         let iol = if let Ok(Some(json)) = db()
             .await
             .map_err(CaseError::Db)?
-            .query_single_json(format!(r#"select Iol filter .model = "{iol_model}";"#), &())
+            .query_single_json(
+                format!(
+                    r#"
+select Iol {{
+    model, name, company, focus, toric
+}} filter .model = "{iol_model}";
+                    "#
+                ),
+                &(),
+            )
             .await
         {
+            dbg!(&json);
             let iol = serde_json::from_str::<Iol>(json.as_ref())
                 .map_err(|err| BoundsError(format!("{err:?}")))?;
 
@@ -299,6 +286,11 @@ impl FormCase {
             return Err(CaseError::MissingField(Required::Iol));
         };
 
+        // Using standard serde parsing here would require you to have Adverse::None.
+        // The benefit of Adverse::None is that you no longer need this value to be Option.
+        // The downside is that now you can't just select all the DB Cas that have a complication
+        // by looking to see if there is a value here. Instead you would need to check for values
+        // != to Adverse.None.
         fn to_adverse(s: &str) -> Option<Adverse> {
             match s {
                 "rhexis" => Some(Adverse::Rhexis),
@@ -390,5 +382,28 @@ impl FormCase {
             site,
             case,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::iol::{Focus, Iol};
+
+    #[test]
+    fn deserializes_iol() {
+        let mut json = r#"{\"id": "2286e9f4-33b2-11f0-8c1d-9bf7694ed7c6", "name": "Acrysof IQ SN60WF", "focus": "Mono", "model": "sn60wf", "toric": null, "company": "Alcon", "created_at": "2025-05-18T06:34:22.494725+00:00"}"#.to_string();
+
+        json.remove_matches("\\");
+
+        let iol = Iol {
+            model: "sn60wf".to_string(),
+            name: Some("Acrysof IQ SN60WF".to_string()),
+            company: Some("Alcon".to_string()),
+            focus: Focus::Mono,
+            toric: None,
+        };
+
+        let result = serde_json::from_str::<Iol>(json.as_str()).unwrap();
+        assert_eq!(result, iol);
     }
 }

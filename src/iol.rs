@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 use std::range::RangeBounds;
 
 /// The class of [`Iol`] (monofocal, EDOF, multifocal).
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub enum Focus {
+    #[default]
     Mono,
     Edof,
     Multi,
@@ -16,7 +17,7 @@ bounded!(
 );
 
 /// A specific model of IOL.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Iol {
     pub model: String,
     pub name: Option<String>,

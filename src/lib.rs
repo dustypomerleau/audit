@@ -1,5 +1,6 @@
 #![feature(lock_value_accessors)]
 #![feature(new_range_api)]
+#![feature(string_remove_matches)]
 #![feature(type_changing_struct_update)]
 
 //! The [`audit`](self) library provides tools for analyzing and plotting the results of cataract
@@ -39,6 +40,12 @@ macro_rules! bounded {
 
                 fn inner(&self) -> $type {
                     self.0
+                }
+            }
+
+            impl std::fmt::Display for $name {
+                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                    write!(f, "{}", self.inner())
                 }
             }
 

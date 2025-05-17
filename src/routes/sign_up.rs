@@ -165,8 +165,9 @@ with QuerySurgeon := (insert Surgeon {{
             left := (select(insert Sia {{
                 power := {sia_power}, axis := {sia_left_axis}
             }}))
-        }})),
+        }}))
     }} unless conflict on .email else (select Surgeon))
+
 select QuerySurgeon {{
     email,
     terms,

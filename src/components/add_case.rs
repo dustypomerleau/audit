@@ -1,36 +1,65 @@
-use crate::case::FormCase;
-use leptos::prelude::{
-    ActionForm, ElementChild, IntoView, ServerAction, ServerFnError, StyleAttribute, component,
-    server, view,
+#[cfg(feature = "ssr")]
+use crate::{
+    biometry::Biometry,
+    bounded::Bounded,
+    case::{Adverse, Case, Side, SurgeonCase},
+    db::db,
+    iol::OpIol,
+    refraction::{OpRefraction, RefCyl, Refraction},
+    sia::Sia,
+    surgeon::Site,
+    target::{Formula, Target, TargetCyl},
+    va::{AfterVa, BeforeVa, OpVa, Va},
 };
+use crate::{case::FormCase, iol::Iol};
+#[cfg(feature = "ssr")] use chrono::Datelike;
+use leptos::{
+    prelude::{
+        ActionForm, ElementChild, For, Get, GlobalAttributes, IntoAny, IntoView, ServerAction,
+        ServerFnError, StyleAttribute, Suspend, Suspense, component, server, view,
+    },
+    server::OnceResource,
+};
+use std::fmt::Debug;
 
 #[component]
 pub fn AddCase() -> impl IntoView {
     // todo: load necessary datalists form the DB:
     // 1. sites
-    // 2. IOL models and default constants
+    // 2. IOL models
     // 3. surgeon defaults (should already be in context)
     //
     let insert_case = ServerAction::<InsertCase>::new();
+    let iol_resource = OnceResource::new(get_iols());
 
+    let iols = move || {
+        iol_resource
+            .get()
+            .map(|res| res.unwrap_or_default())
+            .unwrap_or_default()
+    };
+
+    // bookmark: todo: the invalid digit in string is coming from WTW
     // todo: IOL constant value should be calculated as follows:
     // - surgeon value if IOL matches Surgeon::default_constant or Surgeon::constants
     // - DB default value if any other IOL
+    // todo: autofill second K axis
     view! {
         <ActionForm action=insert_case>
             <div style="display: grid; grid-auto-columns: 1fr; grid-gap: 30px;">
                 "Enter the case details (fields are required unless marked optional)"
                 // todo: "To change your default values, please [update your profile](link)"
                 <label>
-                    "Unique (anonymised) identifier" <input type="text" name="case[urn]" required />
+                    "Unique (anonymised) identifier"
+                    <input type="text" name="case[urn]" required autofocus />
                 </label> <fieldset>
                     <legend>"Side"</legend>
+                    // todo: we need a signal holding this value to update the Sia
                     <label>
-                        // todo: we need a signal holding this value to update the Sia
-                        "Right" <input type="radio" value="right" name="case[side]" required />
+                        "Right"<input type="radio" value="Right" name="case[side]" required />
                     </label>
                     <label>
-                        "Left"<input type="radio" value="left" name="case[side]" required />
+                        "Left"<input type="radio" value="Left" name="case[side]" required />
                     </label>
                 </fieldset>
                 <label>
@@ -70,13 +99,34 @@ pub fn AddCase() -> impl IntoView {
                     <input type="number" min=8 max=14 step=0.01 name="case[wtw]" />
                 </label>
                 <label>
-                    // todo: populate the available formulas from the DB
                     // todo: prefill the surgeon's default formula
-                    "Formula" <input list="formulas" value="Kane" name="case[formula]" required />
-                    <datalist id="formulas">
-                        <option value="barrett">"Barrett"</option>
-                        <option value="kane">"Kane"</option>
-                    </datalist>
+                    "Formula" <select name="case[formula]">
+                        <optgroup label="Thick lens formulas">
+                            <option value="Barrett">"Barrett"</option>
+                            <option value="Evo">"EVO"</option>
+                            <option value="HillRbf">"Hill RBF"</option>
+                            <option value="Holladay2">"Holladay 2"</option>
+                            <option value="Kane" selected>
+                                "Kane"
+                            </option>
+                            <option value="Okulix">"Okulix raytracing"</option>
+                            <option value="Olsen">"Olsen"</option>
+                        </optgroup>
+                        <optgroup label="Thin lens formulas">
+                            <option value="Haigis">"Haigis"</option>
+                            <option value="HofferQ">"Hoffer Q"</option>
+                            <option value="Holladay1">"Holladay 1"</option>
+                            <option value="SrkT">"SRK/T"</option>
+                        </optgroup>
+                        <optgroup label="Post-refractive formulas">
+                            <option value="AscrsKrs">"ASCRS"</option>
+                            <option value="BarrettTrueK">"Barrett True K"</option>
+                            <option value="HaigisL">"Haigis-L"</option>
+                        </optgroup>
+                        <optgroup label="Other">
+                            <option value="Other">"Not listed"</option>
+                        </optgroup>
+                    </select>
                 </label>
                 <label>
                     "Check here if you use a custom/optimized IOL constant with this formula"
@@ -110,14 +160,20 @@ pub fn AddCase() -> impl IntoView {
                 <label>
                     "SIA axis (°)"
                     <input type="number" min=0 max=179 step=1 name="case[sia_axis]" required />
-                </label>
-                <label>
-                    // todo: prefill the surgeon's default IOL
-                    "IOL model"<input list="iols" name="case[iol]" required /><datalist id="iols">
-                        <option value="sn60wf">"SN60WF (Alcon)"</option>
-                        <option value="diuxxx">"DIUxxx, DIB00 (J&J)"</option>
-                    </datalist>
-                </label>
+                </label> <Suspense fallback=move || view! { "Fetching IOLs..." }>
+                    <label>
+                        "IOL model" <input list="iols" name="case[iol_model]" required />
+                        <datalist id="iols">
+                            <For
+                                each=iols
+                                key=|iol| iol.model.clone()
+                                let(Iol { model, name, company, .. })
+                            >
+                                <option value=model>{name}" ("{company}")"</option>
+                            </For>
+                        </datalist>
+                    </label>
+                </Suspense>
                 <label>
                     "IOL spherical equivalent (-20–60 D)"
                     <input type="number" min=-20 max=60 step=0.25 name="case[iol_se]" required />
@@ -128,11 +184,22 @@ pub fn AddCase() -> impl IntoView {
                     <input type="number" min=0 max=179 step=1 name="case[iol_axis]" />
                 </label>> <fieldset>
                     <legend>"Adverse event"</legend>
-                    <input type="radio" value="none" name="case[adverse]" required checked />
-                    <input type="radio" value="rhexis" name="case[adverse]" required />
-                    <input type="radio" value="pc" name="case[adverse]" required />
-                    <input type="radio" value="zonule" name="case[adverse]" required />
-                    <input type="radio" value="other" name="case[adverse]" required />
+                    <label>
+                        "None"
+                        <input type="radio" value="none" name="case[adverse]" required checked />
+                    </label>
+                    <label>
+                        "Rhexis"<input type="radio" value="rhexis" name="case[adverse]" required />
+                    </label>
+                    <label>
+                        "PC"<input type="radio" value="pc" name="case[adverse]" required />
+                    </label>
+                    <label>
+                        "Zonule"<input type="radio" value="zonule" name="case[adverse]" required />
+                    </label>
+                    <label>
+                        "Other"<input type="radio" value="other" name="case[adverse]" required />
+                    </label>
                 </fieldset>
                 <div>
                     "Visual acuity"
@@ -312,10 +379,321 @@ pub fn AddCase() -> impl IntoView {
 }
 
 #[server]
+pub async fn get_iols() -> Result<Vec<Iol>, ServerFnError> {
+    let json = db()
+        .await?
+        .query_json("select Iol { model, name, company, focus, toric };", &())
+        .await?
+        .to_string();
+
+    Ok(serde_json::from_str::<Vec<Iol>>(json.as_str()).unwrap_or_default())
+}
+
+#[server]
 pub async fn insert_case(case: FormCase) -> Result<(), ServerFnError> {
-    // bookmark:
-    // first call into_surgeon_case(case)
-    // then pattern match all of the values in the SurgeonCase and assign to vars
-    // then insert the query unless conflict on urn/side for that surgeon specifically
+    let SurgeonCase {
+        urn,
+        date,
+        site,
+        case:
+            Case {
+                side,
+                biometry:
+                    Biometry {
+                        al,
+                        ks,
+                        acd,
+                        lt,
+                        cct,
+                        wtw,
+                    },
+                target:
+                    Target {
+                        formula,
+                        custom_constant,
+                        se: target_se,
+                        cyl: target_cyl,
+                    },
+                main,
+                sia:
+                    Sia {
+                        power: sia_power,
+                        axis: sia_axis,
+                    },
+                iol:
+                    OpIol {
+                        iol:
+                            Iol {
+                                model: iol_model, ..
+                            },
+                        se: iol_se,
+                        axis: iol_axis,
+                    },
+                adverse,
+                va:
+                    OpVa {
+                        before:
+                            BeforeVa {
+                                best:
+                                    Va {
+                                        num: va_best_before_num,
+                                        den: va_best_before_den,
+                                    },
+                                raw: va_raw_before,
+                            },
+                        after:
+                            AfterVa {
+                                best: va_best_after,
+                                raw:
+                                    Va {
+                                        num: va_raw_after_num,
+                                        den: va_raw_after_den,
+                                    },
+                            },
+                    },
+                refraction:
+                    OpRefraction {
+                        before:
+                            Refraction {
+                                sph: ref_before_sph,
+                                cyl: ref_before_cyl,
+                            },
+                        after:
+                            Refraction {
+                                sph: ref_after_sph,
+                                cyl: ref_after_cyl,
+                            },
+                    },
+            },
+    } = case.into_surgeon_case().await?;
+
+    let year = date.year();
+    let date = date.to_string();
+    let site_name = site.map(|Site { name }| name).unwrap_or("{}".to_string());
+
+    let side = match side {
+        Side::Right => "Side.Right",
+        Side::Left => "Side.Left",
+    };
+
+    // note: We don't need to cast the integer types, because they are just going into a format
+    // string. The <int32> will be inferred based on the object field types in Gel.
+    let (flat_k_power, flat_k_axis, steep_k_power, steep_k_axis, cct, wtw) = (
+        ks.flat_power(),
+        ks.flat_axis(),
+        ks.steep_power(),
+        ks.steep_axis(),
+        cct.map(|cct| cct.inner().to_string())
+            .unwrap_or("{}".to_string()),
+        wtw.map(|wtw| wtw.inner().to_string())
+            .unwrap_or("{}".to_string()),
+    );
+
+    let formula = if let Some(formula) = formula {
+        match formula {
+            Formula::AscrsKrs => "Formula.AscrsKrs",
+            Formula::Barrett => "Formula.Barrett",
+            Formula::BarrettTrueK => "Formula.BarrettTrueK",
+            Formula::Evo => "Formula.Evo",
+            Formula::Haigis => "Formula.Haigis",
+            Formula::HaigisL => "Formula.HaigisL",
+            Formula::HillRbf => "Formula.HillRbf",
+            Formula::HofferQ => "Formula.HofferQ",
+            Formula::Holladay1 => "Formula.Holladay1",
+            Formula::Holladay2 => "Formula.Holladay2",
+            Formula::Kane => "Formula.Kane",
+            Formula::Okulix => "Formula.Okulix",
+            Formula::Olsen => "Formula.Olsen",
+            Formula::SrkT => "Formula.SrkT",
+            Formula::Other => "Formula.Other",
+        }
+    } else {
+        "{}"
+    };
+
+    let target_cyl = if let Some(TargetCyl { power, axis }) = target_cyl {
+        format!("(select(insert TargetCyl {{ power := {power}, axis := {axis} }}))")
+    } else {
+        "{}".to_string()
+    };
+
+    let iol_axis = if let Some(iol_axis) = iol_axis {
+        format!("{iol_axis}")
+    } else {
+        "{}".to_string()
+    };
+
+    let adverse = if let Some(adverse) = adverse {
+        match adverse {
+            Adverse::Rhexis => "Adverse.Rhexis",
+            Adverse::Pc => "Adverse.Pc",
+            Adverse::Zonule => "Adverse.Zonule",
+            Adverse::Other => "Adverse.Other",
+        }
+    } else {
+        "{}"
+    };
+
+    let va_raw_before = if let Some(Va { num, den }) = va_raw_before {
+        format!("(select (insert Va {{ num := {num}, den := {den} }}))")
+    } else {
+        "{}".to_string()
+    };
+
+    let va_best_after = if let Some(Va { num, den }) = va_best_after {
+        format!("(select (insert Va {{ num := {num}, den := {den} }}))")
+    } else {
+        "{}".to_string()
+    };
+
+    let ref_before_cyl = if let Some(RefCyl { power, axis }) = ref_before_cyl {
+        format!("(select (insert RefCyl {{ power := {power}, axis := {axis} }}))")
+    } else {
+        "{}".to_string()
+    };
+
+    let ref_after_cyl = if let Some(RefCyl { power, axis }) = ref_after_cyl {
+        format!("(select (insert RefCyl {{ power := {power}, axis := {axis} }}))")
+    } else {
+        "{}".to_string()
+    };
+
+    let query = format!(
+        r#"
+with QueryBiometry := (insert Biometry {{
+    al := {al},
+
+    ks := (select(insert Ks {{
+        flat := (select(insert K {{
+            power := {flat_k_power},
+            axis := {flat_k_axis}
+        }})),
+
+        steep := (select(insert K {{
+            power := {steep_k_power},
+            axis := {steep_k_axis}
+        }}))
+    }})),
+
+    acd := {acd},
+    lt := {lt},
+    cct := {cct},
+    wtw := {wtw}
+}}),
+
+QueryTarget := (insert Target {{
+    formula := {formula},
+    custom_constant := {custom_constant},
+    se := {target_se},
+    cyl := {target_cyl}
+}}),
+
+QueryIol := (select (insert OpIol {{
+    iol := (select Iol filter .model = "{iol_model}"),
+    se := {iol_se},
+    axis := {iol_axis}
+}})),
+
+QueryVa := (insert OpVa {{
+    before := (select (insert BeforeVa {{
+        best := (select (insert Va {{
+            num := {va_best_before_num},
+            den := {va_best_before_den}
+        }})),
+
+        raw := {va_raw_before}
+    }})),
+
+    after := (select (insert AfterVa {{
+        best := {va_best_after},
+
+        raw := (select (insert Va {{
+            num := {va_raw_after_num},
+            den := {va_raw_after_den}
+        }}))
+    }}))
+}}),
+
+QueryRefraction := (select (insert OpRefraction {{
+    before := (select (insert Refraction {{
+        sph := {ref_before_sph},
+        cyl := {ref_before_cyl}
+    }})),
+
+    after := (select (insert Refraction {{
+        sph := {ref_after_sph},
+        cyl := {ref_after_cyl}
+    }}))
+}})),
+
+QueryCas := (insert Cas {{
+    side := {side},
+    biometry := (select QueryBiometry),
+    target := (select QueryTarget),
+    year := {year},
+    main := {main},
+    sia := (select (insert Sia {{ power := {sia_power}, axis := {sia_axis} }})),
+    iol := (select QueryIol),
+    adverse := {adverse},
+    va := (select QueryVa),
+    refraction := (select QueryRefraction)
+}}),
+
+QuerySurgeonCas := (insert SurgeonCas {{
+    surgeon := (select global cur_surgeon),
+    urn := "{urn}",
+    side := {side},
+    date := <cal::local_date>"{date}",
+
+    site := (select (insert Site {{
+        name := "{site_name}"
+    }} unless conflict on .name else (select Site))),
+
+    cas := (select QueryCas)
+}})
+
+select QuerySurgeonCas {{
+    urn,
+    date,
+    site: {{ name }},
+
+    cas: {{
+        side,
+        biometry: {{ al, ks, acd, lt, cct, wtw }},
+        main,
+        sia: {{ power, axis }},
+
+        iol: {{
+            iol: {{ model, name, company, focus, toric }},
+            se,
+            axis
+        }},
+
+        adverse,
+
+        va: {{
+            before: {{ best: {{ num, den }}, raw: {{ num, den }} }},
+            after: {{ best: {{ num, den }}, raw: {{ num, den }} }},
+        }},
+
+        refraction: {{
+            before: {{ sph, cyl: {{ power, axis}} }},
+            after: {{ sph, cyl: {{ power, axis}} }}
+        }}
+    }}
+}};
+        "#
+    );
+
+    let case = db()
+        .await?
+        .query_single_json(query, &())
+        .await?
+        .map(|json| json.as_ref().to_string());
+    dbg!(&case);
+
+    // todo: redirect to a view that takes the returned String, parses it as JSON into a
+    // SurgeonCase, and displays it alongside a button to add another case.
+
     Ok(())
 }
