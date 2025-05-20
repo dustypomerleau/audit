@@ -123,6 +123,6 @@ select {{
             }
         },
 
-        _ => Err(DbError::Query(format!("{query_result:?}")).into()),
+        _ => Err(DbError::Gel(format!("{query_result:?}")).into()),
     }
 }

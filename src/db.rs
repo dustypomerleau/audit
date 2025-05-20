@@ -3,17 +3,16 @@
 #[cfg(feature = "ssr")] use crate::state::StatePoisonedError;
 #[cfg(feature = "ssr")] use gel_tokio::Client;
 #[cfg(feature = "ssr")] use leptos::prelude::expect_context;
+use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 #[cfg(feature = "ssr")] use thiserror::Error;
 
 // todo: I'm not liking the way Gel and Query are different errors here - just a temporary fix
-#[derive(Debug, Error)]
+#[derive(Clone, Debug, Deserialize, Error, Serialize)]
 #[cfg(feature = "ssr")]
 pub enum DbError {
     #[error("Gel error: {0:?}")]
-    Gel(gel_tokio::Error),
-    #[error("failed Gel query: {0:?}")]
-    Query(String),
+    Gel(String),
     #[error("The DB operation couldn't be completed due to poisoned state: {0:?}")]
     State(StatePoisonedError),
 }
@@ -21,7 +20,7 @@ pub enum DbError {
 #[cfg(feature = "ssr")]
 impl From<gel_tokio::Error> for DbError {
     fn from(err: gel_tokio::Error) -> Self {
-        Self::Gel(err)
+        Self::Gel(format!("{err:?}"))
     }
 }
 

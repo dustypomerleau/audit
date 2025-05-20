@@ -14,12 +14,16 @@ use crate::{
     va::{AfterVa, BeforeVa, Va, VaDen, VaNum},
 };
 use chrono::NaiveDate;
+use leptos::{
+    prelude::{FromServerFnError, ServerFnErrorErr},
+    server_fn::codec::JsonEncoding,
+};
 use serde::{Deserialize, Serialize};
 use std::{fmt::Display, range::RangeBounds};
 use thiserror::Error;
 
 /// The required fields for each [`Case`]. Used by [`CaseError::MissingField`].
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Required {
     Date,
     Email,
@@ -32,13 +36,13 @@ pub enum Required {
 }
 
 /// A wrapper for any type of bounds error on numeric types.
-#[derive(Debug, Error)]
+#[derive(Clone, Debug, Deserialize, Error, PartialEq, Serialize)]
 #[error("the value is out of bounds {0:?}")]
 pub struct BoundsError(pub String);
 
 /// The error type for a [`Case`] with missing fields or out of bounds values.
 #[cfg(feature = "ssr")]
-#[derive(Debug, Error)]
+#[derive(Clone, Debug, Deserialize, Error, Serialize)]
 pub enum CaseError {
     #[error("out of bounds value on a `Case`: {0:?}")]
     Bounds(BoundsError),
@@ -48,12 +52,40 @@ pub enum CaseError {
 
     #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
     MissingField(Required),
+
+    #[error("serde error: {0:?}")]
+    Serde(String),
+
+    #[error("server error {0:?}")]
+    Server(String),
 }
 
 #[cfg(feature = "ssr")]
 impl From<BoundsError> for CaseError {
     fn from(err: BoundsError) -> Self {
         Self::Bounds(BoundsError(format!("{err:?}")))
+    }
+}
+
+#[cfg(feature = "ssr")]
+impl From<serde_json::Error> for CaseError {
+    fn from(err: serde_json::Error) -> Self {
+        Self::Serde(format!("{err:?}"))
+    }
+}
+
+#[cfg(feature = "ssr")]
+impl From<DbError> for CaseError {
+    fn from(err: DbError) -> Self {
+        Self::Db(err)
+    }
+}
+
+impl FromServerFnError for CaseError {
+    type Encoder = JsonEncoding;
+
+    fn from_server_fn_error(err: ServerFnErrorErr) -> Self {
+        Self::Server(format!("{err}"))
     }
 }
 
@@ -291,6 +323,7 @@ select Iol {{
         // The downside is that now you can't just select all the DB Cas that have a complication
         // by looking to see if there is a value here. Instead you would need to check for values
         // != to Adverse.None.
+        // Probably leave it as option, but think on it.
         fn to_adverse(s: &str) -> Option<Adverse> {
             match s {
                 "rhexis" => Some(Adverse::Rhexis),
