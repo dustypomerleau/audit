@@ -22,6 +22,7 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
                     name="viewport"
                     content="width=device-width, initial-scale=1, shrink-to-fit=no"
                 />
+                <script src="https://cdn.plot.ly/plotly-2.14.0.min.js"></script>
                 <meta name="description" content="Vic Eye cataract audit" />
                 <AutoReload options=options.clone() />
                 <HydrationScripts options />
