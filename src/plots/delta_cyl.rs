@@ -14,16 +14,18 @@
 // Actually start with x = preop corneal astigmatism, y = postop refractive astigmatism (scatter)
 
 use crate::{
+    bounded::Bounded,
     case::{Case, CaseError, SurgeonCase},
     db::{DbError, db},
-    surgeon::Email,
+    surgeon::{Email, Surgeon},
 };
-use chrono::NaiveDate;
 use leptos::{
-    prelude::{ServerFnError, component},
-    server,
+    IntoView,
+    prelude::{Get, GlobalAttributes, IntoAny, RwSignal, component, expect_context, server},
+    server::OnceResource,
+    view,
 };
-use plotly::Plot;
+use plotly::{Plot, Scatter};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -33,7 +35,68 @@ pub struct Compare {
 }
 
 #[component]
-pub fn DeltaCyl(compare: Compare) -> Plot {}
+pub fn DeltaCyl() -> impl IntoView {
+    let email = expect_context::<Option<Surgeon>>().unwrap().email;
+    let year = RwSignal::new(2025_u32);
+    let compare_resource = OnceResource::new(get_compare(email, year.get()));
+
+    // for each `Scatter` we are plotting magnitude of preop corneal cyl versus magnitude of
+    // postoperative refractive cyl (do they need to be in the same plane, or is it ok that the
+    // outcome measure is apples:apples)
+    let (surgeon, cohort): ((Vec<f32>, Vec<f32>), (Vec<f32>, Vec<f32>)) =
+        if let Some(Ok(Compare {
+            surgeon_cases,
+            cohort_cases,
+        })) = compare_resource.get()
+        {
+            let surgeon = surgeon_cases
+                .iter()
+                .map(|sc| {
+                    let ks = sc.case.biometry.ks;
+                    let pre = ((ks.steep_power() - ks.flat_power()) / 100) as f32;
+                    let refcyl = sc.case.refraction.after.cyl;
+
+                    let post = if let Some(refcyl) = refcyl {
+                        // todo: inner().absolute_value() or however it's done
+                        (refcyl.power.inner() / 100) as f32
+                    } else {
+                        0_f32
+                    };
+
+                    (pre, post)
+                })
+                .collect();
+
+            let cohort = cohort_cases
+                .iter()
+                .map(|cc| {
+                    let ks = cc.biometry.ks;
+                    let pre = ((ks.steep_power() - ks.flat_power()) / 100) as f32;
+                    let refcyl = cc.refraction.after.cyl;
+
+                    let post = if let Some(refcyl) = refcyl {
+                        // todo: inner().absolute_value() or however it's done
+                        (refcyl.power.inner() / 100) as f32
+                    } else {
+                        0_f32
+                    };
+
+                    (pre, post)
+                })
+                .collect();
+
+            (surgeon, cohort)
+        } else {
+            return view! { "Query for the surgeon and cohort was not successful" }.into_any();
+        };
+
+    let surgeon = Scatter::new(surgeon.0, surgeon.1).name("Surgeon");
+    let cohort = Scatter::new(cohort.0, cohort.1).name("Cohort");
+    let mut plot = Plot::new();
+    plot.add_traces(vec![surgeon, cohort]);
+
+    view! { <div id="plotly"></div> }.into_any()
+}
 
 #[server]
 pub async fn get_compare(email: Email, year: u32) -> Result<Compare, CaseError> {
