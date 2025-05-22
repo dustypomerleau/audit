@@ -690,7 +690,7 @@ select QuerySurgeonCas {{
         .query_single_json(query, &())
         .await?
         .map(|json| json.as_ref().to_string());
-    dbg!(&case);
+    println!("{case:#?}");
 
     // todo: redirect to a view that takes the returned String, parses it as JSON into a
     // SurgeonCase, and displays it alongside a button to add another case.

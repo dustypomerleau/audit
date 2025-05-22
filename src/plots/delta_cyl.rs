@@ -13,17 +13,24 @@
 //
 // Actually start with x = preop corneal astigmatism, y = postop refractive astigmatism (scatter)
 
+// i think we basically want the route to be Report, and then the view on Report contains
+// PlotContainer(compare: Compare) and then all the subviews take &Compare and return a view
+// if there's common patterns then maybe you do some work in PlotContainer and supply the plot with
+// a ScatterCompare, if it's the same for several plots, but the data is shown differently
 use crate::{
+    bounded::Bounded,
     case::{Case, CaseError, SurgeonCase},
     db::{DbError, db},
-    surgeon::Email,
+    surgeon::{Email, Surgeon},
 };
-use chrono::NaiveDate;
 use leptos::{
-    prelude::{ServerFnError, component},
-    server,
+    IntoView,
+    prelude::{Get, GlobalAttributes, IntoAny, RwSignal, component, expect_context, server},
+    reactive::spawn_local,
+    server::OnceResource,
+    view,
 };
-use plotly::Plot;
+use plotly::{Plot, Scatter};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -32,8 +39,96 @@ pub struct Compare {
     cohort_cases: Vec<Case>,
 }
 
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct ScatterData {
+    x: Vec<f32>,
+    y: Vec<f32>,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct ScatterCompare {
+    surgeon: ScatterData,
+    cohort: ScatterData,
+}
+
+// If you find that you are doing a lot of the same processing for future plots, you could
+// have a Cased trait and impl it for both SurgeonCase and Case, and then just write these
+// once over a generic, but hold off on this for now, it's premature.
+impl Compare {
+    pub fn scatter_delta_cyl(&self) -> ScatterCompare {
+        let surgeon: (Vec<f32>, Vec<f32>) = self
+            .surgeon_cases
+            .iter()
+            .map(|sc| {
+                let ks = sc.case.biometry.ks;
+                let pre = ((ks.steep_power() - ks.flat_power()) / 100) as f32;
+
+                let post = sc
+                    .case
+                    .refraction
+                    .after
+                    .cyl
+                    .map(|refcyl| (refcyl.power.inner() / 100) as f32)
+                    .unwrap_or(0_f32);
+
+                (pre, post)
+            })
+            .collect();
+
+        let cohort: (Vec<f32>, Vec<f32>) = self
+            .cohort_cases
+            .iter()
+            .map(|cc| {
+                let ks = cc.biometry.ks;
+                let pre = ((ks.steep_power() - ks.flat_power()) / 100) as f32;
+
+                let post = cc
+                    .refraction
+                    .after
+                    .cyl
+                    .map(|refcyl| (refcyl.power.inner() / 100) as f32)
+                    .unwrap_or(0_f32);
+
+                (pre, post)
+            })
+            .collect();
+
+        ScatterCompare {
+            surgeon: ScatterData {
+                x: surgeon.0,
+                y: surgeon.1,
+            },
+            cohort: ScatterData {
+                x: cohort.0,
+                y: cohort.1,
+            },
+        }
+    }
+}
+
 #[component]
-pub fn DeltaCyl(compare: Compare) -> Plot {}
+pub fn DeltaCyl() -> impl IntoView {
+    let email = expect_context::<Option<Surgeon>>().unwrap().email;
+    let year = RwSignal::new(2025_u32);
+    let compare_resource = OnceResource::new(get_compare(email, year.get()));
+
+    // for each `Scatter` we are plotting magnitude of preop corneal cyl versus magnitude of
+    // postoperative refractive cyl (do they need to be in the same plane, or is it ok that the
+    // outcome measure is apples:apples)
+    let ScatterCompare { surgeon, cohort } = if let Some(Ok(compare)) = compare_resource.get() {
+        compare.scatter_delta_cyl()
+    } else {
+        return view! { "Query for the surgeon and cohort was not successful" }.into_any();
+    };
+
+    let surgeon = Scatter::new(surgeon.x, surgeon.y).name("Surgeon");
+    let cohort = Scatter::new(cohort.x, cohort.y).name("Cohort");
+    let mut plot = Plot::new();
+    plot.add_traces(vec![surgeon, cohort]);
+    spawn_local(async move { plotly::bindings::new_plot("plotly-delta-cyl", &plot).await });
+
+    view! { <div id="plotly-delta-cyl"></div> }.into_any()
+}
 
 #[server]
 pub async fn get_compare(email: Email, year: u32) -> Result<Compare, CaseError> {

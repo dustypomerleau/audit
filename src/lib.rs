@@ -77,7 +77,7 @@ pub mod cyl;
 pub mod db;
 pub mod email;
 pub mod iol;
-pub mod plots;
+// pub mod plots;
 pub mod refraction;
 pub mod routes;
 pub mod sca;

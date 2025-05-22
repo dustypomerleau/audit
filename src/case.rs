@@ -81,6 +81,7 @@ impl From<DbError> for CaseError {
     }
 }
 
+#[cfg(feature = "ssr")]
 impl FromServerFnError for CaseError {
     type Encoder = JsonEncoding;
 
@@ -147,8 +148,6 @@ pub struct Case {
     pub refraction: OpRefraction,
 }
 
-// todo: match required fields on the form to non-Option here
-// todo: fix Ks in the form
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct FormCase {
     pub urn: String,
