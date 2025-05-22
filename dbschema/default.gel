@@ -149,7 +149,7 @@ global cur_surgeon := (assert_single(
 
     type Biometry extending SoftCreate {
         required al: Al;
-        required ks: Ks;
+        required ks: Ks { on source delete delete target if orphan; }
         required acd: Acd;
         required lt: Lt;
         cct: Cct;
@@ -157,20 +157,20 @@ global cur_surgeon := (assert_single(
     }
 
     type AfterVa extending SoftCreate {
-        best: Va;
-        required raw: Va;
+        best: Va { on source delete delete target if orphan; }
+        required raw: Va { on source delete delete target if orphan; }
     }
     
     type BeforeVa extending SoftCreate {
-        required best: Va;
-        raw: Va;
+        required best: Va { on source delete delete target if orphan; }
+        raw: Va { on source delete delete target if orphan; }
     }
 
     # case is a reserved keyword
     type Cas extending SoftCreate {
         required side: Side;
-        biometry: Biometry;
-        required target: Target;
+        biometry: Biometry { on source delete delete target if orphan; }
+        required target: Target { on source delete delete target if orphan; }
 
         required year: int32 {
             default := <int32>datetime_get(datetime_current(), "year");
@@ -179,11 +179,11 @@ global cur_surgeon := (assert_single(
         }
 
         main: Main;
-        sia: Sia;
-        iol: OpIol;
+        sia: Sia { on source delete delete target if orphan; }
+        iol: OpIol { on source delete delete target if orphan; }
         adverse: Adverse;
-        required va: OpVa;
-        required refraction: OpRefraction;
+        required va: OpVa { on source delete delete target if orphan; }
+        required refraction: OpRefraction { on source delete delete target if orphan; }
     }
 
     type Iol extending SoftCreate {
@@ -202,8 +202,8 @@ global cur_surgeon := (assert_single(
     # Multi-hop constraint limitation prevents enforcing that .flat.power <= .steep.power,
     # so this must be checked prior to insertion.
     type Ks extending SoftCreate {
-        required flat: K;
-        required steep: K;
+        required flat: K { on source delete delete target if orphan; }
+        required steep: K { on source delete delete target if orphan; }
     }
 
     type OpIol extending SoftCreate {
@@ -213,13 +213,13 @@ global cur_surgeon := (assert_single(
     }
 
     type OpRefraction extending SoftCreate {
-        required before: Refraction;
-        required after: Refraction;
+        required before: Refraction { on source delete delete target if orphan; }
+        required after: Refraction { on source delete delete target if orphan; }
     }
     
     type OpVa extending SoftCreate {
-        required before: BeforeVa;
-        required after: AfterVa;
+        required before: BeforeVa { on source delete delete target if orphan; }
+        required after: AfterVa { on source delete delete target if orphan; }
     }
 
     type RefCyl extending SoftCreate {
@@ -247,20 +247,31 @@ global cur_surgeon := (assert_single(
         terms: datetime; # the date terms were agreed by the surgeon
         first_name: str;
         last_name: str;
-        defaults: SurgeonDefaults;
-        sia: SurgeonSia;
+        defaults: SurgeonDefaults { on source delete delete target if orphan; }
+        sia: SurgeonSia { on source delete delete target if orphan; }
         multi cases := .<surgeon[is SurgeonCas];
     }
 
+    # Cascading deletes will give users a greater sense of agency:
+    # 1. If the surgeon deletes their account, we remove the Surgeon.
+    # 2. If we remove the Surgeon, we also remove their SurgeonCas es.
+    # 3. If we remove a SurgeonCas, we also remove the linked Cas.
+    # This allows someone to ghost completely, along with all the data they have entered. 
     type SurgeonCas extending SoftCreate {
-        required surgeon: Surgeon;
+        required surgeon: Surgeon { on target delete delete source; }
         required urn: str;
-        # Duplicating the side here is necessary to enforce the exclusive constraint
-        # Otherwise, we risk accidentally entering the same surgery multiple times.
+        # Duplicating the side here is necessary to enforce the exclusive constraint.
+        # Side is available on the Cas, but double-hops aren't permitted in constraints.
+        # Without the constraint, we risk accidentally entering the same surgery multiple
+        # times.
         required side: Side;
         required date: cal::local_date;
         site: Site;
-        required cas: Cas { constraint exclusive; }
+
+        required cas: Cas {
+            constraint exclusive;
+            on source delete delete target if orphan;
+        }
 
         constraint exclusive on ((.surgeon, .urn, .side));
         
@@ -281,15 +292,15 @@ global cur_surgeon := (assert_single(
     }
 
     type SurgeonSia extending SoftCreate {
-        required right: Sia;
-        required left: Sia;
+        required right: Sia { on source delete delete target if orphan; }
+        required left: Sia { on source delete delete target if orphan; }
     }
 
     type Target extending SoftCreate {
         formula: Formula;
         required custom_constant: bool { default := false; }
         required se: TargetSe;
-        cyl: TargetCyl;
+        cyl: TargetCyl { on source delete delete target if orphan; }
     }
 
     type TargetCyl extending SoftCreate {
