@@ -6,8 +6,8 @@ use crate::{
     surgeon::{Email, Surgeon},
 };
 use leptos::prelude::{
-    ActionForm, ElementChild, IntoView, ServerAction, ServerFnError, StyleAttribute, component,
-    server, view,
+    ActionForm, ElementChild, IntoMaybeErased, IntoView, ServerAction, ServerFnError,
+    StyleAttribute, component, server, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 

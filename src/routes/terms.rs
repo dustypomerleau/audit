@@ -1,7 +1,7 @@
 #[cfg(feature = "ssr")] use crate::{db::db, surgeon::set_current_surgeon};
 use leptos::prelude::{
-    ElementChild, IntoView, OnAttribute, ServerAction, ServerFnError, StyleAttribute, component,
-    server, view,
+    ElementChild, IntoMaybeErased, IntoView, OnAttribute, ServerAction, ServerFnError,
+    StyleAttribute, component, server, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 

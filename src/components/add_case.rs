@@ -15,8 +15,8 @@ use crate::{case::FormCase, iol::Iol};
 #[cfg(feature = "ssr")] use chrono::Datelike;
 use leptos::{
     prelude::{
-        ActionForm, ElementChild, For, Get, GlobalAttributes, IntoAny, IntoView, ServerAction,
-        ServerFnError, StyleAttribute, Suspend, Suspense, component, server, view,
+        ActionForm, ElementChild, For, Get, GlobalAttributes, IntoAny, IntoMaybeErased, IntoView,
+        ServerAction, ServerFnError, StyleAttribute, Suspend, Suspense, component, server, view,
     },
     server::OnceResource,
 };

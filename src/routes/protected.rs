@@ -10,8 +10,8 @@ use crate::{
 };
 #[cfg(feature = "ssr")] use leptos::prelude::expect_context;
 use leptos::prelude::{
-    IntoAny, IntoView, OnceResource, RwSignal, ServerFnError, Set, Suspend, Suspense, component,
-    provide_context, server, view,
+    IntoAny, IntoMaybeErased, IntoView, OnceResource, RwSignal, ServerFnError, Set, Suspend,
+    Suspense, component, provide_context, server, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;
