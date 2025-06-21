@@ -1,5 +1,5 @@
 # Multiple steps are required to get leptosfmt working correctly:
-# 1. `rustfmt.toml` must contain the `edition` key
+# 1. `rustfmt.toml` must contain the `edition` key — actually it looks like this was only true until edition 2024 stabilised, as I have now removed it.
 # 2. `rust-analyzer.toml` must contain the override command invoking `leptosfmt`
 # 3. `leptosfmt.toml` must contain your preferred settings
 #
