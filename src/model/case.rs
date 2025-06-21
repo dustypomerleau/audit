@@ -135,6 +135,7 @@ pub struct SurgeonCase {
     pub urn: String,
     pub date: NaiveDate,
     pub site: Option<Site>,
+    #[serde(alias = "cas")]
     pub case: Case,
 }
 
@@ -233,7 +234,7 @@ impl FormCase {
             ref_after_cyl_power,
             ref_after_cyl_axis,
         } = self;
-        dbg!(&date);
+        // dbg!(&date);
 
         let date = NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
             .map_err(|_| CaseError::MissingField(Required::Date))?;
@@ -295,7 +296,7 @@ select Iol {{
         {
             use crate::model::{Iol, IolSe};
 
-            dbg!(&json);
+            // dbg!(&json);
             let iol = serde_json::from_str::<Iol>(json.as_ref())
                 .map_err(|err| BoundsError(format!("{err:?}")))?;
 

@@ -1,5 +1,6 @@
 use crate::{
     components::SignedOut,
+    plots::DeltaCyl,
     routes::{Add, Gateway, Instructions, Landing, List, Protected, Report, SignUp, Terms},
 };
 use leptos::prelude::{
@@ -59,6 +60,8 @@ pub fn App() -> impl IntoView {
                         <Route path=StaticSegment("instructions") view=Instructions />
                         <Route path=StaticSegment("list") view=List />
                         <Route path=StaticSegment("report") view=Report />
+                        // just for testing purposes
+                        <Route path=StaticSegment("test") view=DeltaCyl />
                     </ParentRoute>
                 </Routes>
             </main>

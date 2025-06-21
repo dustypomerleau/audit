@@ -1,5 +1,5 @@
 use crate::{
-    bounded::BoundsError,
+    bounded::{Bounded, BoundsError},
     model::{
         Cyl, CylPower, Formula, RawCyl, RefCyl, RefSph, Refraction, Target, TargetCyl,
         TargetCylPower, TargetSe,

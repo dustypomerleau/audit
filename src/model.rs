@@ -1,21 +1,21 @@
 pub mod biometry;
 pub mod case;
+pub mod cyl;
 pub mod iol;
 pub mod refraction;
-pub mod sia;
 pub mod sca;
-pub mod cyl;
+pub mod sia;
 pub mod surgeon;
 pub mod target;
 pub mod va;
 
 pub use biometry::*;
 pub use case::*;
+pub use cyl::*;
 pub use iol::*;
 pub use refraction::*;
-pub use sia::*;
 pub use sca::*;
-pub use cyl::*;
+pub use sia::*;
 pub use surgeon::*;
 pub use target::*;
 pub use va::*;

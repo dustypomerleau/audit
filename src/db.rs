@@ -56,4 +56,24 @@ pub fn to_hecto(value: i32) -> f32 {
 }
 
 #[cfg(test)]
-mod tests {}
+pub mod tests {
+    use dotenvy::dotenv;
+    use gel_protocol::model::Json;
+    use gel_tokio::Client;
+    use std::{env, sync::LazyLock};
+
+    pub async fn test_db() -> Client {
+        // note: new API for dotenvy will arrive in v16 release
+        pub static TEST_JWT: LazyLock<String> = LazyLock::new(|| {
+            dotenv().ok();
+            env::var("TEST_JWT").expect("expected TEST_JWT environment variable to be present")
+        });
+
+        let jwt = &*TEST_JWT;
+
+        gel_tokio::create_client()
+            .await
+            .unwrap()
+            .with_globals_fn(|client| client.set("ext::auth::client_token", jwt))
+    }
+}

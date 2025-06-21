@@ -4,9 +4,14 @@ mod delta_cyl;
 
 use crate::{
     bounded::Bounded,
-    model::{Case, SurgeonCase},
+    model::{Case, CaseError, SurgeonCase},
+};
+#[cfg(feature = "ssr")] use crate::{
+    db::{DbError, db},
+    query::query_select_compare,
 };
 pub use delta_cyl::*;
+use leptos::prelude::server;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -37,14 +42,14 @@ impl Compare {
             .iter()
             .map(|sc| {
                 let ks = sc.case.biometry.ks;
-                let pre = ((ks.steep_power() - ks.flat_power()) / 100) as f32;
+                let pre = ((ks.steep_power() - ks.flat_power()) as f32 / 100.0).abs();
 
                 let post = sc
                     .case
                     .refraction
                     .after
                     .cyl
-                    .map(|refcyl| (refcyl.power.inner() / 100) as f32)
+                    .map(|refcyl| (refcyl.power.inner() as f32 / 100.0).abs())
                     .unwrap_or(0_f32);
 
                 (pre, post)
@@ -56,13 +61,13 @@ impl Compare {
             .iter()
             .map(|cc| {
                 let ks = cc.biometry.ks;
-                let pre = ((ks.steep_power() - ks.flat_power()) / 100) as f32;
+                let pre = ((ks.steep_power() - ks.flat_power()) as f32 / 100.0).abs();
 
                 let post = cc
                     .refraction
                     .after
                     .cyl
-                    .map(|refcyl| (refcyl.power.inner() / 100) as f32)
+                    .map(|refcyl| (refcyl.power.inner() as f32 / 100.0).abs())
                     .unwrap_or(0_f32);
 
                 (pre, post)
@@ -82,117 +87,45 @@ impl Compare {
     }
 }
 
-#[cfg(feature = "ssr")] use crate::db::{DbError, db};
-use crate::model::{CaseError, Email};
-use leptos::prelude::server;
-
 #[server]
-pub async fn get_compare(email: Email, year: u32) -> Result<Compare, CaseError> {
-    let query = format!(
-        r#"
-with
-surgeon_cases := (select SurgeonCas {{
-    urn,
-    side,
-    date,
-    site {{ name }},
-    cas: {{
-        side,
-
-        biometry: {{
-            al,
-            ks {{ flat: {{ power, axis}}, steep: {{ power, axis }} }},
-            acd,
-            lt,
-            cct,
-            wtw
-        }},
-        
-        target: {{
-            formula,
-            custom_constant,
-            se,
-            cyl: {{ power, axis }}
-        }},
-        
-        year,
-        main,
-        sia: {{ power, axis }},
-        
-        iol: {{
-            iol: {{ model, name, company, focus, toric }},
-            se,
-            axis
-        }},
-
-        adverse,
-
-        va: {{
-            before: {{ best: {{ num, den }}, raw: {{ num, den }} }},
-            after: {{ best: {{ num, den }}, raw: {{ num, den }} }}
-        }},
-
-        refraction: {{
-            before: {{ sph, cyl: {{ power, axis }} }},
-            after: {{ sph, cyl: {{ power, axis }} }},
-        }}
-
-    }}
-}} filter .surgeon.email = "{email}" and .cas.year = {year}),
-
-cohort_cases := (select Cas {{
-    side,
-
-    biometry: {{
-        al,
-        ks {{ flat: {{ power, axis}}, steep: {{ power, axis }} }},
-        acd,
-        lt,
-        cct,
-        wtw
-    }},
-    
-    target: {{
-        formula,
-        custom_constant,
-        se,
-        cyl: {{ power, axis }}
-    }},
-    
-    year,
-    main,
-    sia: {{ power, axis }},
-    
-    iol: {{
-        iol: {{ model, name, company, focus, toric }},
-        se,
-        axis
-    }},
-
-    adverse,
-
-    va: {{
-        before: {{ best: {{ num, den }}, raw: {{ num, den }} }},
-        after: {{ best: {{ num, den }}, raw: {{ num, den }} }}
-    }},
-
-    refraction: {{
-        before: {{ sph, cyl: {{ power, axis }} }},
-        after: {{ sph, cyl: {{ power, axis }} }}
-    }}
-}} filter .year = {year})
-
-select {{ surgeon_cases, cohort_cases }};
-        "#
-    );
+// In future, you may want the ability to compare a specific date range for the Surgeon, against
+// either the cohort, or against the surgeon's own baseline (all other dates outside the range).
+pub async fn get_compare(year: u32) -> Result<Compare, CaseError> {
+    let query = query_select_compare(year);
 
     let query_result = db()
         .await?
-        .query_json(query, &())
+        // The JSON returned here is just one object, mapping to a Compare
+        .query_single_json(query, &())
         .await
-        .map_err(|err| DbError::Gel(format!("{err:?}")))?;
+        .map_err(|err| DbError::Gel(format!("{err:?}")))?
+        .unwrap(); // todo: handle properly once you get the test below passing
 
     let compare = serde_json::from_str::<Compare>(query_result.as_ref())?;
 
     Ok(compare)
+}
+
+#[cfg(test)]
+#[cfg(feature = "ssr")]
+mod tests {
+    use super::*;
+    use crate::db::tests::test_db;
+
+    #[tokio::test]
+    async fn queries_compare() {
+        let year = 2025_u32;
+        let query = query_select_compare(year);
+
+        let query_result = test_db()
+            .await
+            .query_single_json(query, &())
+            .await
+            .unwrap()
+            .unwrap();
+        dbg!(&query_result);
+
+        let compare = serde_json::from_str::<Compare>(query_result.as_ref()).unwrap();
+        dbg!(&compare);
+    }
 }

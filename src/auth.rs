@@ -1,4 +1,7 @@
-use crate::state::{AppState, StatePoisonedError};
+use crate::{
+    db::DbError,
+    state::{AppState, StatePoisonedError},
+};
 use axum::{
     extract::{Query, State},
     response::{IntoResponse, Redirect, Response},
@@ -10,7 +13,10 @@ use axum_extra::extract::{
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
 use gel_tokio::create_client;
-use leptos::prelude::ServerFnError;
+use leptos::{
+    prelude::{FromServerFnError, ServerFnError, ServerFnErrorErr},
+    server_fn::codec::JsonEncoding,
+};
 use leptos_axum::extract;
 use rand::{Rng, rng};
 use serde::{Deserialize, Serialize};
@@ -25,12 +31,16 @@ pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
 });
 
 /// Possible failure modes during the code exchange of a PKCE flow.
-#[derive(Debug, Error)]
+#[derive(Clone, Debug, Deserialize, Error, Serialize)]
 pub enum AuthError {
+    #[error("error during DB query: {0:?}")]
+    Db(String),
     #[error("unable to deserialize the response as JSON: {0:?}")]
     Json(String),
     #[error("did not receive a response from the token request: {0:?}")]
     Request(String),
+    #[error("Leptos ServerFnError: {0:?}")]
+    Server(String),
     #[error("unable to read or write the intended state: {0:?}")]
     State(StatePoisonedError),
     #[error("the auth token cookie is not present")]
@@ -39,26 +49,56 @@ pub enum AuthError {
     Verifier,
 }
 
+impl FromServerFnError for AuthError {
+    type Encoder = JsonEncoding;
+
+    fn from_server_fn_error(err: ServerFnErrorErr) -> Self {
+        Self::Server(format!("{err}"))
+    }
+}
+
 impl IntoResponse for AuthError {
     fn into_response(self) -> Response {
         match self {
+            Self::Db(err) => {
+                format!("Error: unable to complete the DB query: {err:?}").into_response()
+            }
+
             Self::Json(err) => {
                 format!("Error: unable to deserialize the response as JSON: {err:?}")
                     .into_response()
             }
+
             Self::Request(err) => {
                 format!("Error: did not receive a response from the token request: {err:?}")
                     .into_response()
             }
+
+            Self::Server(err) => format!("Leptos ServerFnError: {err:?}").into_response(),
+
             Self::State(err) => {
                 format!("Error: unable to read or write the intended state: {err:?}")
                     .into_response()
             }
+
             Self::Token => "Error: the auth token cookie is not present".into_response(),
+
             Self::Verifier => {
                 "Error: unable to get the PKCE verifier from the cookie jar".into_response()
             }
         }
+    }
+}
+
+impl From<DbError> for AuthError {
+    fn from(err: DbError) -> Self {
+        Self::Db(format!("{err:?}"))
+    }
+}
+
+impl From<ServerFnErrorErr> for AuthError {
+    fn from(err: ServerFnErrorErr) -> Self {
+        Self::Server(format!("{err:?}"))
     }
 }
 
@@ -171,18 +211,20 @@ pub async fn handle_pkce_code(
     let AuthResponse { auth_token, .. } =
         serde_json::from_str(&response).map_err(|err| AuthError::Json(format!("{err:?}")))?;
 
-    let db_with_globals = create_client()
-        .await
-        .expect("DB client to be initialized before adding globals")
-        .with_globals_fn(|client| client.set("ext::auth::client_token", &auth_token));
-
-    db_with_globals
-        .ensure_connected()
-        .await
-        .expect("DB client with globals to connect");
-
-    db.set(db_with_globals)
-        .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
+    // try handling this only in /protected:
+    //
+    // let db_with_globals = create_client()
+    //     .await
+    //     .expect("DB client to be initialized before adding globals")
+    //     .with_globals_fn(|client| client.set("ext::auth::client_token", &auth_token));
+    //
+    // db_with_globals
+    //     .ensure_connected()
+    //     .await
+    //     .expect("DB client with globals to connect");
+    //
+    // db.set(db_with_globals)
+    //     .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
 
     let cookie = Cookie::build(("gel-auth-token", auth_token))
         .expires(None)
@@ -222,17 +264,17 @@ pub async fn handle_kill_session(
     Ok((jar, Redirect::to("/")))
 }
 
-pub async fn get_jwt_cookie() -> Result<String, ServerFnError> {
+// Plan:
+// 1. do what you need to do to get AuthError working as ServerFnErrorErr or whatev
+// 2. instead of unwrapping, map the error when the token isn't present to AuthError::Token
+// 3. visit places where you call this function, and if there's no cookie, redirect to signin
+// 4. if there is a cookie, then check the db global, and if it doesn't match, create a new Client
+//    and write it to state
+pub async fn get_jwt_cookie() -> Result<Option<String>, AuthError> {
     let auth_token = extract::<CookieJar>()
         .await?
         .get("gel-auth-token")
-        .unwrap_or(&Cookie::new(
-            "gel-auth-token",
-            "the unwrap on `gel-auth-token` failed because it was `None`",
-        ))
-        .value()
-        .to_string();
-    dbg!(&auth_token);
+        .map(|cookie| cookie.value().to_string());
 
     Ok(auth_token)
 }
