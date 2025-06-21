@@ -1,4 +1,4 @@
-use crate::surgeon::Surgeon;
+use crate::model::Surgeon;
 use axum_macros::FromRef;
 use gel_tokio::Client;
 use leptos::prelude::LeptosOptions;

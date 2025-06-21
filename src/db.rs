@@ -1,15 +1,12 @@
-// todo: separate out all these configged functions into a module, and just config that
-#[cfg(feature = "ssr")] use crate::state::AppState;
-#[cfg(feature = "ssr")] use crate::state::StatePoisonedError;
-#[cfg(feature = "ssr")] use gel_tokio::Client;
-#[cfg(feature = "ssr")] use leptos::prelude::expect_context;
+use crate::state::{AppState, StatePoisonedError};
+use gel_tokio::Client;
+use leptos::prelude::expect_context;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
-#[cfg(feature = "ssr")] use thiserror::Error;
+use thiserror::Error;
 
 // todo: I'm not liking the way Gel and Query are different errors here - just a temporary fix
 #[derive(Clone, Debug, Deserialize, Error, Serialize)]
-#[cfg(feature = "ssr")]
 pub enum DbError {
     #[error("Gel error: {0:?}")]
     Gel(String),
@@ -17,21 +14,18 @@ pub enum DbError {
     State(StatePoisonedError),
 }
 
-#[cfg(feature = "ssr")]
 impl From<gel_tokio::Error> for DbError {
     fn from(err: gel_tokio::Error) -> Self {
         Self::Gel(format!("{err:?}"))
     }
 }
 
-#[cfg(feature = "ssr")]
 impl From<StatePoisonedError> for DbError {
     fn from(err: StatePoisonedError) -> Self {
         Self::State(err)
     }
 }
 
-#[cfg(feature = "ssr")]
 pub async fn db() -> Result<Client, DbError> {
     let client = expect_context::<AppState>()
         .db

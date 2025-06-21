@@ -1,17 +1,7 @@
+#[cfg(feature = "ssr")] use crate::db::DbError;
 use crate::{
-    biometry::Biometry, bounded::Bounded, iol::OpIol, refraction::OpRefraction, sia::Sia,
-    surgeon::Site, target::Target, va::OpVa,
-};
-#[cfg(feature = "ssr")]
-use crate::{
-    biometry::{Acd, Al, Cct, K, Kpower, Ks, Lt, Wtw},
-    cyl::{Axis, RawCyl},
-    db::{DbError, db},
-    iol::{Iol, IolSe},
-    sca::{RawSca, into_refraction},
-    sia::SiaPower,
-    target::{Formula, TargetCyl, TargetCylPower, TargetSe},
-    va::{AfterVa, BeforeVa, Va, VaDen, VaNum},
+    bounded::{Bounded, BoundsError},
+    model::{Biometry, Formula, OpIol, OpRefraction, OpVa, Sia, Site, Target},
 };
 use chrono::NaiveDate;
 use leptos::{
@@ -35,18 +25,13 @@ pub enum Required {
     Va,
 }
 
-/// A wrapper for any type of bounds error on numeric types.
-#[derive(Clone, Debug, Deserialize, Error, PartialEq, Serialize)]
-#[error("the value is out of bounds {0:?}")]
-pub struct BoundsError(pub String);
-
 /// The error type for a [`Case`] with missing fields or out of bounds values.
-#[cfg(feature = "ssr")]
 #[derive(Clone, Debug, Deserialize, Error, Serialize)]
 pub enum CaseError {
     #[error("out of bounds value on a `Case`: {0:?}")]
     Bounds(BoundsError),
 
+    #[cfg(feature = "ssr")]
     #[error("unable to connect to the database")]
     Db(DbError),
 
@@ -60,14 +45,12 @@ pub enum CaseError {
     Server(String),
 }
 
-#[cfg(feature = "ssr")]
 impl From<BoundsError> for CaseError {
     fn from(err: BoundsError) -> Self {
         Self::Bounds(BoundsError(format!("{err:?}")))
     }
 }
 
-#[cfg(feature = "ssr")]
 impl From<serde_json::Error> for CaseError {
     fn from(err: serde_json::Error) -> Self {
         Self::Serde(format!("{err:?}"))
@@ -81,7 +64,6 @@ impl From<DbError> for CaseError {
     }
 }
 
-#[cfg(feature = "ssr")]
 impl FromServerFnError for CaseError {
     type Encoder = JsonEncoding;
 
@@ -89,7 +71,6 @@ impl FromServerFnError for CaseError {
         Self::Server(format!("{err}"))
     }
 }
-
 /// The side of the patient's surgery.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Side {
@@ -148,6 +129,15 @@ pub struct Case {
     pub refraction: OpRefraction,
 }
 
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct SurgeonCase {
+    /// A unique value that allows (only) the surgeon to deanonymize the case.
+    pub urn: String,
+    pub date: NaiveDate,
+    pub site: Option<Site>,
+    pub case: Case,
+}
+
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct FormCase {
     pub urn: String,
@@ -191,18 +181,17 @@ pub struct FormCase {
     pub ref_after_cyl_axis: Option<u32>,
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct SurgeonCase {
-    /// A unique value that allows (only) the surgeon to deanonymize the case.
-    pub urn: String,
-    pub date: NaiveDate,
-    pub site: Option<Site>,
-    pub case: Case,
-}
-
-#[cfg(feature = "ssr")]
 impl FormCase {
+    #[cfg(feature = "ssr")]
     pub async fn into_surgeon_case(self) -> Result<SurgeonCase, CaseError> {
+        use crate::{
+            db::db,
+            model::{
+                Acd, AfterVa, Al, Axis, BeforeVa, Cct, K, Kpower, Ks, Lt, SiaPower, TargetCyl,
+                TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
+            },
+        };
+
         let FormCase {
             urn,
             date,
@@ -304,6 +293,8 @@ select Iol {{
             )
             .await
         {
+            use crate::model::{Iol, IolSe};
+
             dbg!(&json);
             let iol = serde_json::from_str::<Iol>(json.as_ref())
                 .map_err(|err| BoundsError(format!("{err:?}")))?;
@@ -371,6 +362,8 @@ select Iol {{
 
         let ref_before_raw_cyl = match (ref_before_cyl_power, ref_before_cyl_axis) {
             (Some(power), Some(axis)) => {
+                use crate::model::RawCyl;
+
                 Some(RawCyl::new((power * 100.0) as i32, Axis::new(axis)?))
             }
 
@@ -379,6 +372,8 @@ select Iol {{
 
         let ref_after_raw_cyl = match (ref_after_cyl_power, ref_after_cyl_axis) {
             (Some(power), Some(axis)) => {
+                use crate::model::RawCyl;
+
                 Some(RawCyl::new((power * 100.0) as i32, Axis::new(axis)?))
             }
 
@@ -387,10 +382,14 @@ select Iol {{
 
         let refraction = OpRefraction {
             before: {
+                use crate::model::{RawSca, into_refraction};
+
                 let sca = RawSca::new((ref_before_sph * 100.0) as i32, ref_before_raw_cyl);
                 into_refraction(sca)?
             },
             after: {
+                use crate::model::{RawSca, into_refraction};
+
                 let sca = RawSca::new((ref_after_sph * 100.0) as i32, ref_after_raw_cyl);
                 into_refraction(sca)?
             },
@@ -419,7 +418,7 @@ select Iol {{
 
 #[cfg(test)]
 mod tests {
-    use crate::iol::{Focus, Iol};
+    use crate::model::{Focus, Iol};
 
     #[test]
     fn deserializes_iol() {

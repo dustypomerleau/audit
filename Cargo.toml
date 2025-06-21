@@ -26,7 +26,7 @@ leptos = { version = "0.8.2", features = ["nightly"] }
 leptos_axum = { version = "0.8.2", optional = true }
 leptos_meta = { version = "0.8.2" }
 leptos_router = { version = "0.8.2", features = ["nightly"] }
-# plotly = { version = "0.12.1", features = ["wasm"] }
+plotly = { version = "0.12.1", features = ["wasm"] }
 rand = { version = "0.9.1", optional = true }
 reactive_stores = "0.2.2"
 reqwest = { version = "0.12.20", features = ["blocking", "json"] }

@@ -1,4 +1,4 @@
-use crate::{bounded::Bounded, cyl::Axis};
+use crate::{bounded::Bounded, model::Axis};
 use serde::{Deserialize, Serialize};
 use std::range::RangeBounds;
 

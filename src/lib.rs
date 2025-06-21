@@ -18,6 +18,7 @@
 /// The generated type implements [`Bounded<integer_type>`](crate::bounded::Bounded),
 /// [`AsRef<integer_type>`], and a `Self::new()` constructor with bounds checking.
 // todo: replace the bounded macro with a derive macro that takes range and rem as arguments.
+// todo: check this macro for fully qualified names
 macro_rules! bounded {
     ($(($name:ident, $type:ty, $range:expr $(, $rem:literal)? $(,)?)),+ $(,)?) => (
         $(
@@ -33,7 +34,7 @@ macro_rules! bounded {
                 }
             }
 
-            impl Bounded<$type> for $name {
+            impl $crate::bounded::Bounded<$type> for $name {
                 fn range() -> impl RangeBounds<$type> {
                     $range
                 }
@@ -50,11 +51,11 @@ macro_rules! bounded {
             }
 
             impl $name {
-                pub fn new(value: $type) -> Result<Self, crate::case::BoundsError> {
+                pub fn new(value: $type) -> Result<Self, $crate::bounded::BoundsError> {
                     if ($range).contains(&value) $(&& value % $rem == 0)? {
                         Ok($name(value))
                     } else {
-                        Err(crate::case::BoundsError(format!("{value:?}")))
+                        Err($crate::bounded::BoundsError(format!("{value:?}")))
                     }
                 }
 
@@ -64,28 +65,20 @@ macro_rules! bounded {
 }
 
 macro_rules! some_or_empty {
-    ($($id:ident),+) => (let ($($id),+) = ($(some_or_empty($id),)+);)
+    ($($id:ident),+) => (let ($($id),+) = ($($crate::db::some_or_empty($id),)+);)
 }
 
 // #[cfg(feature = "ssr")] pub mod fileserv;
-#[cfg(feature = "ssr")] pub mod auth;
-pub mod biometry;
-pub mod bounded;
-pub mod case;
-pub mod components;
-pub mod cyl;
-pub mod db;
-pub mod email;
-pub mod iol;
 // pub mod plots;
-pub mod refraction;
+#[cfg(feature = "ssr")] pub mod auth;
+pub mod bounded;
+pub mod components;
+#[cfg(feature = "ssr")] pub mod db;
+pub mod email;
+pub mod model;
+pub mod plots;
 pub mod routes;
-pub mod sca;
-pub mod sia;
 #[cfg(feature = "ssr")] pub mod state;
-pub mod surgeon;
-pub mod target;
-pub mod va;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]

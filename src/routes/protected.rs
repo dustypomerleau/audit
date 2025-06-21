@@ -1,21 +1,12 @@
-#[cfg(feature = "ssr")]
-use crate::{
-    auth::get_jwt_cookie,
-    db::{DbError, db},
-    state::AppState,
-};
 use crate::{
     components::{Nav, SignedOut},
-    surgeon::Surgeon,
+    model::Surgeon,
 };
-#[cfg(feature = "ssr")] use leptos::prelude::expect_context;
 use leptos::prelude::{
-    IntoAny, IntoMaybeErased, IntoView, OnceResource, RwSignal, ServerFnError, Set, Suspend,
-    Suspense, component, provide_context, server, view,
+    IntoAny, IntoMaybeErased, IntoView, OnceResource, RwSignal, Set, Suspend, Suspense, component,
+    provide_context, view,
 };
-#[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;
-#[cfg(feature = "ssr")] use serde::{Deserialize, Serialize};
 
 #[component]
 pub fn Protected() -> impl IntoView {
@@ -43,6 +34,16 @@ pub fn Protected() -> impl IntoView {
         </Suspense>
     }
 }
+
+#[cfg(feature = "ssr")]
+use crate::{
+    auth::get_jwt_cookie,
+    db::{DbError, db},
+    state::AppState,
+};
+use leptos::prelude::{ServerFnError, expect_context, server};
+#[cfg(feature = "ssr")] use leptos_axum::redirect;
+use serde::{Deserialize, Serialize};
 
 #[server]
 pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ServerFnError> {

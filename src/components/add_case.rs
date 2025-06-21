@@ -1,26 +1,19 @@
-#[cfg(feature = "ssr")]
+#[cfg(feature = "ssr")] use crate::db::db;
 use crate::{
-    biometry::Biometry,
     bounded::Bounded,
-    case::{Adverse, Case, Side, SurgeonCase},
-    db::db,
-    iol::OpIol,
-    refraction::{OpRefraction, RefCyl, Refraction},
-    sia::Sia,
-    surgeon::Site,
-    target::{Formula, Target, TargetCyl},
-    va::{AfterVa, BeforeVa, OpVa, Va},
+    model::{
+        Adverse, AfterVa, BeforeVa, Biometry, Case, FormCase, Formula, Iol, OpIol, OpRefraction,
+        OpVa, RefCyl, Refraction, Sia, Side, Site, SurgeonCase, Target, TargetCyl, Va,
+    },
 };
-use crate::{case::FormCase, iol::Iol};
-#[cfg(feature = "ssr")] use chrono::Datelike;
+use chrono::Datelike;
 use leptos::{
     prelude::{
         ActionForm, ElementChild, For, Get, GlobalAttributes, IntoAny, IntoMaybeErased, IntoView,
-        ServerAction, ServerFnError, StyleAttribute, Suspend, Suspense, component, server, view,
+        ServerAction, ServerFnError, StyleAttribute, Suspense, component, server, view,
     },
     server::OnceResource,
 };
-use std::fmt::Debug;
 
 #[component]
 pub fn AddCase() -> impl IntoView {
@@ -39,7 +32,6 @@ pub fn AddCase() -> impl IntoView {
             .unwrap_or_default()
     };
 
-    // bookmark: todo: the invalid digit in string is coming from WTW
     // todo: IOL constant value should be calculated as follows:
     // - surgeon value if IOL matches Surgeon::default_constant or Surgeon::constants
     // - DB default value if any other IOL

@@ -243,7 +243,6 @@ mod tests {
     use dotenvy::dotenv;
     use leptos::logging::log;
 
-    #[cfg(feature = "ssr")]
     #[test]
     fn generates_pkce() {
         let pkce = generate_pkce();

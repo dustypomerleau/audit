@@ -1,14 +1,11 @@
 #[cfg(feature = "ssr")] use crate::state::AppState;
 use crate::{
-    case::{BoundsError, Main},
-    iol::Iol,
-    sia::Sia,
-    target::Formula,
+    bounded::BoundsError,
+    model::{Formula, Iol, Main, Sia},
 };
 use chrono::{DateTime, Utc};
 use garde::Validate;
-#[cfg(feature = "ssr")] use leptos::prelude::expect_context;
-use leptos::prelude::{ServerFnError, server};
+use leptos::prelude::{ServerFnError, expect_context, server};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use thiserror::Error;

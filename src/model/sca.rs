@@ -1,8 +1,9 @@
 use crate::{
-    case::BoundsError,
-    cyl::{Cyl, CylPower, RawCyl},
-    refraction::{RefCyl, RefSph, Refraction},
-    target::{Formula, Target, TargetCyl, TargetCylPower, TargetSe},
+    bounded::BoundsError,
+    model::{
+        Cyl, CylPower, Formula, RawCyl, RefCyl, RefSph, Refraction, Target, TargetCyl,
+        TargetCylPower, TargetSe,
+    },
 };
 use serde::{Deserialize, Serialize};
 

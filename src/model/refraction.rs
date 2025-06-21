@@ -1,8 +1,6 @@
 use crate::{
-    bounded::Bounded,
-    case::BoundsError,
-    cyl::{Axis, Cyl},
-    sca::Sca,
+    bounded::{Bounded, BoundsError},
+    model::{Axis, Cyl, Sca},
 };
 use serde::{Deserialize, Serialize};
 use std::range::RangeBounds;
