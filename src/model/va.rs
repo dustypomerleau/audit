@@ -1,6 +1,5 @@
 use crate::bounded::Bounded;
 use serde::{Deserialize, Serialize};
-use std::range::RangeBounds;
 
 // Choosing not to use NonZeroU32 for VaDen, because it has a slightly different interface than all
 // our other bounded types.

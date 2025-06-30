@@ -3,7 +3,6 @@ use crate::{
     model::{Axis, Cyl},
 };
 use serde::{Deserialize, Serialize};
-use std::range::RangeBounds;
 
 bounded!((SiaPower, u32, 0..=200));
 

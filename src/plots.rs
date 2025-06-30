@@ -33,6 +33,7 @@ pub struct ScatterCompare {
 // If you find that you are doing a lot of the same processing for future plots, you could
 // have a Cased trait and impl it for both SurgeonCase and Case, and then just write these
 // once over a generic, but hold off on this for now, it's premature.
+#[cfg(feature = "ssr")]
 impl Compare {
     pub fn scatter_delta_cyl(&self) -> ScatterCompare {
         let surgeon: (Vec<f32>, Vec<f32>) = self

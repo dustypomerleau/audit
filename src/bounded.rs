@@ -1,28 +1,17 @@
-use crate::{error::AppError, mock::MockBounded};
-#[cfg(feature = "ssr")]
-use rand::{
-    Rng,
-    distr::uniform::{SampleRange, SampleUniform},
-};
+use crate::error::AppError;
+#[cfg(feature = "ssr")] use rand::distr::uniform::{SampleRange, SampleUniform};
 use std::range::RangeBounds;
 
-pub trait Bounded<Idx>: Sized {
-    fn inner(&self) -> Idx;
-    fn new(value: Idx) -> Result<Self, AppError>;
-    fn range() -> impl RangeBounds<Idx>;
-}
+pub trait Bounded: Sized {
+    #[cfg(feature = "ssr")]
+    type Idx: SampleUniform;
 
-#[cfg(feature = "ssr")]
-impl<Idx, T> MockBounded<Idx> for T
-where
-    Idx: SampleUniform,
-    T: Bounded<Idx>,
-    T::range(..): SampleRange<Idx>,
-{
-    fn mock_bounded() -> Self {
-        let random_inner = rand::rng().random_range(Self::range());
+    #[cfg(not(feature = "ssr"))]
+    type Idx;
 
-        // We can unwrap here, because `random_inner` is selected from the bounded range for T.
-        Self::new(random_inner).unwrap()
-    }
+    fn inner(&self) -> Self::Idx;
+    fn new(value: Self::Idx) -> Result<Self, AppError>;
+
+    #[cfg(feature = "ssr")]
+    fn range() -> impl RangeBounds<Self::Idx> + SampleRange<Self::Idx>;
 }

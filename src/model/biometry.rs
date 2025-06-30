@@ -3,7 +3,6 @@ use crate::{
     model::{Axis, Cyl},
 };
 use serde::{Deserialize, Serialize};
-use std::ops::RangeBounds;
 
 bounded!(
     (Acd, u32, 0..=600),

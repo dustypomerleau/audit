@@ -4,7 +4,6 @@ use crate::{
     model::{Axis, Cyl, Sca},
 };
 use serde::{Deserialize, Serialize};
-use std::range::RangeBounds;
 
 bounded!(
     (RefCylPower, i32, -1000..=1000, 25),

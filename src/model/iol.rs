@@ -1,6 +1,5 @@
 use crate::{bounded::Bounded, model::Axis};
 use serde::{Deserialize, Serialize};
-use std::range::RangeBounds;
 
 /// The class of [`Iol`] (monofocal, EDOF, multifocal).
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
@@ -35,6 +34,9 @@ pub struct OpIol {
     // note: It's theoretically possible to add an Axis to a case with a nontoric Iol, but in
     // practice the cases selected for analysis of the Axis will be filtered by
     // `self.iol.toric.is_some()`.
+    //
+    // This can be fixed with private fields and an OpIol::new() function - see method in impl of
+    // Mock.
     pub axis: Option<Axis>,
 }
 

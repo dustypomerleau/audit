@@ -3,7 +3,6 @@ use crate::{
     model::{Axis, Cyl, Sca},
 };
 use serde::{Deserialize, Serialize};
-use std::range::RangeBounds;
 
 /// A formula for calculating IOL power from biometry.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]

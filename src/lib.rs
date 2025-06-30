@@ -22,7 +22,7 @@ pub mod email;
 pub mod error;
 #[macro_use]
 pub mod macros;
-pub mod mock;
+#[cfg(feature = "ssr")] pub mod mock;
 pub mod model;
 pub mod plots;
 #[cfg(feature = "ssr")] pub mod query;

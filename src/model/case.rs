@@ -5,7 +5,7 @@ use crate::{
 };
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
-use std::{fmt::Display, range::RangeBounds};
+use std::fmt::Display;
 
 /// The side of the patient's surgery.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
