@@ -19,6 +19,7 @@ pub mod bounded;
 pub mod components;
 #[cfg(feature = "ssr")] pub mod db;
 pub mod email;
+pub mod error;
 #[macro_use]
 pub mod macros;
 pub mod mock;

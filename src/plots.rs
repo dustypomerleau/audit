@@ -4,12 +4,10 @@ mod delta_cyl;
 
 use crate::{
     bounded::Bounded,
-    model::{Case, CaseError, SurgeonCase},
+    error::AppError,
+    model::{Case, SurgeonCase},
 };
-#[cfg(feature = "ssr")] use crate::{
-    db::{DbError, db},
-    query::query_select_compare,
-};
+#[cfg(feature = "ssr")] use crate::{db::db, query::query_select_compare};
 pub use delta_cyl::*;
 use leptos::prelude::server;
 use serde::{Deserialize, Serialize};
@@ -90,20 +88,18 @@ impl Compare {
 #[server]
 // In future, you may want the ability to compare a specific date range for the Surgeon, against
 // either the cohort, or against the surgeon's own baseline (all other dates outside the range).
-pub async fn get_compare(year: u32) -> Result<Compare, CaseError> {
+pub async fn get_compare(year: u32) -> Result<Compare, AppError> {
     let query = query_select_compare(year);
 
-    let query_result = db()
-        .await?
-        // The JSON returned here is just one object, mapping to a Compare
-        .query_single_json(query, &())
-        .await
-        .map_err(|err| DbError::Gel(format!("{err:?}")))?
-        .unwrap(); // todo: handle properly once you get the test below passing
+    if let Some(query_result) = db().await?.query_single_json(query, &()).await? {
+        let compare = serde_json::from_str::<Compare>(query_result.as_ref())?;
 
-    let compare = serde_json::from_str::<Compare>(query_result.as_ref())?;
-
-    Ok(compare)
+        Ok(compare)
+    } else {
+        Err(AppError::Db(
+            "the query for Compare was not successful".to_string(),
+        ))
+    }
 }
 
 #[cfg(test)]

@@ -25,11 +25,11 @@ macro_rules! bounded {
                     self.0
                 }
 
-                fn new(value: $type) -> Result<Self, $crate::bounded::BoundsError> {
+                fn new(value: $type) -> Result<Self, $crate::error::AppError> {
                     if ($range).contains(&value) $(&& value % $rem == 0)? {
                         Ok($name(value))
                     } else {
-                        Err($crate::bounded::BoundsError(format!("{value:?}")))
+                        Err($crate::error::AppError::Bounds(format!("{value:?}")))
                     }
                 }
 

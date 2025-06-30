@@ -1,5 +1,6 @@
 use crate::{
-    bounded::{Bounded, BoundsError},
+    bounded::Bounded,
+    error::AppError,
     model::{Axis, Cyl, Sca},
 };
 use serde::{Deserialize, Serialize};
@@ -27,7 +28,7 @@ impl Cyl<i32> for RefCyl {
 }
 
 impl RefCyl {
-    pub fn new(power: i32, axis: Axis) -> Result<Self, BoundsError> {
+    pub fn new(power: i32, axis: Axis) -> Result<Self, AppError> {
         Ok(Self {
             power: RefCylPower::new(power)?,
             axis,

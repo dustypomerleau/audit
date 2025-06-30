@@ -1,8 +1,5 @@
+use crate::model::{Formula, Iol, Main, Sia};
 #[cfg(feature = "ssr")] use crate::state::AppState;
-use crate::{
-    bounded::BoundsError,
-    model::{Formula, Iol, Main, Sia},
-};
 use chrono::{DateTime, Utc};
 use garde::Validate;
 use leptos::prelude::{ServerFnError, expect_context, server};
@@ -39,15 +36,6 @@ impl Email {
     pub fn inner(self) -> String {
         self.0
     }
-}
-
-/// An error type representing an invalid [`Surgeon`], typically as a result of invalid form input.
-#[derive(Debug, Error)]
-pub enum SurgeonError {
-    #[error("invalid email")]
-    Email(EmailValidationError),
-    #[error("invalid SIA")]
-    Sia(BoundsError),
 }
 
 /// A surgeon's default [`Sia`] for right and left eyes

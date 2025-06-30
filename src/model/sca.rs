@@ -1,5 +1,6 @@
 use crate::{
-    bounded::{Bounded, BoundsError},
+    bounded::Bounded,
+    error::AppError,
     model::{
         Cyl, CylPower, Formula, RawCyl, RefCyl, RefSph, Refraction, Target, TargetCyl,
         TargetCylPower, TargetSe,
@@ -22,7 +23,7 @@ pub fn into_target<T, U>(
     sca: U,
     formula: Option<Formula>,
     custom_constant: bool,
-) -> Result<Target, BoundsError>
+) -> Result<Target, AppError>
 where
     T: CylPower + Into<u32>,
     U: Sca<T>,
@@ -44,7 +45,7 @@ where
     })
 }
 
-pub fn into_refraction<T, U>(sca: U) -> Result<Refraction, BoundsError>
+pub fn into_refraction<T, U>(sca: U) -> Result<Refraction, AppError>
 where
     T: CylPower + Into<i32>,
     U: Sca<T>,

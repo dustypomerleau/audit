@@ -1,52 +1,21 @@
-#[cfg(feature = "ssr")]
-use crate::{
-    auth::{AuthError, get_jwt_cookie},
-    db::{DbError, db},
-    state::AppState,
-};
+// bookmark: todo: dramatically simplify error types:
+// Auth
+// Db
+// ...
+//
+#[cfg(feature = "ssr")] use crate::{auth::get_jwt_cookie, db::db, state::AppState};
 use crate::{
     components::{Nav, SignedOut},
+    error::AppError,
     model::Surgeon,
 };
 #[cfg(feature = "ssr")] use gel_tokio::create_client;
-use leptos::{
-    prelude::{
-        FromServerFnError, Get, IntoAny, IntoMaybeErased, IntoView, OnceResource, RwSignal,
-        ServerFnError, ServerFnErrorErr, Set, Suspense, component, expect_context, provide_context,
-        server, use_context, view,
-    },
-    server_fn::codec::JsonEncoding,
+use leptos::prelude::{
+    Get, IntoAny, IntoMaybeErased, IntoView, OnceResource, RwSignal, Set, Suspense, component,
+    expect_context, provide_context, server, view,
 };
-#[cfg(feature = "ssr")] use leptos_axum::{extract, redirect};
+#[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;
-use serde::{Deserialize, Serialize};
-use thiserror::Error;
-
-#[derive(Clone, Debug, Deserialize, Error, Serialize)]
-#[error("error accessing a protected route: {0:?}")]
-pub struct ProtectedError(pub String);
-
-#[cfg(feature = "ssr")]
-impl From<AuthError> for ProtectedError {
-    fn from(err: AuthError) -> Self {
-        Self(format!("{err:?}"))
-    }
-}
-
-#[cfg(feature = "ssr")]
-impl From<DbError> for ProtectedError {
-    fn from(err: DbError) -> Self {
-        Self(format!("{err:?}"))
-    }
-}
-
-impl FromServerFnError for ProtectedError {
-    type Encoder = JsonEncoding;
-
-    fn from_server_fn_error(err: ServerFnErrorErr) -> Self {
-        Self(format!("{err}"))
-    }
-}
 
 #[component]
 pub fn Protected() -> impl IntoView {
@@ -76,28 +45,19 @@ pub fn Protected() -> impl IntoView {
 }
 
 #[server]
-pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, ProtectedError> {
+pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, AppError> {
     let auth_token = get_jwt_cookie().await?.unwrap_or_else(|| {
         redirect("/signedout");
-        // This feels hacky at best, as we only care about the redirect, but the return
-        // types need to match.
+        // Hack: we only care about redirecting, but the return types need to match.
         "Redirected to /signedout".to_string()
     });
 
     let client = create_client()
-        .await
-        .map_err(|err| ProtectedError(format!("{err:?}")))?
+        .await?
         .with_globals_fn(|client| client.set("ext::auth::client_token", &auth_token));
 
-    client
-        .ensure_connected()
-        .await
-        .map_err(|err| ProtectedError(format!("{err:?}")))?;
-
-    expect_context::<AppState>()
-        .db
-        .set(client)
-        .map_err(|err| ProtectedError(format!("{err:?}")))?;
+    client.ensure_connected().await?;
+    expect_context::<AppState>().db.set(client)?;
 
     let query = r#"
 select global cur_surgeon {
@@ -118,30 +78,23 @@ select global cur_surgeon {
 };
         "#;
 
-    let query_result = db().await?.query_single_json(query, &()).await;
+    if let Some(json) = db().await?.query_single_json(query, &()).await? {
+        let surgeon = serde_json::from_str::<Surgeon>(json.as_ref())?;
 
-    match query_result {
-        Ok(Some(json)) => {
-            if let Ok(surgeon) = serde_json::from_str::<Surgeon>(json.as_ref()) {
-                if surgeon.terms.is_some() {
-                    expect_context::<AppState>()
-                        .surgeon
-                        .set(Some(surgeon.clone()))
-                        .map_err(|err| ProtectedError(format!("{err:?}")))?;
+        if surgeon.terms.is_some() {
+            expect_context::<AppState>()
+                .surgeon
+                .set(Some(surgeon.clone()))?;
 
-                    Ok(Some(surgeon))
-                } else {
-                    redirect("/terms");
+            Ok(Some(surgeon))
+        } else {
+            redirect("/terms");
 
-                    Ok(None)
-                }
-            } else {
-                redirect("/signup");
-
-                Ok(None)
-            }
+            Ok(None)
         }
+    } else {
+        redirect("/signup");
 
-        _ => Err(ProtectedError(format!("{query_result:?}"))),
+        Ok(None)
     }
 }

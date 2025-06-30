@@ -1,6 +1,7 @@
 #[cfg(feature = "ssr")] use crate::db::db;
 use crate::{
     bounded::Bounded,
+    error::AppError,
     model::{
         Adverse, AfterVa, BeforeVa, Biometry, Case, FormCase, Formula, Iol, OpIol, OpRefraction,
         OpVa, RefCyl, Refraction, Sia, Side, Site, SurgeonCase, Target, TargetCyl, Va,
@@ -382,7 +383,7 @@ pub async fn get_iols() -> Result<Vec<Iol>, ServerFnError> {
 }
 
 #[server]
-pub async fn insert_case(case: FormCase) -> Result<(), ServerFnError> {
+pub async fn insert_case(case: FormCase) -> Result<(), AppError> {
     let SurgeonCase {
         urn,
         date,

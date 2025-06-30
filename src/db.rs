@@ -1,36 +1,10 @@
-use crate::state::{AppState, StatePoisonedError};
+use crate::{error::AppError, state::AppState};
 use gel_tokio::Client;
 use leptos::prelude::expect_context;
-use serde::{Deserialize, Serialize};
 use std::fmt::Display;
-use thiserror::Error;
 
-// todo: I'm not liking the way Gel and Query are different errors here - just a temporary fix
-#[derive(Clone, Debug, Deserialize, Error, Serialize)]
-pub enum DbError {
-    #[error("Gel error: {0:?}")]
-    Gel(String),
-    #[error("The DB operation couldn't be completed due to poisoned state: {0:?}")]
-    State(StatePoisonedError),
-}
-
-impl From<gel_tokio::Error> for DbError {
-    fn from(err: gel_tokio::Error) -> Self {
-        Self::Gel(format!("{err:?}"))
-    }
-}
-
-impl From<StatePoisonedError> for DbError {
-    fn from(err: StatePoisonedError) -> Self {
-        Self::State(err)
-    }
-}
-
-pub async fn db() -> Result<Client, DbError> {
-    let client = expect_context::<AppState>()
-        .db
-        .get_cloned()
-        .map_err(|err| DbError::State(StatePoisonedError(format!("{err:?}"))))?;
+pub async fn db() -> Result<Client, AppError> {
+    let client = expect_context::<AppState>().db.get_cloned()?;
 
     Ok(client)
 }
@@ -58,7 +32,6 @@ pub fn to_hecto(value: i32) -> f32 {
 #[cfg(test)]
 pub mod tests {
     use dotenvy::dotenv;
-    use gel_protocol::model::Json;
     use gel_tokio::Client;
     use std::{env, sync::LazyLock};
 

@@ -1,76 +1,12 @@
-#[cfg(feature = "ssr")] use crate::db::DbError;
+#[cfg(feature = "ssr")] use crate::error::AppError;
 use crate::{
-    bounded::{Bounded, BoundsError},
+    bounded::Bounded,
     model::{Biometry, Formula, OpIol, OpRefraction, OpVa, Sia, Site, Target},
 };
 use chrono::NaiveDate;
-use leptos::{
-    prelude::{FromServerFnError, ServerFnErrorErr},
-    server_fn::codec::JsonEncoding,
-};
 use serde::{Deserialize, Serialize};
 use std::{fmt::Display, range::RangeBounds};
-use thiserror::Error;
 
-/// The required fields for each [`Case`]. Used by [`CaseError::MissingField`].
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub enum Required {
-    Date,
-    Email,
-    Iol,
-    Refraction,
-    Side,
-    Target,
-    Urn,
-    Va,
-}
-
-/// The error type for a [`Case`] with missing fields or out of bounds values.
-#[derive(Clone, Debug, Deserialize, Error, Serialize)]
-pub enum CaseError {
-    #[error("out of bounds value on a `Case`: {0:?}")]
-    Bounds(BoundsError),
-
-    #[cfg(feature = "ssr")]
-    #[error("unable to connect to the database")]
-    Db(DbError),
-
-    #[error("{0:?} is a required field on `Case`, but wasn't supplied")]
-    MissingField(Required),
-
-    #[error("serde error: {0:?}")]
-    Serde(String),
-
-    #[error("server error {0:?}")]
-    Server(String),
-}
-
-impl From<BoundsError> for CaseError {
-    fn from(err: BoundsError) -> Self {
-        Self::Bounds(BoundsError(format!("{err:?}")))
-    }
-}
-
-impl From<serde_json::Error> for CaseError {
-    fn from(err: serde_json::Error) -> Self {
-        Self::Serde(format!("{err:?}"))
-    }
-}
-
-#[cfg(feature = "ssr")]
-impl From<DbError> for CaseError {
-    fn from(err: DbError) -> Self {
-        Self::Db(err)
-    }
-}
-
-impl FromServerFnError for CaseError {
-    type Encoder = JsonEncoding;
-
-    fn from_server_fn_error(err: ServerFnErrorErr) -> Self {
-        Self::Server(format!("{err}"))
-    }
-}
 /// The side of the patient's surgery.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Side {
@@ -184,12 +120,12 @@ pub struct FormCase {
 
 impl FormCase {
     #[cfg(feature = "ssr")]
-    pub async fn into_surgeon_case(self) -> Result<SurgeonCase, CaseError> {
+    pub async fn into_surgeon_case(self) -> Result<SurgeonCase, AppError> {
         use crate::{
             db::db,
             model::{
-                Acd, AfterVa, Al, Axis, BeforeVa, Cct, K, Kpower, Ks, Lt, SiaPower, TargetCyl,
-                TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
+                Acd, AfterVa, Al, Axis, BeforeVa, Cct, Iol, IolSe, K, Kpower, Ks, Lt, SiaPower,
+                TargetCyl, TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
             },
         };
 
@@ -234,10 +170,8 @@ impl FormCase {
             ref_after_cyl_power,
             ref_after_cyl_axis,
         } = self;
-        // dbg!(&date);
 
-        let date = NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")
-            .map_err(|_| CaseError::MissingField(Required::Date))?;
+        let date = NaiveDate::parse_from_str(date.as_str(), "%Y-%m-%d")?;
 
         let site = site.map(|name| Site { name });
 
@@ -280,8 +214,7 @@ impl FormCase {
         // note: For now we are assuming the IOL model is in the DB. To start, offer an option in
         // the datalist that the IOL is not listed, and have a DB option for that.
         let iol = if let Ok(Some(json)) = db()
-            .await
-            .map_err(CaseError::Db)?
+            .await?
             .query_single_json(
                 format!(
                     r#"
@@ -294,11 +227,7 @@ select Iol {{
             )
             .await
         {
-            use crate::model::{Iol, IolSe};
-
-            // dbg!(&json);
-            let iol = serde_json::from_str::<Iol>(json.as_ref())
-                .map_err(|err| BoundsError(format!("{err:?}")))?;
+            let iol = serde_json::from_str::<Iol>(json.as_ref())?;
 
             OpIol {
                 iol,
@@ -306,7 +235,7 @@ select Iol {{
                 axis: iol_axis.and_then(|axis| Axis::new(axis).ok()),
             }
         } else {
-            return Err(CaseError::MissingField(Required::Iol));
+            return Err(AppError::Db("the Iol is not present in the DB".to_string()));
         };
 
         // Using standard serde parsing here would require you to have Adverse::None.

@@ -1,10 +1,7 @@
-use crate::{
-    db::DbError,
-    state::{AppState, StatePoisonedError},
-};
+use crate::{error::AppError, state::AppState};
 use axum::{
     extract::{Query, State},
-    response::{IntoResponse, Redirect, Response},
+    response::Redirect,
 };
 use axum_extra::extract::{
     CookieJar,
@@ -12,101 +9,17 @@ use axum_extra::extract::{
 };
 use axum_macros::debug_handler;
 use base64ct::{Base64UrlUnpadded, Encoding};
-use gel_tokio::create_client;
-use leptos::{
-    prelude::{FromServerFnError, ServerFnError, ServerFnErrorErr},
-    server_fn::codec::JsonEncoding,
-};
 use leptos_axum::extract;
 use rand::{Rng, rng};
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{env, sync::LazyLock};
-use thiserror::Error;
 use uuid::Uuid;
 
 // note: new API for dotenvy will arrive in v16 release
 pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
     env::var("BASE_AUTH_URL").expect("expected BASE_AUTH_URL environment variable to be present")
 });
-
-/// Possible failure modes during the code exchange of a PKCE flow.
-#[derive(Clone, Debug, Deserialize, Error, Serialize)]
-pub enum AuthError {
-    #[error("error during DB query: {0:?}")]
-    Db(String),
-    #[error("unable to deserialize the response as JSON: {0:?}")]
-    Json(String),
-    #[error("did not receive a response from the token request: {0:?}")]
-    Request(String),
-    #[error("Leptos ServerFnError: {0:?}")]
-    Server(String),
-    #[error("unable to read or write the intended state: {0:?}")]
-    State(StatePoisonedError),
-    #[error("the auth token cookie is not present")]
-    Token,
-    #[error("unable to get the PKCE verifier from the cookie jar")]
-    Verifier,
-}
-
-impl FromServerFnError for AuthError {
-    type Encoder = JsonEncoding;
-
-    fn from_server_fn_error(err: ServerFnErrorErr) -> Self {
-        Self::Server(format!("{err}"))
-    }
-}
-
-impl IntoResponse for AuthError {
-    fn into_response(self) -> Response {
-        match self {
-            Self::Db(err) => {
-                format!("Error: unable to complete the DB query: {err:?}").into_response()
-            }
-
-            Self::Json(err) => {
-                format!("Error: unable to deserialize the response as JSON: {err:?}")
-                    .into_response()
-            }
-
-            Self::Request(err) => {
-                format!("Error: did not receive a response from the token request: {err:?}")
-                    .into_response()
-            }
-
-            Self::Server(err) => format!("Leptos ServerFnError: {err:?}").into_response(),
-
-            Self::State(err) => {
-                format!("Error: unable to read or write the intended state: {err:?}")
-                    .into_response()
-            }
-
-            Self::Token => "Error: the auth token cookie is not present".into_response(),
-
-            Self::Verifier => {
-                "Error: unable to get the PKCE verifier from the cookie jar".into_response()
-            }
-        }
-    }
-}
-
-impl From<DbError> for AuthError {
-    fn from(err: DbError) -> Self {
-        Self::Db(format!("{err:?}"))
-    }
-}
-
-impl From<ServerFnErrorErr> for AuthError {
-    fn from(err: ServerFnErrorErr) -> Self {
-        Self::Server(format!("{err:?}"))
-    }
-}
-
-impl From<StatePoisonedError> for AuthError {
-    fn from(err: StatePoisonedError) -> Self {
-        Self::State(err)
-    }
-}
 
 /// Holds the verifier/challenge pair that is used during site authentication. The challenge is
 /// passed via the URL, and the verifier is stored in an HTTP-only cookie for access after the
@@ -187,44 +100,22 @@ pub async fn handle_sign_in(jar: CookieJar) -> (CookieJar, Redirect) {
 /// token as a cookie allows you to confirm the logged-in surgeon when accessing protected routes.
 #[debug_handler]
 pub async fn handle_pkce_code(
-    State(AppState { db, .. }): State<AppState>,
     Query(PkceParams { code }): Query<PkceParams>,
     jar: CookieJar,
-) -> Result<(CookieJar, Redirect), AuthError> {
+) -> Result<(CookieJar, Redirect), AppError> {
     let base_auth_url = &*BASE_AUTH_URL;
 
     let verifier = if let Some(verifier) = jar.get("gel-pkce-verifier") {
         verifier.value()
     } else {
-        return Err(AuthError::Verifier);
+        return Err(AppError::Auth(
+            "the verifier cookie was not found in the cookie jar".to_string(),
+        ));
     };
 
     let url = format!("{base_auth_url}/token?code={code}&verifier={verifier}");
-
-    let response = reqwest::get(&url)
-        .await
-        .map_err(|err| AuthError::Request(format!("{err:?}")))?
-        .text()
-        .await
-        .map_err(|err| AuthError::Json(format!("{err:?}")))?;
-
-    let AuthResponse { auth_token, .. } =
-        serde_json::from_str(&response).map_err(|err| AuthError::Json(format!("{err:?}")))?;
-
-    // try handling this only in /protected:
-    //
-    // let db_with_globals = create_client()
-    //     .await
-    //     .expect("DB client to be initialized before adding globals")
-    //     .with_globals_fn(|client| client.set("ext::auth::client_token", &auth_token));
-    //
-    // db_with_globals
-    //     .ensure_connected()
-    //     .await
-    //     .expect("DB client with globals to connect");
-    //
-    // db.set(db_with_globals)
-    //     .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
+    let response = reqwest::get(&url).await?.text().await?;
+    let AuthResponse { auth_token, .. } = serde_json::from_str(&response)?;
 
     let cookie = Cookie::build(("gel-auth-token", auth_token))
         .expires(None)
@@ -246,21 +137,17 @@ pub async fn handle_pkce_code(
 pub async fn handle_kill_session(
     State(AppState { db, surgeon, .. }): State<AppState>,
     jar: CookieJar,
-) -> Result<(CookieJar, Redirect), AuthError> {
+) -> Result<(CookieJar, Redirect), AppError> {
     // A dummy DB client, so that we can replace the `gel_tokio::Client` that contains
     // surgeon-specific globals
     let client = gel_tokio::create_client()
         .await
         .expect("DB client to be created");
 
-    db.set(client)
-        .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
-
-    surgeon
-        .set(None)
-        .map_err(|err| StatePoisonedError(format!("{err:?}")))?;
-
+    db.set(client)?;
+    surgeon.set(None)?;
     let jar = jar.remove(Cookie::from("gel-auth-token"));
+
     Ok((jar, Redirect::to("/")))
 }
 
@@ -270,7 +157,7 @@ pub async fn handle_kill_session(
 // 3. visit places where you call this function, and if there's no cookie, redirect to signin
 // 4. if there is a cookie, then check the db global, and if it doesn't match, create a new Client
 //    and write it to state
-pub async fn get_jwt_cookie() -> Result<Option<String>, AuthError> {
+pub async fn get_jwt_cookie() -> Result<Option<String>, AppError> {
     let auth_token = extract::<CookieJar>()
         .await?
         .get("gel-auth-token")
