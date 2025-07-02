@@ -28,7 +28,9 @@ pub fn DeltaCyl() -> impl IntoView {
     view! {
         <Suspense fallback=move || {
             view! { "Getting plot data to compare..." }
-        }>view!{"todo!"}</Suspense>
+        }>
+            { view!{"todo"} }
+        </Suspense>
     }
     .into_any()
 }

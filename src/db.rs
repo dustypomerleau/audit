@@ -1,10 +1,16 @@
 use crate::{error::AppError, state::AppState};
 use gel_tokio::Client;
-use leptos::prelude::expect_context;
+use leptos::prelude::use_context;
 use std::fmt::Display;
 
 pub async fn db() -> Result<Client, AppError> {
-    let client = expect_context::<AppState>().db.get_cloned()?;
+    let client = if let Some(state) = use_context::<AppState>() {
+        state.db.get_cloned()?
+    } else {
+        return Err(AppError::Db(
+            "AppState is not present in context".to_string(),
+        ));
+    };
 
     Ok(client)
 }

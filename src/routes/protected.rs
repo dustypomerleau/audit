@@ -12,7 +12,7 @@ use crate::{
 #[cfg(feature = "ssr")] use gel_tokio::create_client;
 use leptos::prelude::{
     Get, IntoAny, IntoMaybeErased, IntoView, OnceResource, RwSignal, Set, Suspense, component,
-    expect_context, provide_context, server, view,
+    provide_context, server, use_context, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;
@@ -57,7 +57,12 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, AppError> {
         .with_globals_fn(|client| client.set("ext::auth::client_token", &auth_token));
 
     client.ensure_connected().await?;
-    expect_context::<AppState>().db.set(client)?;
+
+    if let Some(state) = use_context::<AppState>() {
+        state.db.set(client)?;
+    } else {
+        redirect("/signedout");
+    }
 
     let query = r#"
 select global cur_surgeon {
@@ -82,11 +87,15 @@ select global cur_surgeon {
         let surgeon = serde_json::from_str::<Surgeon>(json.as_ref())?;
 
         if surgeon.terms.is_some() {
-            expect_context::<AppState>()
-                .surgeon
-                .set(Some(surgeon.clone()))?;
+            if let Some(state) = use_context::<AppState>() {
+                state.surgeon.set(Some(surgeon.clone()))?;
 
-            Ok(Some(surgeon))
+                Ok(Some(surgeon))
+            } else {
+                Err(AppError::State(
+                    "AppState is not present in context".to_string(),
+                ))
+            }
         } else {
             redirect("/terms");
 

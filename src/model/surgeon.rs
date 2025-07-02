@@ -1,8 +1,11 @@
-use crate::model::{Formula, Iol, Main, Sia};
 #[cfg(feature = "ssr")] use crate::state::AppState;
+use crate::{
+    error::AppError,
+    model::{Formula, Iol, Main, Sia},
+};
 use chrono::{DateTime, Utc};
 use garde::Validate;
-use leptos::prelude::{ServerFnError, expect_context, server};
+use leptos::prelude::{ServerFnError, server, use_context};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use thiserror::Error;
@@ -92,8 +95,12 @@ pub struct SurgeonDefaults {
 /// [`get_authorized_surgeon`](crate::auth::get_authorized_surgeon), which is then provided as
 /// client-side context.
 #[server]
-pub async fn get_current_surgeon() -> Result<Option<Surgeon>, ServerFnError> {
-    let surgeon = expect_context::<AppState>().surgeon.get_cloned()?;
+pub async fn get_current_surgeon() -> Result<Option<Surgeon>, AppError> {
+    let surgeon = use_context::<AppState>()
+        .ok_or_else(|| AppError::State("AppState not present in context".to_string()))?
+        .surgeon
+        .get_cloned()?;
+
     Ok(surgeon)
 }
 
@@ -101,7 +108,11 @@ pub async fn get_current_surgeon() -> Result<Option<Surgeon>, ServerFnError> {
 /// the input parameter allows clearing the value by setting [`None`].
 #[server]
 pub async fn set_current_surgeon(surgeon: Option<Surgeon>) -> Result<(), ServerFnError> {
-    expect_context::<AppState>().surgeon.set(surgeon)?;
+    use_context::<AppState>()
+        .ok_or_else(|| AppError::State("AppState not present in context".to_string()))?
+        .surgeon
+        .set(surgeon)?;
+
     Ok(())
 }
 
