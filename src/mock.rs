@@ -7,13 +7,7 @@ use crate::{
         Sia, SiaPower, Side, Target, TargetCyl, TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
     },
 };
-use rand::{
-    Rng,
-    distr::{
-        StandardUniform,
-        uniform::{SampleRange, SampleUniform},
-    },
-};
+use rand::{Rng, distr::StandardUniform};
 use serde::{Deserialize, Serialize};
 
 bounded!((Prob, f32, 0.0..1.0));
@@ -29,20 +23,6 @@ pub trait Mock: Sized {
         } else {
             Some(Self::mock())
         }
-    }
-}
-
-impl<T> Mock for T
-where
-    T: Bounded,
-    T::Idx: SampleUniform,
-    T::range(..): SampleRange<T::Idx>,
-{
-    fn mock() -> Self {
-        let random_inner = rand::rng().random_range(Self::range());
-
-        // Safe unwrap: `random_inner` is selected from the bounded range for T.
-        Self::new(random_inner).unwrap()
     }
 }
 
@@ -242,5 +222,19 @@ impl Mock for Va {
         let den: u32 = rand::rng().random_range(400..20_000);
 
         Self::new(VaNum::new(600).unwrap(), VaDen::new(den).unwrap())
+    }
+}
+
+pub fn gen_mocks<T: Mock>(n: u32) -> Vec<T> {
+    (0..n).map(|_| T::mock()).collect()
+}
+
+mod tests {
+    use super::*;
+
+    #[test]
+    fn mocks_refraction() {
+        let mocks = gen_mocks::<Refraction>(10);
+        dbg!(mocks);
     }
 }

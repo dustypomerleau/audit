@@ -46,6 +46,23 @@ macro_rules! bounded {
                     write!(f, "{}", self.inner())
                 }
             }
+
+            #[cfg(feature = "ssr")]
+            impl $crate::mock::Mock for $name {
+                fn mock() -> Self {
+                    use rand::Rng;
+
+                    let random_inner = rand::rng().random_range(Self::range());
+                    $(
+                        use std::ops::Rem;
+
+                        let random_inner = random_inner.rem($rem);
+                    )?
+
+                    // Safe unwrap due to use of the types own range and rem values.
+                    Self::new(random_inner).unwrap()
+                }
+            }
         )+
     )
 }
