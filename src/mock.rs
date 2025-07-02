@@ -24,9 +24,7 @@ pub trait Mock: Sized {
     /// Mocks an optional value, returning [`None`] at a rate determined by `none_probability`. A
     /// `none_probability` of 0.1 will result in 10% [`None`] values and 90% `Some(Self)` values.
     fn mock_option(none_probability: Prob) -> Option<Self> {
-        let n = (none_probability.inner() * 100.0) as u32;
-
-        if rand::rng().random_range(0..100) < n {
+        if rand::rng().random_range(0.0..1.0) < none_probability.inner() {
             None
         } else {
             Some(Self::mock())
