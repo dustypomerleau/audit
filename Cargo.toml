@@ -27,12 +27,12 @@ leptos_router = { version = "0.8.2", features = ["nightly"] }
 plotly = { version = "0.12.1", features = ["kaleido", "kaleido_download"], optional = true }
 rand = { version = "0.9.1", optional = true }
 reactive_stores = "0.2.2"
-reqwest = { version = "0.12.20", features = ["blocking", "json"] }
+reqwest = { version = "0.12.22", features = ["blocking", "json"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 sha2 = { version = "0.10.9", default-features = false, optional = true }
 thiserror = "2.0.12"
-tokio = { version = "1.45.1", features = ["macros", "rt-multi-thread"], optional = true }
+tokio = { version = "1.46.0", features = ["macros", "rt-multi-thread"], optional = true }
 tower = { version = "0.5.2", features = ["util"], optional = true }
 tower-http = { version = "0.6.6", features = ["fs"], optional = true }
 tracing = { version = "0.1.41", optional = true }
