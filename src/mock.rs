@@ -229,8 +229,10 @@ pub fn gen_mocks<T: Mock>(n: u32) -> Vec<T> {
     (0..n).map(|_| T::mock()).collect()
 }
 
+#[cfg(feature = "ssr")]
 mod tests {
     use super::*;
+    use std::ops::Rem;
 
     #[test]
     fn mocks_refraction() {

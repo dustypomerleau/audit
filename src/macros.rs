@@ -53,10 +53,14 @@ macro_rules! bounded {
                     use rand::Rng;
 
                     let random_inner = rand::rng().random_range(Self::range());
+
                     $(
                         use std::ops::Rem;
 
-                        let random_inner = random_inner.rem($rem);
+                        // Mathematically it's problematic to always round towards 0, but we accept
+                        // this for simplicity, because we are only mocking values.
+                        // You could also consider `random_inner.next_multiple_of($rem)` here.
+                        let random_inner = random_inner - (random_inner.rem($rem));
                     )?
 
                     // Safe unwrap due to use of the types own range and rem values.
