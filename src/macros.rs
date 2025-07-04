@@ -10,11 +10,21 @@ macro_rules! bounded {
         $(
             /// A bounded integer newtype generated using the [`bounded!`] macro.
             /// The generated type implements [`Bounded<integer_type>`](crate::bounded::Bounded),
-            /// [`AsRef<integer_type>`], and a `Self::new()` constructor with bounds checking.
-            #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
+            /// [`AsRef<integer_type>`], and a `Self::new()` constructor with bounds checking. It
+            /// also provides easy newtype mocking via [`Mock`](crate::mock::Mock), for testing
+            /// purposes.
+            #[derive(
+                ::core::clone::Clone,
+                ::core::marker::Copy,
+                ::core::fmt::Debug,
+                ::core::default::Default,
+                ::serde::Deserialize,
+                ::core::cmp::PartialEq,
+                ::serde::Serialize
+            )]
             pub struct $name($type);
 
-            impl AsRef<$type> for $name {
+            impl ::core::convert::AsRef<$type> for $name {
                 fn as_ref(&self) -> &$type {
                     &self.0
                 }
@@ -27,7 +37,7 @@ macro_rules! bounded {
                     self.0
                 }
 
-                fn new(value: Self::Idx) -> Result<Self, $crate::error::AppError> {
+                fn new(value: Self::Idx) -> ::core::result::Result<Self, $crate::error::AppError> {
                     if ($range).contains(&value) $(&& value % $rem == 0)? {
                         Ok($name(value))
                     } else {
@@ -36,13 +46,13 @@ macro_rules! bounded {
                 }
 
                 #[cfg(feature = "ssr")]
-                fn range() -> impl std::ops::RangeBounds<$type> + rand::distr::uniform::SampleRange<$type> {
+                fn range() -> impl ::std::ops::RangeBounds<$type> + ::rand::distr::uniform::SampleRange<$type> {
                     $range
                 }
             }
 
-            impl std::fmt::Display for $name {
-                fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            impl ::std::fmt::Display for $name {
+                fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {
                     write!(f, "{}", self.inner())
                 }
             }
@@ -50,12 +60,12 @@ macro_rules! bounded {
             #[cfg(feature = "ssr")]
             impl $crate::mock::Mock for $name {
                 fn mock() -> Self {
-                    use rand::Rng;
+                    use ::rand::Rng;
 
-                    let random_inner = rand::rng().random_range(Self::range());
+                    let random_inner = ::rand::rng().random_range(Self::range());
 
                     $(
-                        use std::ops::Rem;
+                        use ::std::ops::Rem;
 
                         // Mathematically it's problematic to always round towards 0, but we accept
                         // this for simplicity, because we are only mocking values.
