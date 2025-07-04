@@ -8,7 +8,6 @@ use crate::{
     },
 };
 use rand::{Rng, distr::StandardUniform};
-use serde::{Deserialize, Serialize};
 
 bounded!((Prob, f32, 0.0..1.0));
 
@@ -114,14 +113,18 @@ impl Mock for Formula {
 }
 
 // todo: if you are iterating through many mocks, you don't want to create a runtime for each. You
-// need to move the iol fetching outside of this function.
+// need to move the iol fetching outside of this function. If you put the Iols into AppState as
+// you've suggested below, you can just fetch them from there.
 impl Mock for Iol {
     fn mock() -> Self {
         let iols = tokio::runtime::Builder::new_current_thread()
             .enable_all()
             .build()
             .unwrap()
-            .block_on(get_iols())
+            // bookmark: todo: Remove this mock of the get_iols server function when you have a
+            // proper test setup. One option would be a function in main() that loads all
+            // Iols into state and makes them available in the frontend via context.
+            .block_on(self::tests::mock_get_iols())
             .unwrap();
 
         let index = rand::rng().random_range(0..iols.len());
@@ -232,7 +235,24 @@ pub fn gen_mocks<T: Mock>(n: u32) -> Vec<T> {
 #[cfg(feature = "ssr")]
 mod tests {
     use super::*;
+    use crate::error::AppError;
     use std::ops::Rem;
+
+    pub async fn mock_get_iols() -> Result<Vec<Iol>, AppError> {
+        let json = gel_tokio::create_client()
+            .await?
+            .query_json("select Iol { model, name, company, focus, toric };", &())
+            .await?
+            .to_string();
+
+        Ok(serde_json::from_str::<Vec<Iol>>(json.as_str()).unwrap_or_default())
+    }
+
+    #[test]
+    fn mocks_iols() {
+        let mocks = gen_mocks::<Case>(10);
+        dbg!(mocks);
+    }
 
     #[test]
     fn mocks_refraction() {

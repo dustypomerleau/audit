@@ -372,7 +372,7 @@ pub fn AddCase() -> impl IntoView {
 }
 
 #[server]
-pub async fn get_iols() -> Result<Vec<Iol>, ServerFnError> {
+pub async fn get_iols() -> Result<Vec<Iol>, AppError> {
     let json = db()
         .await?
         .query_json("select Iol { model, name, company, focus, toric };", &())
