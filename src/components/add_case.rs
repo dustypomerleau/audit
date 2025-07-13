@@ -11,7 +11,7 @@ use chrono::Datelike;
 use leptos::{
     prelude::{
         ActionForm, ElementChild, For, Get, GlobalAttributes, IntoAny, IntoMaybeErased, IntoView,
-        ServerAction, ServerFnError, StyleAttribute, Suspense, component, server, view,
+        ServerAction, StyleAttribute, Suspense, component, server, view,
     },
     server::OnceResource,
 };
