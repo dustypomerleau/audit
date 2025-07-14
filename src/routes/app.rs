@@ -4,8 +4,8 @@ use crate::{
     routes::{Add, Gateway, Instructions, Landing, List, Protected, Report, SignUp, Terms},
 };
 use leptos::prelude::{
-    AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoMaybeErased, IntoView,
-    LeptosOptions, component, view,
+    AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
+    component, view,
 };
 use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
 use leptos_router::{

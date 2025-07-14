@@ -1,4 +1,4 @@
-use leptos::prelude::{ElementChild, IntoMaybeErased, IntoView, StyleAttribute, component, view};
+use leptos::prelude::{ElementChild, IntoView, StyleAttribute, component, view};
 
 #[component]
 pub fn Landing() -> impl IntoView {

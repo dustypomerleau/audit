@@ -1,8 +1,3 @@
-// bookmark: todo: dramatically simplify error types:
-// Auth
-// Db
-// ...
-//
 #[cfg(feature = "ssr")] use crate::{auth::get_jwt_cookie, db::db, state::AppState};
 use crate::{
     components::{Nav, SignedOut},
@@ -11,8 +6,8 @@ use crate::{
 };
 #[cfg(feature = "ssr")] use gel_tokio::create_client;
 use leptos::prelude::{
-    Get, IntoAny, IntoMaybeErased, IntoView, OnceResource, RwSignal, Set, Suspense, component,
-    provide_context, server, use_context, view,
+    Get, IntoAny, IntoView, OnceResource, RwSignal, Set, Suspense, component, provide_context,
+    server, use_context, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;

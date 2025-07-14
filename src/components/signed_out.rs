@@ -1,4 +1,4 @@
-use leptos::prelude::{ElementChild, IntoMaybeErased, IntoView, component, view};
+use leptos::prelude::{ElementChild, IntoView, component, view};
 
 #[component]
 pub fn SignedOut() -> impl IntoView {

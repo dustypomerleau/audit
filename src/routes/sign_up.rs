@@ -2,8 +2,8 @@
 use crate::model::{Email, FormSurgeon, Surgeon, set_current_surgeon};
 use leptos::{
     prelude::{
-        ActionForm, ElementChild, IntoMaybeErased, IntoView, ServerAction, ServerFnError,
-        StyleAttribute, component, view,
+        ActionForm, ElementChild, IntoView, ServerAction, ServerFnError, StyleAttribute, component,
+        view,
     },
     server,
 };

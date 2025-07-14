@@ -3,9 +3,7 @@
 // if there's common patterns then maybe you do some work in PlotContainer and supply the plot with
 // a ScatterCompare, if it's the same for several plots, but the data is shown differently
 use crate::plots::get_compare;
-use leptos::prelude::{
-    Get, IntoAny, IntoMaybeErased, IntoView, Resource, RwSignal, Suspense, component, view,
-};
+use leptos::prelude::{Get, IntoAny, IntoView, Resource, RwSignal, Suspense, component, view};
 // use plotly::{Plot, Scatter};
 
 // todo: create a view to test this plot.
@@ -29,7 +27,9 @@ pub fn DeltaCyl() -> impl IntoView {
         <Suspense fallback=move || {
             view! { "Getting plot data to compare..." }
         }>
-            { view!{"todo"} }
+            {
+                view! { "todo" }
+            }
         </Suspense>
     }
     .into_any()
