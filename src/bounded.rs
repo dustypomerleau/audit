@@ -1,6 +1,6 @@
 use crate::error::AppError;
 #[cfg(feature = "ssr")] use rand::distr::uniform::{SampleRange, SampleUniform};
-use std::range::RangeBounds;
+#[cfg(feature = "ssr")] use std::range::RangeBounds;
 
 pub trait Bounded: Sized {
     #[cfg(feature = "ssr")]

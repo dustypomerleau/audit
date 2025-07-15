@@ -1,6 +1,5 @@
 use crate::{
     bounded::Bounded,
-    components::get_iols,
     model::{
         Acd, Adverse, AfterVa, Al, Axis, BeforeVa, Biometry, Case, Cct, Formula, Iol, IolSe, K,
         Kpower, Ks, Lt, Main, OpIol, OpRefraction, OpVa, RefCyl, RefCylPower, RefSph, Refraction,
@@ -236,7 +235,6 @@ pub fn gen_mocks<T: Mock>(n: u32) -> Vec<T> {
 mod tests {
     use super::*;
     use crate::error::AppError;
-    use std::ops::Rem;
 
     pub async fn mock_get_iols() -> Result<Vec<Iol>, AppError> {
         let json = gel_tokio::create_client()
