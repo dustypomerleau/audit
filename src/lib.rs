@@ -28,6 +28,7 @@ pub mod plots;
 #[cfg(feature = "ssr")] pub mod query;
 pub mod routes;
 #[cfg(feature = "ssr")] pub mod state;
+#[cfg(test)] mod tests;
 
 #[cfg(feature = "hydrate")]
 #[wasm_bindgen::prelude::wasm_bindgen]

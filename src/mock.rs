@@ -249,12 +249,12 @@ mod tests {
     #[test]
     fn mocks_iols() {
         let mocks = gen_mocks::<Case>(10);
-        dbg!(mocks);
+        // dbg!(mocks);
     }
 
     #[test]
     fn mocks_refraction() {
         let mocks = gen_mocks::<Refraction>(10);
-        dbg!(mocks);
+        // dbg!(mocks);
     }
 }

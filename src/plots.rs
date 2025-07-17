@@ -120,9 +120,9 @@ mod tests {
             .await
             .unwrap()
             .unwrap();
-        dbg!(&query_result);
+        // dbg!(&query_result);
 
         let compare = serde_json::from_str::<Compare>(query_result.as_ref()).unwrap();
-        dbg!(&compare);
+        // dbg!(&compare);
     }
 }
