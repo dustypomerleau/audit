@@ -1,12 +1,17 @@
 use crate::{
     bounded::Bounded,
     model::{
-        Acd, Adverse, AfterVa, Al, Axis, BeforeVa, Biometry, Case, Cct, Formula, Iol, IolSe, K,
-        Kpower, Ks, Lt, Main, OpIol, OpRefraction, OpVa, RefCyl, RefCylPower, RefSph, Refraction,
-        Sia, SiaPower, Side, Target, TargetCyl, TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
+        Acd, Adverse, AfterVa, Al, Axis, BeforeVa, Biometry, Case, Cct, Email, Formula, Iol, IolSe,
+        K, Kpower, Ks, Lt, Main, OpIol, OpRefraction, OpVa, RefCyl, RefCylPower, RefSph,
+        Refraction, Sia, SiaPower, Side, Site, Surgeon, SurgeonDefaults, SurgeonSia, Target,
+        TargetCyl, TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
     },
 };
-use rand::{Rng, distr::StandardUniform};
+use chrono::{DateTime, Utc};
+use rand::{
+    Rng,
+    distr::{Alphanumeric, SampleString, StandardUniform},
+};
 
 bounded!((Prob, f32, 0.0..1.0));
 
@@ -21,6 +26,28 @@ pub trait Mock: Sized {
         } else {
             Some(Self::mock())
         }
+    }
+}
+
+fn random_string(length: usize) -> String {
+    let mut rs = Alphanumeric.sample_string(&mut rand::rng(), length);
+    rs.shrink_to_fit();
+
+    rs
+}
+
+/// A newtype to cap the length of mocked names.
+struct Name(String);
+
+impl Mock for Name {
+    fn mock() -> Self {
+        Self(random_string(8))
+    }
+}
+
+impl Name {
+    fn inner(self) -> String {
+        self.0
     }
 }
 
@@ -86,6 +113,23 @@ impl Mock for Case {
     }
 }
 
+impl Mock for DateTime<Utc> {
+    fn mock() -> Self {
+        let seconds_in_epoch: i64 = rand::rng().random_range(0..1_753_254_173);
+
+        Self::from_timestamp(seconds_in_epoch, 0).unwrap()
+    }
+}
+
+impl Mock for Email {
+    fn mock() -> Self {
+        let prefix = random_string(5);
+        let email = format!("{prefix}@mock.com");
+
+        Self::new(&email).unwrap()
+    }
+}
+
 impl Mock for Formula {
     fn mock() -> Self {
         let index: usize = rand::rng().random_range(0..=14);
@@ -141,7 +185,7 @@ impl Mock for OpIol {
             iol,
             se: IolSe::mock(),
             axis: if toric {
-                Axis::mock_option(Prob::new(1.0).unwrap_or_default())
+                Axis::mock_option(Prob::new(0.0).unwrap_or_default())
             } else {
                 None
             },
@@ -180,11 +224,19 @@ impl Mock for Refraction {
     fn mock() -> Self {
         Self {
             sph: RefSph::mock(),
-            cyl: RefCyl::mock_option(Prob::new(0.8).unwrap_or_default()),
+            cyl: RefCyl::mock_option(Prob::new(0.2).unwrap_or_default()),
         }
     }
 }
 
+impl Mock for Sia {
+    fn mock() -> Self {
+        Self {
+            power: SiaPower::mock(),
+            axis: Axis::mock(),
+        }
+    }
+}
 impl Mock for Side {
     fn mock() -> Self {
         let sample: bool = rand::rng().sample(StandardUniform);
@@ -192,6 +244,60 @@ impl Mock for Side {
         match sample {
             true => Side::Right,
             false => Side::Left,
+        }
+    }
+}
+
+impl Mock for Site {
+    fn mock() -> Self {
+        let index: usize = rand::rng().random_range(0..=3);
+
+        let site = match index {
+            0 => "Royal Melbourne Hospital",
+            1 => "Royal Victorian Eye and Ear Hospital",
+            2 => "Monash Hospital",
+            3 => "Alfred Hospital",
+            _ => unreachable!(),
+        };
+
+        Self {
+            name: site.to_string(),
+        }
+    }
+}
+
+impl Mock for Surgeon {
+    fn mock() -> Self {
+        Self {
+            email: Email::mock(),
+            terms: DateTime::<Utc>::mock_option(Prob::new(0.01).unwrap_or_default()),
+            first_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
+                .map(|name| name.inner()),
+            last_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
+                .map(|name| name.inner()),
+            defaults: SurgeonDefaults::mock_option(Prob::new(0.01).unwrap_or_default()),
+            sia: SurgeonSia::mock(),
+        }
+    }
+}
+
+impl Mock for SurgeonDefaults {
+    fn mock() -> Self {
+        Self {
+            site: Site::mock_option(Prob::new(0.05).unwrap_or_default()),
+            iol: Iol::mock_option(Prob::new(0.01).unwrap_or_default()),
+            formula: Formula::mock_option(Prob::new(0.05).unwrap_or_default()),
+            custom_constant: rand::rng().random_range(0..1000) == 0,
+            main: Main::mock(),
+        }
+    }
+}
+
+impl Mock for SurgeonSia {
+    fn mock() -> Self {
+        Self {
+            right: Sia::mock(),
+            left: Sia::mock(),
         }
     }
 }

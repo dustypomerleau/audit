@@ -83,11 +83,11 @@ pub struct Surgeon {
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct SurgeonDefaults {
-    site: Option<Site>,
-    iol: Option<Iol>,
-    formula: Option<Formula>,
-    custom_constant: bool,
-    main: Main,
+    pub site: Option<Site>,
+    pub iol: Option<Iol>,
+    pub formula: Option<Formula>,
+    pub custom_constant: bool,
+    pub main: Main,
 }
 
 /// Return the current [`Surgeon`] from global server context. In practice, this function should
