@@ -24,6 +24,15 @@ impl Display for Side {
     }
 }
 
+impl Side {
+    pub fn to_db_side(&self) -> &str {
+        match self {
+            Self::Right => "Side.Right",
+            Self::Left => "Side.Left",
+        }
+    }
+}
+
 /// An adverse intraoperative event. Classification is at the surgeon's discretion, and only one
 /// option can be selected. For example, a wrap around split in the rhexis opens the PC, but in the
 /// surgeon's view it may be essentially a rhexis complication. For our purposes, we aren't

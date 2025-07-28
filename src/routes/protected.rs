@@ -47,11 +47,12 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, AppError> {
         "Redirected to /signedout".to_string()
     });
 
+    // `create_client()` errors if a connection can't immediately be established, so it
+    // isn't necessary to call `ensure_connection()` if the client was created through this
+    // convenience method.
     let client = create_client()
         .await?
         .with_globals_fn(|client| client.set("ext::auth::client_token", &auth_token));
-
-    client.ensure_connected().await?;
 
     if let Some(state) = use_context::<AppState>() {
         state.db.set(client)?;

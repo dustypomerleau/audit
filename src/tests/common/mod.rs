@@ -1,15 +1,27 @@
+use crate::{
+    components::insert_surgeon_case,
+    mock::{Mock, random_string},
+    model::{Surgeon, SurgeonCase},
+};
 use dotenvy::dotenv;
-use gel_tokio::Client;
+use gel_tokio::{Client, Config};
 use std::{env, sync::LazyLock};
 
 // note: new API for dotenvy will arrive in v16 release
-pub static TEST_JWT: LazyLock<String> = LazyLock::new(|| {
+pub static TEST_JWT: LazyLock<(String, String)> = LazyLock::new(|| {
     dotenv().ok();
-    env::var("TEST_JWT").expect("expected TEST_JWT environment variable to be present")
+
+    let jwt_0 =
+        env::var("TEST_JWT_1").expect("expected TEST_JWT_1 environment variable to be present");
+
+    let jwt_1 =
+        env::var("TEST_JWT_2").expect("expected TEST_JWT_2 environment variable to be present");
+
+    (jwt_0, jwt_1)
 });
 
 pub async fn test_db() -> Client {
-    let jwt = &*TEST_JWT;
+    let jwt = &*TEST_JWT.0;
 
     gel_tokio::create_client()
         .await
@@ -37,6 +49,38 @@ pub async fn test_db() -> Client {
 /// random )
 /// - 10 mock [`SurgeonCase`](crate::model::SurgeonCase)s for each
 ///   [`Surgeon`](crate::model::Surgeon)
-pub async fn populate_test_db() {}
+// note: since mocking the JWT is the hard part, you could try just having one TEST_JWT and doing:
+// - set the JWT on the client
+// - insert 100 cases
+// - modify 90 of the cases with a fake Surgeon, so that only 10 are from the logged in surgeon
+#[tokio::test]
+pub async fn populate_test_db() {
+    let rs = random_string(8);
+    let branch = format!("testdb{rs}");
+    let client = gel_tokio::create_client().await.unwrap();
+    let query = format!(r#"create schema branch {branch} from main"#);
+    client.execute(query, &()).await.unwrap();
+    let config = Config::default().with_branch(&branch);
+    assert!(&config.db.database().unwrap().contains("testdb"));
 
-pub async fn clear_test_db() {}
+    let client_0 = Client::new(&config)
+        .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.0));
+
+    let client_1 = Client::new(&config)
+        .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.1));
+
+    let mock_cases_0 = (0..=9)
+        .map(|_| SurgeonCase::mock())
+        .collect::<Vec<SurgeonCase>>();
+
+    let mock_cases_1 = (0..=99)
+        .map(|_| SurgeonCase::mock())
+        .collect::<Vec<SurgeonCase>>();
+
+    // you need futures::future::join_all() to await all of the futures you're iterating over
+    let x = mock_cases_0
+        .into_iter()
+        .map(|sc| async { insert_surgeon_case(client_0.clone(), sc).await });
+}
+
+pub async fn clear_test_db<T: AsRef<str>>(branch: T) {}

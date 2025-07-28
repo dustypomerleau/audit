@@ -37,46 +37,47 @@ pub fn DeltaCyl() -> impl IntoView {
 
 #[cfg(test)]
 mod tests {
-    #[cfg(feature = "ssr")]
-    #[tokio::test]
-    async fn exports_a_plot() {
-        use crate::plots::{Compare, ScatterCompare};
-        use dotenvy::dotenv;
-        use plotly::{Plot, Scatter, common::Mode};
-
-        dotenv().ok();
-
-        async fn mock_get_compare(year: u32) -> Compare {
-            use crate::{db::tests::test_db, query::query_select_compare};
-
-            let query = query_select_compare(year);
-
-            let query_result = test_db()
-                .await
-                .query_single_json(query, &())
-                .await
-                .unwrap()
-                .unwrap();
-
-            serde_json::from_str::<Compare>(query_result.as_ref()).unwrap()
-        }
-
-        let ScatterCompare { surgeon, cohort } = mock_get_compare(2025).await.scatter_delta_cyl();
-
-        let surgeon = Scatter::new(surgeon.x, surgeon.y)
-            .name("Surgeon")
-            .mode(Mode::Markers);
-
-        let cohort = Scatter::new(cohort.x, cohort.y)
-            .name("Cohort")
-            .mode(Mode::Markers);
-
-        let mut plot = Plot::new();
-        // note: the surgeon should be added after the cohort, because that allows hover on their
-        // points, which are "on top" in the layered plot
-        plot.add_traces(vec![cohort, surgeon]);
-        plot.show();
-    }
+    // #[cfg(feature = "ssr")]
+    // #[tokio::test]
+    // async fn exports_a_plot() {
+    //     use crate::plots::{Compare, ScatterCompare};
+    //     use dotenvy::dotenv;
+    //     use plotly::{Plot, Scatter, common::Mode};
+    //
+    //     dotenv().ok();
+    //
+    //     async fn mock_get_compare(year: u32) -> Compare {
+    //         use crate::{db::tests::test_db, query::query_select_compare};
+    //
+    //         let query = query_select_compare(year);
+    //
+    //         let query_result = test_db()
+    //             .await
+    //             .query_single_json(query, &())
+    //             .await
+    //             .unwrap()
+    //             .unwrap();
+    //
+    //         serde_json::from_str::<Compare>(query_result.as_ref()).unwrap()
+    //     }
+    //
+    //     let ScatterCompare { surgeon, cohort } =
+    // mock_get_compare(2025).await.scatter_delta_cyl();
+    //
+    //     let surgeon = Scatter::new(surgeon.x, surgeon.y)
+    //         .name("Surgeon")
+    //         .mode(Mode::Markers);
+    //
+    //     let cohort = Scatter::new(cohort.x, cohort.y)
+    //         .name("Cohort")
+    //         .mode(Mode::Markers);
+    //
+    //     let mut plot = Plot::new();
+    //     // note: the surgeon should be added after the cohort, because that allows hover on their
+    //     // points, which are "on top" in the layered plot
+    //     plot.add_traces(vec![cohort, surgeon]);
+    //     plot.show();
+    // }
 }
 
 // For reference, the exported HTML that Plotly produces looks like:

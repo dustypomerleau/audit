@@ -1,16 +1,18 @@
 use crate::{
     bounded::Bounded,
+    mock,
     model::{
         Acd, Adverse, AfterVa, Al, Axis, BeforeVa, Biometry, Case, Cct, Email, Formula, Iol, IolSe,
         K, Kpower, Ks, Lt, Main, OpIol, OpRefraction, OpVa, RefCyl, RefCylPower, RefSph,
-        Refraction, Sia, SiaPower, Side, Site, Surgeon, SurgeonDefaults, SurgeonSia, Target,
-        TargetCyl, TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
+        Refraction, Sia, SiaPower, Side, Site, Surgeon, SurgeonCase, SurgeonDefaults, SurgeonSia,
+        Target, TargetCyl, TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
     },
 };
 use chrono::{DateTime, Utc};
 use rand::{
     Rng,
     distr::{Alphanumeric, SampleString, StandardUniform},
+    rng,
 };
 
 bounded!((Prob, f32, 0.0..1.0));
@@ -21,7 +23,7 @@ pub trait Mock: Sized {
     /// Mocks an optional value, returning [`None`] at a rate determined by `none_probability`. A
     /// `none_probability` of 0.1 will result in 10% [`None`] values and 90% `Some(Self)` values.
     fn mock_option(none_probability: Prob) -> Option<Self> {
-        if rand::rng().random_range(0.0..1.0) < none_probability.inner() {
+        if rng().random_range(0.0..1.0) < none_probability.inner() {
             None
         } else {
             Some(Self::mock())
@@ -29,8 +31,8 @@ pub trait Mock: Sized {
     }
 }
 
-fn random_string(length: usize) -> String {
-    let mut rs = Alphanumeric.sample_string(&mut rand::rng(), length);
+pub fn random_string(length: usize) -> String {
+    let mut rs = Alphanumeric.sample_string(&mut rng(), length);
     rs.shrink_to_fit();
 
     rs
@@ -51,9 +53,26 @@ impl Name {
     }
 }
 
+/// Used for mocking of Gel's `ext::auth::Identity`.
+struct Identity {
+    issuer: String,
+    subject: String,
+}
+
+impl Mock for Identity {
+    fn mock() -> Self {
+        Self {
+            issuer: "mock issuer".to_string(),
+            subject: (0..=20)
+                .map(|_| rng().random_range(0..=9).to_string())
+                .collect(),
+        }
+    }
+}
+
 impl Mock for Adverse {
     fn mock() -> Self {
-        match rand::rng().random_range(0..=3) {
+        match rng().random_range(0..=3) {
             0 => Adverse::Rhexis,
             1 => Adverse::Pc,
             2 => Adverse::Zonule,
@@ -115,7 +134,7 @@ impl Mock for Case {
 
 impl Mock for DateTime<Utc> {
     fn mock() -> Self {
-        let seconds_in_epoch: i64 = rand::rng().random_range(0..1_753_254_173);
+        let seconds_in_epoch: i64 = rng().random_range(0..1_753_254_173);
 
         Self::from_timestamp(seconds_in_epoch, 0).unwrap()
     }
@@ -132,7 +151,7 @@ impl Mock for Email {
 
 impl Mock for Formula {
     fn mock() -> Self {
-        let index: usize = rand::rng().random_range(0..=14);
+        let index: usize = rng().random_range(0..=14);
 
         match index {
             0 => Formula::AscrsKrs,
@@ -170,7 +189,7 @@ impl Mock for Iol {
             .block_on(self::tests::mock_get_iols())
             .unwrap();
 
-        let index = rand::rng().random_range(0..iols.len());
+        let index = rng().random_range(0..iols.len());
 
         iols[index].clone()
     }
@@ -239,7 +258,7 @@ impl Mock for Sia {
 }
 impl Mock for Side {
     fn mock() -> Self {
-        let sample: bool = rand::rng().sample(StandardUniform);
+        let sample: bool = rng().sample(StandardUniform);
 
         match sample {
             true => Side::Right,
@@ -250,7 +269,7 @@ impl Mock for Side {
 
 impl Mock for Site {
     fn mock() -> Self {
-        let index: usize = rand::rng().random_range(0..=3);
+        let index: usize = rng().random_range(0..=3);
 
         let site = match index {
             0 => "Royal Melbourne Hospital",
@@ -281,13 +300,24 @@ impl Mock for Surgeon {
     }
 }
 
+impl Mock for SurgeonCase {
+    fn mock() -> Self {
+        Self {
+            urn: format!("urn-{}", random_string(8)),
+            date: DateTime::<Utc>::mock().date_naive(),
+            site: Site::mock_option(Prob::new(0.1).unwrap()),
+            case: Case::mock(),
+        }
+    }
+}
+
 impl Mock for SurgeonDefaults {
     fn mock() -> Self {
         Self {
             site: Site::mock_option(Prob::new(0.05).unwrap_or_default()),
             iol: Iol::mock_option(Prob::new(0.01).unwrap_or_default()),
             formula: Formula::mock_option(Prob::new(0.05).unwrap_or_default()),
-            custom_constant: rand::rng().random_range(0..1000) == 0,
+            custom_constant: rng().random_range(0..1000) == 0,
             main: Main::mock(),
         }
     }
@@ -304,14 +334,14 @@ impl Mock for SurgeonSia {
 
 impl Mock for Target {
     fn mock() -> Self {
-        let formula = match rand::rng().random_range(0..=9) {
+        let formula = match rng().random_range(0..=9) {
             0 => None,
             _ => Some(Formula::mock()),
         };
 
         let custom_constant = matches!(rand::rng().random_range(0..=99), 0);
 
-        let cyl = match rand::rng().random_range(0..=19) {
+        let cyl = match rng().random_range(0..=19) {
             0 => None,
             _ => Some(TargetCyl::new(TargetCylPower::mock(), Axis::mock())),
         };
@@ -327,7 +357,7 @@ impl Mock for Target {
 
 impl Mock for Va {
     fn mock() -> Self {
-        let den: u32 = rand::rng().random_range(400..20_000);
+        let den: u32 = rng().random_range(400..20_000);
 
         Self::new(VaNum::new(600).unwrap(), VaDen::new(den).unwrap())
     }

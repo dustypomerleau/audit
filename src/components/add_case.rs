@@ -23,7 +23,7 @@ pub fn AddCase() -> impl IntoView {
     // 2. IOL models
     // 3. surgeon defaults (should already be in context)
     //
-    let insert_case = ServerAction::<InsertCase>::new();
+    let insert_case = ServerAction::<InsertFormCase>::new();
     let iol_resource = OnceResource::new(get_iols());
 
     let iols = move || {
@@ -383,7 +383,27 @@ pub async fn get_iols() -> Result<Vec<Iol>, AppError> {
 }
 
 #[server]
-pub async fn insert_case(case: FormCase) -> Result<(), AppError> {
+pub async fn insert_form_case(form_case: FormCase) -> Result<(), AppError> {
+    let client = db().await?;
+    let surgeon_case = form_case.into_surgeon_case().await?;
+
+    let returned_json = insert_surgeon_case(client, surgeon_case)
+        .await?
+        .ok_or(AppError::Db(
+            "no JSON was returned after inserting the case".to_string(),
+        ))?;
+
+    // todo: redirect to a view that takes the returned String, parses it as JSON into a
+    // SurgeonCase, and displays it alongside a button to add another case.
+
+    Ok(())
+}
+
+// Passing in the client makes the function customizable for tests.
+pub async fn insert_surgeon_case(
+    client: gel_tokio::Client,
+    surgeon_case: SurgeonCase,
+) -> Result<Option<String>, AppError> {
     let SurgeonCase {
         urn,
         date,
@@ -458,7 +478,7 @@ pub async fn insert_case(case: FormCase) -> Result<(), AppError> {
                             },
                     },
             },
-    } = case.into_surgeon_case().await?;
+    } = surgeon_case;
 
     let year = date.year();
     let date = date.to_string();
@@ -678,15 +698,11 @@ select QuerySurgeonCas {{
         "#
     );
 
-    let case = db()
-        .await?
+    let case = client
         .query_single_json(query, &())
         .await?
         .map(|json| json.as_ref().to_string());
-    println!("{case:#?}");
+    dbg!(&case);
 
-    // todo: redirect to a view that takes the returned String, parses it as JSON into a
-    // SurgeonCase, and displays it alongside a button to add another case.
-
-    Ok(())
+    Ok(case)
 }
