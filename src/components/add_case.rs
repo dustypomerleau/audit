@@ -387,7 +387,7 @@ pub async fn insert_form_case(form_case: FormCase) -> Result<(), AppError> {
     let client = db().await?;
     let surgeon_case = form_case.into_surgeon_case().await?;
 
-    let returned_json = insert_surgeon_case(client, surgeon_case)
+    let returned_json = insert_surgeon_case(&client, surgeon_case)
         .await?
         .ok_or(AppError::Db(
             "no JSON was returned after inserting the case".to_string(),
@@ -400,8 +400,9 @@ pub async fn insert_form_case(form_case: FormCase) -> Result<(), AppError> {
 }
 
 // Passing in the client makes the function customizable for tests.
+#[cfg(feature = "ssr")]
 pub async fn insert_surgeon_case(
-    client: gel_tokio::Client,
+    client: &gel_tokio::Client,
     surgeon_case: SurgeonCase,
 ) -> Result<Option<String>, AppError> {
     let SurgeonCase {
