@@ -2,10 +2,10 @@ use crate::{
     bounded::Bounded,
     mock,
     model::{
-        Acd, Adverse, AfterVa, Al, Axis, BeforeVa, Biometry, Case, Cct, Email, Formula, Iol, IolSe,
-        K, Kpower, Ks, Lt, Main, OpIol, OpRefraction, OpVa, RefCyl, RefCylPower, RefSph,
+        Acd, Adverse, AfterVa, Al, Axis, BeforeVa, Biometry, Case, Cct, Email, Focus, Formula, Iol,
+        IolSe, K, Kpower, Ks, Lt, Main, OpIol, OpRefraction, OpVa, RefCyl, RefCylPower, RefSph,
         Refraction, Sia, SiaPower, Side, Site, Surgeon, SurgeonCase, SurgeonDefaults, SurgeonSia,
-        Target, TargetCyl, TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
+        Target, TargetCyl, TargetCylPower, TargetSe, ToricPower, Va, VaDen, VaNum, Wtw,
     },
 };
 use chrono::{DateTime, Utc};
@@ -134,7 +134,7 @@ impl Mock for Case {
 
 impl Mock for DateTime<Utc> {
     fn mock() -> Self {
-        let seconds_in_epoch: i64 = rng().random_range(0..1_753_254_173);
+        let seconds_in_epoch: i64 = rng().random_range(965_442_339..1_753_254_173);
 
         Self::from_timestamp(seconds_in_epoch, 0).unwrap()
     }
@@ -146,6 +146,19 @@ impl Mock for Email {
         let email = format!("{prefix}@mock.com");
 
         Self::new(&email).unwrap()
+    }
+}
+
+impl Mock for Focus {
+    fn mock() -> Self {
+        let index: usize = rng().random_range(0..=2);
+
+        match index {
+            0 => Focus::Mono,
+            1 => Focus::Edof,
+            2 => Focus::Multi,
+            _ => unreachable!(),
+        }
     }
 }
 
@@ -179,19 +192,16 @@ impl Mock for Formula {
 // you've suggested below, you can just fetch them from there.
 impl Mock for Iol {
     fn mock() -> Self {
-        let iols = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
-            .build()
-            .unwrap()
-            // bookmark: todo: Remove this mock of the get_iols server function when you have a
-            // proper test setup. One option would be a function in main() that loads all
-            // Iols into state and makes them available in the frontend via context.
-            .block_on(self::tests::mock_get_iols())
-            .unwrap();
-
-        let index = rng().random_range(0..iols.len());
-
-        iols[index].clone()
+        // In the short term, just make random Iol data to get mocks working for tests.
+        Self {
+            // model: format!("iol-model-{}", random_string(4)),
+            // temporarily use a fixed model to get tests working
+            model: "sn60wf".to_string(),
+            name: Some(format!("iol-name-{}", random_string(4))),
+            company: Some(format!("iol-company-{}", random_string(4))),
+            focus: Focus::mock(),
+            toric: ToricPower::mock_option(Prob::new(0.4).unwrap()),
+        }
     }
 }
 
