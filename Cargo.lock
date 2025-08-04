@@ -202,6 +202,7 @@ dependencies = [
  "chrono",
  "console_error_panic_hook",
  "dotenvy",
+ "futures",
  "garde",
  "gel-derive",
  "gel-protocol",
