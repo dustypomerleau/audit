@@ -134,7 +134,9 @@ impl Mock for Case {
 
 impl Mock for DateTime<Utc> {
     fn mock() -> Self {
-        let seconds_in_epoch: i64 = rng().random_range(965_442_339..1_753_254_173);
+        // let seconds_in_epoch: i64 = rng().random_range(965_442_339..1_753_254_173);
+        // temporarily override this with mocks that are in the same year for testing plots
+        let seconds_in_epoch: i64 = rng().random_range(1_735_689_600..1_754_738_664);
 
         Self::from_timestamp(seconds_in_epoch, 0).unwrap()
     }

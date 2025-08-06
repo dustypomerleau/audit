@@ -1,7 +1,39 @@
-use crate::tests::common::populate_test_db;
+use crate::{
+    plots::{ScatterCompare, get_compare_with_client},
+    tests::common::{populate_test_db, test_db},
+};
+use plotly::{Plot, Scatter, common::Mode};
 
 #[tokio::test]
 async fn makes_a_plot() {
-    let client = populate_test_db().await;
-    assert!(client.ensure_connected().await.is_ok());
+    // let _client = populate_test_db().await;
+    // assert!(client.ensure_connected().await.is_ok());
+
+    let client = test_db().await;
+
+    let x = client
+        .query_single_json("select global cur_surgeon.email;", &())
+        .await
+        .unwrap();
+    dbg!(x);
+
+    let ScatterCompare { surgeon, cohort } = get_compare_with_client(&client, 2025)
+        .await
+        .unwrap()
+        .scatter_delta_cyl();
+    // dbg!((&surgeon, &cohort));
+
+    let surgeon = Scatter::new(surgeon.x, surgeon.y)
+        .name("Surgeon")
+        .mode(Mode::Markers);
+
+    let cohort = Scatter::new(cohort.x, cohort.y)
+        .name("Cohort")
+        .mode(Mode::Markers);
+
+    let mut plot = Plot::new();
+    // note: the surgeon should be added after the cohort, because that allows hover on their
+    // points, which are "on top" in the layered plot
+    plot.add_traces(vec![cohort, surgeon]);
+    plot.show();
 }

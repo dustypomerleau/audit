@@ -18,7 +18,13 @@ use uuid::Uuid;
 
 // note: new API for dotenvy will arrive in v16 release
 pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
-    env::var("BASE_AUTH_URL").expect("expected BASE_AUTH_URL environment variable to be present")
+    if cfg!(test) {
+        env::var("TEST_AUTH_URL")
+            .expect("expected TEST_AUTH_URL environment variable to be present")
+    } else {
+        env::var("BASE_AUTH_URL")
+            .expect("expected BASE_AUTH_URL environment variable to be present")
+    }
 });
 
 /// Holds the verifier/challenge pair that is used during site authentication. The challenge is
@@ -162,6 +168,7 @@ pub async fn get_jwt_cookie() -> Result<Option<String>, AppError> {
         .await?
         .get("gel-auth-token")
         .map(|cookie| cookie.value().to_string());
+    // dbg!(&auth_token);
 
     Ok(auth_token)
 }

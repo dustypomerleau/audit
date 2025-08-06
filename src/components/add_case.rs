@@ -383,9 +383,9 @@ pub async fn get_iols() -> Result<Vec<Iol>, AppError> {
 }
 
 #[server]
-pub async fn insert_form_case(form_case: FormCase) -> Result<(), AppError> {
+pub async fn insert_form_case(case: FormCase) -> Result<(), AppError> {
     let client = db().await?;
-    let surgeon_case = form_case.into_surgeon_case().await?;
+    let surgeon_case = case.into_surgeon_case().await?;
 
     let returned_json = insert_surgeon_case(&client, surgeon_case)
         .await?

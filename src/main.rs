@@ -14,8 +14,6 @@ async fn main() {
 
     #[cfg(debug_assertions)]
     dotenv().ok();
-    // can be used for temporarily overriding the BASE_AUTH_URL to set up the `testdbbase` branch.
-    // dotenvy::from_filename(".test.env").ok();
 
     // Use default values for the `cargo-leptos` config:
     let conf = get_configuration(None).unwrap();

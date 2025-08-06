@@ -11,10 +11,6 @@ use leptos::{
 
 #[component]
 pub fn SignUp() -> impl IntoView {
-    // ServerAction::<S>::new() creates an action that will call the server function S
-    // let insert_surgeon = ServerAction::<InsertSurgeon>::new();
-    // let returned_value = insert_surgeon.value();
-    // let is_error = move || returned_value.with(|val| matches!(val, Some(err)));
     let insert_surgeon = ServerAction::<InsertSurgeon>::new();
 
     view! {

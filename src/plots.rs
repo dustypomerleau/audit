@@ -9,6 +9,7 @@ use crate::{
 };
 #[cfg(feature = "ssr")] use crate::{db::db, query::query_select_compare};
 pub use delta_cyl::*;
+#[cfg(feature = "ssr")] use gel_tokio::Client;
 use leptos::prelude::server;
 use serde::{Deserialize, Serialize};
 
@@ -20,14 +21,14 @@ pub struct Compare {
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct ScatterData {
-    x: Vec<f32>,
-    y: Vec<f32>,
+    pub x: Vec<f32>,
+    pub y: Vec<f32>,
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct ScatterCompare {
-    surgeon: ScatterData,
-    cohort: ScatterData,
+    pub surgeon: ScatterData,
+    pub cohort: ScatterData,
 }
 
 // If you find that you are doing a lot of the same processing for future plots, you could
@@ -89,11 +90,22 @@ impl Compare {
 #[server]
 // In future, you may want the ability to compare a specific date range for the Surgeon, against
 // either the cohort, or against the surgeon's own baseline (all other dates outside the range).
+//
+// The reason we separate `get_compare_with_client()` into its own function is so we can call that
+// function directly from tests, and inject a different [`Client`] with a test JWT global.
 pub async fn get_compare(year: u32) -> Result<Compare, AppError> {
+    let client = db().await?;
+
+    get_compare_with_client(&client, year).await
+}
+
+#[cfg(feature = "ssr")]
+pub async fn get_compare_with_client(client: &Client, year: u32) -> Result<Compare, AppError> {
     let query = query_select_compare(year);
 
-    if let Some(query_result) = db().await?.query_single_json(query, &()).await? {
+    if let Some(query_result) = client.query_single_json(query, &()).await? {
         let compare = serde_json::from_str::<Compare>(query_result.as_ref())?;
+        // dbg!(&compare);
 
         Ok(compare)
     } else {

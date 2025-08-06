@@ -37,8 +37,8 @@ pub fn DeltaCyl() -> impl IntoView {
 
 #[cfg(test)]
 mod tests {
-    // #[cfg(feature = "ssr")]
     // #[tokio::test]
+    // #[cfg(feature = "ssr")]
     // async fn exports_a_plot() {
     //     use crate::plots::{Compare, ScatterCompare};
     //     use dotenvy::dotenv;
