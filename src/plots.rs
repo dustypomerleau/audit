@@ -105,7 +105,6 @@ pub async fn get_compare_with_client(client: &Client, year: u32) -> Result<Compa
 
     if let Some(query_result) = client.query_single_json(query, &()).await? {
         let compare = serde_json::from_str::<Compare>(query_result.as_ref())?;
-        // dbg!(&compare);
 
         Ok(compare)
     } else {
@@ -117,24 +116,4 @@ pub async fn get_compare_with_client(client: &Client, year: u32) -> Result<Compa
 
 #[cfg(test)]
 #[cfg(feature = "ssr")]
-mod tests {
-    // use super::*;
-    // use crate::tests::common::test_db;
-    //
-    // #[tokio::test]
-    // async fn queries_compare() {
-    //     let year = 2025_u32;
-    //     let query = query_select_compare(year);
-    //
-    //     let query_result = test_db()
-    //         .await
-    //         .query_single_json(query, &())
-    //         .await
-    //         .unwrap()
-    //         .unwrap();
-    //     // dbg!(&query_result);
-    //
-    //     let compare = serde_json::from_str::<Compare>(query_result.as_ref()).unwrap();
-    //     // dbg!(&compare);
-    // }
-}
+mod tests {}

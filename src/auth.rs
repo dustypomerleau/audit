@@ -168,7 +168,6 @@ pub async fn get_jwt_cookie() -> Result<Option<String>, AppError> {
         .await?
         .get("gel-auth-token")
         .map(|cookie| cookie.value().to_string());
-    // dbg!(&auth_token);
 
     Ok(auth_token)
 }

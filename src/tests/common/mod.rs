@@ -40,13 +40,9 @@ pub async fn populate_test_db() -> Client {
     // - check that the output contains `testdb` or whatever unique string you choose
     // - if it doesn't contain that, call `gel branch switch testdb` or similar
 
-    let base_client = create_client().await.unwrap();
-
-    // todo: these assignments could instead be:
-    // let surgeon_client = test_db().await;
-    // let cohort_client = surgeon_client.with_globals_fn(...);
-    let surgeon_client =
-        base_client.with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.0));
+    let surgeon_client = test_db()
+        .await
+        .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.0));
 
     let surgeon_mock_cases = (0..=9)
         .map(|_| SurgeonCase::mock())
@@ -54,22 +50,20 @@ pub async fn populate_test_db() -> Client {
 
     // This is much slower than doing a bulk insert from JSON, but it avoids maxing out the
     // [`gel_tokio::Client`] with a non-blocking iterator, and it avoids needing a dedicated
-    // function just to do the test inserts.
+    // version of the insert query just for test setup.
     for case in surgeon_mock_cases {
-        let x = insert_surgeon_case(&surgeon_client, case).await.unwrap();
-        // dbg!(&x);
+        insert_surgeon_case(&surgeon_client, case).await.unwrap();
     }
 
-    let cohort_client =
-        base_client.with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.1));
+    let cohort_client = surgeon_client
+        .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.1));
 
     let cohort_mock_cases = (0..=99)
         .map(|_| SurgeonCase::mock())
         .collect::<Vec<SurgeonCase>>();
 
     for case in cohort_mock_cases {
-        let x = insert_surgeon_case(&cohort_client, case).await.unwrap();
-        // dbg!(&x);
+        insert_surgeon_case(&cohort_client, case).await.unwrap();
     }
 
     surgeon_client

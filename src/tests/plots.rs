@@ -6,22 +6,16 @@ use plotly::{Plot, Scatter, common::Mode};
 
 #[tokio::test]
 async fn makes_a_plot() {
-    // let _client = populate_test_db().await;
-    // assert!(client.ensure_connected().await.is_ok());
-
     let client = test_db().await;
 
-    let x = client
-        .query_single_json("select global cur_surgeon.email;", &())
-        .await
-        .unwrap();
-    dbg!(x);
+    // uncomment below to populate the test DB with cases.
+    // let client = populate_test_db().await;
+    // assert!(client.ensure_connected().await.is_ok());
 
     let ScatterCompare { surgeon, cohort } = get_compare_with_client(&client, 2025)
         .await
         .unwrap()
         .scatter_delta_cyl();
-    // dbg!((&surgeon, &cohort));
 
     let surgeon = Scatter::new(surgeon.x, surgeon.y)
         .name("Surgeon")
