@@ -17,7 +17,9 @@ use rand::{
 
 bounded!((Prob, f32, 0.0..1.0));
 
+/// Provides a mocked instance of `Self` for testing purposes.
 pub trait Mock: Sized {
+    /// Return a mocked instance of the type.
     fn mock() -> Self;
 
     /// Mocks an optional value, returning [`None`] at a rate determined by `none_probability`. A
@@ -31,6 +33,7 @@ pub trait Mock: Sized {
     }
 }
 
+/// Generates a random, alphanumeric, owned [`String`] of the given length.
 pub fn random_string(length: usize) -> String {
     let mut rs = Alphanumeric.sample_string(&mut rng(), length);
     rs.shrink_to_fit();
@@ -382,25 +385,16 @@ pub fn gen_mocks<T: Mock>(n: u32) -> Vec<T> {
 #[cfg(feature = "ssr")]
 mod tests {
     use super::*;
-    use crate::error::AppError;
 
-    pub async fn mock_get_iols() -> Result<Vec<Iol>, AppError> {
-        let json = gel_tokio::create_client()
-            .await?
-            .query_json("select Iol { model, name, company, focus, toric };", &())
-            .await?
-            .to_string();
-
-        Ok(serde_json::from_str::<Vec<Iol>>(json.as_str()).unwrap_or_default())
+    // Mocking [`SurgeonCase`](crate::model::SurgeonCase) and [`Surgeon`](crate::model::Surgeon) is
+    // sufficient to test most of the impls in this module.
+    #[test]
+    fn mocks_surgeon_case() {
+        let _mocks = gen_mocks::<SurgeonCase>(10);
     }
 
     #[test]
-    fn mocks_iols() {
-        let mocks = gen_mocks::<Case>(10);
-    }
-
-    #[test]
-    fn mocks_refraction() {
-        let mocks = gen_mocks::<Refraction>(10);
+    fn mocks_surgeon() {
+        let _mocks = gen_mocks::<Surgeon>(10);
     }
 }
