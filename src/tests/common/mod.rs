@@ -1,6 +1,6 @@
 use crate::{
     components::insert_surgeon_case,
-    mock::{Mock, random_string},
+    mock::{Mock, gen_mocks, random_string},
     model::{Surgeon, SurgeonCase},
 };
 use dotenvy::dotenv;
@@ -44,9 +44,7 @@ pub async fn populate_test_db() -> Client {
         .await
         .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.0));
 
-    let surgeon_mock_cases = (0..=9)
-        .map(|_| SurgeonCase::mock())
-        .collect::<Vec<SurgeonCase>>();
+    let surgeon_mock_cases = gen_mocks::<SurgeonCase>(10);
 
     // This is much slower than doing a bulk insert from JSON, but it avoids maxing out the
     // [`gel_tokio::Client`] with a non-blocking iterator, and it avoids needing a dedicated
@@ -58,9 +56,7 @@ pub async fn populate_test_db() -> Client {
     let cohort_client = surgeon_client
         .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.1));
 
-    let cohort_mock_cases = (0..=99)
-        .map(|_| SurgeonCase::mock())
-        .collect::<Vec<SurgeonCase>>();
+    let cohort_mock_cases = gen_mocks::<SurgeonCase>(100);
 
     for case in cohort_mock_cases {
         insert_surgeon_case(&cohort_client, case).await.unwrap();
