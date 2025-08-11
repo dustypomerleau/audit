@@ -65,6 +65,10 @@ impl Ks {
         self.steep.power.inner()
     }
 
+    pub fn cyl(&self) -> u32 {
+        self.steep_power() - self.flat_power()
+    }
+
     pub fn flat_axis(&self) -> u32 {
         self.flat.axis.inner()
     }

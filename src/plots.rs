@@ -31,9 +31,6 @@ pub struct ScatterCompare {
     pub cohort: ScatterData,
 }
 
-// If you find that you are doing a lot of the same processing for future plots, you could
-// have a Cased trait and impl it for both SurgeonCase and Case, and then just write these
-// once over a generic, but hold off on this for now, it's premature.
 #[cfg(feature = "ssr")]
 impl Compare {
     pub fn scatter_delta_cyl(&self) -> ScatterCompare {
@@ -41,10 +38,9 @@ impl Compare {
             .surgeon_cases
             .iter()
             .map(|sc| {
-                let ks = sc.case.biometry.ks;
-                let pre = ((ks.steep_power() - ks.flat_power()) as f32 / 100.0).abs();
+                let before = sc.case.biometry.ks.cyl() as f32 / 100.0;
 
-                let post = sc
+                let after = sc
                     .case
                     .refraction
                     .after
@@ -52,7 +48,7 @@ impl Compare {
                     .map(|refcyl| (refcyl.power.inner() as f32 / 100.0).abs())
                     .unwrap_or(0_f32);
 
-                (pre, post)
+                (before, after)
             })
             .collect();
 
@@ -60,17 +56,16 @@ impl Compare {
             .cohort_cases
             .iter()
             .map(|cc| {
-                let ks = cc.biometry.ks;
-                let pre = ((ks.steep_power() - ks.flat_power()) as f32 / 100.0).abs();
+                let before = cc.biometry.ks.cyl() as f32 / 100.0;
 
-                let post = cc
+                let after = cc
                     .refraction
                     .after
                     .cyl
                     .map(|refcyl| (refcyl.power.inner() as f32 / 100.0).abs())
                     .unwrap_or(0_f32);
 
-                (pre, post)
+                (before, after)
             })
             .collect();
 
