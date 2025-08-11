@@ -45,12 +45,11 @@ pub struct PkceParams {
     code: String,
 }
 
-/// A deserialization target for the JSON "gel-auth-token" cookie. Used primarily for holding
-/// the current surgeon's identity ID.
+/// A deserialization target for the Gel Auth JSON API.
 #[allow(unused)]
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AuthResponse {
-    /// A Base64 URL-encoded JWT, consisting of `.`-separated header, payload, and signature.
+    /// A Base64 URL-encoded JWT, consisting of dot-separated header, payload, and signature.
     pub auth_token: String,
     pub identity_id: Uuid,
     pub provider_token: String,
@@ -157,12 +156,7 @@ pub async fn handle_kill_session(
     Ok((jar, Redirect::to("/")))
 }
 
-// Plan:
-// 1. do what you need to do to get AuthError working as ServerFnErrorErr or whatev
-// 2. instead of unwrapping, map the error when the token isn't present to AuthError::Token
-// 3. visit places where you call this function, and if there's no cookie, redirect to signin
-// 4. if there is a cookie, then check the db global, and if it doesn't match, create a new Client
-//    and write it to state
+/// Get the current surgeon's JWT from the `gel-auth-token` cookie.
 pub async fn get_jwt_cookie() -> Result<Option<String>, AppError> {
     let auth_token = extract::<CookieJar>()
         .await?
