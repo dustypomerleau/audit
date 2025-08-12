@@ -1,9 +1,9 @@
-//! Utilities for creating the underlying data for a plot.
+//! Utilities for creating [`Plot`]s and their underlying data.
 
 mod delta_cyl;
 
 use crate::{
-    bounded::{self, Bounded},
+    bounded::Bounded,
     error::AppError,
     model::{Case, SurgeonCase},
 };
@@ -11,6 +11,7 @@ use crate::{
 pub use delta_cyl::*;
 #[cfg(feature = "ssr")] use gel_tokio::Client;
 use leptos::prelude::server;
+use plotly::{Plot, Scatter, ScatterPolar, common::Mode};
 use serde::{Deserialize, Serialize};
 
 /// bookmark: todo: docs
@@ -27,7 +28,7 @@ pub struct PolarData {
     // bounded!((PolarAxis, u32, 0..=359));
     //
     // and use that instead of u32, it adds complexity to passing the data to Plotly, and the
-    // bounds will already be met because of the constraints on the way into the DB.
+    // bounds will already be met because of the constraints on the DB.
     pub theta: Vec<u32>,
     pub r: Vec<f32>,
 }
@@ -58,6 +59,25 @@ impl PolarData {
 pub struct PolarCompare {
     pub surgeon: PolarData,
     pub cohort: PolarData,
+}
+
+impl PolarCompare {
+    pub fn polar_plot(self) -> Plot {
+        let Self { surgeon, cohort } = self;
+
+        let surgeon = ScatterPolar::new(surgeon.theta, surgeon.r)
+            .name("Surgeon")
+            .mode(Mode::Markers);
+
+        let cohort = ScatterPolar::new(cohort.theta, cohort.r)
+            .name("Cohort")
+            .mode(Mode::Markers);
+
+        let mut polar_plot = Plot::new();
+        polar_plot.add_traces(vec![cohort, surgeon]);
+
+        polar_plot
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -94,67 +114,72 @@ pub struct ScatterCompare {
     pub cohort: ScatterData,
 }
 
+impl ScatterCompare {
+    pub fn scatter_plot(self) -> Plot {
+        let Self { surgeon, cohort } = self;
+
+        let surgeon = Scatter::new(surgeon.x, surgeon.y)
+            .name("Surgeon")
+            .mode(Mode::Markers);
+
+        let cohort = Scatter::new(cohort.x, cohort.y)
+            .name("Cohort")
+            .mode(Mode::Markers);
+
+        let mut scatter_plot = Plot::new();
+        // note: the surgeon should be added after the cohort, because that allows hover on their
+        // points, which are "on top" in the layered plot
+        scatter_plot.add_traces(vec![cohort, surgeon]);
+
+        scatter_plot
+    }
+}
+
 #[cfg(feature = "ssr")]
 impl Compare {
     pub fn polar_cyl_before(&self) -> PolarCompare {
+        fn k_cyl_double_angle(case: &Case) -> (u32, f32) {
+            let ks = case.biometry.ks;
+
+            // We double the axis for double-angle plot.
+            // Consider halving the axis instead, so it is properly labeled as 0-179.
+            (ks.steep_axis() * 2, (ks.cyl() as f32) / 100.0)
+        }
+
         let surgeon = self
             .surgeon_cases
             .iter()
-            .map(|sc| {
-                let ks = sc.case.biometry.ks;
-
-                // We double the axis for double-angle plot.
-                (ks.steep_axis() * 2, (ks.cyl() as f32) / 100.0)
-            })
+            .map(|sc| k_cyl_double_angle(&sc.case))
             .collect();
 
-        let cohort = self
-            .cohort_cases
-            .iter()
-            .map(|cc| {
-                let ks = cc.biometry.ks;
-
-                (ks.steep_axis() * 2, (ks.cyl() as f32) / 100.0)
-            })
-            .collect();
+        let cohort = self.cohort_cases.iter().map(k_cyl_double_angle).collect();
 
         PolarCompare { surgeon, cohort }
     }
 
     pub fn scatter_delta_cyl(&self) -> ScatterCompare {
+        fn k_cyl_before(case: &Case) -> f32 {
+            case.biometry.ks.cyl() as f32 / 100.0
+        }
+
+        fn ref_cyl_after(case: &Case) -> f32 {
+            case.refraction
+                .after
+                .cyl
+                .map(|refcyl| (refcyl.power.inner() as f32 / 100.0).abs())
+                .unwrap_or(0_f32)
+        }
+
         let surgeon = self
             .surgeon_cases
             .iter()
-            .map(|sc| {
-                let before = sc.case.biometry.ks.cyl() as f32 / 100.0;
-
-                let after = sc
-                    .case
-                    .refraction
-                    .after
-                    .cyl
-                    .map(|refcyl| (refcyl.power.inner() as f32 / 100.0).abs())
-                    .unwrap_or(0_f32);
-
-                (before, after)
-            })
+            .map(|sc| (k_cyl_before(&sc.case), ref_cyl_after(&sc.case)))
             .collect();
 
         let cohort = self
             .cohort_cases
             .iter()
-            .map(|cc| {
-                let before = cc.biometry.ks.cyl() as f32 / 100.0;
-
-                let after = cc
-                    .refraction
-                    .after
-                    .cyl
-                    .map(|refcyl| (refcyl.power.inner() as f32 / 100.0).abs())
-                    .unwrap_or(0_f32);
-
-                (before, after)
-            })
+            .map(|cc| (k_cyl_before(cc), ref_cyl_after(cc)))
             .collect();
 
         ScatterCompare { surgeon, cohort }
