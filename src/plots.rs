@@ -3,7 +3,7 @@
 mod delta_cyl;
 
 use crate::{
-    bounded::Bounded,
+    bounded::{self, Bounded},
     error::AppError,
     model::{Case, SurgeonCase},
 };
@@ -13,6 +13,7 @@ pub use delta_cyl::*;
 use leptos::prelude::server;
 use serde::{Deserialize, Serialize};
 
+/// bookmark: todo: docs
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Compare {
     surgeon_cases: Vec<SurgeonCase>,
@@ -20,9 +21,71 @@ pub struct Compare {
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct PolarData {
+    // Although we could define:
+    //
+    // bounded!((PolarAxis, u32, 0..=359));
+    //
+    // and use that instead of u32, it adds complexity to passing the data to Plotly, and the
+    // bounds will already be met because of the constraints on the way into the DB.
+    pub theta: Vec<u32>,
+    pub r: Vec<f32>,
+}
+
+impl FromIterator<(u32, f32)> for PolarData {
+    fn from_iter<T: IntoIterator<Item = (u32, f32)>>(iter: T) -> Self {
+        let mut polar_data = PolarData::new();
+
+        for (theta, r) in iter {
+            polar_data.theta.push(theta);
+            polar_data.r.push(r);
+        }
+
+        polar_data
+    }
+}
+
+impl PolarData {
+    fn new() -> Self {
+        Self {
+            theta: Vec::new(),
+            r: Vec::new(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+pub struct PolarCompare {
+    pub surgeon: PolarData,
+    pub cohort: PolarData,
+}
+
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct ScatterData {
     pub x: Vec<f32>,
     pub y: Vec<f32>,
+}
+
+impl FromIterator<(f32, f32)> for ScatterData {
+    fn from_iter<T: IntoIterator<Item = (f32, f32)>>(iter: T) -> Self {
+        let mut scatter_data = ScatterData::new();
+
+        for (x, y) in iter {
+            scatter_data.x.push(x);
+            scatter_data.y.push(y);
+        }
+
+        scatter_data
+    }
+}
+
+impl ScatterData {
+    fn new() -> Self {
+        Self {
+            x: Vec::new(),
+            y: Vec::new(),
+        }
+    }
 }
 
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -33,8 +96,33 @@ pub struct ScatterCompare {
 
 #[cfg(feature = "ssr")]
 impl Compare {
+    pub fn polar_cyl_before(&self) -> PolarCompare {
+        let surgeon = self
+            .surgeon_cases
+            .iter()
+            .map(|sc| {
+                let ks = sc.case.biometry.ks;
+
+                // We double the axis for double-angle plot.
+                (ks.steep_axis() * 2, (ks.cyl() as f32) / 100.0)
+            })
+            .collect();
+
+        let cohort = self
+            .cohort_cases
+            .iter()
+            .map(|cc| {
+                let ks = cc.biometry.ks;
+
+                (ks.steep_axis() * 2, (ks.cyl() as f32) / 100.0)
+            })
+            .collect();
+
+        PolarCompare { surgeon, cohort }
+    }
+
     pub fn scatter_delta_cyl(&self) -> ScatterCompare {
-        let surgeon: (Vec<f32>, Vec<f32>) = self
+        let surgeon = self
             .surgeon_cases
             .iter()
             .map(|sc| {
@@ -52,7 +140,7 @@ impl Compare {
             })
             .collect();
 
-        let cohort: (Vec<f32>, Vec<f32>) = self
+        let cohort = self
             .cohort_cases
             .iter()
             .map(|cc| {
@@ -69,16 +157,7 @@ impl Compare {
             })
             .collect();
 
-        ScatterCompare {
-            surgeon: ScatterData {
-                x: surgeon.0,
-                y: surgeon.1,
-            },
-            cohort: ScatterData {
-                x: cohort.0,
-                y: cohort.1,
-            },
-        }
+        ScatterCompare { surgeon, cohort }
     }
 }
 
