@@ -4,12 +4,12 @@ mod delta_cyl;
 
 use crate::{
     bounded::Bounded,
+    db::db,
     error::AppError,
     model::{Case, SurgeonCase},
+    query::query_select_compare,
 };
-#[cfg(feature = "ssr")] use crate::{db::db, query::query_select_compare};
-pub use delta_cyl::*;
-#[cfg(feature = "ssr")] use gel_tokio::Client;
+use gel_tokio::Client;
 use leptos::prelude::server;
 use plotly::{Plot, Scatter, ScatterPolar, common::Mode};
 use serde::{Deserialize, Serialize};
@@ -74,6 +74,8 @@ impl PolarCompare {
             .mode(Mode::Markers);
 
         let mut polar_plot = Plot::new();
+        // note: the surgeon should be added after the cohort, because that allows hover on their
+        // points, which are "on top" in the layered plot
         polar_plot.add_traces(vec![cohort, surgeon]);
 
         polar_plot
@@ -135,7 +137,6 @@ impl ScatterCompare {
     }
 }
 
-#[cfg(feature = "ssr")]
 impl Compare {
     pub fn polar_cyl_before(&self) -> PolarCompare {
         fn k_cyl_double_angle(case: &Case) -> (u32, f32) {
@@ -186,7 +187,6 @@ impl Compare {
     }
 }
 
-#[server]
 // In future, you may want the ability to compare a specific date range for the Surgeon, against
 // either the cohort, or against the surgeon's own baseline (all other dates outside the range).
 //
@@ -198,7 +198,6 @@ pub async fn get_compare(year: u32) -> Result<Compare, AppError> {
     get_compare_with_client(&client, year).await
 }
 
-#[cfg(feature = "ssr")]
 pub async fn get_compare_with_client(client: &Client, year: u32) -> Result<Compare, AppError> {
     let query = query_select_compare(year);
 
@@ -214,5 +213,4 @@ pub async fn get_compare_with_client(client: &Client, year: u32) -> Result<Compa
 }
 
 #[cfg(test)]
-#[cfg(feature = "ssr")]
 mod tests {}

@@ -1,6 +1,5 @@
 use crate::{
-    components::SignedOut,
-    plots::DeltaCyl,
+    components::{PlotContainer, SignedOut},
     routes::{Add, Gateway, Instructions, Landing, List, Protected, Report, SignUp, Terms},
 };
 use leptos::prelude::{
@@ -23,8 +22,12 @@ pub fn shell(options: LeptosOptions) -> impl IntoView {
                     name="viewport"
                     content="width=device-width, initial-scale=1, shrink-to-fit=no"
                 />
-                <script src="https://cdn.plot.ly/plotly-2.14.0.min.js"></script>
                 <meta name="description" content="Vic Eye cataract audit" />
+                // Plotly releases: https://github.com/plotly/plotly.js/releases
+                // At present, we load this up front, but it really should load only on
+                // the report page. The issue is that <Script> doesn't seem to inject it
+                // properly.
+                <script src="https://cdn.plot.ly/plotly-3.1.0.min.js"></script>
                 <AutoReload options=options.clone() />
                 <HydrationScripts options />
                 <MetaTags />
@@ -55,13 +58,13 @@ pub fn App() -> impl IntoView {
                     <Route path=StaticSegment("signup") view=SignUp />
                     <Route path=StaticSegment("terms") view=Terms />
                     <ParentRoute path=StaticSegment("protected") view=Protected>
+                        // note: just a test route, delete once plots are working
+                        <Route path=StaticSegment("test-plots") view=PlotContainer />
                         // todo: consider making instructions a sidebar inside Add
                         <Route path=StaticSegment("add") view=Add />
                         <Route path=StaticSegment("instructions") view=Instructions />
                         <Route path=StaticSegment("list") view=List />
                         <Route path=StaticSegment("report") view=Report />
-                        // just for testing purposes
-                        <Route path=StaticSegment("test") view=DeltaCyl />
                     </ParentRoute>
                 </Routes>
             </main>
