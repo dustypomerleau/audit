@@ -17,7 +17,7 @@ pub fn PlotContainer() -> impl IntoView {
         }>
             {move || {
                 if let Some(Ok(inner)) = plot_resource.get() {
-                    dbg!(&inner);
+                    // dbg!(&inner);
                     view! { <div inner_html=inner></div> }.into_any()
                 } else {
                     "no inner!".into_any()
@@ -37,7 +37,7 @@ pub async fn test_a_polar_plot() -> Result<String, AppError> {
         .polar_cyl_before()
         .polar_plot()
         .to_inline_html(Some("plot"));
-    dbg!(&plot_string);
+    // dbg!(&plot_string);
 
     Ok(plot_string)
 }
