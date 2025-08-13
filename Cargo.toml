@@ -25,20 +25,19 @@ leptos = { version = "0.8.6", features = ["nightly"] }
 leptos_axum = { version = "0.8.5", optional = true }
 leptos_meta = { version = "0.8.5" }
 leptos_router = { version = "0.8.5", features = ["nightly"] }
-# todo: attempt to use wasm_js feature gated by not ssr, now that you are on 13
-plotly = { version = "0.13.5", features = ["kaleido", "kaleido_download"], optional = true }
+plotly = { version = "0.13.5", features = ["static_export_default"], optional = true }
 rand = { version = "0.9.2", optional = true }
 reactive_stores = "0.2.5"
-reqwest = { version = "0.12.22", features = ["blocking", "json"] }
+reqwest = { version = "0.12.23", features = ["blocking", "json"] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.142"
 sha2 = { version = "0.10.9", default-features = false, optional = true }
-thiserror = "2.0.12"
+thiserror = "2.0.14"
 tokio = { version = "1.47.1", features = ["macros", "rt-multi-thread"], optional = true }
 tower = { version = "0.5.2", features = ["util"], optional = true }
 tower-http = { version = "0.6.6", features = ["fs"], optional = true }
 tracing = { version = "0.1.41", optional = true }
-uuid = { version = "1.17.0", features = ["serde"] }
+uuid = { version = "1.18.0", features = ["serde"] }
 wasm-bindgen = "=0.2.100"
 
 [features]
@@ -139,3 +138,35 @@ lib-profile-release = "wasm-release"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(wasm_bindgen_unstable_test_coverage)'] }
+
+# note: attempting to compile plotly for wasm throws:
+# 
+# Could not find openssl via pkg-config:
+#  pkg-config has not been configured to support cross-compilation.
+#
+#  Install a sysroot for the target platform and configure it via
+#  PKG_CONFIG_SYSROOT_DIR and PKG_CONFIG_PATH, or install a
+#  cross-compiling wrapper for pkg-config and set it via
+#  PKG_CONFIG environment variable.
+#
+#  cargo:warning=Could not find directory of OpenSSL installation, and this `-sys` crate cannot proceed without this knowledge. If OpenSSL is installed and this crate had trouble finding it,  you can set the `OPENSSL_DIR` environment variable for the compilation process. See stderr section below for further information.
+#
+#  --- stderr
+#
+#
+#  Could not find directory of OpenSSL installation, and this `-sys` crate cannot
+#  proceed without this knowledge. If OpenSSL is installed and this crate had
+#  trouble finding it,  you can set the `OPENSSL_DIR` environment variable for the
+#  compilation process.
+#
+#  Make sure you also have the development packages of openssl installed.
+#  For example, `libssl-dev` on Ubuntu or `openssl-devel` on Fedora.
+#
+#  If you're in a situation where you think the directory *should* be found
+#  automatically, please open a bug at https://github.com/sfackler/rust-openssl
+#  and include information about your system as well as this message.
+#
+#  $HOST = aarch64-apple-darwin
+#  $TARGET = wasm32-unknown-unknown
+#  openssl-sys = 0.9.109
+#
