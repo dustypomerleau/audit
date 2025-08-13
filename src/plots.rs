@@ -1,5 +1,14 @@
 //! Utilities for creating [`Plot`]s and their underlying data.
 
+// Notes on converting subj refraction powers to corneal plane:
+// Power(K plane) =
+//   Power(Spec plane) / (1 - (Power(Spec Plane)(Vertex distance in m)))
+//
+// The range for a standard vertex distance starting point is typically 12-14 mm, so using 13 mm as
+// a default is reasonable for these calcs.
+//
+// This needs to be created as a method on RefSph and RefCylPower, or a trait they share.
+
 mod delta_cyl;
 
 use crate::{
