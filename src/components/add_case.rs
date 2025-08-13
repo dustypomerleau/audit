@@ -383,20 +383,21 @@ pub async fn get_iols() -> Result<Vec<Iol>, AppError> {
 }
 
 #[server]
-pub async fn insert_form_case(case: FormCase) -> Result<(), AppError> {
+pub async fn insert_form_case(case: FormCase) -> Result<String, AppError> {
     let client = db().await?;
     let surgeon_case = case.into_surgeon_case().await?;
 
-    let returned_json = insert_surgeon_case(&client, surgeon_case)
-        .await?
-        .ok_or(AppError::Db(
-            "no JSON was returned after inserting the case".to_string(),
-        ))?;
+    let inserted_case_json =
+        insert_surgeon_case(&client, surgeon_case)
+            .await?
+            .ok_or(AppError::Db(
+                "no JSON was returned after inserting the case".to_string(),
+            ))?;
 
     // todo: redirect to a view that takes the returned String, parses it as JSON into a
     // SurgeonCase, and displays it alongside a button to add another case.
 
-    Ok(())
+    Ok(inserted_case_json)
 }
 
 // Passing in the client makes the function customizable for tests.

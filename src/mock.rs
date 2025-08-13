@@ -1,6 +1,5 @@
 use crate::{
     bounded::Bounded,
-    mock,
     model::{
         Acd, Adverse, AfterVa, Al, Axis, BeforeVa, Biometry, Case, Cct, Email, Focus, Formula, Iol,
         IolSe, K, Kpower, Ks, Lt, Main, OpIol, OpRefraction, OpVa, RefCyl, RefCylPower, RefSph,
@@ -382,7 +381,7 @@ pub fn gen_mocks<T: Mock>(n: u32) -> Vec<T> {
     (0..n).map(|_| T::mock()).collect()
 }
 
-#[cfg(feature = "ssr")]
+#[cfg(test)]
 mod tests {
     use super::*;
 

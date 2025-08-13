@@ -1,13 +1,7 @@
-use crate::{
-    components::insert_surgeon_case,
-    mock::{Mock, gen_mocks, random_string},
-    model::{Surgeon, SurgeonCase},
-};
+use crate::{components::insert_surgeon_case, mock::gen_mocks, model::SurgeonCase};
 use dotenvy::dotenv;
-use futures::{StreamExt, executor, future::join_all, stream::FuturesOrdered};
-use gel_tokio::{Client, Config, create_client};
+use gel_tokio::{Client, create_client};
 use std::{env, sync::LazyLock};
-use tokio::{runtime::Runtime, task};
 
 pub static TEST_JWT: LazyLock<(String, String)> = LazyLock::new(|| {
     dotenv().ok();
@@ -46,9 +40,9 @@ pub async fn populate_test_db() -> Client {
 
     let surgeon_mock_cases = gen_mocks::<SurgeonCase>(10);
 
-    // This is much slower than doing a bulk insert from JSON, but it avoids maxing out the
-    // [`gel_tokio::Client`] with a non-blocking iterator, and it avoids needing a dedicated
-    // version of the insert query just for test setup.
+    // This is much slower than doing a bulk insert from JSON, but it avoids maxing out connections
+    // to the [`gel_tokio::Client`] with a non-blocking iterator. At some point, we can create a
+    // dedicated version of the insert query for test setup with JSON.
     for case in surgeon_mock_cases {
         insert_surgeon_case(&surgeon_client, case).await.unwrap();
     }

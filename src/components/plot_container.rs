@@ -1,13 +1,8 @@
 use crate::error::AppError;
 #[cfg(feature = "ssr")] use crate::plots::get_compare;
-use leptos::{
-    html::InnerHtmlAttribute,
-    prelude::{
-        ElementChild, Get, GlobalAttributes, IntoAny, IntoView, Resource, StyleAttribute, Suspense,
-        component, server, view,
-    },
+use leptos::prelude::{
+    Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, Suspense, component, server, view,
 };
-use leptos_meta::Script;
 
 #[component]
 pub fn PlotContainer() -> impl IntoView {

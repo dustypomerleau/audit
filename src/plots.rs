@@ -9,8 +9,6 @@
 //
 // This needs to be created as a method on RefSph and RefCylPower, or a trait they share.
 
-mod delta_cyl;
-
 use crate::{
     bounded::Bounded,
     db::db,
@@ -19,7 +17,6 @@ use crate::{
     query::query_select_compare,
 };
 use gel_tokio::Client;
-use leptos::prelude::server;
 use plotly::{Plot, Scatter, ScatterPolar, common::Mode};
 use serde::{Deserialize, Serialize};
 
@@ -223,3 +220,37 @@ pub async fn get_compare_with_client(client: &Client, year: u32) -> Result<Compa
 
 #[cfg(test)]
 mod tests {}
+
+// For reference, the exported HTML that Plotly produces looks like:
+// <!doctype html>
+// <html lang="en">
+//     <head>
+//         <meta charset="utf-8" />
+//     </head>
+//
+//     <body>
+//         <div>
+//             <script src="https://cdn.plot.ly/plotly-2.12.1.min.js"></script>
+//             <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+//             <script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.0/es5/tex-mml-chtml.js"></script>
+//
+//             <div
+//                 id="plotly-html-element"
+//                 class="plotly-graph-div"
+//                 style="height:100%; width:100%;"
+//             ></div>
+//
+//             <script type="module">
+//                 const graph_div = document.getElementById("plotly-html-element");
+//                 await Plotly.newPlot(graph_div, {
+//                     data: [
+//                         { type: "scatter", name: "Surgeon", x: [5.0, 0.0], y: [0.0, 0.0] },
+//                         { type: "scatter", name: "Cohort", x: [0.0], y: [0.0] },
+//                     ],
+//                     layout: {},
+//                     config: {},
+//                 });
+//             </script>
+//         </div>
+//     </body>
+// </html>

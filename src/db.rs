@@ -36,4 +36,4 @@ pub fn to_hecto(value: i32) -> f32 {
 }
 
 #[cfg(test)]
-pub mod tests {}
+mod tests {}
