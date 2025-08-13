@@ -16,9 +16,11 @@ use leptos::{
     server::OnceResource,
 };
 
+/// Display a form that inserts a `SurgeonCas` on submit.
 #[component]
 pub fn AddCase() -> impl IntoView {
     // todo: load necessary datalists form the DB:
+    //
     // 1. sites
     // 2. IOL models
     // 3. surgeon defaults (should already be in context)
@@ -33,10 +35,6 @@ pub fn AddCase() -> impl IntoView {
             .unwrap_or_default()
     };
 
-    // todo: IOL constant value should be calculated as follows:
-    // - surgeon value if IOL matches Surgeon::default_constant or Surgeon::constants
-    // - DB default value if any other IOL
-    // todo: autofill second K axis
     view! {
         <ActionForm action=insert_case>
             <div style="display: grid; grid-auto-columns: 1fr; grid-gap: 30px;">
@@ -137,10 +135,7 @@ pub fn AddCase() -> impl IntoView {
                     "Target cylinder axis (0–179°)"
                     <input type="number" min=0 max=179 step=1 name="case[target_cyl_axis]" />
                 </label>
-                <label>
-                    // interop
-                    "Date of surgery" <input type="date" name="case[date]" required />
-                </label>
+                <label>"Date of surgery" <input type="date" name="case[date]" required /></label>
                 <label>"Hospital/Site (optional)" <input type="text" name="case[site]" /></label>
                 <label>
                     "Main incision size (1–6 mm)"
@@ -371,6 +366,7 @@ pub fn AddCase() -> impl IntoView {
     }
 }
 
+/// Return a [`Vec`] of all [`Iol`]s in the database.
 #[server]
 pub async fn get_iols() -> Result<Vec<Iol>, AppError> {
     let json = db()
@@ -382,6 +378,7 @@ pub async fn get_iols() -> Result<Vec<Iol>, AppError> {
     Ok(serde_json::from_str::<Vec<Iol>>(json.as_str()).unwrap_or_default())
 }
 
+/// Insert a [`SurgeonCas`] into the database on form submit.
 #[server]
 pub async fn insert_form_case(case: FormCase) -> Result<String, AppError> {
     let client = db().await?;
@@ -394,13 +391,15 @@ pub async fn insert_form_case(case: FormCase) -> Result<String, AppError> {
                 "no JSON was returned after inserting the case".to_string(),
             ))?;
 
-    // todo: redirect to a view that takes the returned String, parses it as JSON into a
-    // SurgeonCase, and displays it alongside a button to add another case.
-
     Ok(inserted_case_json)
+
+    // todo: If possible, capture the returned JSON on form submit, deserialize it into a
+    // SurgeonCase, and redirect to a view showing the inserted case, with a button to add another
+    // case (or simply show it above the form to add another case).
 }
 
-// Passing in the client makes the function customizable for tests.
+/// Insert a [`SurgeonCase`] into the database using the given [`gel_tokio::Client`]. Passing in the
+/// client makes it possible to use custom [`Client`](gel_tokio::Client)s for tests.
 #[cfg(feature = "ssr")]
 pub async fn insert_surgeon_case(
     client: &gel_tokio::Client,

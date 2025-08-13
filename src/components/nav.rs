@@ -1,5 +1,6 @@
 use leptos::prelude::{ElementChild, IntoView, StyleAttribute, component, view};
 
+/// A header containing navigation, profile link, and sign out link.
 #[component]
 pub fn Nav() -> impl IntoView {
     view! {
