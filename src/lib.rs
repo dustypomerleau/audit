@@ -24,7 +24,7 @@ pub mod error;
 pub mod macros;
 #[cfg(feature = "ssr")] pub mod mock;
 pub mod model;
-#[cfg(feature = "ssr")] mod plots;
+#[cfg(feature = "ssr")] pub mod plots;
 #[cfg(feature = "ssr")] pub mod query;
 pub mod routes;
 #[cfg(feature = "ssr")] pub mod state;
