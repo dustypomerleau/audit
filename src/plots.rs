@@ -77,7 +77,8 @@ impl PolarCompare {
 
         let cohort = ScatterPolar::new(cohort.theta, cohort.r)
             .name("Cohort")
-            .mode(Mode::Markers);
+            .mode(Mode::Markers)
+            .opacity(0.6);
 
         let mut polar_plot = Plot::new();
         // note: the surgeon should be added after the cohort, because that allows hover on their
@@ -132,7 +133,8 @@ impl ScatterCompare {
 
         let cohort = Scatter::new(cohort.x, cohort.y)
             .name("Cohort")
-            .mode(Mode::Markers);
+            .mode(Mode::Markers)
+            .opacity(0.6);
 
         let mut scatter_plot = Plot::new();
         // note: the surgeon should be added after the cohort, because that allows hover on their
