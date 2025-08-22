@@ -1,24 +1,26 @@
 use crate::error::AppError;
 #[cfg(feature = "ssr")] use crate::plots::get_compare;
 use leptos::prelude::{
-    Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, Suspense, component, server, view,
+    Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, RwSignal, Suspense, component, server,
+    view,
 };
 
 #[component]
 pub fn PlotContainer() -> impl IntoView {
-    // todo: modify (and rename) the server function `test_a_polar_plot` to instead return separate
-    // strings for each plot in a vec (with proper error handling), and then iterate the vec and
-    // create a view for each.
-    let plot_resource = Resource::new_blocking(|| (), |_| test_a_polar_plot());
+    let year = RwSignal::new(2025_u32);
+    let plot_resource = Resource::new_blocking(|| year.get(), |_| get_plots(year.get()));
 
     view! {
         <Suspense fallback=|| {
             "waiting for the plot_resource to load..."
         }>
             {move || {
-                if let Some(Ok(inner)) = plot_resource.get() {
-                    // dbg!(&inner);
-                    view! { <div inner_html=inner></div> }.into_any()
+                if let Some(Ok(plots)) = plot_resource.get() {
+                    plots
+                        .into_iter()
+                        .map(|plot| view! { <div inner_html=plot></div> })
+                        .collect::<Vec<_>>()
+                        .into_any()
                 } else {
                     "no inner!".into_any()
                 }
@@ -28,16 +30,17 @@ pub fn PlotContainer() -> impl IntoView {
 }
 
 #[server]
-pub async fn test_a_polar_plot() -> Result<String, AppError> {
-    // todo: note: get compare fails if you aren't signed in, but once you put it inside protected
-    // does that matter?
-    let plot_string = get_compare(2025)
+pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
+    // bookmark: todo:
+    // - separate this assignment into 2 parts: get the Compare, and generate the polar plot
+    // - use the same compare to generate each plot you need for the whole report
+    // - return the HTML as a Vec and iterate over it to create the views.
+    let plot_string = get_compare(year)
         .await
         .unwrap()
         .polar_cyl_before()
         .polar_plot()
         .to_inline_html(Some("plot"));
-    // dbg!(&plot_string);
 
-    Ok(plot_string)
+    Ok(vec![plot_string])
 }
