@@ -3,6 +3,9 @@ windows:
   - window_name: nvim
     panes:
       - nvim src/lib.rs
+  - window_name: bacon
+    panes:
+      - bacon -j nextest
   - window_name: fish
     focus: true
     panes:
