@@ -8,7 +8,7 @@ use leptos::prelude::{
 #[component]
 pub fn PlotContainer() -> impl IntoView {
     let year = RwSignal::new(2025_u32);
-    let plot_resource = Resource::new_blocking(|| year.get(), |_| get_plots(year.get()));
+    let plot_resource = Resource::new_blocking(move || year.get(), move |_| get_plots(year.get()));
 
     view! {
         <Suspense fallback=|| {
