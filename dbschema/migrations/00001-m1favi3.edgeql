@@ -1,5 +1,5 @@
-CREATE MIGRATION m1iwjufq2jwl3rspeldx454n6n32r767s4g6qinew2t6nchdsfefsa
-    ONTO m1lj2m6pdyzvddl7dvv5s2chdngg2kuqlw6k25vnnouucpju4btrva
+CREATE MIGRATION m1favi3rvyox7zwbrkxmenllcdhne7zokdtidwh7kzyk6v3atced3q
+    ONTO initial
 {
   CREATE EXTENSION pgcrypto VERSION '1.3';
   CREATE EXTENSION auth VERSION '1.0';
@@ -92,11 +92,17 @@ CREATE MIGRATION m1iwjufq2jwl3rspeldx454n6n32r767s4g6qinew2t6nchdsfefsa
       CREATE REQUIRED PROPERTY power: default::Kpower;
   };
   CREATE TYPE default::Ks EXTENDING default::SoftCreate {
-      CREATE REQUIRED LINK flat: default::K;
-      CREATE REQUIRED LINK steep: default::K;
+      CREATE REQUIRED LINK flat: default::K {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE REQUIRED LINK steep: default::K {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
   };
   CREATE TYPE default::Biometry EXTENDING default::SoftCreate {
-      CREATE REQUIRED LINK ks: default::Ks;
+      CREATE REQUIRED LINK ks: default::Ks {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
       CREATE REQUIRED PROPERTY acd: default::Acd;
       CREATE REQUIRED PROPERTY al: default::Al;
       CREATE PROPERTY cct: default::Cct;
@@ -128,24 +134,40 @@ CREATE MIGRATION m1iwjufq2jwl3rspeldx454n6n32r767s4g6qinew2t6nchdsfefsa
       CREATE REQUIRED PROPERTY sph: default::RefSph;
   };
   CREATE TYPE default::OpRefraction EXTENDING default::SoftCreate {
-      CREATE REQUIRED LINK after: default::Refraction;
-      CREATE REQUIRED LINK before: default::Refraction;
+      CREATE REQUIRED LINK after: default::Refraction {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE REQUIRED LINK before: default::Refraction {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
   };
   CREATE TYPE default::Va EXTENDING default::SoftCreate {
       CREATE REQUIRED PROPERTY den: default::VaDen;
       CREATE REQUIRED PROPERTY num: default::VaNum;
   };
   CREATE TYPE default::AfterVa EXTENDING default::SoftCreate {
-      CREATE LINK best: default::Va;
-      CREATE REQUIRED LINK raw: default::Va;
+      CREATE LINK best: default::Va {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE REQUIRED LINK raw: default::Va {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
   };
   CREATE TYPE default::BeforeVa EXTENDING default::SoftCreate {
-      CREATE REQUIRED LINK best: default::Va;
-      CREATE LINK raw: default::Va;
+      CREATE REQUIRED LINK best: default::Va {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE LINK raw: default::Va {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
   };
   CREATE TYPE default::OpVa EXTENDING default::SoftCreate {
-      CREATE REQUIRED LINK after: default::AfterVa;
-      CREATE REQUIRED LINK before: default::BeforeVa;
+      CREATE REQUIRED LINK after: default::AfterVa {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE REQUIRED LINK before: default::BeforeVa {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
   };
   CREATE TYPE default::Sia EXTENDING default::SoftCreate {
       CREATE REQUIRED PROPERTY axis: default::Axis;
@@ -156,7 +178,9 @@ CREATE MIGRATION m1iwjufq2jwl3rspeldx454n6n32r767s4g6qinew2t6nchdsfefsa
       CREATE REQUIRED PROPERTY power: default::TargetCylPower;
   };
   CREATE TYPE default::Target EXTENDING default::SoftCreate {
-      CREATE LINK cyl: default::TargetCyl;
+      CREATE LINK cyl: default::TargetCyl {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
       CREATE REQUIRED PROPERTY custom_constant: std::bool {
           SET default := false;
       };
@@ -164,12 +188,24 @@ CREATE MIGRATION m1iwjufq2jwl3rspeldx454n6n32r767s4g6qinew2t6nchdsfefsa
       CREATE REQUIRED PROPERTY se: default::TargetSe;
   };
   CREATE TYPE default::Cas EXTENDING default::SoftCreate {
-      CREATE LINK biometry: default::Biometry;
-      CREATE LINK iol: default::OpIol;
-      CREATE REQUIRED LINK refraction: default::OpRefraction;
-      CREATE LINK sia: default::Sia;
-      CREATE REQUIRED LINK target: default::Target;
-      CREATE REQUIRED LINK va: default::OpVa;
+      CREATE LINK biometry: default::Biometry {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE LINK iol: default::OpIol {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE REQUIRED LINK refraction: default::OpRefraction {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE LINK sia: default::Sia {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE REQUIRED LINK target: default::Target {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE REQUIRED LINK va: default::OpVa {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
       CREATE PROPERTY adverse: default::Adverse;
       CREATE PROPERTY main: default::Main;
       CREATE REQUIRED PROPERTY side: default::Side;
@@ -194,15 +230,23 @@ CREATE MIGRATION m1iwjufq2jwl3rspeldx454n6n32r767s4g6qinew2t6nchdsfefsa
       CREATE PROPERTY main: default::Main;
   };
   CREATE TYPE default::SurgeonSia EXTENDING default::SoftCreate {
-      CREATE REQUIRED LINK left: default::Sia;
-      CREATE REQUIRED LINK right: default::Sia;
+      CREATE REQUIRED LINK left: default::Sia {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE REQUIRED LINK right: default::Sia {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
   };
   CREATE TYPE default::Surgeon EXTENDING default::SoftCreate {
       CREATE REQUIRED LINK identity: ext::auth::Identity {
           CREATE CONSTRAINT std::exclusive;
       };
-      CREATE LINK defaults: default::SurgeonDefaults;
-      CREATE LINK sia: default::SurgeonSia;
+      CREATE LINK defaults: default::SurgeonDefaults {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
+      CREATE LINK sia: default::SurgeonSia {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
+      };
       CREATE REQUIRED PROPERTY email: default::EmailType {
           CREATE CONSTRAINT std::exclusive;
       };
@@ -211,13 +255,18 @@ CREATE MIGRATION m1iwjufq2jwl3rspeldx454n6n32r767s4g6qinew2t6nchdsfefsa
       CREATE PROPERTY terms: std::datetime;
   };
   CREATE TYPE default::SurgeonCas EXTENDING default::SoftCreate {
-      CREATE REQUIRED LINK surgeon: default::Surgeon;
+      CREATE REQUIRED LINK surgeon: default::Surgeon {
+          ON TARGET DELETE DELETE SOURCE;
+      };
       CREATE REQUIRED LINK cas: default::Cas {
+          ON SOURCE DELETE DELETE TARGET IF ORPHAN;
           CREATE CONSTRAINT std::exclusive;
       };
       CREATE LINK site: default::Site;
-      CREATE REQUIRED PROPERTY date: std::cal::local_date;
+      CREATE REQUIRED PROPERTY side: default::Side;
       CREATE REQUIRED PROPERTY urn: std::str;
+      CREATE CONSTRAINT std::exclusive ON ((.surgeon, .urn, .side));
+      CREATE REQUIRED PROPERTY date: std::cal::local_date;
   };
   ALTER TYPE default::Surgeon {
       CREATE MULTI LINK cases := (.<surgeon[IS default::SurgeonCas]);
