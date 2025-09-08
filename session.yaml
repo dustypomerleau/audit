@@ -13,9 +13,12 @@ windows:
   - window_name: watch
     panes:
       - cargo leptos watch
-  - window_name: db
+  - window_name: db local
     panes:
       - gel
+  - window_name: db cloud
+    panes:
+      - gel -I dustypomerleau/audit
   - window_name: leptos
     shell_command_before: cd ../er/leptos
     panes:
