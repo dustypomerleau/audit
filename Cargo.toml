@@ -12,7 +12,7 @@ axum-extra = { version = "0.10.1", features = ["cookie", "typed-header"], option
 axum-macros = { version = "0.5.0", optional = true }
 base64ct = { version = "1.8.0", features = ["alloc"], optional = true }
 # todo: switch to jiff
-chrono = { version = "0.4.41", features = ["serde"] }
+chrono = { version = "0.4.42", features = ["serde"] }
 console_error_panic_hook = "0.1.7"
 dotenvy = "0.15.7"
 futures = "0.3.31"
@@ -38,7 +38,7 @@ tower = { version = "0.5.2", features = ["util"], optional = true }
 tower-http = { version = "0.6.6", features = ["fs"], optional = true }
 tracing = { version = "0.1.41", optional = true }
 uuid = { version = "1.18.1", features = ["serde"] }
-wasm-bindgen = "=0.2.100"
+wasm-bindgen = "=0.2.101"
 
 [features]
 hydrate = ["leptos/hydrate"]
