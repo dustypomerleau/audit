@@ -2,7 +2,7 @@ from rustlang/rust:nightly-alpine as builder
 
 run apk update && apk add --no-cache bash curl libc-dev binaryen
 run cargo install cargo-binstall
-run cargo binstall cargo-leptos
+run curl --proto '=https' --tlsv1.3 -LsSf https://github.com/leptos-rs/cargo-leptos/releases/latest/download/cargo-leptos-installer.sh | sh
 run rustup target add wasm32-unknown-unknown
 
 workdir /work
