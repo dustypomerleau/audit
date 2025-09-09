@@ -72,9 +72,6 @@ opt-level = 'z'
 panic = "abort"
 
 [package.metadata.leptos]
-# todo: this is temporary due to https://github.com/leptos-rs/cargo-leptos/pull/359, and is fixed with upcoming cargo leptos 0.2.26
-bin-target-triple = "aarch64-apple-darwin"
-
 # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
 output-name = "audit"
 
