@@ -7,16 +7,19 @@
 configure current branch set
 ext::auth::AuthConfig::token_time_to_live := <duration>"336 hours";
 
-# note: the value of redirect_to in the Auth UI is the address in your application
-# where you want to end up after auth is complete.
+# For the avoidance of any future doubt:
 # 
-# The redirect for the callback function _within_ the auth flow has to be set in the GCP console.
+# 1. The `BASE_AUTH_URL` environment variable should be set according to the value in the Gel UI under 'Built-in UI sign-in URL' but minus everything after the word `auth`.
+# 2. In the Gel UI, the `Config > Allowed redirect URLs` just needs to be set to the root URL for the app (like https://myapp.com + https://www.myapp.com). 
+# 3. In the Gel UI, the `Providers/UI > Built-in Login UI > Redirect to` needs to be set to http://myapp.com/code.
+# 4. In the Google OAuth config at https://console.cloud.google.com/auth/clients, the `authorised redirect URLs` need to be set to the values of `Gel UI > Auth > Config > OAuth callback endpoint`, but minus the :PORT component (except localhost, where you do need the port). For the OAuth client, you have to put the full callback URL (parent URLs won't match).
+# 5. Include the full protocol ahead of the URL in all cases above.
+#
 configure current branch set
 ext::auth::AuthConfig::allowed_redirect_urls := {
     "http://localhost:3000",
-    "http://localhost:3000/code",
     "https://audit.viceye.au",
-    "https://audit.viceye.au/code",
+    "https://www.audit.viceye.au",
 };
 
 configure current branch set
