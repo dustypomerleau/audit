@@ -1,35 +1,36 @@
-from rustlang/rust:nightly-alpine as builder
+# see https://github.com/leptos-rs/leptos-website/blob/main/Dockerfile for reference
 
-run apk update && \
-apk add --no-cache \
-bash \
-binaryen \
-chromium-chromedriver \
-curl \
-libc-dev \
-openssl-dev \
-openssl-libs-static \
-pkgconfig
+FROM rustlang/rust:nightly-alpine as builder
 
-run cargo install cargo-binstall
-run cargo binstall cargo-leptos
-run rustup target add wasm32-unknown-unknown
+RUN apk update \
+    && apk add --no-cache \
+        bash \
+        binaryen \
+        chromium-chromedriver \
+        curl \
+        libc-dev \
+        openssl-dev \
+        openssl-libs-static \
+        pkgconfig
 
-workdir /work
-copy . .
-run cargo leptos build --release -vv
+RUN cargo install cargo-binstall
+RUN cargo binstall cargo-leptos
+RUN rustup target add wasm32-unknown-unknown
 
-from rustlang/rust:nightly-alpine as runner
+WORKDIR /work
+COPY . .
+RUN cargo leptos build --release -vv
 
-workdir /app
-copy --from=builder /work/target/release/audit /app/
-copy --from=builder /work/target/site /app/site
-copy --from=builder /work/Cargo.toml /app/
+FROM rustlang/rust:nightly-alpine as runner
 
-env RUST_LOG="info"
-env LEPTOS_SITE_ADDR="0.0.0.0:8080"
-env LEPTOS_SITE_ROOT=./site
-expose 8080
+WORKDIR /app
+COPY --from=builder /work/target/release/audit /app/
+COPY --from=builder /work/target/site /app/site
+COPY --from=builder /work/Cargo.toml /app/
 
-cmd ["/app/audit"]
+ENV RUST_LOG="info"
+ENV LEPTOS_SITE_ADDR="0.0.0.0:8080"
+ENV LEPTOS_SITE_ROOT=./site
+EXPOSE 8080
 
+CMD ["/app/audit"]
