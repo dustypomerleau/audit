@@ -1,16 +1,61 @@
 @layer reset, base, components, overrides;
 
 :root {
-    --accent1: #a6e22e;
-    --accent2: #ff5522;
-    --accent3: #669def;
-    --background: #26292c;
-    --border: #798188;
-    --code: #e6d874;
-    --foreground: #f8f8f2;
-    --header: #d6d9db;
-    --marker: #f92672;
-    --title: #fd971f;
+  --blue-1: #f1f6fa;
+  --blue-2: #cee1f2;
+  --blue-3: #accded;
+  --blue-4: #86b8e9;
+  --blue-5: #61a2e3;
+  --blue-6: #468dd6;
+  --blue-7: #3a77ba;
+  --blue-8: #2f629e;
+  --blue-9: #244f84;
+  --blue-10: #183863;
+  --blue-11: #10294e;
+  --blue-12: #081a37;
+  --blue-13: #030a1d;
+
+  --dgray-1: #363a48;
+  --dgray-2: #323644;
+  --dgray-3: #2d313e;
+  --dgray-4: #2a2d39;
+  --dgray-5: #252833;
+  --dgray-6: #22252f;
+  --dgray-7: #1e212b;
+  --dgray-8: #1b1e26;
+  --dgray-9: #171921;
+  --dgray-10: #14161d;
+  --dgray-11: #111219;
+  --dgray-12: #0d0e13;
+  --dgray-13: #0a0b0f;
+
+  --lgray-1: #eeeef0;
+  --lgray-2: #e0e1e4;
+  --lgray-3: #d1d2d7;
+  --lgray-4: #c3c5cc;
+  --lgray-5: #b4b7c0;
+  --lgray-6: #a7aab5;
+  --lgray-7: #999ca9;
+  --lgray-8: #8c909e;
+  --lgray-9: #7e8393;
+  --lgray-10: #727788;
+  --lgray-11: #646a7d;
+  --lgray-12: #585e73;
+  --lgray-13: #4c5265;
+
+  --orange-1: #fcf3ed;
+  --orange-2: #fbd6bb;
+  --orange-3: #fcb889;
+  --orange-4: #ff9348;
+  --orange-5: #ff7b00;
+  --orange-6: #d76203;
+  --orange-7: #bb4f03;
+  --orange-8: #a03d01;
+  --orange-9: #872c00;
+  --orange-10: #6b1c00;
+  --orange-11: #500e00;
+  --orange-12: #380501;
+  --orange-13: #1d0101;
 }
 
 @layer overrides {
