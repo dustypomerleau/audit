@@ -56,49 +56,15 @@
     --orange-11: #500e00;
     --orange-12: #380501;
     --orange-13: #1d0101;
-}
 
-@layer overrides {
-}
+    /* dark theme */
+    --background: var(--dgray-5);
+    --foreground: var(--lgray-1);
 
-@layer components {
-    /* remove all scroll only in slides view */
-    .container {
-        height: 100vh;
-        overflow-y: hidden;
-    }
-}
-
-@layer base {
-    /* albert var latin */
-    @font-face {
-        font-family: Albert;
-        font-style: normal;
-        font-weight: 100 900;
-        font-display: swap;
-        src: url("/fonts/albertvar.woff2") format("woff2");
-    }
-
-    html {
-        font-family:
-            Albert,
-            ui-sans-serif,
-            system-ui,
-            -apple-system,
-            BlinkMacSystemFont,
-            Segoe UI,
-            Roboto,
-            Helvetica Neue,
-            Arial,
-            sans-serif,
-            Apple Color Emoji,
-            Segoe UI Emoji,
-            Segoe UI Symbol;
-    }
-
-    body {
-        background: var(--background);
-        color: var(--foreground);
+    /* light theme */
+    @media (prefers-color-scheme: light) {
+        --background: var(--lgray-2);
+        --foreground: var(--dgray-7);
     }
 }
 
@@ -195,4 +161,48 @@
     :target {
         scroll-margin-block: 5ex;
     }
+}
+
+@layer base {
+    /* albert var latin */
+    @font-face {
+        font-family: Albert;
+        font-style: normal;
+        font-weight: 100 900;
+        font-display: swap;
+        src: url("/fonts/albertvar.woff2") format("woff2");
+    }
+
+    html {
+        font-family:
+            Albert,
+            ui-sans-serif,
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            Segoe UI,
+            Roboto,
+            Helvetica Neue,
+            Arial,
+            sans-serif,
+            Apple Color Emoji,
+            Segoe UI Emoji,
+            Segoe UI Symbol;
+    }
+
+    body {
+        background: var(--background);
+        color: var(--foreground);
+    }
+}
+
+@layer components {
+    /* remove all scroll only in slides view */
+    .container {
+        height: 100vh;
+        overflow-y: hidden;
+    }
+}
+
+@layer overrides {
 }
