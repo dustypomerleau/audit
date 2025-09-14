@@ -285,9 +285,37 @@
 
 @layer components {
     /* remove all scroll only in slides view */
-    .container {
-        height: 100vh;
-        overflow-y: hidden;
+    /* .container { */
+    /*     height: 100vh; */
+    /*     overflow-y: hidden; */
+    /* } */
+
+    .header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+
+        background-color: var(--background-header);
+        color: var(--foreground-header);
+        column-gap: var(--space-8);
+        padding-block: var(--space-4);
+        padding-inline: var(--space-4);
+
+        @media (width >= 40rem) {
+            padding-inline: var(--space-8);
+        }
+    }
+
+    .logo {
+        display: flex;
+        flex-direction: column;
+
+        width: calc(var(--space-4) * 12);
+
+        @media (width >= 40rem) {
+            width: calc(var(--space-4) * 15);
+        }
     }
 }
 
