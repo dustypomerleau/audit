@@ -71,6 +71,88 @@
         --background: #fff;
         --foreground: var(--dgray-7);
     }
+
+    /* spacing */
+    --container-xs: 20rem;
+    --container-sm: 24rem;
+    --container-md: 28rem;
+    --container-lg: 32rem;
+    --container-xl: 36rem;
+
+    font-size: 1em;
+    --fs-base: 1rem;
+    /* todo: revisit these values */
+    --fs-sm: calc(var(--fs-base) * 0.875);
+    --fs-lg: calc(var(--fs-base) * 1.125);
+    --fs-xl: calc(var(--fs-base) * 1.25);
+    --fs-2xl: calc(var(--fs-base) * 1.5);
+    --fs-3xl: calc(var(--fs-base) * 1.875);
+
+    --fw-light: 300;
+    --fw-midlight: 350;
+    --fw-normal: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+
+    /* todo: check these values */
+    /* multiply this unitless factor by the font size */
+    /* line-height should decrease as font size increases */
+    /* see packages/tailwindcss/theme.css */
+    --lh-base: 1.5;
+    --lh-sm: calc(var(--lh-base) * 0.833);
+    --lh-lg: calc(var(--lh-base) * 1.167);
+    --lh-xl: calc(var(--lh-base) * 1.167);
+    --lh-2xl: calc(var(--lh-base) * 1.333);
+    --lh-3xl: calc(var(--lh-base) * 1.5);
+    /* this is the part you need to dig into */
+    /* --text-xs: 0.75rem; */
+    /* --text-xs--line-height: calc(1 / 0.75); */
+    /* --text-sm: 0.875rem; */
+    /* --text-sm--line-height: calc(1.25 / 0.875); */
+    /* --text-base: 1rem; */
+    /* --text-base--line-height: calc(1.5 / 1); */
+    /* --text-lg: 1.125rem; */
+    /* --text-lg--line-height: calc(1.75 / 1.125); */
+    /* --text-xl: 1.25rem; */
+    /* --text-xl--line-height: calc(1.75 / 1.25); */
+    /* --text-2xl: 1.5rem; */
+    /* --text-2xl--line-height: calc(2 / 1.5); */
+    /* --text-3xl: 1.875rem; */
+    /* --text-3xl--line-height: calc(2.25 / 1.875); */
+    /* --text-4xl: 2.25rem; */
+    /* --text-4xl--line-height: calc(2.5 / 2.25); */
+    /* --text-5xl: 3rem; */
+    /* --text-5xl--line-height: 1; */
+    /* --text-6xl: 3.75rem; */
+    /* --text-6xl--line-height: 1; */
+    /* --text-7xl: 4.5rem; */
+    /* --text-7xl--line-height: 1; */
+    /* --text-8xl: 6rem; */
+    /* --text-8xl--line-height: 1; */
+    /* --text-9xl: 8rem; */
+    /* --text-9xl--line-height: 1; */
+
+    --radius: 0.125rem;
+    --radius-xs: calc(var(--radius) * 1);
+    --radius-sm: calc(var(--radius) * 2);
+    --radius-md: calc(var(--radius) * 3);
+    --radius-lg: calc(var(--radius) * 4);
+    --radius-xl: calc(var(--radius) * 6);
+
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+
+    --space: 0.25rem;
+    --space-half: calc(var(--space) * 0.5);
+    --space-1: calc(var(--space) * 1);
+    --space-2: calc(var(--space) * 2);
+    --space-3: calc(var(--space) * 3);
+    --space-4: calc(var(--space) * 4);
+    --space-5: calc(var(--space) * 5);
+    --space-6: calc(var(--space) * 6);
+    --space-7: calc(var(--space) * 7);
+    --space-8: calc(var(--space) * 8);
 }
 
 @layer reset {
