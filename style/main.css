@@ -29,20 +29,21 @@
     --dgray-12: #0d0e13;
     --dgray-13: #0a0b0f;
 
-    --lgray-1: #eeeef0;
-    --lgray-2: #e0e1e4;
-    --lgray-3: #d1d2d7;
-    --lgray-4: #c3c5cc;
-    --lgray-5: #b4b7c0;
-    --lgray-6: #a7aab5;
-    --lgray-7: #999ca9;
-    --lgray-8: #8c909e;
-    --lgray-9: #7e8393;
-    --lgray-10: #727788;
-    --lgray-11: #646a7d;
-    --lgray-12: #585e73;
-    --lgray-13: #4c5265;
+    --lgray-1: #ffffff;
+    --lgray-2: #f5f5f6;
+    --lgray-3: #eaebed;
+    --lgray-4: #e0e1e4;
+    --lgray-5: #d4d6da;
+    --lgray-6: #caccd1;
+    --lgray-7: #c0c2c9;
+    --lgray-8: #b6b9c1;
+    --lgray-9: #acafb9;
+    --lgray-10: #a2a6b1;
+    --lgray-11: #979ba8;
+    --lgray-12: #8e929f;
+    --lgray-13: #848998;
 
+    /* --orange-5: #ff6c00; if you want to try saturating more, this is about the best ref color I can get */
     --orange-1: #fcf3ed;
     --orange-2: #fbd6bb;
     --orange-3: #fcb889;
@@ -59,11 +60,15 @@
 
     /* dark theme */
     --background: var(--dgray-5);
-    --foreground: var(--lgray-1);
+    --background-header: var(--dgray-4);
+    --foreground: var(--lgray-3);
+    --foreground-header: #fff;
+    --logo-color: #fff;
+    --logo-accent: var(--orange-5);
 
     /* light theme */
     @media (prefers-color-scheme: light) {
-        --background: var(--lgray-2);
+        --background: #fff;
         --foreground: var(--dgray-7);
     }
 }
