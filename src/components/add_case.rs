@@ -703,7 +703,6 @@ select QuerySurgeonCas {{
         .query_single_json(query, &())
         .await?
         .map(|json| json.as_ref().to_string());
-    // dbg!(&case);
 
     Ok(case)
 }

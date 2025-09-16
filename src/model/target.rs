@@ -5,7 +5,7 @@ use crate::{
 use serde::{Deserialize, Serialize};
 
 /// A formula for calculating IOL power from biometry.
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub enum Formula {
     AscrsKrs,
     Barrett,
@@ -21,13 +21,8 @@ pub enum Formula {
     Okulix,
     Olsen,
     SrkT,
+    #[default]
     Other,
-}
-
-impl Default for Formula {
-    fn default() -> Self {
-        Self::Other
-    }
 }
 
 impl Formula {

@@ -183,7 +183,6 @@ select QuerySurgeon {{
 
     if let Ok(Some(surgeon_json)) = db().await?.query_single_json(query, &()).await {
         let surgeon = serde_json::from_str::<Surgeon>(surgeon_json.as_ref())?;
-        // dbg!(&surgeon);
         set_current_surgeon(Some(surgeon)).await?;
         redirect("/terms");
     } else {

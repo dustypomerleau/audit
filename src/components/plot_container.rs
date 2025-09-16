@@ -31,7 +31,7 @@ pub fn PlotContainer() -> impl IntoView {
 
 #[server]
 pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
-    // bookmark: todo:
+    // todo:
     // - separate this assignment into 2 parts: get the Compare, and generate the polar plot
     // - use the same compare to generate each plot you need for the whole report
     // - return the HTML as a Vec and iterate over it to create the views.
@@ -39,7 +39,7 @@ pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
         .await
         .unwrap()
         .polar_cyl_before()
-        .polar_plot()
+        .plot()
         .to_inline_html(Some("plot"));
 
     Ok(vec![plot_string])

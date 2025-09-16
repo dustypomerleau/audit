@@ -9,7 +9,7 @@ with
     QueryCohortCas := (select Cas except QuerySurgeonCas.cas filter .year = {year})
 
 select {{
-    surgeon_cases := QuerySurgeonCas {{
+    surgeon := QuerySurgeonCas {{
         urn,
         side,
         date,
@@ -58,7 +58,7 @@ select {{
         }}
     }},
 
-    cohort_cases := QueryCohortCas {{
+    cohort := QueryCohortCas {{
         side,
 
         biometry: {{

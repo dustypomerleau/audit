@@ -9,221 +9,109 @@
 //
 // This needs to be created as a method on RefSph and RefCylPower, or a trait they share.
 
-use crate::{
-    bounded::Bounded,
-    db::db,
-    error::AppError,
-    model::{Case, SurgeonCase},
-    query::query_select_compare,
-};
-use gel_tokio::Client;
-use plotly::{Plot, Scatter, ScatterPolar, common::Mode};
+mod cartesian;
+mod case;
+mod polar;
+
+use crate::bounded::Bounded;
+pub use cartesian::*;
+pub use case::*;
+pub use polar::*;
 use serde::{Deserialize, Serialize};
+use std::f64::consts::PI;
 
-/// bookmark: todo: docs
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct Compare {
-    surgeon_cases: Vec<SurgeonCase>,
-    cohort_cases: Vec<Case>,
-}
+bounded!((StdDev, f64, 1.0..5.0), (PlotStep, f64, 0.001..1.0));
 
+/// The characterstics of a tolerance interval used for plotting a tolerance ellipse.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct PolarData {
-    // Although we could define:
-    //
-    // bounded!((PolarAxis, u32, 0..=359));
-    //
-    // and use that instead of u32, it adds complexity to passing the data to Plotly, and the
-    // bounds will already be met because of the constraints on the DB.
-    pub theta: Vec<u32>,
-    pub r: Vec<f32>,
+pub struct ToleranceParams {
+    /// Whether to use population variance or sample variance. See [`Variance`].
+    variance: Variance,
+    /// The number of standard deviations the tolerance interval should cover.
+    std_dev: StdDev,
+    /// The size of the steps between points in the tolerance ellipse (in the same units as
+    /// [`r`](crate::plots::PolarPoint::r)).
+    step: PlotStep,
 }
 
-impl FromIterator<(u32, f32)> for PolarData {
-    fn from_iter<T: IntoIterator<Item = (u32, f32)>>(iter: T) -> Self {
-        let mut polar_data = PolarData::new();
-
-        for (theta, r) in iter {
-            polar_data.theta.push(theta);
-            polar_data.r.push(r);
-        }
-
-        polar_data
-    }
-}
-
-impl PolarData {
-    fn new() -> Self {
-        Self {
-            theta: Vec::new(),
-            r: Vec::new(),
-        }
-    }
-}
-
+/// Represents the variance of a 1-dimensional dataset.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct PolarCompare {
-    pub surgeon: PolarData,
-    pub cohort: PolarData,
+pub enum Variance {
+    /// The entire population is available in the dataset.
+    Population,
+    /// The entire dataset is not available, and only a sample has been taken.
+    Sample,
 }
 
-impl PolarCompare {
-    pub fn polar_plot(self) -> Plot {
-        let Self { surgeon, cohort } = self;
+/// Calculate the variance of a 1-dimensional dataset, for either an entire population or a
+/// representative sample of the data.
+pub fn variance(data: &[f64], variance: Variance) -> f64 {
+    let population = match variance {
+        Variance::Population => data.len() as f64,
+        Variance::Sample => (data.len() - 1) as f64,
+    };
 
-        let surgeon = ScatterPolar::new(surgeon.theta, surgeon.r)
-            .name("Surgeon")
-            .mode(Mode::Markers);
+    let mean = mean(data);
 
-        let cohort = ScatterPolar::new(cohort.theta, cohort.r)
-            .name("Cohort")
-            .mode(Mode::Markers)
-            .opacity(0.6);
+    let sum = data
+        .iter()
+        .map(|value| {
+            let diff = value - mean;
+            diff * diff
+        })
+        .sum::<f64>();
 
-        let mut polar_plot = Plot::new();
-        // note: the surgeon should be added after the cohort, because that allows hover on their
-        // points, which are "on top" in the layered plot
-        polar_plot.add_traces(vec![cohort, surgeon]);
-
-        polar_plot
-    }
+    sum / population
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct ScatterData {
-    pub x: Vec<f32>,
-    pub y: Vec<f32>,
+/// Convert from degrees to radians, typically before performing trigonometric calculations.
+pub fn degrees_to_radians(degrees: f64) -> f64 {
+    degrees * PI / 180.0
 }
 
-impl FromIterator<(f32, f32)> for ScatterData {
-    fn from_iter<T: IntoIterator<Item = (f32, f32)>>(iter: T) -> Self {
-        let mut scatter_data = ScatterData::new();
-
-        for (x, y) in iter {
-            scatter_data.x.push(x);
-            scatter_data.y.push(y);
-        }
-
-        scatter_data
-    }
+/// Convert from radians to degrees.
+pub fn radians_to_degrees(radians: f64) -> f64 {
+    radians * 180.0 / PI
 }
 
-impl ScatterData {
-    fn new() -> Self {
-        Self {
-            x: Vec::new(),
-            y: Vec::new(),
-        }
-    }
+/// Calculate the average value of a 1-dimensional dataset.
+fn mean(data: &[f64]) -> f64 {
+    data.iter().sum::<f64>() / data.len() as f64
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct ScatterCompare {
-    pub surgeon: ScatterData,
-    pub cohort: ScatterData,
-}
+/// Convert a single, cartesian, XY pair to its corresponding polar angle in radians, taking into
+/// account the adjustments needed for each quadrant.
+pub fn theta_radians(x: f64, y: f64) -> f64 {
+    // We special-case 0.0 because we can't divide by it.
+    let theta_radians = if x == 0.0 { PI / 2.0 } else { f64::atan(y / x) };
 
-impl ScatterCompare {
-    pub fn scatter_plot(self) -> Plot {
-        let Self { surgeon, cohort } = self;
+    // Adjust the value of theta, based on the quadrant of the XY pair.
+    match (x.is_sign_negative(), y.is_sign_negative()) {
+        // If the cartesian point is in the upper right corner (0° to 90°), then both values are
+        // positive and the quotient is positive. We can use the angle unchanged.
+        (false, false) => theta_radians,
 
-        let surgeon = Scatter::new(surgeon.x, surgeon.y)
-            .name("Surgeon")
-            .mode(Mode::Markers);
+        // If the cartesian point is in the upper left corner (90° to 180°), then x is negative and
+        // the quotient is negative. adding this negative value to Pi radians (180°) is like
+        // subtracting the acute angle from 180° to get the obtuse angle.
+        (true, false) => PI + theta_radians,
 
-        let cohort = Scatter::new(cohort.x, cohort.y)
-            .name("Cohort")
-            .mode(Mode::Markers)
-            .opacity(0.6);
+        // If the cartesian point is in the lower left corner (180° to 270°), then both values are
+        // negative and the quotient is positive. We add Pi radians (180°) to get the full angle.
+        (true, true) => PI + theta_radians,
 
-        let mut scatter_plot = Plot::new();
-        // note: the surgeon should be added after the cohort, because that allows hover on their
-        // points, which are "on top" in the layered plot
-        scatter_plot.add_traces(vec![cohort, surgeon]);
-
-        scatter_plot
-    }
-}
-
-impl Compare {
-    pub fn polar_cyl_before(&self) -> PolarCompare {
-        fn k_cyl_double_angle(case: &Case) -> (u32, f32) {
-            let ks = case.biometry.ks;
-
-            // We double the axis for double-angle plot.
-            // Consider halving the axis instead, so it is properly labeled as 0-179.
-            (ks.steep_axis() * 2, (ks.cyl() as f32) / 100.0)
-        }
-
-        let surgeon = self
-            .surgeon_cases
-            .iter()
-            .map(|sc| k_cyl_double_angle(&sc.case))
-            .collect();
-
-        let cohort = self.cohort_cases.iter().map(k_cyl_double_angle).collect();
-
-        PolarCompare { surgeon, cohort }
-    }
-
-    pub fn scatter_delta_cyl(&self) -> ScatterCompare {
-        fn k_cyl_before(case: &Case) -> f32 {
-            case.biometry.ks.cyl() as f32 / 100.0
-        }
-
-        fn ref_cyl_after(case: &Case) -> f32 {
-            case.refraction
-                .after
-                .cyl
-                .map(|refcyl| (refcyl.power.inner() as f32 / 100.0).abs())
-                .unwrap_or(0_f32)
-        }
-
-        let surgeon = self
-            .surgeon_cases
-            .iter()
-            .map(|sc| (k_cyl_before(&sc.case), ref_cyl_after(&sc.case)))
-            .collect();
-
-        let cohort = self
-            .cohort_cases
-            .iter()
-            .map(|cc| (k_cyl_before(cc), ref_cyl_after(cc)))
-            .collect();
-
-        ScatterCompare { surgeon, cohort }
-    }
-}
-
-// In future, you may want the ability to compare a specific date range for the Surgeon, against
-// either the cohort, or against the surgeon's own baseline (all other dates outside the range).
-//
-// The reason we separate `get_compare_with_client()` into its own function is so we can call that
-// function directly from tests, and inject a different [`Client`] with a test JWT global.
-pub async fn get_compare(year: u32) -> Result<Compare, AppError> {
-    let client = db().await?;
-
-    get_compare_with_client(&client, year).await
-}
-
-pub async fn get_compare_with_client(client: &Client, year: u32) -> Result<Compare, AppError> {
-    let query = query_select_compare(year);
-
-    if let Some(query_result) = client.query_single_json(query, &()).await? {
-        let compare = serde_json::from_str::<Compare>(query_result.as_ref())?;
-
-        Ok(compare)
-    } else {
-        Err(AppError::Db(
-            "the query for Compare was not successful".to_string(),
-        ))
+        // If the cartesian point is in the lower right corner (270° to 360°), then y is negative
+        // and the quotient is negative. Adding this negative value to 2Pi radians is like
+        // subtracting the acute angle from 360° to get the larger angle.
+        (false, true) => (2.0 * PI) + theta_radians,
     }
 }
 
 #[cfg(test)]
 mod tests {}
 
-// For reference, the exported HTML that Plotly produces looks like:
+// For reference, the exported HTML that Plotly produces looks like this:
+//
 // <!doctype html>
 // <html lang="en">
 //     <head>
