@@ -1,7 +1,6 @@
 use crate::plots::{PolarData, mean, radians_to_degrees, theta_radians};
 use plotly::{Plot, Scatter, common::Mode};
 use serde::{Deserialize, Serialize};
-use std::f64::consts::PI;
 
 /// A pair of cartesian datasets, representing the surgeon of interest and a comparison cohort of
 /// peers.
@@ -150,3 +149,4 @@ pub struct Translate {
     pub x: f64,
     pub y: f64,
 }
+
