@@ -53,7 +53,7 @@ fn test_cartesian() {
 }
 
 #[test]
-fn test_tolerance() {
+fn test_confidence() {
     let mut polar = PolarData {
         points: vec![
             PolarPoint {

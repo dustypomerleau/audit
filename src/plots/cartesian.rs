@@ -37,7 +37,7 @@ impl CartesianCompare {
     }
 }
 
-// todo: consider creating a cartesian tolerance and associated method for the ellipse, like you
+// todo: consider creating a cartesian confidence and associated method for the ellipse, like you
 // did with the polar plot.
 
 /// A cartesian dataset, with values along the [`x`](CartesianPoint::x) and [`y`](CartesianPoint::y)

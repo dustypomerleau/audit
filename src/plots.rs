@@ -22,14 +22,14 @@ use std::f64::consts::PI;
 
 bounded!((StdDev, f64, 1.0..5.0), (PlotStep, f64, 0.001..1.0));
 
-/// The characterstics of a tolerance interval used for plotting a tolerance ellipse.
+/// The characteristics of a confidence ellipse.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
-pub struct ToleranceParams {
+pub struct ConfidenceParams {
     /// Whether to use population variance or sample variance. See [`Variance`].
     variance: Variance,
-    /// The number of standard deviations the tolerance interval should cover.
+    /// The number of standard deviations the confidence ellipse should cover.
     std_dev: StdDev,
-    /// The size of the steps between points in the tolerance ellipse (in the same units as
+    /// The size of the steps between points in the confidence ellipse (in the same units as
     /// [`r`](crate::plots::PolarPoint::r)).
     step: PlotStep,
 }
@@ -144,3 +144,4 @@ mod tests {}
 //         </div>
 //     </body>
 // </html>
+

@@ -1,7 +1,7 @@
 use crate::{
     bounded::Bounded,
     plots::{
-        CartesianData, CartesianPoint, PlotStep, Scale, StdDev, ToleranceParams, Translate,
+        CartesianData, CartesianPoint, ConfidenceParams, PlotStep, Scale, StdDev, Translate,
         Variance, degrees_to_radians, mean, radians_to_degrees, theta_radians, variance,
     },
 };
@@ -28,13 +28,13 @@ impl PolarCompare {
 
         let (centroid_theta, centroid_r) = self.surgeon.centroid().split_axes();
 
-        let ellipse = self.surgeon.tolerance(&ToleranceParams {
+        let ellipse = self.surgeon.confidence(&ConfidenceParams {
             variance: Variance::Population,
             std_dev: StdDev::new(2.0).unwrap_or_default(),
             step: PlotStep::new(0.01).unwrap_or_default(),
         });
 
-        let ellipse2 = self.surgeon.tolerance(&ToleranceParams {
+        let ellipse2 = self.surgeon.confidence(&ConfidenceParams {
             variance: Variance::Population,
             std_dev: StdDev::new(3.0).unwrap_or_default(),
             step: PlotStep::new(0.01).unwrap_or_default(),
@@ -57,11 +57,11 @@ impl PolarCompare {
             .mode(Mode::Markers);
 
         let ellipse_1 = ScatterPolar::new(ellipse_theta, ellipse_r)
-            .name("Tolerance (2 std dev)")
+            .name("Confidence (2 std dev)")
             .mode(Mode::Lines);
 
         let ellipse_2 = ScatterPolar::new(ellipse2_theta, ellipse2_r)
-            .name("Tolerance (3 std dev)")
+            .name("Confidence (3 std dev)")
             .mode(Mode::Lines);
 
         let mut plot = Plot::new();
@@ -174,10 +174,11 @@ impl PolarData {
     // https://gist.github.com/CarstenSchelp/b992645537660bda692f218b562d0712
     //
     /// Generate an ellipse encompassing the points within a given number of standard deviations.
-    /// This function calculates a tolerance interval (a range where most values fall), rather
-    /// than a confidence interval (a range likely to contain the mean).
-    pub fn tolerance(&self, params: &ToleranceParams) -> PolarData {
-        let ToleranceParams {
+    /// This function calculates a confidence ellipse, which is more closely related to a tolerance
+    /// interval (a range where most values fall) than a confidence interval (a range likely to
+    /// contain the mean).
+    pub fn confidence(&self, params: &ConfidenceParams) -> PolarData {
+        let ConfidenceParams {
             variance: params_variance,
             std_dev,
             step,
@@ -269,3 +270,4 @@ pub struct PolarPoint {
 
 #[cfg(test)]
 mod tests {}
+
