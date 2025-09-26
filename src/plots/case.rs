@@ -4,10 +4,19 @@ use crate::{
     error::AppError,
     model::{Case, SurgeonCase},
     plots::{CartesianCompare, PolarCompare},
-    query::query_select_compare,
+    query::{query_select_compare, query_select_self_compare},
 };
 use gel_tokio::Client;
 use serde::{Deserialize, Serialize};
+
+/// The reference group for plot comparisons. This is either the full cohort of surgeons
+/// participating (same year), or the current surgeon (prior year).
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+pub enum Reference {
+    #[default]
+    Cohort,
+    Surgeon,
+}
 
 /// A pair of case datasets, representing the surgeon of interest and a comparison cohort of peers.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
@@ -73,15 +82,22 @@ impl CaseCompare {
 // The reason we separate `get_compare_with_client()` into its own function is so we can call that
 // function directly from tests, and inject a different [`Client`] with a test JWT global.
 /// Query the database for cases from the given year.
-pub async fn get_compare(year: u32) -> Result<CaseCompare, AppError> {
+pub async fn get_compare(year: u32, reference: Reference) -> Result<CaseCompare, AppError> {
     let client = db().await?;
 
-    get_compare_with_client(&client, year).await
+    get_compare_with_client(&client, year, reference).await
 }
 
 /// Query the database for cases from the given year, using a custom [`gel_tokio::Client`].
-pub async fn get_compare_with_client(client: &Client, year: u32) -> Result<CaseCompare, AppError> {
-    let query = query_select_compare(year);
+pub async fn get_compare_with_client(
+    client: &Client,
+    year: u32,
+    reference: Reference,
+) -> Result<CaseCompare, AppError> {
+    let query = match reference {
+        Reference::Cohort => query_select_compare(year),
+        Reference::Surgeon => query_select_self_compare(year),
+    };
 
     if let Some(query_result) = client.query_single_json(query, &()).await? {
         let compare = serde_json::from_str::<CaseCompare>(query_result.as_ref())?;
