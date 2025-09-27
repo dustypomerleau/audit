@@ -5,7 +5,14 @@ use crate::{
         Variance, degrees_to_radians, mean, radians_to_degrees, theta_radians, variance,
     },
 };
-use plotly::{Plot, ScatterPolar, common::Mode};
+use plotly::{
+    Layout, Plot, ScatterPolar,
+    common::{Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode},
+    layout::{
+        AngularAxis, LayoutPolar, Legend, PolarAxisAttributes, PolarAxisTicks, PolarTickMode,
+        RadialAxis, TraceOrder,
+    },
+};
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
 
@@ -26,48 +33,143 @@ impl PolarCompare {
         let ((surgeon_theta, surgeon_r), (cohort_theta, cohort_r)) =
             (surgeon.split_axes(), cohort.split_axes());
 
-        let (centroid_theta, centroid_r) = self.surgeon.centroid().split_axes();
+        let (surgeon_centroid_theta, surgeon_centroid_r) = surgeon.centroid().split_axes();
+        let (cohort_centroid_theta, cohort_centroid_r) = cohort.centroid().split_axes();
 
-        let ellipse = self.surgeon.confidence(&ConfidenceParams {
+        let surgeon_ellipse = surgeon.confidence(&ConfidenceParams {
             variance: Variance::Population,
             std_dev: StdDev::new(2.0).unwrap_or_default(),
             step: PlotStep::new(0.01).unwrap_or_default(),
         });
 
-        let ellipse2 = self.surgeon.confidence(&ConfidenceParams {
+        let cohort_ellipse = cohort.confidence(&ConfidenceParams {
             variance: Variance::Population,
-            std_dev: StdDev::new(3.0).unwrap_or_default(),
+            std_dev: StdDev::new(2.0).unwrap_or_default(),
             step: PlotStep::new(0.01).unwrap_or_default(),
         });
 
-        let (ellipse_theta, ellipse_r) = ellipse.split_axes();
-        let (ellipse2_theta, ellipse2_r) = ellipse2.split_axes();
+        let (surgeon_ellipse_theta, surgeon_ellipse_r) = surgeon_ellipse.split_axes();
+        let (cohort_ellipse_theta, cohort_ellipse_r) = cohort_ellipse.split_axes();
 
         let surgeon = ScatterPolar::new(surgeon_theta, surgeon_r)
-            .name("Surgeon")
-            .mode(Mode::Markers);
+            .name("cases")
+            .legend_group("surgeon")
+            .legend_group_title(
+                LegendGroupTitle::new()
+                    .text("Surgeon")
+                    .font(Font::new().color("#eaebed")),
+            )
+            .mode(Mode::Markers)
+            .marker(Marker::new().color("#ff7b00"));
 
         let cohort = ScatterPolar::new(cohort_theta, cohort_r)
-            .name("Cohort")
+            .name("cases")
+            .legend_group("cohort")
+            .legend_group_title(
+                LegendGroupTitle::new()
+                    .text("Peer cohort")
+                    .font(Font::new().color("#eaebed")),
+            )
             .mode(Mode::Markers)
-            .opacity(0.6);
+            .marker(Marker::new().color("#848998"))
+            .opacity(0.4)
+            .hover_info(HoverInfo::Skip);
 
-        let centroid = ScatterPolar::new(centroid_theta, centroid_r)
-            .name("Centroid (surgeon)")
-            .mode(Mode::Markers);
+        let surgeon_centroid = ScatterPolar::new(surgeon_centroid_theta, surgeon_centroid_r)
+            .name("centroid")
+            .legend_group("surgeon")
+            .mode(Mode::Markers)
+            .marker(Marker::new().color("#00f115").size(10));
 
-        let ellipse_1 = ScatterPolar::new(ellipse_theta, ellipse_r)
-            .name("Confidence (2 std dev)")
-            .mode(Mode::Lines);
+        let cohort_centroid = ScatterPolar::new(cohort_centroid_theta, cohort_centroid_r)
+            .name("centroid")
+            .legend_group("cohort")
+            .mode(Mode::Markers)
+            .marker(Marker::new().color("#f5f5f6").size(10));
 
-        let ellipse_2 = ScatterPolar::new(ellipse2_theta, ellipse2_r)
-            .name("Confidence (3 std dev)")
-            .mode(Mode::Lines);
+        let surgeon_ellipse = ScatterPolar::new(surgeon_ellipse_theta, surgeon_ellipse_r)
+            .name("2.0 SD confidence")
+            .legend_group("surgeon")
+            .mode(Mode::Lines)
+            .line(Line::new().color("#f100dc").width(1.5))
+            .hover_info(HoverInfo::Skip);
+
+        let cohort_ellipse = ScatterPolar::new(cohort_ellipse_theta, cohort_ellipse_r)
+            .name("2.0 SD confidence")
+            .legend_group("cohort")
+            .mode(Mode::Lines)
+            .line(Line::new().color("#848998").width(1.5))
+            .opacity(0.7)
+            .hover_info(HoverInfo::Skip);
 
         let mut plot = Plot::new();
-        // note: the surgeon should be added after the cohort, because that allows hover on their
-        // points, which are "on top" in the layered plot
-        plot.add_traces(vec![cohort, surgeon, centroid, ellipse_1, ellipse_2]);
+
+        plot.add_traces(vec![
+            cohort,
+            surgeon,
+            cohort_centroid,
+            surgeon_centroid,
+            cohort_ellipse,
+            surgeon_ellipse,
+        ]);
+
+        // todo: set these as constants app-wide and use in all plots
+        let grid_color = "#363a48";
+        let label_color = "#eaebed";
+        let tick_color = "#acafb9";
+
+        let radial_ticks = PolarAxisTicks::new().tick_color(tick_color);
+
+        let angular_ticks = PolarAxisTicks::new()
+            .tick_mode(PolarTickMode::Array {
+                tick_values: Some(vec![0.0, 45.0, 90.0, 135.0, 180.0, 225.0, 270.0, 315.0]),
+
+                tick_text: Some(vec![
+                    "0°".to_string(),
+                    "".to_string(),
+                    "45°".to_string(),
+                    "".to_string(),
+                    "90°".to_string(),
+                    "".to_string(),
+                    "135°".to_string(),
+                    "".to_string(),
+                ]),
+            })
+            .tick_color(tick_color);
+
+        let angular_axis_attributes = PolarAxisAttributes::new()
+            .color(label_color)
+            .show_line(false)
+            .grid_color(grid_color)
+            .ticks(angular_ticks);
+
+        let radial_axis_attributes = PolarAxisAttributes::new()
+            .color(label_color)
+            .show_line(false)
+            .grid_color(grid_color)
+            .ticks(radial_ticks);
+
+        let radial_axis = RadialAxis::new().axis_attributes(radial_axis_attributes.clone());
+        let angular_axis = AngularAxis::new().axis_attributes(angular_axis_attributes);
+
+        // todo: use a signal on the plot container to set the colors for light/dark mode.
+        // Find a way to do this with CSS variables (not natively available in Plotly).
+        let polar_layout = LayoutPolar::new()
+            .bg_color("#252833")
+            .radial_axis(radial_axis)
+            .angular_axis(angular_axis);
+
+        let layout = Layout::new()
+            .paper_background_color("#252833")
+            .polar(polar_layout)
+            .legend(
+                Legend::new()
+                    .font(Font::new().color("#caccd1"))
+                    .trace_order(TraceOrder::Grouped)
+                    .trace_group_gap(30),
+            );
+
+        plot.set_layout(layout);
 
         plot
     }
@@ -270,4 +372,3 @@ pub struct PolarPoint {
 
 #[cfg(test)]
 mod tests {}
-
