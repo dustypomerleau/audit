@@ -30,6 +30,49 @@
     --audit-dark-gray-825: #0d0e13;
     --audit-dark-gray-850: #0a0b0f;
 
+    /* Audit mid gray */
+    --audit-mid-gray-400: oklch(60% 0.025 273.04);
+    --audit-mid-gray-425: oklch(58% 0.027 273.04);
+    --audit-mid-gray-425: oklch(56.5% 0.028 273.04);
+    --audit-mid-gray-450: oklch(54.5% 0.029 273.04);
+    --audit-mid-gray-475: oklch(53% 0.031 273.04);
+    --audit-mid-gray-500: oklch(51% 0.032 273.04);
+    --audit-mid-gray-500: oklch(49.5% 0.033 273.04);
+    --audit-mid-gray-525: oklch(47.5% 0.035 273.04);
+    --audit-mid-gray-550: oklch(46% 0.034 273.04);
+    --audit-mid-gray-550: oklch(44% 0.033 273.04);
+    --audit-mid-gray-575: oklch(42.5% 0.032 273.04);
+    --audit-mid-gray-600: oklch(40.5% 0.03 273.04);
+    --audit-mid-gray-600: oklch(39% 0.029 273.04);
+
+    --audit-mid-gray-400: #7b8090;
+    --audit-mid-gray-425: #757a8b;
+    --audit-mid-gray-425: #707587;
+    --audit-mid-gray-450: #6a6f82;
+    --audit-mid-gray-475: #666b7e;
+    --audit-mid-gray-500: #606579;
+    --audit-mid-gray-500: #5b6175;
+    --audit-mid-gray-525: #555b70;
+    --audit-mid-gray-550: #52576b;
+    --audit-mid-gray-550: #4c5265;
+    --audit-mid-gray-575: #484e60;
+    --audit-mid-gray-600: #43485a;
+    --audit-mid-gray-600: #404455;
+
+    --audit-mid-gray-400: rgb(123, 128, 144);
+    --audit-mid-gray-425: rgb(117, 122, 139);
+    --audit-mid-gray-425: rgb(112, 117, 135);
+    --audit-mid-gray-450: rgb(106, 111, 130);
+    --audit-mid-gray-475: rgb(102, 107, 126);
+    --audit-mid-gray-500: rgb(96, 101, 121);
+    --audit-mid-gray-500: rgb(91, 97, 117);
+    --audit-mid-gray-525: rgb(85, 91, 112);
+    --audit-mid-gray-550: rgb(82, 87, 107);
+    --audit-mid-gray-550: rgb(76, 82, 101);
+    --audit-mid-gray-575: rgb(72, 78, 96);
+    --audit-mid-gray-600: rgb(67, 72, 90);
+    --audit-mid-gray-600: rgb(64, 68, 85);
+
     /* Audit dark gray */
     --audit-dark-gray-650: rgb(54, 58, 72);
     --audit-dark-gray-675: rgb(50, 54, 68);

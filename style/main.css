@@ -43,6 +43,20 @@
     --lgray-12: #8e929f;
     --lgray-13: #848998;
 
+    --mgray-1: #7b8090;
+    --mgray-2: #757a8b;
+    --mgray-3: #707587;
+    --mgray-4: #6a6f82;
+    --mgray-5: #666b7e;
+    --mgray-6: #606579;
+    --mgray-7: #5b6175;
+    --mgray-8: #555b70;
+    --mgray-9: #52576b;
+    --mgray-10: #4c5265;
+    --mgray-11: #484e60;
+    --mgray-12: #43485a;
+    --mgray-13: #404455;
+
     /* --orange-5: #ff6c00; if you want to try saturating more, this is about the best ref color I can get */
     --orange-1: #fcf3ed;
     --orange-2: #fbd6bb;
@@ -65,6 +79,8 @@
     --foreground-header: #fff;
     --logo-color: #fff;
     --logo-accent: var(--orange-5);
+    --plot-axis: var(--lgray-7);
+    --plot-labels: var(--foreground);
 
     /* light theme */
     @media (prefers-color-scheme: light) {

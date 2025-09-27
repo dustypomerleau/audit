@@ -47,6 +47,7 @@ impl CaseCompare {
     }
 
     /// Compare preoperative corneal cylinder and postoperative refractive cylinder.
+    // todo: vertex the postop refractive cylinder to the corneal plane
     pub fn cartesian_delta_cyl(&self) -> CartesianCompare {
         fn k_cyl_before(case: &Case) -> f64 {
             case.biometry.ks.cyl() as f64 / 100.0

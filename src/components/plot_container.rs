@@ -1,8 +1,8 @@
-#[cfg(feature = "ssr")] use crate::plots::get_compare;
-use crate::{error::AppError, plots::Reference};
+use crate::error::AppError;
+#[cfg(feature = "ssr")] use crate::plots::{Reference, get_compare};
 use leptos::prelude::{
-    Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, RwSignal, Suspense, component, server,
-    view,
+    ElementChild, Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, RwSignal, StyleAttribute,
+    Suspense, component, server, view,
 };
 
 #[component]
@@ -45,12 +45,16 @@ pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
         .polar_cyl_before()
         // fix the plot function to add ellipses for both groups rather than 2 surgeon ellipses
         .plot()
-        .to_inline_html(Some("plot"));
+        .to_inline_html(Some("cyl-before"));
 
     // bookmark: todo:
     // let cyl_after = todo!();
     // let target_error = todo!();
-    // let cyl_both = todo!();
+
+    let cyl_both = compare
+        .cartesian_delta_cyl()
+        .plot()
+        .to_inline_html(Some("cyl-both"));
 
     Ok(vec![cyl_before])
 }
