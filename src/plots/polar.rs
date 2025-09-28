@@ -51,6 +51,15 @@ impl PolarCompare {
         let (surgeon_ellipse_r, surgeon_ellipse_theta) = surgeon_ellipse.split_axes();
         let (cohort_ellipse_r, cohort_ellipse_theta) = cohort_ellipse.split_axes();
 
+        // todo: set these as constants app-wide and use in all plots
+        let grid_color = "#363a48";
+        let label_color = "#eaebed";
+        let legend_font_color = "#caccd1";
+        let legend_group_font_color = "#eaebed";
+        let tick_color = "#acafb9";
+
+        // These format strings use d3 format syntax:
+        // https://d3js.org/d3-format
         // The empty <extra> tag is necessary to avoid displaying the trace name.
         let hover_template = "Power: %{r:.2f} D<br />Axis: %{theta:.0f}°<extra></extra>";
 
@@ -60,7 +69,7 @@ impl PolarCompare {
             .legend_group_title(
                 LegendGroupTitle::new()
                     .text("Surgeon")
-                    .font(Font::new().color("#eaebed")),
+                    .font(Font::new().color(legend_group_font_color)),
             )
             .mode(Mode::Markers)
             .marker(Marker::new().color("#ff7b00"))
@@ -72,7 +81,7 @@ impl PolarCompare {
             .legend_group_title(
                 LegendGroupTitle::new()
                     .text("Peer cohort")
-                    .font(Font::new().color("#eaebed")),
+                    .font(Font::new().color(legend_group_font_color)),
             )
             .mode(Mode::Markers)
             .marker(Marker::new().color("#848998"))
@@ -94,14 +103,14 @@ impl PolarCompare {
             .hover_template(hover_template);
 
         let surgeon_ellipse = ScatterPolar::new(surgeon_ellipse_theta, surgeon_ellipse_r)
-            .name("2.0 SD confidence")
+            .name("confidence (2 SD)")
             .legend_group("surgeon")
             .mode(Mode::Lines)
             .line(Line::new().color("#f100dc").width(1.5))
             .hover_info(HoverInfo::Skip);
 
         let cohort_ellipse = ScatterPolar::new(cohort_ellipse_theta, cohort_ellipse_r)
-            .name("2.0 SD confidence")
+            .name("confidence (2 SD)")
             .legend_group("cohort")
             .mode(Mode::Lines)
             .line(Line::new().color("#848998").width(1.5))
@@ -118,11 +127,6 @@ impl PolarCompare {
             cohort_ellipse,
             surgeon_ellipse,
         ]);
-
-        // todo: set these as constants app-wide and use in all plots
-        let grid_color = "#363a48";
-        let label_color = "#eaebed";
-        let tick_color = "#acafb9";
 
         let radial_ticks = PolarAxisTicks::new().tick_color(tick_color);
 
@@ -171,7 +175,7 @@ impl PolarCompare {
             .polar(polar_layout)
             .legend(
                 Legend::new()
-                    .font(Font::new().color("#caccd1"))
+                    .font(Font::new().color(legend_font_color))
                     .trace_order(TraceOrder::Grouped)
                     .trace_group_gap(30),
             );
