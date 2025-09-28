@@ -191,8 +191,8 @@ impl FromIterator<(f64, f64)> for PolarData {
     fn from_iter<T: IntoIterator<Item = (f64, f64)>>(iter: T) -> Self {
         let mut points = Vec::new();
 
-        for (theta, r) in iter {
-            points.push(PolarPoint { theta, r });
+        for (r, theta) in iter {
+            points.push(PolarPoint { r, theta });
         }
 
         Self { points }
@@ -366,8 +366,8 @@ impl PolarData {
 /// [`r`](Self::r) represents the radial axis.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct PolarPoint {
-    pub theta: f64,
     pub r: f64,
+    pub theta: f64,
 }
 
 #[cfg(test)]

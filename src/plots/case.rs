@@ -2,7 +2,7 @@ use crate::{
     bounded::Bounded,
     db::db,
     error::AppError,
-    model::{Case, SurgeonCase},
+    model::{Case, RefCyl, SurgeonCase, VertexK},
     plots::{CartesianCompare, PolarCompare},
     query::{query_select_compare, query_select_self_compare},
 };
@@ -28,11 +28,14 @@ pub struct CaseCompare {
 impl CaseCompare {
     /// Compare preoperative corneal cylinder values.
     pub fn polar_cyl_before(&self) -> PolarCompare {
+        // It's important to maintain the pattern of power first, then axis, which means that tuples
+        // for plotting should always be in (r, theta) order.
+        // An alternative to avoid this pitfall is just to create [`PolarPoint`]s here.
         fn k_cyl_double_angle(case: &Case) -> (f64, f64) {
             let ks = case.biometry.ks;
 
             // We double the axis to create a double-angle plot.
-            (ks.steep_axis() as f64 * 2.0, ks.cyl() as f64 / 100.0)
+            (ks.cyl() as f64 / 100.0, ks.steep_axis() as f64 * 2.0)
         }
 
         let surgeon = self
@@ -42,6 +45,55 @@ impl CaseCompare {
             .collect();
 
         let cohort = self.cohort.iter().map(k_cyl_double_angle).collect();
+
+        PolarCompare { surgeon, cohort }
+    }
+
+    /// Compare postoperative refractive cylinder values, vertexed to the corneal plane.
+    pub fn polar_cyl_after(&self) -> PolarCompare {
+        fn ref_cyl_double_angle(case: &Case) -> (f64, f64) {
+            let cyl = case.refraction.after.cyl;
+
+            match cyl {
+                None => (0.0, 0.0),
+
+                Some(RefCyl { power, axis }) => {
+                    // Convert to diopters and vertex to the corneal plane.
+                    let power = power.vertex();
+
+                    // We double the axis to create a double angle plot. Since the type from the DB
+                    // can't exceed 179, our doubled axis can't exceed 358.
+                    let axis = axis.inner() as f64 * 2.0;
+
+                    if power.is_sign_negative() {
+                        let power = -power;
+
+                        // When converting to plus cyl, we would normally add 90° % 180, but since
+                        // we are already working with doubled angles, we need to add 180° % 360. If
+                        // the doubled axis is _exactly_ 180, then we want to return 0.0 rather than
+                        // 360.0 for plotting purposes (even though they are equivalent), so we
+                        // special-case that situation.
+                        let axis = if axis == 180.0 {
+                            0.0
+                        } else {
+                            (axis + 180.0) % 360.0
+                        };
+
+                        (power, axis)
+                    } else {
+                        (power, axis)
+                    }
+                }
+            }
+        }
+
+        let surgeon = self
+            .surgeon
+            .iter()
+            .map(|sc| ref_cyl_double_angle(&sc.case))
+            .collect();
+
+        let cohort = self.cohort.iter().map(ref_cyl_double_angle).collect();
 
         PolarCompare { surgeon, cohort }
     }

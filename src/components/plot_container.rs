@@ -43,7 +43,6 @@ pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
     // the same 4 plots again, but now comparing the surgeon the themselves the previous year.
     let cyl_before = compare
         .polar_cyl_before()
-        // fix the plot function to add ellipses for both groups rather than 2 surgeon ellipses
         .plot()
         .to_inline_html(Some("cyl-before"));
 
