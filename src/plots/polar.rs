@@ -7,7 +7,7 @@ use crate::{
 };
 use plotly::{
     Layout, Plot, ScatterPolar,
-    common::{Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode},
+    common::{Font, HoverInfo, Label, LegendGroupTitle, Line, Marker, Mode},
     layout::{
         AngularAxis, LayoutPolar, Legend, PolarAxisAttributes, PolarAxisTicks, PolarTickMode,
         RadialAxis, TraceOrder,
@@ -51,6 +51,9 @@ impl PolarCompare {
         let (surgeon_ellipse_r, surgeon_ellipse_theta) = surgeon_ellipse.split_axes();
         let (cohort_ellipse_r, cohort_ellipse_theta) = cohort_ellipse.split_axes();
 
+        // The empty <extra> tag is necessary to avoid displaying the trace name.
+        let hover_template = "Power: %{r:.2f} D<br />Axis: %{theta:.0f}°<extra></extra>";
+
         let surgeon = ScatterPolar::new(surgeon_theta, surgeon_r)
             .name("cases")
             .legend_group("surgeon")
@@ -60,7 +63,8 @@ impl PolarCompare {
                     .font(Font::new().color("#eaebed")),
             )
             .mode(Mode::Markers)
-            .marker(Marker::new().color("#ff7b00"));
+            .marker(Marker::new().color("#ff7b00"))
+            .hover_template(hover_template);
 
         let cohort = ScatterPolar::new(cohort_theta, cohort_r)
             .name("cases")
@@ -79,13 +83,15 @@ impl PolarCompare {
             .name("centroid")
             .legend_group("surgeon")
             .mode(Mode::Markers)
-            .marker(Marker::new().color("#00f115").size(10));
+            .marker(Marker::new().color("#00f115").size(10))
+            .hover_template(hover_template);
 
         let cohort_centroid = ScatterPolar::new(cohort_centroid_theta, cohort_centroid_r)
             .name("centroid")
             .legend_group("cohort")
             .mode(Mode::Markers)
-            .marker(Marker::new().color("#f5f5f6").size(10));
+            .marker(Marker::new().color("#f5f5f6").size(10))
+            .hover_template(hover_template);
 
         let surgeon_ellipse = ScatterPolar::new(surgeon_ellipse_theta, surgeon_ellipse_r)
             .name("2.0 SD confidence")
@@ -150,6 +156,7 @@ impl PolarCompare {
             .ticks(radial_ticks);
 
         let radial_axis = RadialAxis::new().axis_attributes(radial_axis_attributes.clone());
+
         let angular_axis = AngularAxis::new().axis_attributes(angular_axis_attributes);
 
         // todo: use a signal on the plot container to set the colors for light/dark mode.
