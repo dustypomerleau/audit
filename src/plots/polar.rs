@@ -42,6 +42,8 @@ impl PolarCompare {
             // you derived Default in bounded!. You need to rethink that decision and come up with
             // a solution to an out of bounds value in these cases.
             std_dev: StdDev::new(2.0).unwrap(),
+            // Ellipse breaks are evident at 0.05, so the step should probably be bounded
+            // 0.001..=0.05 or something.
             step: PlotStep::new(0.01).unwrap(),
         });
 
@@ -64,6 +66,9 @@ impl PolarCompare {
         // These format strings use d3 format syntax:
         // https://d3js.org/d3-format
         // The empty <extra> tag is necessary to avoid displaying the trace name.
+        //
+        // todo: you need to divide the displayed value by 2 here, because it's a double-angle
+        // plot, so it's showing the doubled angle on hover.
         let hover_template = "Power: %{r:.2f} D<br />Axis: %{theta:.0f}°<extra></extra>";
 
         let surgeon = ScatterPolar::new(surgeon_theta, surgeon_r)
