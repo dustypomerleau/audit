@@ -50,14 +50,16 @@ pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
         .polar_cyl_after()
         .plot()
         .to_inline_html(Some("cyl-after"));
-    //
+
     // bookmark: todo:
     // let target_error = todo!();
 
     let cyl_both = compare
+        // todo: this function needs VertexK::vertex()
         .cartesian_delta_cyl()
+        // todo: styling
         .plot()
-        .to_inline_html(Some("cyl-both"));
+        .to_inline_html(Some("cyl-delta"));
 
     Ok(vec![cyl_before, cyl_after])
 }
