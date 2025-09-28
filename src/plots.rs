@@ -20,7 +20,7 @@ pub use polar::*;
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
 
-bounded!((StdDev, f64, 1.0..5.0), (PlotStep, f64, 0.001..1.0));
+bounded!((StdDev, f64, 1.0..=5.0), (PlotStep, f64, 0.001..=1.0));
 
 /// The characteristics of a confidence ellipse.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -144,4 +144,3 @@ mod tests {}
 //         </div>
 //     </body>
 // </html>
-

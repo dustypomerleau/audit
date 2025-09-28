@@ -38,14 +38,17 @@ impl PolarCompare {
 
         let surgeon_ellipse = surgeon.confidence(&ConfidenceParams {
             variance: Variance::Population,
-            std_dev: StdDev::new(2.0).unwrap_or_default(),
-            step: PlotStep::new(0.01).unwrap_or_default(),
+            // todo: unwrap_or_default() hangs the program if your value is out of bounds, because
+            // you derived Default in bounded!. You need to rethink that decision and come up with
+            // a solution to an out of bounds value in these cases.
+            std_dev: StdDev::new(2.0).unwrap(),
+            step: PlotStep::new(0.01).unwrap(),
         });
 
         let cohort_ellipse = cohort.confidence(&ConfidenceParams {
             variance: Variance::Population,
-            std_dev: StdDev::new(2.0).unwrap_or_default(),
-            step: PlotStep::new(0.01).unwrap_or_default(),
+            std_dev: StdDev::new(2.0).unwrap(),
+            step: PlotStep::new(0.01).unwrap(),
         });
 
         let (surgeon_ellipse_r, surgeon_ellipse_theta) = surgeon_ellipse.split_axes();
