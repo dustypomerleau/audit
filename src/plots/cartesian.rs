@@ -89,7 +89,7 @@ impl CartesianData {
                 let theta_degrees = radians_to_degrees(theta_radians);
                 let r = f64::sqrt((x * x) + (y * y));
 
-                (theta_degrees, r)
+                (r, theta_degrees)
             })
             .collect()
     }
@@ -149,4 +149,3 @@ pub struct Translate {
     pub x: f64,
     pub y: f64,
 }
-

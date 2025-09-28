@@ -46,8 +46,12 @@ pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
         .plot()
         .to_inline_html(Some("cyl-before"));
 
+    let cyl_after = compare
+        .polar_cyl_after()
+        .plot()
+        .to_inline_html(Some("cyl-after"));
+    //
     // bookmark: todo:
-    // let cyl_after = todo!();
     // let target_error = todo!();
 
     let cyl_both = compare
@@ -55,5 +59,5 @@ pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
         .plot()
         .to_inline_html(Some("cyl-both"));
 
-    Ok(vec![cyl_before])
+    Ok(vec![cyl_before, cyl_after])
 }

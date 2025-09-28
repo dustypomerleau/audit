@@ -30,11 +30,11 @@ impl PolarCompare {
     pub fn plot(&self) -> Plot {
         let Self { surgeon, cohort } = self;
 
-        let ((surgeon_theta, surgeon_r), (cohort_theta, cohort_r)) =
+        let ((surgeon_r, surgeon_theta), (cohort_r, cohort_theta)) =
             (surgeon.split_axes(), cohort.split_axes());
 
-        let (surgeon_centroid_theta, surgeon_centroid_r) = surgeon.centroid().split_axes();
-        let (cohort_centroid_theta, cohort_centroid_r) = cohort.centroid().split_axes();
+        let (surgeon_centroid_r, surgeon_centroid_theta) = surgeon.centroid().split_axes();
+        let (cohort_centroid_r, cohort_centroid_theta) = cohort.centroid().split_axes();
 
         let surgeon_ellipse = surgeon.confidence(&ConfidenceParams {
             variance: Variance::Population,
@@ -48,8 +48,8 @@ impl PolarCompare {
             step: PlotStep::new(0.01).unwrap_or_default(),
         });
 
-        let (surgeon_ellipse_theta, surgeon_ellipse_r) = surgeon_ellipse.split_axes();
-        let (cohort_ellipse_theta, cohort_ellipse_r) = cohort_ellipse.split_axes();
+        let (surgeon_ellipse_r, surgeon_ellipse_theta) = surgeon_ellipse.split_axes();
+        let (cohort_ellipse_r, cohort_ellipse_theta) = cohort_ellipse.split_axes();
 
         let surgeon = ScatterPolar::new(surgeon_theta, surgeon_r)
             .name("cases")
@@ -209,7 +209,7 @@ impl PolarData {
     pub fn cartesian(&self) -> CartesianData {
         self.points
             .iter()
-            .map(|PolarPoint { theta, r }| {
+            .map(|PolarPoint { r, theta }| {
                 let (sin_theta, cos_theta) = degrees_to_radians(*theta).sin_cos();
                 let x = r * cos_theta;
                 let y = r * sin_theta;
@@ -230,8 +230,8 @@ impl PolarData {
 
         PolarData {
             points: vec![PolarPoint {
-                theta: theta_centroid_degrees,
                 r: r_centroid,
+                theta: theta_centroid_degrees,
             }],
         }
     }
@@ -247,12 +247,12 @@ impl PolarData {
     }
 
     /// Separate a polar dataset into 2 vectors of equal length, containing values for
-    /// [`theta`](PolarPoint::theta) and [`r`](PolarPoint::r), respectively. This is useful for
+    ///  [`r`](PolarPoint::r) and [`theta`](PolarPoint::theta), respectively. This is useful for
     /// generating [`Plot`]s, which require each axis to be a separate vector.
     pub fn split_axes(&self) -> (Vec<f64>, Vec<f64>) {
         self.points
             .iter()
-            .map(|point| (point.theta, point.r))
+            .map(|point| (point.r, point.theta))
             .collect()
     }
 
