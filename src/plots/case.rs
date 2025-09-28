@@ -12,9 +12,9 @@ use serde::{Deserialize, Serialize};
 /// The reference group for plot comparisons. This is either the full cohort of surgeons
 /// participating (same year), or the current surgeon (prior year).
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
-pub enum Reference {
+pub enum Cohort {
     #[default]
-    Cohort,
+    Peers,
     Surgeon,
 }
 
@@ -135,21 +135,21 @@ impl CaseCompare {
 // The reason we separate `get_compare_with_client()` into its own function is so we can call that
 // function directly from tests, and inject a different [`Client`] with a test JWT global.
 /// Query the database for cases from the given year.
-pub async fn get_compare(year: u32, reference: Reference) -> Result<CaseCompare, AppError> {
+pub async fn get_compare(year: u32, cohort: Cohort) -> Result<CaseCompare, AppError> {
     let client = db().await?;
 
-    get_compare_with_client(&client, year, reference).await
+    get_compare_with_client(&client, year, cohort).await
 }
 
 /// Query the database for cases from the given year, using a custom [`gel_tokio::Client`].
 pub async fn get_compare_with_client(
     client: &Client,
     year: u32,
-    reference: Reference,
+    cohort: Cohort,
 ) -> Result<CaseCompare, AppError> {
-    let query = match reference {
-        Reference::Cohort => query_select_compare(year),
-        Reference::Surgeon => query_select_self_compare(year),
+    let query = match cohort {
+        Cohort::Peers => query_select_compare(year),
+        Cohort::Surgeon => query_select_self_compare(year),
     };
 
     if let Some(query_result) = client.query_single_json(query, &()).await? {

@@ -7,7 +7,7 @@ use crate::{
 };
 use plotly::{
     Layout, Plot, ScatterPolar,
-    common::{Font, HoverInfo, Label, LegendGroupTitle, Line, Marker, Mode},
+    common::{Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode},
     layout::{
         AngularAxis, LayoutPolar, Legend, PolarAxisAttributes, PolarAxisTicks, PolarTickMode,
         RadialAxis, TraceOrder,

@@ -1,5 +1,5 @@
 use crate::{
-    plots::{PolarCompare, PolarData, PolarPoint, Reference, get_compare_with_client},
+    plots::{Cohort, PolarCompare, PolarData, PolarPoint, get_compare_with_client},
     tests::common::{populate_test_db, test_db},
 };
 
@@ -18,7 +18,7 @@ async fn creates_plots() {
     // let client = populate_test_db().await;
     // assert!(client.ensure_connected().await.is_ok());
 
-    let compare = get_compare_with_client(&client, 2025, Reference::Cohort)
+    let compare = get_compare_with_client(&client, 2025, Cohort::Peers)
         .await
         .unwrap();
     // let scatter_plot = compare.cartesian_delta_cyl().plot();
@@ -84,4 +84,3 @@ fn test_confidence() {
 
     compare.plot().show();
 }
-

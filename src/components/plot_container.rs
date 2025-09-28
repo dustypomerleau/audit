@@ -1,5 +1,5 @@
 use crate::error::AppError;
-#[cfg(feature = "ssr")] use crate::plots::{Reference, get_compare};
+#[cfg(feature = "ssr")] use crate::plots::{Cohort, get_compare};
 use leptos::prelude::{
     ElementChild, Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, RwSignal, StyleAttribute,
     Suspense, component, server, view,
@@ -31,9 +31,9 @@ pub fn PlotContainer() -> impl IntoView {
 
 #[server]
 pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
-    let compare = get_compare(year, Reference::Cohort).await?;
+    let compare = get_compare(year, Cohort::Peers).await?;
     // It's not elegant, but for now just get the previous year comparison as a separate query.
-    let self_compare = get_compare(year, Reference::Surgeon).await?;
+    let self_compare = get_compare(year, Cohort::Surgeon).await?;
 
     // plots to create:
     // 1. preop corneal cylinder polar plot
