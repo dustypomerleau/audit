@@ -7,7 +7,7 @@ use crate::{
 };
 use plotly::{
     Layout, Plot, ScatterPolar,
-    common::{Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode},
+    common::{Dim, Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode},
     layout::{
         AngularAxis, LayoutPolar, Legend, PolarAxisAttributes, PolarAxisTicks, PolarTickMode,
         RadialAxis, TraceOrder,
@@ -28,13 +28,32 @@ impl PolarCompare {
     // todo: consider whether `plot(&self) -> Plot` should be a trait.
     /// Generate a polar [`Plot`] from a [`PolarCompare`].
     pub fn plot(&self) -> Plot {
+        // Given that we double the angle in the [`PolarCompare`], we need a separate [`Vec`] to
+        // hold the labels, which should not be doubled.
+        fn labels(data: &PolarData) -> Vec<String> {
+            data.points
+                .iter()
+                .map(|PolarPoint { r, theta }| format!("{:.2} D × {:.0}°", r, *theta / 2.0))
+                .collect()
+        }
+
         let Self { surgeon, cohort } = self;
 
         let ((surgeon_r, surgeon_theta), (cohort_r, cohort_theta)) =
             (surgeon.split_axes(), cohort.split_axes());
 
-        let (surgeon_centroid_r, surgeon_centroid_theta) = surgeon.centroid().split_axes();
-        let (cohort_centroid_r, cohort_centroid_theta) = cohort.centroid().split_axes();
+        let (surgeon_centroid, cohort_centroid) = (surgeon.centroid(), cohort.centroid());
+
+        let (
+            (surgeon_centroid_r, surgeon_centroid_theta),
+            (cohort_centroid_r, cohort_centroid_theta),
+        ) = (surgeon_centroid.split_axes(), cohort_centroid.split_axes());
+
+        let (surgeon_labels, surgeon_centroid_labels, cohort_centroid_labels) = (
+            labels(surgeon),
+            labels(&surgeon_centroid),
+            labels(&cohort_centroid),
+        );
 
         let surgeon_ellipse = surgeon.confidence(&ConfidenceParams {
             variance: Variance::Population,
@@ -81,7 +100,9 @@ impl PolarCompare {
             )
             .mode(Mode::Markers)
             .marker(Marker::new().color("#ff7b00"))
-            .hover_template(hover_template);
+            // .hover_template(hover_template);
+            .hover_info(HoverInfo::Text)
+            .hover_text_array(surgeon_labels);
 
         let cohort = ScatterPolar::new(cohort_theta, cohort_r)
             .name("cases")
@@ -101,14 +122,16 @@ impl PolarCompare {
             .legend_group("surgeon")
             .mode(Mode::Markers)
             .marker(Marker::new().color("#00f115").size(10))
-            .hover_template(hover_template);
+            .hover_info(HoverInfo::Text)
+            .hover_text_array(surgeon_centroid_labels);
 
         let cohort_centroid = ScatterPolar::new(cohort_centroid_theta, cohort_centroid_r)
             .name("centroid")
             .legend_group("cohort")
             .mode(Mode::Markers)
             .marker(Marker::new().color("#f5f5f6").size(10))
-            .hover_template(hover_template);
+            .hover_info(HoverInfo::Text)
+            .hover_text_array(cohort_centroid_labels);
 
         let surgeon_ellipse = ScatterPolar::new(surgeon_ellipse_theta, surgeon_ellipse_r)
             .name("confidence (2 SD)")
@@ -155,20 +178,14 @@ impl PolarCompare {
             })
             .tick_color(tick_color);
 
-        let angular_axis_attributes = PolarAxisAttributes::new()
+        let axis_attributes = PolarAxisAttributes::new()
             .color(label_color)
             .show_line(false)
-            .grid_color(grid_color)
-            .ticks(angular_ticks);
+            .grid_color(grid_color);
 
-        let radial_axis_attributes = PolarAxisAttributes::new()
-            .color(label_color)
-            .show_line(false)
-            .grid_color(grid_color)
-            .ticks(radial_ticks);
-
+        let radial_axis_attributes = axis_attributes.clone().ticks(radial_ticks);
+        let angular_axis_attributes = axis_attributes.ticks(angular_ticks);
         let radial_axis = RadialAxis::new().axis_attributes(radial_axis_attributes.clone());
-
         let angular_axis = AngularAxis::new().axis_attributes(angular_axis_attributes);
 
         // todo: use a signal on the plot container to set the colors for light/dark mode.
