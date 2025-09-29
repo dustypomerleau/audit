@@ -32,8 +32,8 @@ pub fn PlotContainer() -> impl IntoView {
 #[server]
 pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
     let compare = get_compare(year, Cohort::Peers).await?;
-    // It's not elegant, but for now just get the previous year comparison as a separate query.
-    let self_compare = get_compare(year, Cohort::Surgeon).await?;
+    // Eventually, we will want the surgeon to be able to compare to their prior data.
+    // let self_compare = get_compare(year, Cohort::Surgeon).await?;
 
     // plots to create:
     // 1. preop corneal cylinder polar plot

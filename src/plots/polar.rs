@@ -230,6 +230,18 @@ impl FromIterator<(f64, f64)> for PolarData {
     }
 }
 
+impl FromIterator<PolarPoint> for PolarData {
+    fn from_iter<T: IntoIterator<Item = PolarPoint>>(iter: T) -> Self {
+        let mut points = Vec::new();
+
+        for point in iter {
+            points.push(point);
+        }
+
+        Self { points }
+    }
+}
+
 impl PolarData {
     /// Create a new instance of [`PolarData`], without data points.
     fn new() -> Self {
@@ -280,6 +292,9 @@ impl PolarData {
     /// Separate a polar dataset into 2 vectors of equal length, containing values for
     ///  [`r`](PolarPoint::r) and [`theta`](PolarPoint::theta), respectively. This is useful for
     /// generating [`Plot`]s, which require each axis to be a separate vector.
+    // todo: it's probably better not to use this tuple, because it's easy to confuse the
+    // order of r and theta, but instead to directly produce a ScatterPolar::new and
+    // return it.
     pub fn split_axes(&self) -> (Vec<f64>, Vec<f64>) {
         self.points
             .iter()

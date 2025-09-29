@@ -57,6 +57,18 @@ impl FromIterator<(f64, f64)> for CartesianData {
     }
 }
 
+impl FromIterator<CartesianPoint> for CartesianData {
+    fn from_iter<T: IntoIterator<Item = CartesianPoint>>(iter: T) -> Self {
+        let mut points = Vec::new();
+
+        for point in iter {
+            points.push(point);
+        }
+
+        Self { points }
+    }
+}
+
 impl CartesianData {
     fn new() -> Self {
         Self { points: Vec::new() }

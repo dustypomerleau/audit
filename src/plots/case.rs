@@ -3,7 +3,7 @@ use crate::{
     db::db,
     error::AppError,
     model::{Case, RefCyl, SurgeonCase, VertexK},
-    plots::{CartesianCompare, PolarCompare},
+    plots::{CartesianCompare, PolarCompare, PolarPoint},
     query::{query_select_compare, query_select_self_compare},
 };
 use gel_tokio::Client;
@@ -28,14 +28,14 @@ pub struct CaseCompare {
 impl CaseCompare {
     /// Compare preoperative corneal cylinder values.
     pub fn polar_cyl_before(&self) -> PolarCompare {
-        // It's important to maintain the pattern of power first, then axis, which means that tuples
-        // for plotting should always be in (r, theta) order.
-        // An alternative to avoid this pitfall is just to create [`PolarPoint`]s here.
-        fn k_cyl_double_angle(case: &Case) -> (f64, f64) {
+        fn k_cyl_double_angle(case: &Case) -> PolarPoint {
             let ks = case.biometry.ks;
 
-            // We double the axis to create a double-angle plot.
-            (ks.cyl() as f64 / 100.0, ks.steep_axis() as f64 * 2.0)
+            PolarPoint {
+                r: ks.cyl() as f64 / 100.0,
+                // We double the axis to create a double-angle plot.
+                theta: ks.steep_axis() as f64 * 2.0,
+            }
         }
 
         let surgeon = self
@@ -51,11 +51,9 @@ impl CaseCompare {
 
     /// Compare postoperative refractive cylinder values, vertexed to the corneal plane.
     pub fn polar_cyl_after(&self) -> PolarCompare {
-        fn ref_cyl_double_angle(case: &Case) -> (f64, f64) {
-            let cyl = case.refraction.after.cyl;
-
-            match cyl {
-                None => (0.0, 0.0),
+        fn ref_cyl_double_angle(case: &Case) -> PolarPoint {
+            match case.refraction.after.cyl {
+                None => PolarPoint { r: 0.0, theta: 0.0 },
 
                 Some(RefCyl { power, axis }) => {
                     // Convert to diopters and vertex to the corneal plane.
@@ -79,9 +77,15 @@ impl CaseCompare {
                             (axis + 180.0) % 360.0
                         };
 
-                        (power, axis)
+                        PolarPoint {
+                            r: power,
+                            theta: axis,
+                        }
                     } else {
-                        (power, axis)
+                        PolarPoint {
+                            r: power,
+                            theta: axis,
+                        }
                     }
                 }
             }
