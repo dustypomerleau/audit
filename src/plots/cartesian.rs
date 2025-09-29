@@ -1,4 +1,4 @@
-use crate::plots::{PolarData, mean, radians_to_degrees, theta_radians};
+use crate::plots::{AsPlot, PolarData, mean, radians_to_degrees, theta_radians};
 use plotly::{Plot, Scatter, common::Mode};
 use serde::{Deserialize, Serialize};
 
@@ -10,9 +10,8 @@ pub struct CartesianCompare {
     pub cohort: CartesianData,
 }
 
-impl CartesianCompare {
-    /// Generate a cartesian [`Plot`] from a [`CartesianCompare`].
-    pub fn plot(self) -> Plot {
+impl AsPlot for CartesianCompare {
+    fn plot(&self) -> Plot {
         let Self { surgeon, cohort } = self;
 
         let ((surgeon_x, surgeon_y), (cohort_x, cohort_y)) =

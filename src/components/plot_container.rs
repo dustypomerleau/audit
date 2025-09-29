@@ -1,8 +1,8 @@
-use crate::error::AppError;
 #[cfg(feature = "ssr")] use crate::plots::{Cohort, get_compare};
+use crate::{error::AppError, plots::AsPlot};
 use leptos::prelude::{
-    ElementChild, Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, RwSignal, StyleAttribute,
-    Suspense, component, server, view,
+    ElementChild, Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, RwSignal, Suspense,
+    component, server, view,
 };
 
 #[component]

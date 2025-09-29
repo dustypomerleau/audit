@@ -1,13 +1,13 @@
 use crate::{
     bounded::Bounded,
     plots::{
-        CartesianData, CartesianPoint, ConfidenceParams, PlotStep, Scale, StdDev, Translate,
-        Variance, degrees_to_radians, mean, radians_to_degrees, theta_radians, variance,
+        AsPlot, CartesianData, CartesianPoint, ConfidenceParams, PlotStep, Scale, StdDev,
+        Translate, Variance, degrees_to_radians, mean, radians_to_degrees, theta_radians, variance,
     },
 };
 use plotly::{
     Layout, Plot, ScatterPolar,
-    common::{Dim, Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode},
+    common::{Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode},
     layout::{
         AngularAxis, LayoutPolar, Legend, PolarAxisAttributes, PolarAxisTicks, PolarTickMode,
         RadialAxis, TraceOrder,
@@ -24,10 +24,8 @@ pub struct PolarCompare {
     pub cohort: PolarData,
 }
 
-impl PolarCompare {
-    // todo: consider whether `plot(&self) -> Plot` should be a trait.
-    /// Generate a polar [`Plot`] from a [`PolarCompare`].
-    pub fn plot(&self) -> Plot {
+impl AsPlot for PolarCompare {
+    fn plot(&self) -> Plot {
         /// Create custom hover labels for double-angle plots.
         fn labels(data: &PolarData) -> Vec<String> {
             data.points
@@ -85,9 +83,7 @@ impl PolarCompare {
         // https://d3js.org/d3-format
         // The empty <extra> tag is necessary to avoid displaying the trace name.
         //
-        // todo: you need to divide the displayed value by 2 here, because it's a double-angle
-        // plot, so it's showing the doubled angle on hover.
-        let hover_template = "Power: %{r:.2f} D<br />Axis: %{theta:.0f}°<extra></extra>";
+        // let hover_template = "Power: %{r:.2f} D<br />Axis: %{theta:.0f}°<extra></extra>";
 
         let surgeon = ScatterPolar::new(surgeon_theta, surgeon_r)
             .name("cases")
