@@ -28,8 +28,7 @@ impl PolarCompare {
     // todo: consider whether `plot(&self) -> Plot` should be a trait.
     /// Generate a polar [`Plot`] from a [`PolarCompare`].
     pub fn plot(&self) -> Plot {
-        // Given that we double the angle in the [`PolarCompare`], we need a separate [`Vec`] to
-        // hold the labels, which should not be doubled.
+        /// Create custom hover labels for double-angle plots.
         fn labels(data: &PolarData) -> Vec<String> {
             data.points
                 .iter()
