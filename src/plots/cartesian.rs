@@ -116,6 +116,13 @@ impl CartesianData {
         self
     }
 
+    /// Create a [`Scatter`] trace from a [`CartesianData`].
+    pub fn scatter(&self) -> Box<Scatter<f64, f64>> {
+        let (x, y) = self.split_axes();
+
+        Scatter::new(x, y)
+    }
+
     /// Separate a cartesian dataset into 2 vectors of equal length, containing values for
     /// [`x`](CartesianPoint::x) and [`y`](CartesianPoint::y), respectively. This is useful for
     /// generating [`Plot`]s, which require each axis to be a separate vector.

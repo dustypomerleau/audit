@@ -35,16 +35,7 @@ impl AsPlot for PolarCompare {
         }
 
         let Self { surgeon, cohort } = self;
-
-        let ((surgeon_r, surgeon_theta), (cohort_r, cohort_theta)) =
-            (surgeon.split_axes(), cohort.split_axes());
-
         let (surgeon_centroid, cohort_centroid) = (surgeon.centroid(), cohort.centroid());
-
-        let (
-            (surgeon_centroid_r, surgeon_centroid_theta),
-            (cohort_centroid_r, cohort_centroid_theta),
-        ) = (surgeon_centroid.split_axes(), cohort_centroid.split_axes());
 
         let (surgeon_labels, surgeon_centroid_labels, cohort_centroid_labels) = (
             labels(surgeon),
@@ -69,9 +60,6 @@ impl AsPlot for PolarCompare {
             step: PlotStep::new(0.01).unwrap(),
         });
 
-        let (surgeon_ellipse_r, surgeon_ellipse_theta) = surgeon_ellipse.split_axes();
-        let (cohort_ellipse_r, cohort_ellipse_theta) = cohort_ellipse.split_axes();
-
         // todo: set these as constants app-wide and use in all plots
         let grid_color = "#363a48";
         let label_color = "#eaebed";
@@ -85,7 +73,8 @@ impl AsPlot for PolarCompare {
         //
         // let hover_template = "Power: %{r:.2f} D<br />Axis: %{theta:.0f}°<extra></extra>";
 
-        let surgeon = ScatterPolar::new(surgeon_theta, surgeon_r)
+        let surgeon = surgeon
+            .scatter_polar()
             .name("cases")
             .legend_group("surgeon")
             .legend_group_title(
@@ -99,7 +88,8 @@ impl AsPlot for PolarCompare {
             .hover_info(HoverInfo::Text)
             .hover_text_array(surgeon_labels);
 
-        let cohort = ScatterPolar::new(cohort_theta, cohort_r)
+        let cohort = cohort
+            .scatter_polar()
             .name("cases")
             .legend_group("cohort")
             .legend_group_title(
@@ -112,7 +102,8 @@ impl AsPlot for PolarCompare {
             .opacity(0.4)
             .hover_info(HoverInfo::Skip);
 
-        let surgeon_centroid = ScatterPolar::new(surgeon_centroid_theta, surgeon_centroid_r)
+        let surgeon_centroid = surgeon_centroid
+            .scatter_polar()
             .name("centroid")
             .legend_group("surgeon")
             .mode(Mode::Markers)
@@ -120,7 +111,8 @@ impl AsPlot for PolarCompare {
             .hover_info(HoverInfo::Text)
             .hover_text_array(surgeon_centroid_labels);
 
-        let cohort_centroid = ScatterPolar::new(cohort_centroid_theta, cohort_centroid_r)
+        let cohort_centroid = cohort_centroid
+            .scatter_polar()
             .name("centroid")
             .legend_group("cohort")
             .mode(Mode::Markers)
@@ -128,14 +120,16 @@ impl AsPlot for PolarCompare {
             .hover_info(HoverInfo::Text)
             .hover_text_array(cohort_centroid_labels);
 
-        let surgeon_ellipse = ScatterPolar::new(surgeon_ellipse_theta, surgeon_ellipse_r)
+        let surgeon_ellipse = surgeon_ellipse
+            .scatter_polar()
             .name("confidence (2 SD)")
             .legend_group("surgeon")
             .mode(Mode::Lines)
             .line(Line::new().color("#f100dc").width(1.5))
             .hover_info(HoverInfo::Skip);
 
-        let cohort_ellipse = ScatterPolar::new(cohort_ellipse_theta, cohort_ellipse_r)
+        let cohort_ellipse = cohort_ellipse
+            .scatter_polar()
             .name("confidence (2 SD)")
             .legend_group("cohort")
             .mode(Mode::Lines)
@@ -287,6 +281,13 @@ impl PolarData {
             .for_each(|point| point.theta = (point.theta + degrees) % 360.0);
 
         self
+    }
+
+    /// Create a [`ScatterPolar`] trace from a [`PolarData`].
+    pub fn scatter_polar(&self) -> Box<ScatterPolar<f64, f64>> {
+        let (r, theta) = self.split_axes();
+
+        ScatterPolar::new(theta, r)
     }
 
     /// Separate a polar dataset into 2 vectors of equal length, containing values for
