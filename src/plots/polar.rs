@@ -7,10 +7,10 @@ use crate::{
 };
 use plotly::{
     Layout, Plot, ScatterPolar,
-    common::{Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode},
+    common::{Anchor, Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode, Orientation},
     layout::{
-        AngularAxis, LayoutPolar, Legend, PolarAxisAttributes, PolarAxisTicks, PolarTickMode,
-        RadialAxis, TraceOrder,
+        AngularAxis, LayoutPolar, Legend, Margin, PolarAxisAttributes, PolarAxisTicks,
+        PolarTickMode, RadialAxis, TraceOrder,
     },
 };
 use serde::{Deserialize, Serialize};
@@ -122,7 +122,7 @@ impl AsPlot for PolarCompare {
 
         let surgeon_ellipse = surgeon_ellipse
             .scatter_polar()
-            .name("confidence (2 SD)")
+            .name("confidence")
             .legend_group("surgeon")
             .mode(Mode::Lines)
             .line(Line::new().color("#f100dc").width(1.5))
@@ -130,7 +130,7 @@ impl AsPlot for PolarCompare {
 
         let cohort_ellipse = cohort_ellipse
             .scatter_polar()
-            .name("confidence (2 SD)")
+            .name("confidence")
             .legend_group("cohort")
             .mode(Mode::Lines)
             .line(Line::new().color("#848998").width(1.5))
@@ -191,7 +191,11 @@ impl AsPlot for PolarCompare {
                 Legend::new()
                     .font(Font::new().color(legend_font_color))
                     .trace_order(TraceOrder::Grouped)
-                    .trace_group_gap(30),
+                    .orientation(Orientation::Horizontal)
+                    .x_anchor(Anchor::Center)
+                    .x(0.52)
+                    .y_anchor(Anchor::Top)
+                    .y(-0.1),
             );
 
         plot.set_layout(layout);

@@ -307,6 +307,13 @@
             width: calc(var(--space-4) * 15);
         }
     }
+
+    .plot-container {
+        @media (width >= 40rem) {
+            /* temporary centering until we design the parent grid */
+            justify-self: center;
+        }
+    }
 }
 
 @layer overrides {

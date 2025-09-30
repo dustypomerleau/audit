@@ -1,8 +1,8 @@
-#[cfg(feature = "ssr")] use crate::plots::{Cohort, get_compare};
-use crate::{error::AppError, plots::AsPlot};
+use crate::error::AppError;
+#[cfg(feature = "ssr")] use crate::plots::{AsPlot, Cohort, get_compare};
 use leptos::prelude::{
-    ElementChild, Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, RwSignal, Suspense,
-    component, server, view,
+    ClassAttribute, ElementChild, Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, RwSignal,
+    StyleAttribute, Suspense, component, server, view,
 };
 
 #[component]
@@ -18,7 +18,7 @@ pub fn PlotContainer() -> impl IntoView {
                 if let Some(Ok(plots)) = plot_resource.get() {
                     plots
                         .into_iter()
-                        .map(|plot| view! { <div inner_html=plot></div> })
+                        .map(|plot| view! { <div class="plot-container" inner_html=plot></div> })
                         .collect::<Vec<_>>()
                         .into_any()
                 } else {
@@ -37,6 +37,8 @@ pub async fn get_plots(year: u32) -> Result<Vec<String>, AppError> {
 
     // plots to create:
     // 1. preop corneal cylinder polar plot
+    // todo: you need to adjust the refractive cylinder angle in order to compare it to the corneal
+    // cylinder - do you need to do that for both plots, or just for the target error plot?
     // 2. postop refractive cylinder vertexed to cornea polar plot
     // 3. target error polar plot (vertexed to cornea)
     // 4. preop corneal cylinder x, postop refractive cylinder vertexed to cornea y, cartesian
