@@ -7,8 +7,8 @@ version = "0.1.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-axum = { version = "0.8.5", optional = true }
-axum-extra = { version = "0.10.2", features = ["cookie", "typed-header"], optional = true }
+axum = { version = "0.8.6", optional = true }
+axum-extra = { version = "0.10.3", features = ["cookie", "typed-header"], optional = true }
 axum-macros = { version = "0.5.0", optional = true }
 base64ct = { version = "1.8.0", features = ["alloc"], optional = true }
 # todo: switch to jiff
