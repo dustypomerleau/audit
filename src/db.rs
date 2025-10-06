@@ -31,8 +31,8 @@ pub fn to_centi(value: f32) -> i32 {
 }
 
 /// Takes an integer value from the database and returns a float representing the user-facing value.
-pub fn to_hecto(value: i32) -> f32 {
-    (value as f32) / 100.0
+pub fn to_hecto<T: Into<f64>>(value: T) -> f64 {
+    value.into() / 100.0
 }
 
 #[cfg(test)]

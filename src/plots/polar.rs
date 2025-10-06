@@ -68,11 +68,18 @@ impl AsPlot for PolarCompare {
             step: PlotStep::new(0.01).unwrap(),
         });
 
-        // todo: set these as constants app-wide and use in all plots
+        // todo: set these as constants app-wide, adapt for light mode, and use in all plots
+        let cohort_centroid_marker_color = "#f5f5f6";
+        let cohort_confidence_color = "#848998";
+        let cohort_marker_color = "#848998";
         let grid_color = "#363a48";
         let label_color = "#eaebed";
         let legend_font_color = "#caccd1";
         let legend_group_font_color = "#eaebed";
+        let paper_background_color = "#252833";
+        let surgeon_centroid_marker_color = "#00f115";
+        let surgeon_confidence_color = "#f100dc";
+        let surgeon_marker_color = "#ff7b00";
         let tick_color = "#acafb9";
 
         // These format strings use d3 format syntax:
@@ -91,7 +98,7 @@ impl AsPlot for PolarCompare {
                     .font(Font::new().color(legend_group_font_color)),
             )
             .mode(Mode::Markers)
-            .marker(Marker::new().color("#ff7b00"))
+            .marker(Marker::new().color(surgeon_marker_color))
             // .hover_template(hover_template);
             .hover_info(HoverInfo::Text)
             .hover_text_array(surgeon_labels);
@@ -106,7 +113,7 @@ impl AsPlot for PolarCompare {
                     .font(Font::new().color(legend_group_font_color)),
             )
             .mode(Mode::Markers)
-            .marker(Marker::new().color("#848998"))
+            .marker(Marker::new().color(cohort_marker_color))
             .opacity(0.4)
             .hover_info(HoverInfo::Skip);
 
@@ -115,7 +122,7 @@ impl AsPlot for PolarCompare {
             .name("centroid")
             .legend_group("surgeon")
             .mode(Mode::Markers)
-            .marker(Marker::new().color("#00f115").size(10))
+            .marker(Marker::new().color(surgeon_centroid_marker_color).size(10))
             .hover_info(HoverInfo::Text)
             .hover_text_array(surgeon_centroid_labels);
 
@@ -124,7 +131,7 @@ impl AsPlot for PolarCompare {
             .name("centroid")
             .legend_group("cohort")
             .mode(Mode::Markers)
-            .marker(Marker::new().color("#f5f5f6").size(10))
+            .marker(Marker::new().color(cohort_centroid_marker_color).size(10))
             .hover_info(HoverInfo::Text)
             .hover_text_array(cohort_centroid_labels);
 
@@ -133,15 +140,16 @@ impl AsPlot for PolarCompare {
             .name("confidence")
             .legend_group("surgeon")
             .mode(Mode::Lines)
-            .line(Line::new().color("#f100dc").width(1.5))
+            .line(Line::new().color(surgeon_confidence_color).width(1.5))
             .hover_info(HoverInfo::Skip);
 
         let cohort_ellipse = cohort_ellipse
             .scatter_polar()
-            .name("confidence")
+            // Hack: adding spaces to the name because Plotly doesn't have horizontal group spacing.
+            .name("confidence    ")
             .legend_group("cohort")
             .mode(Mode::Lines)
-            .line(Line::new().color("#848998").width(1.5))
+            .line(Line::new().color(cohort_confidence_color).width(1.5))
             .opacity(0.7)
             .hover_info(HoverInfo::Skip);
 
@@ -193,15 +201,16 @@ impl AsPlot for PolarCompare {
             .angular_axis(angular_axis);
 
         let layout = Layout::new()
-            .paper_background_color("#252833")
+            .paper_background_color(paper_background_color)
             .polar(polar_layout)
+            .margin(Margin::new().top(30).right(30).bottom(0).left(30))
             .legend(
                 Legend::new()
                     .font(Font::new().color(legend_font_color))
                     .trace_order(TraceOrder::Grouped)
                     .orientation(Orientation::Horizontal)
                     .x_anchor(Anchor::Center)
-                    .x(0.52)
+                    .x(0.5)
                     .y_anchor(Anchor::Top)
                     .y(-0.1),
             );

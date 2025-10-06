@@ -1,5 +1,9 @@
 use crate::plots::{AsPlot, Polar, PolarData, PolarPoint, mean, radians_to_degrees, theta_radians};
-use plotly::{Plot, Scatter, common::Mode};
+use plotly::{
+    Layout, Plot, Scatter,
+    common::{Anchor, Font, HoverInfo, LegendGroupTitle, Marker, Mode, Orientation},
+    layout::{Axis, Legend, Margin, TraceOrder},
+};
 use serde::{Deserialize, Serialize};
 
 /// Convert a polar dataset to a cartesian dataset.
@@ -19,24 +23,97 @@ pub struct CartesianCompare {
 
 impl AsPlot for CartesianCompare {
     fn plot(&self) -> Plot {
+        /// Place values into bins of 0.25 D, and return a vec of bin/mean pairs, where x is the
+        /// middle of the bin.
+        fn bins(data: &CartesianData) -> CartesianData {
+            todo!()
+        }
+
+        /// Create custom hover labels for the plot.
+        fn labels(data: &CartesianData) -> Vec<String> {
+            data.points
+                .iter()
+                .map(|CartesianPoint { x, y }| format!("Pre: {x:.2} D, Post: {y:.2} D"))
+                .collect()
+        }
+
+        // todo: set these as constants app-wide, adapt for light mode, and use in all plots
+        // (see plots/polar.rs as well)
+        let cohort_centroid_marker_color = "#f5f5f6";
+        let cohort_confidence_color = "#848998";
+        let cohort_marker_color = "#848998";
+        let grid_color = "#363a48";
+        let label_color = "#eaebed";
+        let legend_font_color = "#caccd1";
+        let legend_group_font_color = "#eaebed";
+        let paper_background_color = "#252833";
+        let surgeon_centroid_marker_color = "#00f115";
+        let surgeon_confidence_color = "#f100dc";
+        let surgeon_marker_color = "#ff7b00";
+        let tick_color = "#acafb9";
+
         let Self { surgeon, cohort } = self;
 
-        let ((surgeon_x, surgeon_y), (cohort_x, cohort_y)) =
-            (surgeon.split_axes(), cohort.split_axes());
-
-        let surgeon = Scatter::new(surgeon_x, surgeon_y)
-            .name("Surgeon")
-            .mode(Mode::Markers);
-
-        let cohort = Scatter::new(cohort_x, cohort_y)
-            .name("Cohort")
+        let surgeon = surgeon
+            .scatter()
+            .name("cases")
+            .legend_group("surgeon")
+            .legend_group_title(
+                LegendGroupTitle::new()
+                    .text("Surgeon")
+                    .font(Font::new().color(legend_group_font_color)),
+            )
             .mode(Mode::Markers)
-            .opacity(0.6);
+            .marker(Marker::new().color(surgeon_marker_color))
+            // .hover_template(hover_template);
+            .hover_info(HoverInfo::Text)
+            .hover_text_array(labels(surgeon));
+
+        let cohort = cohort
+            .scatter()
+            .name("cases")
+            .legend_group("cohort")
+            .legend_group_title(
+                LegendGroupTitle::new()
+                    // Hack: adding spaces to the name because Plotly doesn't have horizontal group
+                    // spacing.
+                    .text("Peer cohort    ")
+                    .font(Font::new().color(legend_group_font_color)),
+            )
+            .mode(Mode::Markers)
+            .marker(Marker::new().color(cohort_marker_color))
+            .opacity(0.4)
+            .hover_info(HoverInfo::Skip);
+
+        // todo: add plots for 0.25 D bins using the centroid colors
 
         let mut plot = Plot::new();
-        // note: the surgeon should be added after the cohort, because that allows hover on their
-        // points, which are "on top" in the layered plot
         plot.add_traces(vec![cohort, surgeon]);
+
+        let axis = Axis::new()
+            .color(label_color)
+            .show_line(false)
+            .zero_line(false)
+            .grid_color(grid_color);
+
+        let layout = Layout::new()
+            .x_axis(axis.clone())
+            .y_axis(axis)
+            .paper_background_color(paper_background_color)
+            .plot_background_color(paper_background_color)
+            .margin(Margin::new().top(30).right(30).bottom(0).left(30))
+            .legend(
+                Legend::new()
+                    .font(Font::new().color(legend_font_color))
+                    .trace_order(TraceOrder::Grouped)
+                    .orientation(Orientation::Horizontal)
+                    .x_anchor(Anchor::Center)
+                    .x(0.5)
+                    .y_anchor(Anchor::Top)
+                    .y(-0.1),
+            );
+
+        plot.set_layout(layout);
 
         plot
     }

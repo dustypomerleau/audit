@@ -2,8 +2,10 @@ use crate::{
     bounded::Bounded,
     db::db,
     error::AppError,
-    model::{Case, RefCyl, SurgeonCase, VertexK},
-    plots::{CartesianCompare, PolarCompare, PolarPoint},
+    model::{Case, RefCyl, Refraction, SurgeonCase, Target, TargetCyl},
+    plots::{
+        Cartesian, CartesianCompare, CartesianPoint, Polar, PolarCompare, PolarPoint, VertexK,
+    },
     query::{query_select_compare, query_select_self_compare},
 };
 use gel_tokio::Client;
@@ -25,6 +27,46 @@ pub struct CaseCompare {
     cohort: Vec<Case>,
 }
 
+pub fn ref_cyl_double_angle(case: &Case) -> PolarPoint {
+    match case.refraction.after.cyl {
+        None => PolarPoint { r: 0.0, theta: 0.0 },
+
+        Some(RefCyl { power, axis }) => {
+            // Convert to diopters and vertex to the corneal plane.
+            let power = power.vertex();
+
+            // We double the axis to create a double angle plot. Since the type from the DB
+            // can't exceed 179, our doubled axis can't exceed 358.
+            let axis = f64::from(axis.inner()) * 2.0;
+
+            if power.is_sign_negative() {
+                let power = -power;
+
+                // When converting to plus cyl, we would normally add 90° % 180, but since
+                // we are already working with doubled angles, we need to add 180° % 360. If
+                // the doubled axis is _exactly_ 180, then we want to return 0.0 rather than
+                // 360.0 for plotting purposes (even though they are equivalent), so we
+                // special-case that situation.
+                let axis = if axis == 180.0 {
+                    0.0
+                } else {
+                    (axis + 180.0) % 360.0
+                };
+
+                PolarPoint {
+                    r: power,
+                    theta: axis,
+                }
+            } else {
+                PolarPoint {
+                    r: power,
+                    theta: axis,
+                }
+            }
+        }
+    }
+}
+
 impl CaseCompare {
     /// Compare preoperative corneal cylinder values.
     pub fn polar_cyl_before(&self) -> PolarCompare {
@@ -32,9 +74,9 @@ impl CaseCompare {
             let ks = case.biometry.ks;
 
             PolarPoint {
-                r: ks.cyl() as f64 / 100.0,
+                r: f64::from(ks.cyl()) / 100.0,
                 // We double the axis to create a double-angle plot.
-                theta: ks.steep_axis() as f64 * 2.0,
+                theta: f64::from(ks.steep_axis()) * 2.0,
             }
         }
 
@@ -51,46 +93,6 @@ impl CaseCompare {
 
     /// Compare postoperative refractive cylinder values, vertexed to the corneal plane.
     pub fn polar_cyl_after(&self) -> PolarCompare {
-        fn ref_cyl_double_angle(case: &Case) -> PolarPoint {
-            match case.refraction.after.cyl {
-                None => PolarPoint { r: 0.0, theta: 0.0 },
-
-                Some(RefCyl { power, axis }) => {
-                    // Convert to diopters and vertex to the corneal plane.
-                    let power = power.vertex();
-
-                    // We double the axis to create a double angle plot. Since the type from the DB
-                    // can't exceed 179, our doubled axis can't exceed 358.
-                    let axis = axis.inner() as f64 * 2.0;
-
-                    if power.is_sign_negative() {
-                        let power = -power;
-
-                        // When converting to plus cyl, we would normally add 90° % 180, but since
-                        // we are already working with doubled angles, we need to add 180° % 360. If
-                        // the doubled axis is _exactly_ 180, then we want to return 0.0 rather than
-                        // 360.0 for plotting purposes (even though they are equivalent), so we
-                        // special-case that situation.
-                        let axis = if axis == 180.0 {
-                            0.0
-                        } else {
-                            (axis + 180.0) % 360.0
-                        };
-
-                        PolarPoint {
-                            r: power,
-                            theta: axis,
-                        }
-                    } else {
-                        PolarPoint {
-                            r: power,
-                            theta: axis,
-                        }
-                    }
-                }
-            }
-        }
-
         let surgeon = self
             .surgeon
             .iter()
@@ -102,31 +104,87 @@ impl CaseCompare {
         PolarCompare { surgeon, cohort }
     }
 
-    /// Compare preoperative corneal cylinder and postoperative refractive cylinder.
-    // todo: vertex the postop refractive cylinder to the corneal plane
+    // todo: Do we need an equivalent for SE or sph?
+    // todo: you don't want this to generate negative differences
+    pub fn polar_cyl_target_error(&self) -> PolarCompare {
+        fn delta_target(case: &Case) -> PolarPoint {
+            let target = if let Target {
+                cyl: Some(TargetCyl { power, axis }),
+                ..
+            } = case.target
+            {
+                // todo: We are presuming that the target power is in the spectacle plane, and
+                // therefore needs to be vertexed to corneal plane, but this needs to be
+                // confirmed (Abulafia article says yes).
+                PolarPoint {
+                    r: power.vertex(),
+                    theta: f64::from(axis.inner()),
+                }
+                .cartesian()
+            } else {
+                CartesianPoint { x: 0.0, y: 0.0 }
+            };
+
+            let refraction = if let Refraction {
+                cyl: Some(RefCyl { power, axis }),
+                ..
+            } = case.refraction.after
+            {
+                PolarPoint {
+                    r: power.vertex(),
+                    theta: f64::from(axis.inner()),
+                }
+                .cartesian()
+            } else {
+                CartesianPoint { x: 0.0, y: 0.0 }
+            };
+
+            CartesianPoint {
+                x: refraction.x - target.x,
+                y: refraction.y - target.y,
+            }
+            .polar()
+        }
+
+        let CaseCompare { surgeon, cohort } = self;
+        let surgeon = surgeon.iter().map(|sc| delta_target(&sc.case)).collect();
+        let cohort = cohort.iter().map(delta_target).collect();
+
+        PolarCompare { surgeon, cohort }
+    }
+
+    /// Compare preoperative corneal cylinder and postoperative refractive cylinder (vertexed to the
+    /// corneal plane). We use the absolute value of the cylinder, because the axis isn't relevant
+    /// for this plot.
     pub fn cartesian_delta_cyl(&self) -> CartesianCompare {
         fn k_cyl_before(case: &Case) -> f64 {
-            case.biometry.ks.cyl() as f64 / 100.0
+            f64::from(case.biometry.ks.cyl()) / 100.0
         }
 
         fn ref_cyl_after(case: &Case) -> f64 {
             case.refraction
                 .after
                 .cyl
-                .map(|refcyl| (refcyl.power.inner() as f64 / 100.0).abs())
-                .unwrap_or(0_f64)
+                .map(|RefCyl { power, .. }| power.vertex().abs())
+                .unwrap_or(0.0)
         }
 
         let surgeon = self
             .surgeon
             .iter()
-            .map(|sc| (k_cyl_before(&sc.case), ref_cyl_after(&sc.case)))
+            .map(|SurgeonCase { case, .. }| CartesianPoint {
+                x: k_cyl_before(case),
+                y: ref_cyl_after(case),
+            })
             .collect();
 
         let cohort = self
             .cohort
             .iter()
-            .map(|cc| (k_cyl_before(cc), ref_cyl_after(cc)))
+            .map(|case| CartesianPoint {
+                x: k_cyl_before(case),
+                y: ref_cyl_after(case),
+            })
             .collect();
 
         CartesianCompare { surgeon, cohort }

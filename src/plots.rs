@@ -12,6 +12,7 @@
 mod cartesian;
 mod case;
 mod polar;
+mod vertex;
 
 use crate::{bounded::Bounded, range_bounded};
 pub use cartesian::*;
@@ -20,6 +21,7 @@ use plotly::Plot;
 pub use polar::*;
 use serde::{Deserialize, Serialize};
 use std::f64::consts::PI;
+pub use vertex::*;
 
 /// Generate a Plotly [`Plot`] from the given type.
 pub trait AsPlot {

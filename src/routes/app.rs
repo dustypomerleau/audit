@@ -1,5 +1,5 @@
 use crate::{
-    components::{PlotContainer, SignedOut},
+    components::{PlotSet, SignedOut},
     routes::{Add, Gateway, Instructions, Landing, List, Protected, Report, SignUp, Terms},
 };
 use leptos::prelude::{
@@ -59,7 +59,7 @@ pub fn App() -> impl IntoView {
                     <Route path=StaticSegment("terms") view=Terms />
                     <ParentRoute path=StaticSegment("protected") view=Protected>
                         // note: just a test route, delete once plots are working
-                        <Route path=StaticSegment("test-plots") view=PlotContainer />
+                        <Route path=StaticSegment("test-plots") view=PlotSet />
                         // todo: consider making instructions a sidebar inside Add
                         <Route path=StaticSegment("add") view=Add />
                         <Route path=StaticSegment("instructions") view=Instructions />

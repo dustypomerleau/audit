@@ -56,7 +56,7 @@ fn test_cartesian() {
 
 #[test]
 fn test_confidence() {
-    let mut polar = PolarData {
+    let polar = PolarData {
         points: vec![
             PolarPoint {
                 theta: 45.0,
