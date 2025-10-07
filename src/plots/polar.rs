@@ -1,8 +1,9 @@
 use crate::{
     bounded::Bounded,
     plots::{
-        AsPlot, CartesianData, CartesianPoint, ConfidenceParams, PlotStep, Scale, StdDev,
-        Translate, Variance, degrees_to_radians, mean, radians_to_degrees, theta_radians, variance,
+        AsPlot, Cartesian, CartesianData, CartesianPoint, ConfidenceParams, PlotStep, Scale,
+        StdDev, Translate, Variance, degrees_to_radians, mean, radians_to_degrees, theta_radians,
+        variance,
     },
 };
 use plotly::{
@@ -15,6 +16,13 @@ use plotly::{
 };
 use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
+
+/// Convert a cartesian dataset to a polar dataset.
+pub trait Polar {
+    type PolarOutput;
+
+    fn polar(&self) -> Self::PolarOutput;
+}
 
 /// A pair of polar datasets, representing the surgeon of interest and a comparison cohort of
 /// peers.
@@ -216,6 +224,23 @@ pub struct PolarData {
     pub points: Vec<PolarPoint>,
 }
 
+impl Cartesian for PolarData {
+    type CartesianOutput = CartesianData;
+
+    fn cartesian(&self) -> Self::CartesianOutput {
+        self.points
+            .iter()
+            .map(|PolarPoint { r, theta }| {
+                let (sin_theta, cos_theta) = degrees_to_radians(*theta).sin_cos();
+                let x = r * cos_theta;
+                let y = r * sin_theta;
+
+                (x, y)
+            })
+            .collect()
+    }
+}
+
 impl FromIterator<(f64, f64)> for PolarData {
     fn from_iter<T: IntoIterator<Item = (f64, f64)>>(iter: T) -> Self {
         let mut points = Vec::new();
@@ -246,33 +271,19 @@ impl PolarData {
         Self { points: Vec::new() }
     }
 
-    /// Convert a polar dataset to a cartesian dataset.
-    pub fn cartesian(&self) -> CartesianData {
-        self.points
-            .iter()
-            .map(|PolarPoint { r, theta }| {
-                let (sin_theta, cos_theta) = degrees_to_radians(*theta).sin_cos();
-                let x = r * cos_theta;
-                let y = r * sin_theta;
-
-                (x, y)
-            })
-            .collect()
-    }
-
     /// Returns a [`PolarData`] containing a single [`PolarPoint`] representing the mean vector of
     /// the polar dataset.
     pub fn centroid(&self) -> PolarData {
         let (x, y) = self.cartesian().split_axes();
         let (mean_x, mean_y) = (mean(&x), mean(&y));
         let theta_centroid_radians = theta_radians(mean_x, mean_y);
-        let theta_centroid_degrees = radians_to_degrees(theta_centroid_radians);
+        let theta_centroid = radians_to_degrees(theta_centroid_radians);
         let r_centroid = f64::sqrt((mean_x * mean_x) + (mean_y * mean_y));
 
         PolarData {
             points: vec![PolarPoint {
                 r: r_centroid,
-                theta: theta_centroid_degrees,
+                theta: theta_centroid,
             }],
         }
     }
@@ -419,6 +430,20 @@ impl PolarData {
 pub struct PolarPoint {
     pub r: f64,
     pub theta: f64,
+}
+
+impl Cartesian for PolarPoint {
+    type CartesianOutput = CartesianPoint;
+
+    fn cartesian(&self) -> Self::CartesianOutput {
+        let PolarPoint { r, theta } = self;
+
+        let (sin_theta, cos_theta) = degrees_to_radians(*theta).sin_cos();
+        let x = r * cos_theta;
+        let y = r * sin_theta;
+
+        CartesianPoint { x, y }
+    }
 }
 
 #[cfg(test)]

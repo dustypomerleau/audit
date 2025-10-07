@@ -1,6 +1,13 @@
-use crate::plots::{AsPlot, PolarData, mean, radians_to_degrees, theta_radians};
+use crate::plots::{AsPlot, Polar, PolarData, PolarPoint, mean, radians_to_degrees, theta_radians};
 use plotly::{Plot, Scatter, common::Mode};
 use serde::{Deserialize, Serialize};
+
+/// Convert a polar dataset to a cartesian dataset.
+pub trait Cartesian {
+    type CartesianOutput;
+
+    fn cartesian(&self) -> Self::CartesianOutput;
+}
 
 /// A pair of cartesian datasets, representing the surgeon of interest and a comparison cohort of
 /// peers.
@@ -69,6 +76,23 @@ impl FromIterator<CartesianPoint> for CartesianData {
     }
 }
 
+impl Polar for CartesianData {
+    type PolarOutput = PolarData;
+
+    fn polar(&self) -> Self::PolarOutput {
+        self.points
+            .iter()
+            .map(|CartesianPoint { x, y }| {
+                let theta_radians = theta_radians(*x, *y);
+                let theta = radians_to_degrees(theta_radians);
+                let r = f64::sqrt((x * x) + (y * y));
+
+                PolarPoint { r, theta }
+            })
+            .collect()
+    }
+}
+
 impl CartesianData {
     fn new() -> Self {
         Self { points: Vec::new() }
@@ -89,20 +113,6 @@ impl CartesianData {
             .sum::<f64>();
 
         sum / population
-    }
-
-    /// Convert a cartesian dataset to a polar dataset.
-    pub fn polar(&self) -> PolarData {
-        self.points
-            .iter()
-            .map(|CartesianPoint { x, y }| {
-                let theta_radians = theta_radians(*x, *y);
-                let theta_degrees = radians_to_degrees(theta_radians);
-                let r = f64::sqrt((x * x) + (y * y));
-
-                (r, theta_degrees)
-            })
-            .collect()
     }
 
     /// Scale a cartesian dataset in place, multiplying the [`x`](CartesianPoint::x) and
@@ -154,6 +164,19 @@ pub struct CartesianPoint {
     pub y: f64,
 }
 
+impl Polar for CartesianPoint {
+    type PolarOutput = PolarPoint;
+
+    fn polar(&self) -> Self::PolarOutput {
+        let CartesianPoint { x, y } = self;
+        let theta_radians = theta_radians(*x, *y);
+        let theta = radians_to_degrees(theta_radians);
+        let r = f64::sqrt((x * x) + (y * y));
+
+        PolarPoint { r, theta }
+    }
+}
+
 /// A set of scale factors for growing or shrinking a cartesian plot along its axes.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct Scale {
@@ -167,3 +190,4 @@ pub struct Translate {
     pub x: f64,
     pub y: f64,
 }
+
