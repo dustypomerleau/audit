@@ -1,4 +1,4 @@
-use crate::{bounded::Bounded, model::Axis};
+use crate::{bounded::Bounded, model::Axis, range_bounded};
 use serde::{Deserialize, Serialize};
 
 /// The class of [`Iol`] (monofocal, EDOF, multifocal).
@@ -10,7 +10,7 @@ pub enum Focus {
     Multi,
 }
 
-bounded!(
+range_bounded!(
     (IolSe, i32, -2000..=6000, 25),
     (ToricPower, u32, 100..=2000, 25),
 );

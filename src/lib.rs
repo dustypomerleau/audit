@@ -20,7 +20,6 @@ pub mod components;
 #[cfg(feature = "ssr")] pub mod db;
 pub mod email;
 pub mod error;
-#[macro_use]
 pub mod macros;
 #[cfg(feature = "ssr")] pub mod mock;
 pub mod model;

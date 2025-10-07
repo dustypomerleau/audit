@@ -6,6 +6,7 @@ use crate::{
         Refraction, Sia, SiaPower, Side, Site, Surgeon, SurgeonCase, SurgeonDefaults, SurgeonSia,
         Target, TargetCyl, TargetCylPower, TargetSe, ToricPower, Va, VaDen, VaNum, Wtw,
     },
+    range_bounded,
 };
 use chrono::{DateTime, Utc};
 use rand::{
@@ -14,7 +15,7 @@ use rand::{
     rng,
 };
 
-bounded!((Prob, f32, 0.0..1.0));
+range_bounded!((Prob, f32, 0.0..1.0));
 
 /// Provides a mocked instance of `Self` for testing purposes.
 pub trait Mock: Sized {

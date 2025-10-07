@@ -2,10 +2,11 @@ use crate::{
     bounded::Bounded,
     error::AppError,
     model::{Axis, Cyl, Sca},
+    range_bounded,
 };
 use serde::{Deserialize, Serialize};
 
-bounded!(
+range_bounded!(
     (RefCylPower, i32, -1000..=1000, 25),
     (RefSph, i32, -2000..=2000, 25),
 );

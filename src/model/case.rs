@@ -2,6 +2,7 @@
 use crate::{
     bounded::Bounded,
     model::{Biometry, Formula, OpIol, OpRefraction, OpVa, Sia, Site, Target},
+    range_bounded,
 };
 use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
@@ -58,7 +59,7 @@ impl Display for Adverse {
     }
 }
 
-bounded!((Main, u32, 100..=600));
+range_bounded!((Main, u32, 100..=600));
 
 /// A single surgical case.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]

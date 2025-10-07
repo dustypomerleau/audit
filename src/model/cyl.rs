@@ -1,11 +1,11 @@
-use crate::bounded::Bounded;
+use crate::{bounded::Bounded, range_bounded};
 use serde::{Deserialize, Serialize};
 
 pub trait CylPower {}
 impl CylPower for i32 {}
 impl CylPower for u32 {}
 
-bounded!((Axis, u32, 0..=179));
+range_bounded!((Axis, u32, 0..=179));
 
 pub trait Cyl<T>
 where T: CylPower

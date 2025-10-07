@@ -1,9 +1,9 @@
-use crate::bounded::Bounded;
+use crate::{bounded::Bounded, range_bounded};
 use serde::{Deserialize, Serialize};
 
 // Choosing not to use NonZeroU32 for VaDen, because it has a slightly different interface than all
 // our other bounded types.
-bounded!((VaDen, u32, 1..u32::MAX), (VaNum, u32, 0..=2000));
+range_bounded!((VaDen, u32, 1..u32::MAX), (VaNum, u32, 0..=2000));
 
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  

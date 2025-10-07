@@ -1,10 +1,11 @@
 use crate::{
     bounded::Bounded,
     model::{Axis, Cyl},
+    range_bounded,
 };
 use serde::{Deserialize, Serialize};
 
-bounded!(
+range_bounded!(
     (Acd, u32, 0..=600),
     (Al, u32, 1200..=3800),
     (Cct, u32, 350..=650),

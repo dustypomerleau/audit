@@ -1,10 +1,11 @@
 use crate::{
     bounded::Bounded,
     model::{Axis, Cyl},
+    range_bounded,
 };
 use serde::{Deserialize, Serialize};
 
-bounded!((SiaPower, u32, 0..=200));
+range_bounded!((SiaPower, u32, 0..=200));
 
 /// A surgically-induced astigmatism. The purist would prefer using
 /// `meridian` rather than `axis` for [`Sia`] and biometric Ks, but on balance I've

@@ -13,7 +13,7 @@ mod cartesian;
 mod case;
 mod polar;
 
-use crate::bounded::Bounded;
+use crate::{bounded::Bounded, range_bounded};
 pub use cartesian::*;
 pub use case::*;
 use plotly::Plot;
@@ -26,7 +26,7 @@ pub trait AsPlot {
     fn plot(&self) -> Plot;
 }
 
-bounded!((StdDev, f64, 1.0..=5.0), (PlotStep, f64, 0.001..=0.05));
+range_bounded!((StdDev, f64, 1.0..=5.0), (PlotStep, f64, 0.001..=0.05));
 
 /// The characteristics of a confidence ellipse.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]

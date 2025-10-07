@@ -1,6 +1,7 @@
 use crate::{
     bounded::Bounded,
     model::{Axis, Cyl, Sca},
+    range_bounded,
 };
 use serde::{Deserialize, Serialize};
 
@@ -44,7 +45,7 @@ impl Formula {
 
 // note: ToricPower, TargetCylPower are nonnegative, but RefCylPower can be negative.
 // This has implications for the `Cyl` trait that you need to consider.
-bounded!((TargetCylPower, u32, 0..=600), (TargetSe, i32, -600..=200));
+range_bounded!((TargetCylPower, u32, 0..=600), (TargetSe, i32, -600..=200));
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct TargetCyl {

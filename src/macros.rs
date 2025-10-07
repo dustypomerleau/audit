@@ -5,10 +5,11 @@
 /// The generated type implements [`Bounded<integer_type>`](crate::bounded::Bounded),
 /// [`AsRef<integer_type>`], and a `Self::new()` constructor with bounds checking.
 // todo: replace the bounded macro with a derive macro that takes range and rem as arguments.
-macro_rules! bounded {
+#[macro_export]
+macro_rules! range_bounded {
     ($(($name:ident, $type:ty, $range:expr $(, $rem:literal)? $(,)?)),+ $(,)?) => (
         $(
-            /// A bounded integer newtype generated using the [`bounded!`] macro.
+            /// A bounded integer newtype generated using the [`range_bounded!`] macro.
             /// The generated type implements [`Bounded<integer_type>`](crate::bounded::Bounded),
             /// [`AsRef<integer_type>`], and a `Self::new()` constructor with bounds checking. It
             /// also provides easy newtype mocking via [`Mock`](crate::mock::Mock), for testing
@@ -81,6 +82,7 @@ macro_rules! bounded {
     )
 }
 
+#[macro_export]
 macro_rules! some_or_empty {
     ($($id:ident),+) => (let ($($id),+) = ($($crate::db::some_or_empty($id),)+);)
 }

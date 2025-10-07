@@ -46,8 +46,8 @@ impl AsPlot for PolarCompare {
         let surgeon_ellipse = surgeon.confidence(&ConfidenceParams {
             variance: Variance::Population,
             // todo: unwrap_or_default() hangs the program if your value is out of bounds, because
-            // you derived Default in bounded!. You need to rethink that decision and come up with
-            // a solution to an out of bounds value in these cases.
+            // you derived Default in range_bounded!. You need to rethink that decision and come up
+            // with a solution to an out of bounds value in these cases.
             std_dev: StdDev::new(2.0).unwrap(),
             // Ellipse breaks are evident at 0.05, so the step should probably be bounded
             // 0.001..=0.05 or something.
@@ -209,7 +209,7 @@ impl AsPlot for PolarCompare {
 pub struct PolarData {
     // Although we could define:
     //
-    // bounded!((PolarAxis, f64, 0.0..360.0));
+    // range_bounded!((PolarAxis, f64, 0.0..360.0));
     //
     // and use that instead of f64, it adds complexity to passing the data to Plotly, and the
     // bounds will already be met because of the constraints on the DB.

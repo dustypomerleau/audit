@@ -1,13 +1,17 @@
 #[cfg(feature = "ssr")] use crate::db::db;
+#[cfg(feature = "ssr")]
 use crate::{
     bounded::Bounded,
-    error::AppError,
     model::{
-        Adverse, AfterVa, BeforeVa, Biometry, Case, FormCase, Formula, Iol, OpIol, OpRefraction,
-        OpVa, RefCyl, Refraction, Sia, Side, Site, SurgeonCase, Target, TargetCyl, Va,
+        Adverse, AfterVa, BeforeVa, Biometry, Case, Formula, OpIol, OpRefraction, OpVa, RefCyl,
+        Refraction, Sia, Side, Site, SurgeonCase, Target, TargetCyl, Va,
     },
 };
-use chrono::Datelike;
+use crate::{
+    error::AppError,
+    model::{FormCase, Iol},
+};
+#[cfg(feature = "ssr")] use chrono::Datelike;
 use leptos::{
     prelude::{
         ActionForm, ElementChild, For, Get, GlobalAttributes, IntoView, ServerAction,
