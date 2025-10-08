@@ -1,9 +1,7 @@
 use crate::plots::{AsPlot, Polar, PolarData, PolarPoint, mean, radians_to_degrees, theta_radians};
 use plotly::{
     Configuration, Layout, Plot, Scatter,
-    common::{
-        Anchor, Font, HoverInfo, LegendGroupTitle, Marker, Mode, Orientation, Pad, Side, Title,
-    },
+    common::{Anchor, Font, HoverInfo, LegendGroupTitle, Marker, Mode, Orientation, Title},
     configuration::{ModeBarButtonName, ToImageButtonOptions},
     layout::{Axis, Legend, Margin, TraceOrder},
 };
@@ -26,11 +24,12 @@ pub struct CartesianCompare {
 
 impl AsPlot for CartesianCompare {
     fn plot(&self) -> Plot {
+        #[allow(clippy::empty_line_after_doc_comments)]
         /// Place values into bins of 0.25 D, and return a vec of bin/mean pairs, where x is the
         /// middle of the bin.
-        fn bins(data: &CartesianData) -> CartesianData {
-            todo!()
-        }
+        // fn bins(data: &CartesianData) -> CartesianData {
+        //     todo!()
+        // }
 
         /// Create custom hover labels for the plot.
         fn labels(data: &CartesianData) -> Vec<String> {
@@ -42,7 +41,9 @@ impl AsPlot for CartesianCompare {
 
         // todo: set these as constants app-wide, adapt for light mode, and use in all plots
         // (see plots/polar.rs as well)
+        #[allow(unused_variables)]
         let cohort_centroid_marker_color = "#f5f5f6";
+        #[allow(unused_variables)]
         let cohort_confidence_color = "#848998";
         let cohort_marker_color = "#848998";
         let grid_color = "#363a48";
@@ -50,9 +51,12 @@ impl AsPlot for CartesianCompare {
         let legend_font_color = "#caccd1";
         let legend_group_font_color = "#eaebed";
         let paper_background_color = "#252833";
+        #[allow(unused_variables)]
         let surgeon_centroid_marker_color = "#00f115";
+        #[allow(unused_variables)]
         let surgeon_confidence_color = "#f100dc";
         let surgeon_marker_color = "#ff7b00";
+        #[allow(unused_variables)]
         let tick_color = "#acafb9";
 
         let Self { surgeon, cohort } = self;
@@ -210,6 +214,7 @@ impl Polar for CartesianData {
 }
 
 impl CartesianData {
+    #[allow(dead_code)]
     fn new() -> Self {
         Self { points: Vec::new() }
     }

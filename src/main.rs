@@ -7,7 +7,7 @@ async fn main() {
         state::AppState,
     };
     use axum::{Router, routing::get};
-    use dotenvy::dotenv;
+    #[cfg(debug_assertions)] use dotenvy::dotenv;
     use leptos::{logging::log, prelude::get_configuration};
     use leptos_axum::{LeptosRoutes, generate_route_list};
     use std::sync::{Arc, RwLock};

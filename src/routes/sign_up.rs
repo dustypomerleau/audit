@@ -1,8 +1,7 @@
 #[cfg(feature = "ssr")] use crate::db::{db, to_centi};
-use crate::{
-    model::{Email, FormSurgeon, Surgeon, set_current_surgeon},
-    some_or_empty,
-};
+use crate::model::FormSurgeon;
+#[cfg(feature = "ssr")] use crate::model::{Email, Surgeon, set_current_surgeon};
+#[cfg(feature = "ssr")] use crate::some_or_empty;
 use leptos::{
     prelude::{
         ActionForm, ElementChild, IntoView, ServerAction, ServerFnError, StyleAttribute, component,

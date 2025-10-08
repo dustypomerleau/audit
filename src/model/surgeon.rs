@@ -5,7 +5,8 @@ use crate::{
 };
 use chrono::{DateTime, Utc};
 use garde::Validate;
-use leptos::prelude::{ServerFnError, server, use_context};
+#[cfg(feature = "ssr")] use leptos::prelude::use_context;
+use leptos::prelude::{ServerFnError, server};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use thiserror::Error;

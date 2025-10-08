@@ -1,8 +1,6 @@
 use crate::{
-    plots::{
-        AsPlot, Cartesian, Cohort, PolarCompare, PolarData, PolarPoint, get_compare_with_client,
-    },
-    tests::common::{populate_test_db, test_db},
+    plots::{AsPlot, Cohort, get_compare_with_client},
+    tests::common::test_db,
 };
 
 #[tokio::test]
@@ -24,65 +22,66 @@ async fn creates_plots() {
         .await
         .unwrap();
     // let scatter_plot = compare.cartesian_delta_cyl().plot();
+    #[allow(unused_variables)]
     let polar_plot = compare.polar_cyl_before().plot();
     // scatter_plot.show();
-    polar_plot.show();
+    // polar_plot.show();
 }
 
 // junk tests to work out issues
-#[test]
-fn test_cartesian() {
-    let polar = PolarData {
-        points: vec![
-            PolarPoint {
-                theta: 45.0,
-                r: 2.5,
-            },
-            PolarPoint {
-                theta: 135.0,
-                r: 3.5,
-            },
-            PolarPoint {
-                theta: 225.0,
-                r: 2.5,
-            },
-            PolarPoint {
-                theta: 315.0,
-                r: 4.5,
-            },
-        ],
-    };
-
-    let cartesian = polar.cartesian();
-}
-
-#[test]
-fn test_confidence() {
-    let polar = PolarData {
-        points: vec![
-            PolarPoint {
-                theta: 45.0,
-                r: 2.5,
-            },
-            PolarPoint {
-                theta: 35.0,
-                r: 3.5,
-            },
-            PolarPoint {
-                theta: 25.0,
-                r: 2.5,
-            },
-            PolarPoint {
-                theta: 15.0,
-                r: 4.5,
-            },
-        ],
-    };
-
-    let compare = PolarCompare {
-        surgeon: polar,
-        cohort: PolarData { points: vec![] },
-    };
-
-    compare.plot().show();
-}
+// #[test]
+// fn test_cartesian() {
+//     let polar = PolarData {
+//         points: vec![
+//             PolarPoint {
+//                 theta: 45.0,
+//                 r: 2.5,
+//             },
+//             PolarPoint {
+//                 theta: 135.0,
+//                 r: 3.5,
+//             },
+//             PolarPoint {
+//                 theta: 225.0,
+//                 r: 2.5,
+//             },
+//             PolarPoint {
+//                 theta: 315.0,
+//                 r: 4.5,
+//             },
+//         ],
+//     };
+//
+//     let cartesian = polar.cartesian();
+// }
+//
+// #[test]
+// fn test_confidence() {
+//     let polar = PolarData {
+//         points: vec![
+//             PolarPoint {
+//                 theta: 45.0,
+//                 r: 2.5,
+//             },
+//             PolarPoint {
+//                 theta: 35.0,
+//                 r: 3.5,
+//             },
+//             PolarPoint {
+//                 theta: 25.0,
+//                 r: 2.5,
+//             },
+//             PolarPoint {
+//                 theta: 15.0,
+//                 r: 4.5,
+//             },
+//         ],
+//     };
+//
+//     let compare = PolarCompare {
+//         surgeon: polar,
+//         cohort: PolarData { points: vec![] },
+//     };
+//
+//     compare.plot().show();
+// }

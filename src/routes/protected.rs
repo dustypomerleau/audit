@@ -5,9 +5,10 @@ use crate::{
     model::Surgeon,
 };
 #[cfg(feature = "ssr")] use gel_tokio::create_client;
+#[cfg(feature = "ssr")] use leptos::prelude::use_context;
 use leptos::prelude::{
     Get, IntoAny, IntoView, OnceResource, RwSignal, Set, Suspense, component, provide_context,
-    server, use_context, view,
+    server, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;

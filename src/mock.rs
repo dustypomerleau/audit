@@ -57,6 +57,7 @@ impl Name {
 }
 
 /// Used for mocking of Gel's `ext::auth::Identity`.
+#[allow(dead_code)]
 struct Identity {
     issuer: String,
     subject: String,

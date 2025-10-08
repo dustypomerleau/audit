@@ -27,6 +27,7 @@ pub async fn test_db() -> Client {
 /// Add 110 mock cases to a test branch of the DB. The first 10 cases use a JWT representing
 /// the currently logged-in [`Surgeon`], and the other 100 cases use a different JWT that
 /// generically represents the rest of the comparison cohort.
+#[allow(dead_code)]
 pub async fn populate_test_db() -> Client {
     // todo: consider shell command to check current DB branch and switch it to testdb.
     //
@@ -59,6 +60,7 @@ pub async fn populate_test_db() -> Client {
     surgeon_client
 }
 
+#[allow(dead_code)]
 pub async fn drop_test_db(client: &Client, branch: &str) {
     // Add some safety checks so we don't drop prod.
     assert!(branch.contains("testdb"));

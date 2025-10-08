@@ -295,6 +295,7 @@ impl FromIterator<PolarPoint> for PolarData {
 
 impl PolarData {
     /// Create a new instance of [`PolarData`], without data points.
+    #[allow(dead_code)]
     fn new() -> Self {
         Self { points: Vec::new() }
     }

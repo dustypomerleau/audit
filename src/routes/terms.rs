@@ -1,5 +1,5 @@
 #[cfg(feature = "ssr")] use crate::db::db;
-use crate::model::set_current_surgeon;
+#[cfg(feature = "ssr")] use crate::model::set_current_surgeon;
 use leptos::prelude::{
     ElementChild, IntoView, OnAttribute, ServerAction, ServerFnError, StyleAttribute, component,
     server, view,

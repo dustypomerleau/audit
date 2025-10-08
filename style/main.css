@@ -340,8 +340,7 @@
                 align-items: center;
                 gap: var(--space-4);
 
-                .plot-title {
-                }
+                /* .plot-title { } */
 
                 .plot-traces {
                     width: 23rem;
