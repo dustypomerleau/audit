@@ -62,7 +62,7 @@ pub async fn get_plots(year: u32) -> Result<Vec<PlotSet>, AppError> {
         .to_inline_html(Some("cyl-before"));
 
     let (title, info) = (
-        String::from("Preop corneal astigmatism"),
+        String::from("Preop astigmatism"),
         String::from("cyl before info"),
     );
 
@@ -78,7 +78,7 @@ pub async fn get_plots(year: u32) -> Result<Vec<PlotSet>, AppError> {
         .to_inline_html(Some("cyl-after"));
 
     let (title, info) = (
-        String::from("Postop refractive astigmatism"),
+        String::from("Postop astigmatism"),
         String::from("cyl after info"),
     );
 
@@ -110,7 +110,7 @@ pub async fn get_plots(year: u32) -> Result<Vec<PlotSet>, AppError> {
         .to_inline_html(Some("cyl-delta"));
 
     let (title, info) = (
-        String::from("∆ astigmatism"),
+        String::from("Astigmatism magnitude"),
         String::from("cyl delta info"),
     );
 

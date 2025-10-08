@@ -7,8 +7,9 @@ use crate::{
     },
 };
 use plotly::{
-    Layout, Plot, ScatterPolar,
+    Configuration, Layout, Plot, ScatterPolar,
     common::{Anchor, Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode, Orientation},
+    configuration::{ModeBarButtonName, ToImageButtonOptions},
     layout::{
         AngularAxis, LayoutPolar, Legend, Margin, PolarAxisAttributes, PolarAxisTicks,
         PolarTickMode, RadialAxis, TraceOrder,
@@ -154,6 +155,23 @@ impl AsPlot for PolarCompare {
             .hover_info(HoverInfo::Skip);
 
         let mut plot = Plot::new();
+        // todo: autosizable depends on the value of Layout::auto_size() - investigate.
+        plot.set_configuration(
+            Configuration::new()
+                .autosizable(true)
+                .display_logo(false)
+                // todo: PR for mode_bar_buttons_to_add
+                .mode_bar_buttons_to_remove(vec![
+                    ModeBarButtonName::Lasso2d,
+                    ModeBarButtonName::Zoom2d,
+                ])
+                .to_image_button_options(
+                    ToImageButtonOptions::new()
+                        .filename("cataract-audit-plot")
+                        .scale(4),
+                ),
+        );
+        // todo: PR to fix scroll_zoom which should be a string like "gl3d+geo+map"
 
         plot.add_traces(vec![
             cohort,
@@ -201,6 +219,7 @@ impl AsPlot for PolarCompare {
             .angular_axis(angular_axis);
 
         let layout = Layout::new()
+            .auto_size(true)
             .paper_background_color(paper_background_color)
             .polar(polar_layout)
             .margin(Margin::new().top(30).right(30).bottom(0).left(30))

@@ -1,5 +1,7 @@
 use crate::{
-    plots::{AsPlot, Cohort, PolarCompare, PolarData, PolarPoint, get_compare_with_client},
+    plots::{
+        AsPlot, Cartesian, Cohort, PolarCompare, PolarData, PolarPoint, get_compare_with_client,
+    },
     tests::common::{populate_test_db, test_db},
 };
 

@@ -1,7 +1,10 @@
 use crate::plots::{AsPlot, Polar, PolarData, PolarPoint, mean, radians_to_degrees, theta_radians};
 use plotly::{
-    Layout, Plot, Scatter,
-    common::{Anchor, Font, HoverInfo, LegendGroupTitle, Marker, Mode, Orientation},
+    Configuration, Layout, Plot, Scatter,
+    common::{
+        Anchor, Font, HoverInfo, LegendGroupTitle, Marker, Mode, Orientation, Pad, Side, Title,
+    },
+    configuration::{ModeBarButtonName, ToImageButtonOptions},
     layout::{Axis, Legend, Margin, TraceOrder},
 };
 use serde::{Deserialize, Serialize};
@@ -88,20 +91,56 @@ impl AsPlot for CartesianCompare {
         // todo: add plots for 0.25 D bins using the centroid colors
 
         let mut plot = Plot::new();
+
+        plot.set_configuration(
+            Configuration::new()
+                .autosizable(true)
+                .display_logo(false)
+                // todo: PR for mode_bar_buttons_to_add
+                .mode_bar_buttons_to_remove(vec![
+                    ModeBarButtonName::Lasso2d,
+                    ModeBarButtonName::Pan2d,
+                    ModeBarButtonName::Zoom2d,
+                ])
+                .to_image_button_options(
+                    ToImageButtonOptions::new()
+                        .filename("cataract-audit-plot")
+                        .scale(4),
+                ),
+        );
+
         plot.add_traces(vec![cohort, surgeon]);
 
-        let axis = Axis::new()
+        let x_axis = Axis::new()
+            .title(
+                Title::new()
+                    .text("Preop corneal astigmatism (D)")
+                    // todo: none of these seem to work
+                    .x_anchor(Anchor::Left)
+                    .x(0.0)
+                    .y_anchor(Anchor::Bottom)
+                    .y(0.0),
+            )
+            .color(label_color)
+            .show_line(false)
+            .zero_line(false)
+            .grid_color(grid_color);
+
+        let y_axis = Axis::new()
+            .title("Postop refractive astigmatism (vertexed D)")
             .color(label_color)
             .show_line(false)
             .zero_line(false)
             .grid_color(grid_color);
 
         let layout = Layout::new()
-            .x_axis(axis.clone())
-            .y_axis(axis)
+            // .height(600)
+            // .width(600)
+            .x_axis(x_axis)
+            .y_axis(y_axis)
             .paper_background_color(paper_background_color)
             .plot_background_color(paper_background_color)
-            .margin(Margin::new().top(30).right(30).bottom(0).left(30))
+            .margin(Margin::new().top(30).right(5).bottom(0).left(50))
             .legend(
                 Legend::new()
                     .font(Font::new().color(legend_font_color))
@@ -110,7 +149,7 @@ impl AsPlot for CartesianCompare {
                     .x_anchor(Anchor::Center)
                     .x(0.5)
                     .y_anchor(Anchor::Top)
-                    .y(-0.1),
+                    .y(-0.2),
             );
 
         plot.set_layout(layout);
@@ -267,4 +306,3 @@ pub struct Translate {
     pub x: f64,
     pub y: f64,
 }
-
