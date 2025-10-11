@@ -52,22 +52,8 @@ impl AsPlot for PolarCompare {
             labels(&cohort_centroid),
         );
 
-        let surgeon_ellipse = surgeon.confidence(&ConfidenceParams {
-            variance: Variance::Population,
-            // todo: unwrap_or_default() hangs the program if your value is out of bounds, because
-            // you derived Default in range_bounded!. You need to rethink that decision and come up
-            // with a solution to an out of bounds value in these cases.
-            std_dev: StdDev::new(2.0).unwrap(),
-            // Ellipse breaks are evident at 0.05, so the step should probably be bounded
-            // 0.001..=0.05 or something.
-            step: PlotStep::new(0.01).unwrap(),
-        });
-
-        let cohort_ellipse = cohort.confidence(&ConfidenceParams {
-            variance: Variance::Population,
-            std_dev: StdDev::new(2.0).unwrap(),
-            step: PlotStep::new(0.01).unwrap(),
-        });
+        let surgeon_ellipse = surgeon.confidence(None);
+        let cohort_ellipse = cohort.confidence(None);
 
         // todo: set these as constants app-wide, adapt for light mode, and use in all plots
         let cohort_centroid_marker_color = "#f5f5f6";
