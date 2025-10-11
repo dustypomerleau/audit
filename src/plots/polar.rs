@@ -322,9 +322,11 @@ impl PolarData {
             .collect()
     }
 
-    pub fn theta_sort(&mut self) {
+    pub fn theta_sort(mut self) -> Self {
         self.points
             .sort_by(|a, b| a.theta.partial_cmp(&b.theta).unwrap_or(Ordering::Equal));
+
+        self
     }
 
     // This function uses the method
@@ -396,11 +398,10 @@ impl PolarData {
             current_x += step.inner();
         }
 
-        let mut ellipse = CartesianData { points }.polar();
         // It's essential to sort the ellipse in theta order before transforming it, while it still
         // surrounds the origin. That way the lines connecting each point will still draw the
         // outside of the ellipse, rather than crossing it.
-        ellipse.theta_sort();
+        let mut ellipse = CartesianData { points }.polar().theta_sort();
         // We duplicate the first point in the ellipse at the end, to ensure that our ellipse
         // is fully closed.
         ellipse.points.push(ellipse.points[0].clone());
