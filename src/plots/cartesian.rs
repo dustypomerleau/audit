@@ -202,7 +202,7 @@ impl Polar for CartesianData {
 }
 
 impl CartesianData {
-    #[allow(dead_code)]
+    #[expect(unused)]
     fn new() -> Self {
         Self { points: Vec::new() }
     }
