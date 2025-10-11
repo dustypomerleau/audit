@@ -19,8 +19,7 @@ RUN rustup target add wasm32-unknown-unknown
 
 WORKDIR /work
 COPY . .
-ENV LEPTOS_WASM_OPT_VERSION=version_124
-RUN cargo leptos build --release -vv
+RUN RUSTFLAGS="--cfg erase_components" cargo leptos build --release -vv
 
 FROM rustlang/rust:nightly-alpine as runner
 
