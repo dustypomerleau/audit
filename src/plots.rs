@@ -119,7 +119,7 @@ pub fn radians_to_degrees(radians: f64) -> f64 {
 }
 
 /// Calculate the average value of a 1-dimensional dataset.
-fn mean(data: &[f64]) -> f64 {
+pub fn mean(data: &[f64]) -> f64 {
     data.iter().sum::<f64>() / data.len() as f64
 }
 
