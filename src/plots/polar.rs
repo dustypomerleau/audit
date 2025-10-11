@@ -359,12 +359,12 @@ impl PolarData {
     /// This function calculates a confidence ellipse, which is more closely related to a tolerance
     /// interval (a range where most values fall) than a confidence interval (a range likely to
     /// contain the mean).
-    pub fn confidence(&self, params: &ConfidenceParams) -> PolarData {
+    pub fn confidence(&self, params: Option<ConfidenceParams>) -> PolarData {
         let ConfidenceParams {
             variance: params_variance,
             std_dev,
             step,
-        } = params;
+        } = params.unwrap_or_default();
 
         let cartesian_data = self.cartesian();
         let covariance_xy = cartesian_data.covariance();

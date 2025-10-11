@@ -42,6 +42,42 @@ pub struct ConfidenceParams {
     step: PlotStep,
 }
 
+impl Default for ConfidenceParams {
+    fn default() -> Self {
+        Self {
+            variance: Variance::Population,
+            std_dev: StdDev(2.0),
+            step: PlotStep(0.01),
+        }
+    }
+}
+
+impl ConfidenceParams {
+    pub fn new() -> Self {
+        Self {
+            ..Default::default()
+        }
+    }
+
+    pub fn variance(mut self, variance: Variance) -> Self {
+        self.variance = variance;
+
+        self
+    }
+
+    pub fn std_dev(mut self, std_dev: StdDev) -> Self {
+        self.std_dev = std_dev;
+
+        self
+    }
+
+    pub fn step(mut self, step: PlotStep) -> Self {
+        self.step = step;
+
+        self
+    }
+}
+
 /// Represents the variance of a 1-dimensional dataset.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Variance {
