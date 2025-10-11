@@ -347,6 +347,7 @@
 
                     /* todo: the plotly plots have hardcoded size—ideally i'd like them larger on desktop */
                     /* https://github.com/plotly/plotly.rs/issues/240 */
+                    /* consider just transform: scale(1.5); or similar, but it doesn't help with doc flow */
                     @media (width >= 40rem) {
                         width: 30rem;
                     }
