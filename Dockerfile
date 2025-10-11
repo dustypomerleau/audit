@@ -19,6 +19,7 @@ RUN rustup target add wasm32-unknown-unknown
 
 WORKDIR /work
 COPY . .
+ENV LEPTOS_WASM_OPT_VERSION=version_124
 RUN cargo leptos build --release -vv
 
 FROM rustlang/rust:nightly-alpine as runner
@@ -28,9 +29,9 @@ COPY --from=builder /work/target/release/audit /app/
 COPY --from=builder /work/target/site /app/site
 COPY --from=builder /work/Cargo.toml /app/
 
-ENV RUST_LOG="info"
 ENV LEPTOS_SITE_ADDR="0.0.0.0:10000"
 ENV LEPTOS_SITE_ROOT=./site
+ENV RUST_LOG="info"
 EXPOSE 10000
 
 CMD ["/app/audit"]
