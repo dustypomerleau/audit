@@ -172,18 +172,6 @@ pub struct CartesianData {
     pub points: Vec<CartesianPoint>,
 }
 
-impl FromIterator<(f64, f64)> for CartesianData {
-    fn from_iter<T: IntoIterator<Item = (f64, f64)>>(iter: T) -> Self {
-        let mut points = Vec::new();
-
-        for (x, y) in iter {
-            points.push(CartesianPoint { x, y });
-        }
-
-        Self { points }
-    }
-}
-
 impl FromIterator<CartesianPoint> for CartesianData {
     fn from_iter<T: IntoIterator<Item = CartesianPoint>>(iter: T) -> Self {
         let mut points = Vec::new();

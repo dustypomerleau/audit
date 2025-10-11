@@ -260,24 +260,13 @@ impl Cartesian for PolarData {
             .iter()
             .map(|PolarPoint { r, theta }| {
                 let (sin_theta, cos_theta) = degrees_to_radians(*theta).sin_cos();
-                let x = r * cos_theta;
-                let y = r * sin_theta;
 
-                (x, y)
+                CartesianPoint {
+                    x: r * cos_theta,
+                    y: r * sin_theta,
+                }
             })
             .collect()
-    }
-}
-
-impl FromIterator<(f64, f64)> for PolarData {
-    fn from_iter<T: IntoIterator<Item = (f64, f64)>>(iter: T) -> Self {
-        let mut points = Vec::new();
-
-        for (r, theta) in iter {
-            points.push(PolarPoint { r, theta });
-        }
-
-        Self { points }
     }
 }
 
