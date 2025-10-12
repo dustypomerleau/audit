@@ -29,9 +29,9 @@ COPY --from=builder /work/target/release/audit /app/
 COPY --from=builder /work/target/site /app/site
 COPY --from=builder /work/Cargo.toml /app/
 
-ENV LEPTOS_SITE_ADDR=0.0.0.0:$PORT
+ENV LEPTOS_SITE_ADDR=0.0.0.0:${PORT}
 ENV LEPTOS_SITE_ROOT=site
 ENV RUST_LOG=info
-EXPOSE $PORT
+EXPOSE ${PORT}
 
 CMD ["/app/audit"]
