@@ -1,9 +1,8 @@
 use crate::{
     bounded::Bounded,
     plots::{
-        AsPlot, Cartesian, CartesianData, CartesianPoint, ConfidenceParams, PlotStep, Scale,
-        StdDev, Translate, Variance, degrees_to_radians, mean, radians_to_degrees, theta_radians,
-        variance,
+        AsPlot, Cartesian, CartesianData, CartesianPoint, ConfidenceParams, Scale, Translate,
+        degrees_to_radians, mean, radians_to_degrees, theta_radians, variance,
     },
 };
 use plotly::{
