@@ -11,6 +11,7 @@ RUN apk update \
         libc-dev \
         openssl-dev \
         openssl-libs-static \
+        perl \
         pkgconfig
 
 RUN cargo install cargo-binstall
