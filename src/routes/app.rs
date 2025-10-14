@@ -1,5 +1,5 @@
 use crate::{
-    components::SignedOut,
+    components::{Nav, SignedOut},
     routes::{Add, Gateway, Instructions, Landing, List, Protected, Report, SignUp, Terms},
 };
 use leptos::prelude::{
@@ -52,17 +52,19 @@ pub fn App() -> impl IntoView {
                 // note: plain Axum server routes are not represented here,
                 // as they are added directly to the router in `src/main.rs`.
                 <Routes fallback=|| "Page not found.".into_view()>
-                    <Route path=StaticSegment("") view=Landing />
-                    <Route path=StaticSegment("gateway") view=Gateway />
-                    <Route path=StaticSegment("signedout") view=SignedOut />
-                    <Route path=StaticSegment("signup") view=SignUp />
-                    <Route path=StaticSegment("terms") view=Terms />
-                    <ParentRoute path=StaticSegment("protected") view=Protected>
-                        // todo: consider making instructions a sidebar inside Add
-                        <Route path=StaticSegment("add") view=Add />
-                        <Route path=StaticSegment("instructions") view=Instructions />
-                        <Route path=StaticSegment("list") view=List />
-                        <Route path=StaticSegment("report") view=Report />
+                    <ParentRoute path=StaticSegment("") view=Nav>
+                        <Route path=StaticSegment("") view=Landing />
+                        <Route path=StaticSegment("gateway") view=Gateway />
+                        <Route path=StaticSegment("signedout") view=SignedOut />
+                        <Route path=StaticSegment("signup") view=SignUp />
+                        <Route path=StaticSegment("terms") view=Terms />
+                        <ParentRoute path=StaticSegment("protected") view=Protected>
+                            // todo: consider making instructions a sidebar inside Add
+                            <Route path=StaticSegment("add") view=Add />
+                            <Route path=StaticSegment("instructions") view=Instructions />
+                            <Route path=StaticSegment("list") view=List />
+                            <Route path=StaticSegment("report") view=Report />
+                        </ParentRoute>
                     </ParentRoute>
                 </Routes>
             </main>

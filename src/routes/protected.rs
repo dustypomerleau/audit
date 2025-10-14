@@ -1,9 +1,5 @@
 #[cfg(feature = "ssr")] use crate::{auth::get_jwt_cookie, db::db, state::AppState};
-use crate::{
-    components::{Nav, SignedOut},
-    error::AppError,
-    model::Surgeon,
-};
+use crate::{components::SignedOut, error::AppError, model::Surgeon};
 #[cfg(feature = "ssr")] use gel_tokio::create_client;
 #[cfg(feature = "ssr")] use leptos::prelude::use_context;
 use leptos::prelude::{
@@ -27,10 +23,7 @@ pub fn Protected() -> impl IntoView {
                     current_surgeon.set(Some(surgeon));
                     provide_context(current_surgeon);
 
-                    view! {
-                        <Nav />
-                        <Outlet />
-                    }
+                    view! { <Outlet /> }
                         .into_any()
                 } else {
                     view! { <SignedOut /> }.into_any()
