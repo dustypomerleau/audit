@@ -304,6 +304,23 @@
         }
     }
 
+    .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        padding-block: calc(var(--space-4) * 3);
+    }
+
+    .hero-arrow {
+        margin-block-start: -1rem;
+        width: 70%;
+    }
+
+    .hero-text {
+        font-size: var(--fs-3xl);
+    }
+
     .logo {
         display: flex;
         flex-direction: column;
@@ -313,6 +330,24 @@
         @media (width >= 40rem) {
             width: calc(var(--space-4) * 15);
         }
+    }
+
+    .neon-pink-text {
+        /* font-weight: var(--fw-semibold); */
+        color: #fff;
+        text-shadow:
+            0 0 7px #fff,
+            0 0 10px #fff,
+            0 0 21px #fff,
+            0 0 42px #f100dc,
+            0 0 82px #f100dc,
+            0 0 92px #f100dc,
+            0 0 102px #f100dc,
+            0 0 151px #f100dc;
+    }
+
+    .neon-pink-svg {
+        filter: url(#neon-pink-svg);
     }
 
     .plot-group {
