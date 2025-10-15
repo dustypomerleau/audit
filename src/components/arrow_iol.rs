@@ -11,7 +11,7 @@ pub fn ArrowIol() -> impl IntoView {
         >
             <defs>
                 <filter
-                    id="neon-pink-svg"
+                    id="neon-pink-filter"
                     filterUnits="userSpaceOnUse"
                     x="-50%"
                     y="-50%"
@@ -32,22 +32,23 @@ pub fn ArrowIol() -> impl IntoView {
                     </feMerge>
 
                     <feColorMatrix
-                        result="red-blur"
+                        result="magenta-blur"
                         in="blur-merged"
                         type="matrix"
                         values="0.5 0 0 0 0
                         0 0.06 0 0 0
                         0 0 0.44 0 0
-                        0 0 0 1 0"
+                        0 0 0 1.2 0"
                     />
 
                     <feMerge>
-                        <feMergeNode in="red-blur" />
+                        <feMergeNode in="magenta-blur" />
                         <feMergeNode in="blur5" />
                         <feMergeNode in="SourceGraphic" />
                     </feMerge>
                 </filter>
             </defs>
+
             <path
                 d="M24 31.25s8.425 0 11.386-2.545c3.685-3.167 1.792-10.317-2.79-11.105"
                 style="fill:none;stroke:currentColor;stroke-width:1px"

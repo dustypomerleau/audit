@@ -1,6 +1,6 @@
 use crate::components::ArrowIol;
 use leptos::{
-    prelude::{ClassAttribute, ElementChild, IntoView, StyleAttribute, component},
+    prelude::{ClassAttribute, ElementChild, IntoView, component},
     view,
 };
 

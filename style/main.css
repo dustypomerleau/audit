@@ -356,7 +356,16 @@
     }
 
     .neon-pink-svg {
-        filter: url(#neon-pink-svg);
+        /* hack: webkit just cannot render this filter and still scale the SVG */
+        @supports (not (font: -apple-system-body)) {
+            filter: url(#neon-pink-filter);
+            /* the glow effect from the text above should be on top */
+            z-index: -1;
+        }
+
+        @supports (font: -apple-system-body) {
+            display: none;
+        }
     }
 
     .plot-group {
