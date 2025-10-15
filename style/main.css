@@ -315,10 +315,19 @@
     .hero-arrow {
         margin-block-start: -1rem;
         width: 70%;
+        transform: rotate(-25deg);
+
+        @media (width >= 40rem) {
+            max-width: 35rem;
+        }
     }
 
     .hero-text {
         font-size: var(--fs-3xl);
+
+        @media (width >= 40rem) {
+            font-size: calc(var(--fs-3xl) * 2);
+        }
     }
 
     .logo {
