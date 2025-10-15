@@ -25,12 +25,6 @@ pub enum AppError {
     View(String),
 }
 
-impl From<ServerFnErrorErr> for AppError {
-    fn from(err: ServerFnErrorErr) -> Self {
-        Self::Server(format!("{err:?}"))
-    }
-}
-
 impl From<chrono::format::ParseError> for AppError {
     fn from(err: chrono::format::ParseError) -> Self {
         Self::Server(format!("{err:?}"))
@@ -41,6 +35,12 @@ impl From<chrono::format::ParseError> for AppError {
 impl From<gel_tokio::Error> for AppError {
     fn from(err: gel_tokio::Error) -> Self {
         Self::Db(format!("{err:?}"))
+    }
+}
+
+impl<T> From<PoisonError<T>> for AppError {
+    fn from(err: PoisonError<T>) -> Self {
+        Self::State(format!("{err:?}"))
     }
 }
 
@@ -56,9 +56,15 @@ impl From<serde_json::Error> for AppError {
     }
 }
 
-impl<T> From<PoisonError<T>> for AppError {
-    fn from(err: PoisonError<T>) -> Self {
-        Self::State(format!("{err:?}"))
+impl From<ServerFnErrorErr> for AppError {
+    fn from(err: ServerFnErrorErr) -> Self {
+        Self::Server(format!("{err:?}"))
+    }
+}
+
+impl From<std::io::Error> for AppError {
+    fn from(err: std::io::Error) -> Self {
+        Self::Server(format!("{err}"))
     }
 }
 
