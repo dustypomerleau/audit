@@ -1,6 +1,7 @@
 use crate::error::AppError;
 use leptos::prelude::{
-    Get, InnerHtmlAttribute, IntoView, Resource, Suspense, component, server, view,
+    ClassAttribute, ElementChild, Get, InnerHtmlAttribute, IntoView, Resource, Suspense, component,
+    server, view,
 };
 use markdown::to_html;
 use std::path::PathBuf;
@@ -63,7 +64,11 @@ pub fn Markdown(md: Md) -> impl IntoView {
 
                 // todo: Escaping this html with html_escape::encode_text() results in the html
                 // being displayed as a string in the view, rather than as html.
-                view! { <div inner_html=html></div> }
+                view! {
+                    <div class="markdown-container">
+                        <div class="content" inner_html=html></div>
+                    </div>
+                }
             }}
         </Suspense>
     }

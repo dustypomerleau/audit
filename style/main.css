@@ -287,6 +287,82 @@
     /*     overflow-y: hidden; */
     /* } */
 
+    .markdown-container {
+        display: flex;
+        justify-content: center;
+
+        padding-inline: var(--space-3);
+
+        .content {
+            display: flex;
+            flex-direction: column;
+
+            max-width: 60ch;
+        }
+
+        /* todo: design this gradient for your current color scheme, and probably un-nest it */
+        .divider {
+            background-image: linear-gradient(to right, var(--gray-4), var(--gray-2));
+            height: 2px;
+            margin-block: var(--space-6);
+        }
+
+        h1,
+        h2,
+        h3,
+        h4 {
+            align-self: flex-start;
+
+            color: var(--gray-8);
+            padding-block-end: var(--space-3);
+            padding-block-start: var(--space-5);
+        }
+
+        /* override webkit user agent styles, which make h1 smaller inside articles and sections */
+        h1 {
+            font-size: 1.75em;
+        }
+
+        ol,
+        ul {
+            margin-block: var(--space-3);
+
+            li:not(:first-child) {
+                padding-block-start: var(--space-1);
+            }
+
+            li:not(:last-child) {
+                padding-block-end: var(--space-3);
+            }
+
+            @media (width >= 40rem) {
+                padding-inline-start: var(--space-8);
+            }
+        }
+
+        ol {
+            list-style-type: decimal;
+            padding-inline-start: var(--space-6);
+
+            li::marker {
+                color: var(--gray-7);
+            }
+        }
+
+        ul {
+            list-style-type: disc;
+            padding-inline-start: var(--space-5);
+
+            li::marker {
+                color: var(--gray-6);
+            }
+        }
+
+        p + p {
+            padding-block-start: var(--space-2);
+        }
+    }
+
     .header {
         display: flex;
         flex-wrap: wrap;
@@ -309,11 +385,12 @@
         flex-direction: column;
         align-items: center;
 
-        padding-block: calc(var(--space-4) * 3);
+        padding-block-start: calc(var(--space-4) * 3);
     }
 
-    .hero-arrow {
+    .hero-iol {
         margin-block-start: -1rem;
+        /* margin-block-end: calc(var(--space-4) * -1); */
         width: 70%;
         transform: rotate(-25deg);
 

@@ -6,7 +6,7 @@ pub fn Hero() -> impl IntoView {
     view! {
         <div class="hero hero-text neon-pink-text">
             <h1>"Level UP"</h1>
-            <div class="hero-arrow neon-pink-svg">
+            <div class="hero-iol neon-pink-svg">
                 <ArrowIol />
             </div>
         </div>
