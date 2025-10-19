@@ -2,12 +2,9 @@
 use crate::model::FormSurgeon;
 #[cfg(feature = "ssr")] use crate::model::{Email, Surgeon, set_current_surgeon};
 #[cfg(feature = "ssr")] use crate::some_or_empty;
-use leptos::{
-    prelude::{
-        ActionForm, ElementChild, IntoView, ServerAction, ServerFnError, StyleAttribute, component,
-        view,
-    },
-    server,
+use leptos::prelude::{
+    ActionForm, ElementChild, IntoView, ServerAction, ServerFnError, StyleAttribute, component,
+    server, view,
 };
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 

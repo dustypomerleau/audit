@@ -1,8 +1,5 @@
 use crate::components::ArrowIol;
-use leptos::{
-    prelude::{ClassAttribute, ElementChild, IntoView, component},
-    view,
-};
+use leptos::prelude::{ClassAttribute, ElementChild, IntoView, component, view};
 
 #[component]
 pub fn Hero() -> impl IntoView {
