@@ -386,6 +386,7 @@
         align-items: center;
 
         padding-block-start: calc(var(--space) * 12);
+        margin-block-end: var(--space-6);
     }
 
     .hero-iol {
