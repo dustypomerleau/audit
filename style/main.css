@@ -298,6 +298,8 @@
             flex-direction: column;
 
             max-width: 60ch;
+            font-size: var(--fs-lg);
+            line-height: var(--lh-fs-lg);
         }
 
         /* todo: design this gradient for your current color scheme, and probably un-nest it */
