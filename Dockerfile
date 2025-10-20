@@ -25,11 +25,11 @@ RUN RUSTFLAGS="--cfg erase_components" cargo leptos build --release -vv
 FROM rustlang/rust:nightly-alpine as runner
 
 WORKDIR /app
-COPY --from=builder /work/Cargo.toml /app/
 COPY --from=builder /work/target/release/audit /app/
-COPY --from=builder /work/target/site /app/
+COPY --from=builder /work/target/site /app/site
+COPY --from=builder /work/Cargo.toml /app/
 # todo: I'm not sure this is the best way to handle vis of the markdown files. Perhaps they should be placed in public/ with the prefix set as an environment var or a global constant with a different value for prod.
-COPY --from=builder /work/markdown /app/site/
+COPY --from=builder /work/markdown /app/markdown
 
 ENV LEPTOS_SITE_ADDR=0.0.0.0:8080
 ENV LEPTOS_SITE_ROOT=site
