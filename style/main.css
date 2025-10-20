@@ -385,12 +385,11 @@
         flex-direction: column;
         align-items: center;
 
-        padding-block-start: calc(var(--space-4) * 3);
+        padding-block-start: calc(var(--space) * 12);
     }
 
     .hero-iol {
         margin-block-start: -1rem;
-        /* margin-block-end: calc(var(--space-4) * -1); */
         width: 70%;
         transform: rotate(-25deg);
 
@@ -411,10 +410,10 @@
         display: flex;
         flex-direction: column;
 
-        width: calc(var(--space-4) * 12);
+        width: calc(var(--space) * 35);
 
         @media (width >= 40rem) {
-            width: calc(var(--space-4) * 15);
+            width: calc(var(--space) * 40);
         }
     }
 
@@ -438,6 +437,7 @@
             filter: url(#neon-pink-filter);
             /* the glow effect from the text above should be on top */
             z-index: -1;
+            margin-block-end: calc(var(--space) * -10);
         }
 
         @supports (font: -apple-system-body) {
@@ -449,7 +449,7 @@
         display: flex;
         flex-direction: column;
         align-items: stretch;
-        gap: calc(var(--space-4) * 4);
+        gap: calc(var(--space) * 16);
 
         padding: var(--space-4);
 
