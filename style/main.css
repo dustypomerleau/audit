@@ -420,6 +420,23 @@
         }
     }
 
+    .neon-iol-image {
+        /* hack: render this image only on Safari, to get around bugs when rendering the filter in .neon-pink-svg */
+        @supports (not (font: -apple-system-body)) {
+            display: none;
+        }
+
+        /* mostly copied from .hero-iol, could probably be unified if you moved the rotation to a new class */
+        @supports (font: -apple-system-body) {
+            z-index: -1;
+            width: 70%;
+
+            @media (width >= 40rem) {
+                max-width: 35rem;
+            }
+        }
+    }
+
     .neon-pink-text {
         /* font-weight: var(--fw-semibold); */
         color: #fff;
@@ -435,12 +452,17 @@
     }
 
     .neon-pink-svg {
+        /* put the glow effect from the hero text on top */
+        z-index: -1;
+        margin-block-end: calc(var(--space) * -10);
+
+        @media (width >= 40rem) {
+            margin-block-end: calc(var(--space) * -30);
+        }
+
         /* hack: webkit just cannot render this filter and still scale the SVG */
         @supports (not (font: -apple-system-body)) {
             filter: url(#neon-pink-filter);
-            /* the glow effect from the text above should be on top */
-            z-index: -1;
-            margin-block-end: calc(var(--space) * -10);
         }
 
         @supports (font: -apple-system-body) {

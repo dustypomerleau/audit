@@ -9,6 +9,7 @@ pub fn Hero() -> impl IntoView {
             <div class="hero-iol neon-pink-svg">
                 <ArrowIol />
             </div>
+            <img src="images/neon-iol.avif" class="neon-iol-image" />
         </div>
     }
 }
