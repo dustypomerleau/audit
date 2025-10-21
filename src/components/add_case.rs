@@ -1,24 +1,41 @@
-#[cfg(feature = "ssr")] use crate::db::db;
-#[cfg(feature = "ssr")]
-use crate::{
-    bounded::Bounded,
-    model::{
-        Adverse, AfterVa, BeforeVa, Biometry, Case, Formula, OpIol, OpRefraction, OpVa, RefCyl,
-        Refraction, Sia, Side, Site, SurgeonCase, Target, TargetCyl, Va,
-    },
-};
-use crate::{
-    error::AppError,
-    model::{FormCase, Iol},
-};
 #[cfg(feature = "ssr")] use chrono::Datelike;
-use leptos::{
-    prelude::{
-        ActionForm, ElementChild, For, Get, GlobalAttributes, IntoView, ServerAction,
-        StyleAttribute, Suspense, component, server, view,
-    },
-    server::OnceResource,
-};
+use leptos::prelude::ActionForm;
+use leptos::prelude::ElementChild;
+use leptos::prelude::For;
+use leptos::prelude::Get;
+use leptos::prelude::GlobalAttributes;
+use leptos::prelude::IntoView;
+use leptos::prelude::ServerAction;
+use leptos::prelude::StyleAttribute;
+use leptos::prelude::Suspense;
+use leptos::prelude::component;
+use leptos::prelude::server;
+use leptos::prelude::view;
+use leptos::server::OnceResource;
+
+#[cfg(feature = "ssr")] use crate::bounded::Bounded;
+#[cfg(feature = "ssr")] use crate::db::db;
+use crate::error::AppError;
+#[cfg(feature = "ssr")] use crate::model::Adverse;
+#[cfg(feature = "ssr")] use crate::model::AfterVa;
+#[cfg(feature = "ssr")] use crate::model::BeforeVa;
+#[cfg(feature = "ssr")] use crate::model::Biometry;
+#[cfg(feature = "ssr")] use crate::model::Case;
+use crate::model::FormCase;
+#[cfg(feature = "ssr")] use crate::model::Formula;
+use crate::model::Iol;
+#[cfg(feature = "ssr")] use crate::model::OpIol;
+#[cfg(feature = "ssr")] use crate::model::OpRefraction;
+#[cfg(feature = "ssr")] use crate::model::OpVa;
+#[cfg(feature = "ssr")] use crate::model::RefCyl;
+#[cfg(feature = "ssr")] use crate::model::Refraction;
+#[cfg(feature = "ssr")] use crate::model::Sia;
+#[cfg(feature = "ssr")] use crate::model::Side;
+#[cfg(feature = "ssr")] use crate::model::Site;
+#[cfg(feature = "ssr")] use crate::model::SurgeonCase;
+#[cfg(feature = "ssr")] use crate::model::Target;
+#[cfg(feature = "ssr")] use crate::model::TargetCyl;
+#[cfg(feature = "ssr")] use crate::model::Va;
 
 /// Display a form that inserts a `SurgeonCas` on submit.
 #[component]

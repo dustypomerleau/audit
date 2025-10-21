@@ -1,20 +1,58 @@
-use crate::{
-    bounded::Bounded,
-    model::{
-        Acd, Adverse, AfterVa, Al, Axis, BeforeVa, Biometry, Case, Cct, Email, Focus, Formula, Iol,
-        IolSe, K, Kpower, Ks, Lt, Main, OpIol, OpRefraction, OpVa, RefCyl, RefCylPower, RefSph,
-        Refraction, Sia, SiaPower, Side, Site, Surgeon, SurgeonCase, SurgeonDefaults, SurgeonSia,
-        Target, TargetCyl, TargetCylPower, TargetSe, ToricPower, Va, VaDen, VaNum, Wtw,
-    },
-    range_bounded,
-};
-use chrono::{DateTime, Utc};
-use rand::{
-    Rng,
-    distr::{Alphanumeric, SampleString, StandardUniform},
-    rng,
-};
 use std::ops::Rem;
+
+use chrono::DateTime;
+use chrono::Utc;
+use rand::Rng;
+use rand::distr::Alphanumeric;
+use rand::distr::SampleString;
+use rand::distr::StandardUniform;
+use rand::rng;
+
+use crate::bounded::Bounded;
+use crate::model::Acd;
+use crate::model::Adverse;
+use crate::model::AfterVa;
+use crate::model::Al;
+use crate::model::Axis;
+use crate::model::BeforeVa;
+use crate::model::Biometry;
+use crate::model::Case;
+use crate::model::Cct;
+use crate::model::Email;
+use crate::model::Focus;
+use crate::model::Formula;
+use crate::model::Iol;
+use crate::model::IolSe;
+use crate::model::K;
+use crate::model::Kpower;
+use crate::model::Ks;
+use crate::model::Lt;
+use crate::model::Main;
+use crate::model::OpIol;
+use crate::model::OpRefraction;
+use crate::model::OpVa;
+use crate::model::RefCyl;
+use crate::model::RefCylPower;
+use crate::model::RefSph;
+use crate::model::Refraction;
+use crate::model::Sia;
+use crate::model::SiaPower;
+use crate::model::Side;
+use crate::model::Site;
+use crate::model::Surgeon;
+use crate::model::SurgeonCase;
+use crate::model::SurgeonDefaults;
+use crate::model::SurgeonSia;
+use crate::model::Target;
+use crate::model::TargetCyl;
+use crate::model::TargetCylPower;
+use crate::model::TargetSe;
+use crate::model::ToricPower;
+use crate::model::Va;
+use crate::model::VaDen;
+use crate::model::VaNum;
+use crate::model::Wtw;
+use crate::range_bounded;
 
 range_bounded!((Prob, f32, 0.0..1.0));
 
@@ -46,15 +84,11 @@ pub fn random_string(length: usize) -> String {
 struct Name(String);
 
 impl Mock for Name {
-    fn mock() -> Self {
-        Self(random_string(8))
-    }
+    fn mock() -> Self { Self(random_string(8)) }
 }
 
 impl Name {
-    fn inner(self) -> String {
-        self.0
-    }
+    fn inner(self) -> String { self.0 }
 }
 
 /// Used for mocking of Gel's `ext::auth::Identity`.
@@ -262,9 +296,7 @@ impl Mock for RefCyl {
 struct RefCylAltPower(pub i32);
 
 impl From<RefCylAltPower> for RefCylPower {
-    fn from(value: RefCylAltPower) -> Self {
-        Self::new(value.0).unwrap()
-    }
+    fn from(value: RefCylAltPower) -> Self { Self::new(value.0).unwrap() }
 }
 
 impl Mock for RefCylAltPower {
@@ -402,9 +434,7 @@ impl Mock for Va {
     }
 }
 
-pub fn gen_mocks<T: Mock>(n: u32) -> Vec<T> {
-    (0..n).map(|_| T::mock()).collect()
-}
+pub fn gen_mocks<T: Mock>(n: u32) -> Vec<T> { (0..n).map(|_| T::mock()).collect() }
 
 #[cfg(test)]
 mod tests {
@@ -413,12 +443,8 @@ mod tests {
     // Mocking [`SurgeonCase`](crate::model::SurgeonCase) and [`Surgeon`](crate::model::Surgeon) is
     // sufficient to test most of the impls in this module.
     #[test]
-    fn mocks_surgeon_case() {
-        let _mocks = gen_mocks::<SurgeonCase>(10);
-    }
+    fn mocks_surgeon_case() { let _mocks = gen_mocks::<SurgeonCase>(10); }
 
     #[test]
-    fn mocks_surgeon() {
-        let _mocks = gen_mocks::<Surgeon>(10);
-    }
+    fn mocks_surgeon() { let _mocks = gen_mocks::<Surgeon>(10); }
 }

@@ -1,10 +1,18 @@
-use crate::error::AppError;
-use leptos::prelude::{
-    ClassAttribute, ElementChild, Get, InnerHtmlAttribute, IntoView, Resource, Suspense, component,
-    server, view,
-};
-use markdown::to_html;
 use std::path::PathBuf;
+
+use leptos::prelude::ClassAttribute;
+use leptos::prelude::ElementChild;
+use leptos::prelude::Get;
+use leptos::prelude::InnerHtmlAttribute;
+use leptos::prelude::IntoView;
+use leptos::prelude::Resource;
+use leptos::prelude::Suspense;
+use leptos::prelude::component;
+use leptos::prelude::server;
+use leptos::prelude::view;
+use markdown::to_html;
+
+use crate::error::AppError;
 
 pub enum Md {
     Inline(&'static str),
@@ -19,15 +27,11 @@ pub trait MdParse {
 }
 
 impl MdParse for &str {
-    fn md_parse(self) -> Result<String, AppError> {
-        Ok(to_html(self))
-    }
+    fn md_parse(self) -> Result<String, AppError> { Ok(to_html(self)) }
 }
 
 impl MdParse for String {
-    fn md_parse(self) -> Result<String, AppError> {
-        self.as_str().md_parse()
-    }
+    fn md_parse(self) -> Result<String, AppError> { self.as_str().md_parse() }
 }
 
 impl MdParse for PathBuf {

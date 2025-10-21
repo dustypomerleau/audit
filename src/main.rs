@@ -1,16 +1,22 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() {
-    use audit::{
-        auth::{handle_kill_session, handle_pkce_code, handle_sign_in},
-        routes::{App, shell},
-        state::AppState,
-    };
-    use axum::{Router, routing::get};
+    use std::sync::Arc;
+    use std::sync::RwLock;
+
+    use audit::auth::handle_kill_session;
+    use audit::auth::handle_pkce_code;
+    use audit::auth::handle_sign_in;
+    use audit::routes::App;
+    use audit::routes::shell;
+    use audit::state::AppState;
+    use axum::Router;
+    use axum::routing::get;
     #[cfg(debug_assertions)] use dotenvy::dotenv;
-    use leptos::{logging::log, prelude::get_configuration};
-    use leptos_axum::{LeptosRoutes, generate_route_list};
-    use std::sync::{Arc, RwLock};
+    use leptos::logging::log;
+    use leptos::prelude::get_configuration;
+    use leptos_axum::LeptosRoutes;
+    use leptos_axum::generate_route_list;
 
     #[cfg(debug_assertions)]
     dotenv().ok();

@@ -1,11 +1,31 @@
-use crate::plots::{AsPlot, Polar, PolarData, PolarPoint, mean, radians_to_degrees, theta_radians};
-use plotly::{
-    Configuration, Layout, Plot, Scatter,
-    common::{Anchor, Font, HoverInfo, LegendGroupTitle, Marker, Mode, Orientation, Title},
-    configuration::{ModeBarButtonName, ToImageButtonOptions},
-    layout::{Axis, Legend, Margin, TraceOrder},
-};
-use serde::{Deserialize, Serialize};
+use plotly::Configuration;
+use plotly::Layout;
+use plotly::Plot;
+use plotly::Scatter;
+use plotly::common::Anchor;
+use plotly::common::Font;
+use plotly::common::HoverInfo;
+use plotly::common::LegendGroupTitle;
+use plotly::common::Marker;
+use plotly::common::Mode;
+use plotly::common::Orientation;
+use plotly::common::Title;
+use plotly::configuration::ModeBarButtonName;
+use plotly::configuration::ToImageButtonOptions;
+use plotly::layout::Axis;
+use plotly::layout::Legend;
+use plotly::layout::Margin;
+use plotly::layout::TraceOrder;
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::plots::AsPlot;
+use crate::plots::Polar;
+use crate::plots::PolarData;
+use crate::plots::PolarPoint;
+use crate::plots::mean;
+use crate::plots::radians_to_degrees;
+use crate::plots::theta_radians;
 
 /// Convert a polar dataset to a cartesian dataset.
 pub trait Cartesian {
@@ -203,9 +223,7 @@ impl Polar for CartesianData {
 
 impl CartesianData {
     #[expect(unused)]
-    fn new() -> Self {
-        Self { points: Vec::new() }
-    }
+    fn new() -> Self { Self { points: Vec::new() } }
 
     // Eventually I think you separate this out into a trait Covariance: Variance: Mean (or some
     // arrangement like this), and then functions like centroid could be generic over that.

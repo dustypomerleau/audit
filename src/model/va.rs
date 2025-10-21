@@ -1,5 +1,8 @@
-use crate::{bounded::Bounded, range_bounded};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::range_bounded;
 
 // Choosing not to use NonZeroU32 for VaDen, because it has a slightly different interface than all
 // our other bounded types.
@@ -32,17 +35,11 @@ impl Default for Va {
 
 impl Va {
     /// Creates a new [`Va`] with bounds checking.
-    pub fn new(num: VaNum, den: VaDen) -> Self {
-        Self { num, den }
-    }
+    pub fn new(num: VaNum, den: VaDen) -> Self { Self { num, den } }
 
-    pub fn num(&self) -> u32 {
-        self.num.inner()
-    }
+    pub fn num(&self) -> u32 { self.num.inner() }
 
-    pub fn den(&self) -> u32 {
-        self.den.inner()
-    }
+    pub fn den(&self) -> u32 { self.den.inner() }
 }
 
 /// A collection of visual acuities from before surgery. We use separate structs for [`BeforeVa`]

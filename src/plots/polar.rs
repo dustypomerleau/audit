@@ -1,21 +1,44 @@
-use crate::{
-    bounded::Bounded,
-    plots::{
-        AsPlot, Cartesian, CartesianData, CartesianPoint, ConfidenceParams, Scale, Translate,
-        degrees_to_radians, mean, radians_to_degrees, theta_radians, variance,
-    },
-};
-use plotly::{
-    Configuration, Layout, Plot, ScatterPolar,
-    common::{Anchor, Font, HoverInfo, LegendGroupTitle, Line, Marker, Mode, Orientation},
-    configuration::{ModeBarButtonName, ToImageButtonOptions},
-    layout::{
-        AngularAxis, LayoutPolar, Legend, Margin, PolarAxisAttributes, PolarAxisTicks,
-        PolarTickMode, RadialAxis, TraceOrder,
-    },
-};
-use serde::{Deserialize, Serialize};
 use std::cmp::Ordering;
+
+use plotly::Configuration;
+use plotly::Layout;
+use plotly::Plot;
+use plotly::ScatterPolar;
+use plotly::common::Anchor;
+use plotly::common::Font;
+use plotly::common::HoverInfo;
+use plotly::common::LegendGroupTitle;
+use plotly::common::Line;
+use plotly::common::Marker;
+use plotly::common::Mode;
+use plotly::common::Orientation;
+use plotly::configuration::ModeBarButtonName;
+use plotly::configuration::ToImageButtonOptions;
+use plotly::layout::AngularAxis;
+use plotly::layout::LayoutPolar;
+use plotly::layout::Legend;
+use plotly::layout::Margin;
+use plotly::layout::PolarAxisAttributes;
+use plotly::layout::PolarAxisTicks;
+use plotly::layout::PolarTickMode;
+use plotly::layout::RadialAxis;
+use plotly::layout::TraceOrder;
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::plots::AsPlot;
+use crate::plots::Cartesian;
+use crate::plots::CartesianData;
+use crate::plots::CartesianPoint;
+use crate::plots::ConfidenceParams;
+use crate::plots::Scale;
+use crate::plots::Translate;
+use crate::plots::degrees_to_radians;
+use crate::plots::mean;
+use crate::plots::radians_to_degrees;
+use crate::plots::theta_radians;
+use crate::plots::variance;
 
 /// Convert a cartesian dataset to a polar dataset.
 pub trait Polar {
@@ -270,9 +293,7 @@ impl FromIterator<PolarPoint> for PolarData {
 impl PolarData {
     /// Create a new instance of [`PolarData`], without data points.
     #[expect(unused)]
-    fn new() -> Self {
-        Self { points: Vec::new() }
-    }
+    fn new() -> Self { Self { points: Vec::new() } }
 
     /// Returns a [`PolarData`] containing a single [`PolarPoint`] representing the mean vector of
     /// the polar dataset.

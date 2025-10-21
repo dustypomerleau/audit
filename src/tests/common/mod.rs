@@ -1,7 +1,13 @@
-use crate::{components::insert_surgeon_case, mock::gen_mocks, model::SurgeonCase};
+use std::env;
+use std::sync::LazyLock;
+
 use dotenvy::dotenv;
-use gel_tokio::{Client, create_client};
-use std::{env, sync::LazyLock};
+use gel_tokio::Client;
+use gel_tokio::create_client;
+
+use crate::components::insert_surgeon_case;
+use crate::mock::gen_mocks;
+use crate::model::SurgeonCase;
 
 pub static TEST_JWT: LazyLock<(String, String)> = LazyLock::new(|| {
     dotenv().ok();
@@ -48,14 +54,14 @@ pub async fn populate_test_db() -> Client {
         insert_surgeon_case(&surgeon_client, case).await.unwrap();
     }
 
-    let cohort_client = surgeon_client
-        .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.1));
-
-    let cohort_mock_cases = gen_mocks::<SurgeonCase>(100);
-
-    for case in cohort_mock_cases {
-        insert_surgeon_case(&cohort_client, case).await.unwrap();
-    }
+    // let cohort_client = surgeon_client
+    //     .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.1));
+    //
+    // let cohort_mock_cases = gen_mocks::<SurgeonCase>(100);
+    //
+    // for case in cohort_mock_cases {
+    //     insert_surgeon_case(&cohort_client, case).await.unwrap();
+    // }
 
     surgeon_client
 }

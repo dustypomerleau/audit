@@ -1,10 +1,16 @@
+use leptos::prelude::ElementChild;
+use leptos::prelude::IntoView;
+use leptos::prelude::OnAttribute;
+use leptos::prelude::ServerAction;
+use leptos::prelude::ServerFnError;
+use leptos::prelude::StyleAttribute;
+use leptos::prelude::component;
+use leptos::prelude::server;
+use leptos::prelude::view;
+#[cfg(feature = "ssr")] use leptos_axum::redirect;
+
 #[cfg(feature = "ssr")] use crate::db::db;
 #[cfg(feature = "ssr")] use crate::model::set_current_surgeon;
-use leptos::prelude::{
-    ElementChild, IntoView, OnAttribute, ServerAction, ServerFnError, StyleAttribute, component,
-    server, view,
-};
-#[cfg(feature = "ssr")] use leptos_axum::redirect;
 
 #[component]
 pub fn Terms() -> impl IntoView {

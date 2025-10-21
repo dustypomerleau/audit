@@ -1,9 +1,10 @@
-use crate::{
-    bounded::Bounded,
-    model::{Axis, Cyl},
-    range_bounded,
-};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::model::Axis;
+use crate::model::Cyl;
+use crate::range_bounded;
 
 range_bounded!((SiaPower, u32, 0..=200));
 
@@ -18,20 +19,14 @@ pub struct Sia {
 }
 
 impl Cyl<u32> for Sia {
-    fn power(&self) -> u32 {
-        self.power.inner()
-    }
+    fn power(&self) -> u32 { self.power.inner() }
 
-    fn axis(&self) -> Axis {
-        self.axis
-    }
+    fn axis(&self) -> Axis { self.axis }
 }
 
 impl Sia {
     /// Create a new bounds-checked [`Sia`].
-    pub fn new(power: SiaPower, axis: Axis) -> Self {
-        Self { power, axis }
-    }
+    pub fn new(power: SiaPower, axis: Axis) -> Self { Self { power, axis } }
 }
 
 #[cfg(test)]

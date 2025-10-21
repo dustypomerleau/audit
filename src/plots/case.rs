@@ -1,15 +1,25 @@
-use crate::{
-    bounded::Bounded,
-    db::db,
-    error::AppError,
-    model::{Case, RefCyl, Refraction, SurgeonCase, Target, TargetCyl},
-    plots::{
-        Cartesian, CartesianCompare, CartesianPoint, Polar, PolarCompare, PolarPoint, VertexK,
-    },
-    query::{query_select_compare, query_select_self_compare},
-};
 use gel_tokio::Client;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::db::db;
+use crate::error::AppError;
+use crate::model::Case;
+use crate::model::RefCyl;
+use crate::model::Refraction;
+use crate::model::SurgeonCase;
+use crate::model::Target;
+use crate::model::TargetCyl;
+use crate::plots::Cartesian;
+use crate::plots::CartesianCompare;
+use crate::plots::CartesianPoint;
+use crate::plots::Polar;
+use crate::plots::PolarCompare;
+use crate::plots::PolarPoint;
+use crate::plots::VertexK;
+use crate::query::query_select_compare;
+use crate::query::query_select_self_compare;
 
 /// The reference group for plot comparisons. This is either the full cohort of surgeons
 /// participating (same year), or the current surgeon (prior year).
@@ -157,9 +167,7 @@ impl CaseCompare {
     /// corneal plane). We use the absolute value of the cylinder, because the axis isn't relevant
     /// for this plot.
     pub fn cartesian_delta_cyl(&self) -> CartesianCompare {
-        fn k_cyl_before(case: &Case) -> f64 {
-            f64::from(case.biometry.ks.cyl()) / 100.0
-        }
+        fn k_cyl_before(case: &Case) -> f64 { f64::from(case.biometry.ks.cyl()) / 100.0 }
 
         fn ref_cyl_after(case: &Case) -> f64 {
             case.refraction

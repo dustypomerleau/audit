@@ -1,10 +1,12 @@
-use crate::{
-    bounded::Bounded,
-    error::AppError,
-    model::{Axis, Cyl, Sca},
-    range_bounded,
-};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::error::AppError;
+use crate::model::Axis;
+use crate::model::Cyl;
+use crate::model::Sca;
+use crate::range_bounded;
 
 range_bounded!(
     (RefCylPower, i32, -1000..=1000, 25),
@@ -18,13 +20,9 @@ pub struct RefCyl {
 }
 
 impl Cyl<i32> for RefCyl {
-    fn power(&self) -> i32 {
-        self.power.inner()
-    }
+    fn power(&self) -> i32 { self.power.inner() }
 
-    fn axis(&self) -> Axis {
-        self.axis
-    }
+    fn axis(&self) -> Axis { self.axis }
 }
 
 impl RefCyl {
@@ -44,13 +42,9 @@ pub struct Refraction {
 }
 
 impl Sca<i32> for Refraction {
-    fn sph(&self) -> i32 {
-        self.sph.inner()
-    }
+    fn sph(&self) -> i32 { self.sph.inner() }
 
-    fn cyl(&self) -> Option<impl Cyl<i32>> {
-        self.cyl
-    }
+    fn cyl(&self) -> Option<impl Cyl<i32>> { self.cyl }
 }
 
 /// The preoperative and postoperative refractions for a given [`Case`](crate::case::Case).

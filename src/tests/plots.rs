@@ -1,7 +1,8 @@
-use crate::{
-    plots::{AsPlot, Cohort, get_compare_with_client},
-    tests::common::test_db,
-};
+use crate::plots::AsPlot;
+use crate::plots::Cohort;
+use crate::plots::get_compare_with_client;
+#[allow(unused_imports)] use crate::tests::common::populate_test_db;
+use crate::tests::common::test_db;
 
 #[tokio::test]
 async fn creates_plots() {

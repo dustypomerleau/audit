@@ -1,10 +1,12 @@
-#[cfg(feature = "ssr")] use axum::response::{IntoResponse, Response};
-use leptos::{
-    prelude::{FromServerFnError, ServerFnErrorErr},
-    server_fn::codec::JsonEncoding,
-};
-use serde::{Deserialize, Serialize};
 use std::sync::PoisonError;
+
+#[cfg(feature = "ssr")] use axum::response::IntoResponse;
+#[cfg(feature = "ssr")] use axum::response::Response;
+use leptos::prelude::FromServerFnError;
+use leptos::prelude::ServerFnErrorErr;
+use leptos::server_fn::codec::JsonEncoding;
+use serde::Deserialize;
+use serde::Serialize;
 use thiserror::Error;
 
 #[derive(Clone, Debug, Deserialize, Error, Serialize)]
@@ -26,59 +28,41 @@ pub enum AppError {
 }
 
 impl From<chrono::format::ParseError> for AppError {
-    fn from(err: chrono::format::ParseError) -> Self {
-        Self::Server(format!("{err:?}"))
-    }
+    fn from(err: chrono::format::ParseError) -> Self { Self::Server(format!("{err:?}")) }
 }
 
 #[cfg(feature = "ssr")]
 impl From<gel_tokio::Error> for AppError {
-    fn from(err: gel_tokio::Error) -> Self {
-        Self::Db(format!("{err:?}"))
-    }
+    fn from(err: gel_tokio::Error) -> Self { Self::Db(format!("{err:?}")) }
 }
 
 impl<T> From<PoisonError<T>> for AppError {
-    fn from(err: PoisonError<T>) -> Self {
-        Self::State(format!("{err:?}"))
-    }
+    fn from(err: PoisonError<T>) -> Self { Self::State(format!("{err:?}")) }
 }
 
 impl From<reqwest::Error> for AppError {
-    fn from(err: reqwest::Error) -> Self {
-        Self::Server(format!("{err:?}"))
-    }
+    fn from(err: reqwest::Error) -> Self { Self::Server(format!("{err:?}")) }
 }
 
 impl From<serde_json::Error> for AppError {
-    fn from(err: serde_json::Error) -> Self {
-        Self::Serde(format!("{err:?}"))
-    }
+    fn from(err: serde_json::Error) -> Self { Self::Serde(format!("{err:?}")) }
 }
 
 impl From<ServerFnErrorErr> for AppError {
-    fn from(err: ServerFnErrorErr) -> Self {
-        Self::Server(format!("{err:?}"))
-    }
+    fn from(err: ServerFnErrorErr) -> Self { Self::Server(format!("{err:?}")) }
 }
 
 impl From<std::io::Error> for AppError {
-    fn from(err: std::io::Error) -> Self {
-        Self::Server(format!("{err}"))
-    }
+    fn from(err: std::io::Error) -> Self { Self::Server(format!("{err}")) }
 }
 
 impl FromServerFnError for AppError {
     type Encoder = JsonEncoding;
 
-    fn from_server_fn_error(err: ServerFnErrorErr) -> Self {
-        Self::Server(format!("{err}"))
-    }
+    fn from_server_fn_error(err: ServerFnErrorErr) -> Self { Self::Server(format!("{err}")) }
 }
 
 #[cfg(feature = "ssr")]
 impl IntoResponse for AppError {
-    fn into_response(self) -> Response {
-        self.to_string().into_response()
-    }
+    fn into_response(self) -> Response { self.to_string().into_response() }
 }

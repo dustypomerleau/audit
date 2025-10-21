@@ -1,9 +1,10 @@
-use crate::{
-    bounded::Bounded,
-    model::{Axis, Cyl},
-    range_bounded,
-};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::model::Axis;
+use crate::model::Cyl;
+use crate::range_bounded;
 
 range_bounded!(
     (Acd, u32, 0..=600),
@@ -21,19 +22,13 @@ pub struct K {
 }
 
 impl Cyl<u32> for K {
-    fn power(&self) -> u32 {
-        self.power.inner()
-    }
+    fn power(&self) -> u32 { self.power.inner() }
 
-    fn axis(&self) -> Axis {
-        self.axis
-    }
+    fn axis(&self) -> Axis { self.axis }
 }
 
 impl K {
-    pub fn new(power: Kpower, axis: Axis) -> Self {
-        Self { power, axis }
-    }
+    pub fn new(power: Kpower, axis: Axis) -> Self { Self { power, axis } }
 }
 
 // Safety: These fields are private to enforce the invariant that flat <= steep.
@@ -58,25 +53,15 @@ impl Ks {
         }
     }
 
-    pub fn flat_power(&self) -> u32 {
-        self.flat.power.inner()
-    }
+    pub fn flat_power(&self) -> u32 { self.flat.power.inner() }
 
-    pub fn steep_power(&self) -> u32 {
-        self.steep.power.inner()
-    }
+    pub fn steep_power(&self) -> u32 { self.steep.power.inner() }
 
-    pub fn cyl(&self) -> u32 {
-        self.steep_power() - self.flat_power()
-    }
+    pub fn cyl(&self) -> u32 { self.steep_power() - self.flat_power() }
 
-    pub fn flat_axis(&self) -> u32 {
-        self.flat.axis.inner()
-    }
+    pub fn flat_axis(&self) -> u32 { self.flat.axis.inner() }
 
-    pub fn steep_axis(&self) -> u32 {
-        self.steep.axis.inner()
-    }
+    pub fn steep_axis(&self) -> u32 { self.steep.axis.inner() }
 }
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]

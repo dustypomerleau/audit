@@ -1,6 +1,9 @@
-use crate::error::AppError;
-#[cfg(feature = "ssr")] use rand::distr::uniform::{SampleRange, SampleUniform};
 #[cfg(feature = "ssr")] use std::range::RangeBounds;
+
+#[cfg(feature = "ssr")] use rand::distr::uniform::SampleRange;
+#[cfg(feature = "ssr")] use rand::distr::uniform::SampleUniform;
+
+use crate::error::AppError;
 
 /// A numeric type with bounds that can be described by a [`Range`](std::range::Range).
 pub trait Bounded: Sized {

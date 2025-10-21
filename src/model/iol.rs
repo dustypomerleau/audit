@@ -1,5 +1,9 @@
-use crate::{bounded::Bounded, model::Axis, range_bounded};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::model::Axis;
+use crate::range_bounded;
 
 /// The class of [`Iol`] (monofocal, EDOF, multifocal).
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]

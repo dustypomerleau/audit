@@ -1,5 +1,8 @@
-use crate::{bounded::Bounded, range_bounded};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::range_bounded;
 
 pub trait CylPower {}
 impl CylPower for i32 {}
@@ -21,17 +24,11 @@ pub struct RawCyl {
 }
 
 impl Cyl<i32> for RawCyl {
-    fn power(&self) -> i32 {
-        self.power
-    }
+    fn power(&self) -> i32 { self.power }
 
-    fn axis(&self) -> Axis {
-        self.axis
-    }
+    fn axis(&self) -> Axis { self.axis }
 }
 
 impl RawCyl {
-    pub fn new(power: i32, axis: Axis) -> Self {
-        Self { power, axis }
-    }
+    pub fn new(power: i32, axis: Axis) -> Self { Self { power, axis } }
 }

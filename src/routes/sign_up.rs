@@ -1,12 +1,21 @@
-#[cfg(feature = "ssr")] use crate::db::{db, to_centi};
-use crate::model::FormSurgeon;
-#[cfg(feature = "ssr")] use crate::model::{Email, Surgeon, set_current_surgeon};
-#[cfg(feature = "ssr")] use crate::some_or_empty;
-use leptos::prelude::{
-    ActionForm, ElementChild, IntoView, ServerAction, ServerFnError, StyleAttribute, component,
-    server, view,
-};
+use leptos::prelude::ActionForm;
+use leptos::prelude::ElementChild;
+use leptos::prelude::IntoView;
+use leptos::prelude::ServerAction;
+use leptos::prelude::ServerFnError;
+use leptos::prelude::StyleAttribute;
+use leptos::prelude::component;
+use leptos::prelude::server;
+use leptos::prelude::view;
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
+
+#[cfg(feature = "ssr")] use crate::db::db;
+#[cfg(feature = "ssr")] use crate::db::to_centi;
+#[cfg(feature = "ssr")] use crate::model::Email;
+use crate::model::FormSurgeon;
+#[cfg(feature = "ssr")] use crate::model::Surgeon;
+#[cfg(feature = "ssr")] use crate::model::set_current_surgeon;
+#[cfg(feature = "ssr")] use crate::some_or_empty;
 
 #[component]
 pub fn SignUp() -> impl IntoView {

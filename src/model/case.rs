@@ -1,12 +1,20 @@
-#[cfg(feature = "ssr")] use crate::error::AppError;
-use crate::{
-    bounded::Bounded,
-    model::{Biometry, Formula, OpIol, OpRefraction, OpVa, Sia, Site, Target},
-    range_bounded,
-};
-use chrono::NaiveDate;
-use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+
+use chrono::NaiveDate;
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+#[cfg(feature = "ssr")] use crate::error::AppError;
+use crate::model::Biometry;
+use crate::model::Formula;
+use crate::model::OpIol;
+use crate::model::OpRefraction;
+use crate::model::OpVa;
+use crate::model::Sia;
+use crate::model::Site;
+use crate::model::Target;
+use crate::range_bounded;
 
 /// The side of the patient's surgery.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -131,13 +139,27 @@ pub struct FormCase {
 impl FormCase {
     #[cfg(feature = "ssr")]
     pub async fn into_surgeon_case(self) -> Result<SurgeonCase, AppError> {
-        use crate::{
-            db::db,
-            model::{
-                Acd, AfterVa, Al, Axis, BeforeVa, Cct, Iol, IolSe, K, Kpower, Ks, Lt, SiaPower,
-                TargetCyl, TargetCylPower, TargetSe, Va, VaDen, VaNum, Wtw,
-            },
-        };
+        use crate::db::db;
+        use crate::model::Acd;
+        use crate::model::AfterVa;
+        use crate::model::Al;
+        use crate::model::Axis;
+        use crate::model::BeforeVa;
+        use crate::model::Cct;
+        use crate::model::Iol;
+        use crate::model::IolSe;
+        use crate::model::K;
+        use crate::model::Kpower;
+        use crate::model::Ks;
+        use crate::model::Lt;
+        use crate::model::SiaPower;
+        use crate::model::TargetCyl;
+        use crate::model::TargetCylPower;
+        use crate::model::TargetSe;
+        use crate::model::Va;
+        use crate::model::VaDen;
+        use crate::model::VaNum;
+        use crate::model::Wtw;
 
         let FormCase {
             urn,
@@ -322,13 +344,15 @@ select Iol {{
 
         let refraction = OpRefraction {
             before: {
-                use crate::model::{RawSca, into_refraction};
+                use crate::model::RawSca;
+                use crate::model::into_refraction;
 
                 let sca = RawSca::new((ref_before_sph * 100.0) as i32, ref_before_raw_cyl);
                 into_refraction(sca)?
             },
             after: {
-                use crate::model::{RawSca, into_refraction};
+                use crate::model::RawSca;
+                use crate::model::into_refraction;
 
                 let sca = RawSca::new((ref_after_sph * 100.0) as i32, ref_after_raw_cyl);
                 into_refraction(sca)?
@@ -358,7 +382,8 @@ select Iol {{
 
 #[cfg(test)]
 mod tests {
-    use crate::model::{Focus, Iol};
+    use crate::model::Focus;
+    use crate::model::Iol;
 
     #[test]
     fn deserializes_iol() {

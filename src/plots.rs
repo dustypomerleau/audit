@@ -14,14 +14,18 @@ mod case;
 mod polar;
 mod vertex;
 
-use crate::{bounded::Bounded, range_bounded};
+use std::f64::consts::PI;
+
 pub use cartesian::*;
 pub use case::*;
 use plotly::Plot;
 pub use polar::*;
-use serde::{Deserialize, Serialize};
-use std::f64::consts::PI;
+use serde::Deserialize;
+use serde::Serialize;
 pub use vertex::*;
+
+use crate::bounded::Bounded;
+use crate::range_bounded;
 
 /// Generate a Plotly [`Plot`] from the given type.
 pub trait AsPlot {
@@ -109,19 +113,13 @@ pub fn variance(data: &[f64], variance: Variance) -> f64 {
 }
 
 /// Convert from degrees to radians, typically before performing trigonometric calculations.
-pub fn degrees_to_radians(degrees: f64) -> f64 {
-    degrees * PI / 180.0
-}
+pub fn degrees_to_radians(degrees: f64) -> f64 { degrees * PI / 180.0 }
 
 /// Convert from radians to degrees.
-pub fn radians_to_degrees(radians: f64) -> f64 {
-    radians * 180.0 / PI
-}
+pub fn radians_to_degrees(radians: f64) -> f64 { radians * 180.0 / PI }
 
 /// Calculate the average value of a 1-dimensional dataset.
-pub fn mean(data: &[f64]) -> f64 {
-    data.iter().sum::<f64>() / data.len() as f64
-}
+pub fn mean(data: &[f64]) -> f64 { data.iter().sum::<f64>() / data.len() as f64 }
 
 /// Convert a single, cartesian, XY pair to its corresponding polar angle in radians, taking into
 /// account the adjustments needed for each quadrant.

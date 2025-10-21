@@ -1,7 +1,8 @@
-use crate::{
-    bounded::Bounded,
-    model::{RefCylPower, RefSph, TargetCylPower, TargetSe},
-};
+use crate::bounded::Bounded;
+use crate::model::RefCylPower;
+use crate::model::RefSph;
+use crate::model::TargetCylPower;
+use crate::model::TargetSe;
 
 /// A marker trait for measurements with the following properties:
 ///

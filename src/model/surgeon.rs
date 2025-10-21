@@ -1,15 +1,21 @@
-#[cfg(feature = "ssr")] use crate::state::AppState;
-use crate::{
-    error::AppError,
-    model::{Formula, Iol, Main, Sia},
-};
-use chrono::{DateTime, Utc};
-use garde::Validate;
-#[cfg(feature = "ssr")] use leptos::prelude::use_context;
-use leptos::prelude::{ServerFnError, server};
-use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+
+use chrono::DateTime;
+use chrono::Utc;
+use garde::Validate;
+use leptos::prelude::ServerFnError;
+use leptos::prelude::server;
+#[cfg(feature = "ssr")] use leptos::prelude::use_context;
+use serde::Deserialize;
+use serde::Serialize;
 use thiserror::Error;
+
+use crate::error::AppError;
+use crate::model::Formula;
+use crate::model::Iol;
+use crate::model::Main;
+use crate::model::Sia;
+#[cfg(feature = "ssr")] use crate::state::AppState;
 
 #[derive(Debug, Error)]
 #[error("Email invalid: ({0:?})")]
@@ -22,9 +28,7 @@ pub struct Email(#[garde(email)] String);
 
 // Implementing Display allows directly including an Email in a format String.
 impl Display for Email {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.fmt(f)
-    }
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { self.0.fmt(f) }
 }
 
 impl Email {
@@ -37,9 +41,7 @@ impl Email {
         }
     }
 
-    pub fn inner(self) -> String {
-        self.0
-    }
+    pub fn inner(self) -> String { self.0 }
 }
 
 /// A surgeon's default [`Sia`] for right and left eyes

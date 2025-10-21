@@ -1,5 +1,10 @@
+use leptos::prelude::ClassAttribute;
+use leptos::prelude::ElementChild;
+use leptos::prelude::IntoView;
+use leptos::prelude::component;
+use leptos::prelude::view;
+
 use crate::components::ArrowIol;
-use leptos::prelude::{ClassAttribute, ElementChild, IntoView, component, view};
 
 #[component]
 pub fn Hero() -> impl IntoView {

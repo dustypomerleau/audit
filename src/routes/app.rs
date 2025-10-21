@@ -1,16 +1,32 @@
-use crate::{
-    components::{Nav, SignedOut},
-    routes::{Add, Gateway, Instructions, Landing, List, Protected, Report, SignUp, Terms},
-};
-use leptos::prelude::{
-    AutoReload, ElementChild, GlobalAttributes, HydrationScripts, IntoView, LeptosOptions,
-    component, view,
-};
-use leptos_meta::{MetaTags, Stylesheet, Title, provide_meta_context};
-use leptos_router::{
-    StaticSegment,
-    components::{ParentRoute, Route, Router, Routes},
-};
+use leptos::prelude::AutoReload;
+use leptos::prelude::ElementChild;
+use leptos::prelude::GlobalAttributes;
+use leptos::prelude::HydrationScripts;
+use leptos::prelude::IntoView;
+use leptos::prelude::LeptosOptions;
+use leptos::prelude::component;
+use leptos::prelude::view;
+use leptos_meta::MetaTags;
+use leptos_meta::Stylesheet;
+use leptos_meta::Title;
+use leptos_meta::provide_meta_context;
+use leptos_router::StaticSegment;
+use leptos_router::components::ParentRoute;
+use leptos_router::components::Route;
+use leptos_router::components::Router;
+use leptos_router::components::Routes;
+
+use crate::components::Nav;
+use crate::components::SignedOut;
+use crate::routes::Add;
+use crate::routes::Gateway;
+use crate::routes::Instructions;
+use crate::routes::Landing;
+use crate::routes::List;
+use crate::routes::Protected;
+use crate::routes::Report;
+use crate::routes::SignUp;
+use crate::routes::Terms;
 
 pub fn shell(options: LeptosOptions) -> impl IntoView {
     view! {

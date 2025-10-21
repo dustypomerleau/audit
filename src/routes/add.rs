@@ -1,5 +1,8 @@
+use leptos::prelude::IntoView;
+use leptos::prelude::component;
+use leptos::prelude::view;
+
 use crate::components::AddCase;
-use leptos::prelude::{IntoView, component, view};
 
 #[component]
 pub fn Add() -> impl IntoView {

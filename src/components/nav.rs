@@ -1,6 +1,12 @@
-use crate::components::Logo;
-use leptos::prelude::{ClassAttribute, ElementChild, GlobalAttributes, IntoView, component, view};
+use leptos::prelude::ClassAttribute;
+use leptos::prelude::ElementChild;
+use leptos::prelude::GlobalAttributes;
+use leptos::prelude::IntoView;
+use leptos::prelude::component;
+use leptos::prelude::view;
 use leptos_router::components::Outlet;
+
+use crate::components::Logo;
 
 /// A header containing navigation, profile link, and sign out link.
 #[component]

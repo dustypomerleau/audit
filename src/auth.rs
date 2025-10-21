@@ -1,20 +1,26 @@
-use crate::{error::AppError, state::AppState};
-use axum::{
-    extract::{Query, State},
-    response::Redirect,
-};
-use axum_extra::extract::{
-    CookieJar,
-    cookie::{Cookie, SameSite},
-};
+use std::env;
+use std::sync::LazyLock;
+
+use axum::extract::Query;
+use axum::extract::State;
+use axum::response::Redirect;
+use axum_extra::extract::CookieJar;
+use axum_extra::extract::cookie::Cookie;
+use axum_extra::extract::cookie::SameSite;
 use axum_macros::debug_handler;
-use base64ct::{Base64UrlUnpadded, Encoding};
+use base64ct::Base64UrlUnpadded;
+use base64ct::Encoding;
 use leptos_axum::extract;
-use rand::{Rng, rng};
-use serde::{Deserialize, Serialize};
-use sha2::{Digest, Sha256};
-use std::{env, sync::LazyLock};
+use rand::Rng;
+use rand::rng;
+use serde::Deserialize;
+use serde::Serialize;
+use sha2::Digest;
+use sha2::Sha256;
 use uuid::Uuid;
+
+use crate::error::AppError;
+use crate::state::AppState;
 
 // note: new API for dotenvy will arrive in v16 release
 pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
@@ -168,9 +174,10 @@ pub async fn get_jwt_cookie() -> Result<Option<String>, AppError> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use dotenvy::dotenv;
     use leptos::logging::log;
+
+    use super::*;
 
     #[test]
     fn generates_pkce() {

@@ -1,9 +1,11 @@
-use crate::{
-    bounded::Bounded,
-    model::{Axis, Cyl, Sca},
-    range_bounded,
-};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::model::Axis;
+use crate::model::Cyl;
+use crate::model::Sca;
+use crate::range_bounded;
 
 /// A formula for calculating IOL power from biometry.
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
@@ -54,19 +56,13 @@ pub struct TargetCyl {
 }
 
 impl Cyl<u32> for TargetCyl {
-    fn power(&self) -> u32 {
-        self.power.inner()
-    }
+    fn power(&self) -> u32 { self.power.inner() }
 
-    fn axis(&self) -> Axis {
-        self.axis
-    }
+    fn axis(&self) -> Axis { self.axis }
 }
 
 impl TargetCyl {
-    pub fn new(power: TargetCylPower, axis: Axis) -> Self {
-        Self { power, axis }
-    }
+    pub fn new(power: TargetCylPower, axis: Axis) -> Self { Self { power, axis } }
 }
 
 /// The residual postop refraction for a case, assuming the provided formula and IOL constant.
@@ -79,13 +75,9 @@ pub struct Target {
 }
 
 impl Sca<u32> for Target {
-    fn sph(&self) -> i32 {
-        self.se.inner()
-    }
+    fn sph(&self) -> i32 { self.se.inner() }
 
-    fn cyl(&self) -> Option<impl Cyl<u32>> {
-        self.cyl
-    }
+    fn cyl(&self) -> Option<impl Cyl<u32>> { self.cyl }
 }
 
 #[cfg(test)]

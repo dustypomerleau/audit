@@ -1,10 +1,22 @@
+use leptos::prelude::ClassAttribute;
+use leptos::prelude::ElementChild;
+use leptos::prelude::Get;
+use leptos::prelude::InnerHtmlAttribute;
+use leptos::prelude::IntoAny;
+use leptos::prelude::IntoView;
+use leptos::prelude::Resource;
+use leptos::prelude::RwSignal;
+use leptos::prelude::Suspense;
+use leptos::prelude::component;
+use leptos::prelude::server;
+use leptos::prelude::view;
+use serde::Deserialize;
+use serde::Serialize;
+
 use crate::error::AppError;
-#[cfg(feature = "ssr")] use crate::plots::{AsPlot, Cohort, get_compare};
-use leptos::prelude::{
-    ClassAttribute, ElementChild, Get, InnerHtmlAttribute, IntoAny, IntoView, Resource, RwSignal,
-    Suspense, component, server, view,
-};
-use serde::{Deserialize, Serialize};
+#[cfg(feature = "ssr")] use crate::plots::AsPlot;
+#[cfg(feature = "ssr")] use crate::plots::Cohort;
+#[cfg(feature = "ssr")] use crate::plots::get_compare;
 
 #[component]
 pub fn PlotSet() -> impl IntoView {

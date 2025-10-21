@@ -1,7 +1,10 @@
-use crate::{error::AppError, state::AppState};
+use std::fmt::Display;
+
 use gel_tokio::Client;
 use leptos::prelude::use_context;
-use std::fmt::Display;
+
+use crate::error::AppError;
+use crate::state::AppState;
 
 pub async fn db() -> Result<Client, AppError> {
     let client = if let Some(state) = use_context::<AppState>() {
@@ -31,9 +34,7 @@ pub fn to_centi(value: f32) -> i32 {
 }
 
 /// Takes an integer value from the database and returns a float representing the user-facing value.
-pub fn to_hecto<T: Into<f64>>(value: T) -> f64 {
-    value.into() / 100.0
-}
+pub fn to_hecto<T: Into<f64>>(value: T) -> f64 { value.into() / 100.0 }
 
 #[cfg(test)]
 mod tests {}

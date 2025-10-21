@@ -1,13 +1,25 @@
-#[cfg(feature = "ssr")] use crate::{auth::get_jwt_cookie, db::db, state::AppState};
-use crate::{components::SignedOut, error::AppError, model::Surgeon};
 #[cfg(feature = "ssr")] use gel_tokio::create_client;
+use leptos::prelude::Get;
+use leptos::prelude::IntoAny;
+use leptos::prelude::IntoView;
+use leptos::prelude::OnceResource;
+use leptos::prelude::RwSignal;
+use leptos::prelude::Set;
+use leptos::prelude::Suspense;
+use leptos::prelude::component;
+use leptos::prelude::provide_context;
+use leptos::prelude::server;
 #[cfg(feature = "ssr")] use leptos::prelude::use_context;
-use leptos::prelude::{
-    Get, IntoAny, IntoView, OnceResource, RwSignal, Set, Suspense, component, provide_context,
-    server, view,
-};
+use leptos::prelude::view;
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
 use leptos_router::components::Outlet;
+
+#[cfg(feature = "ssr")] use crate::auth::get_jwt_cookie;
+use crate::components::SignedOut;
+#[cfg(feature = "ssr")] use crate::db::db;
+use crate::error::AppError;
+use crate::model::Surgeon;
+#[cfg(feature = "ssr")] use crate::state::AppState;
 
 #[component]
 pub fn Protected() -> impl IntoView {

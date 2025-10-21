@@ -1,12 +1,19 @@
-use crate::{
-    bounded::Bounded,
-    error::AppError,
-    model::{
-        Cyl, CylPower, Formula, RawCyl, RefCyl, RefSph, Refraction, Target, TargetCyl,
-        TargetCylPower, TargetSe,
-    },
-};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
+use serde::Serialize;
+
+use crate::bounded::Bounded;
+use crate::error::AppError;
+use crate::model::Cyl;
+use crate::model::CylPower;
+use crate::model::Formula;
+use crate::model::RawCyl;
+use crate::model::RefCyl;
+use crate::model::RefSph;
+use crate::model::Refraction;
+use crate::model::Target;
+use crate::model::TargetCyl;
+use crate::model::TargetCylPower;
+use crate::model::TargetSe;
 
 /// A type that wraps a sphere and a cylinder.
 pub trait Sca<T>
@@ -71,20 +78,14 @@ pub struct RawSca {
 }
 
 impl Sca<i32> for RawSca {
-    fn sph(&self) -> i32 {
-        self.sph
-    }
+    fn sph(&self) -> i32 { self.sph }
 
-    fn cyl(&self) -> Option<impl Cyl<i32>> {
-        self.cyl
-    }
+    fn cyl(&self) -> Option<impl Cyl<i32>> { self.cyl }
 }
 
 impl RawSca {
     /// Construct a new [`RawSca`].
-    pub fn new(sph: i32, cyl: Option<RawCyl>) -> Self {
-        Self { sph, cyl }
-    }
+    pub fn new(sph: i32, cyl: Option<RawCyl>) -> Self { Self { sph, cyl } }
 }
 
 mod tests {}
