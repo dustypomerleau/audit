@@ -300,6 +300,10 @@
             max-width: 60ch;
             font-size: var(--fs-lg);
             line-height: var(--lh-fs-lg);
+
+            p:not(:last-child) {
+                padding-block-end: var(--space-2);
+            }
         }
 
         /* todo: design this gradient for your current color scheme, and probably un-nest it */
