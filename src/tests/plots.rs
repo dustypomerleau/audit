@@ -15,8 +15,11 @@ async fn creates_plots() {
     // least one (for some reason).
     // Write a proper setup from an empty DB.
     //
-    // let client = populate_test_db().await;
-    // assert!(client.ensure_connected().await.is_ok());
+    #[cfg(debug_assertions)]
+    {
+        // let client = populate_test_db().await;
+        // assert!(client.ensure_connected().await.is_ok());
+    }
 
     let compare = get_compare_with_client(&client, 2025, Cohort::Peers)
         .await
