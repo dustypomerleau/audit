@@ -74,7 +74,7 @@ macro_rules! range_bounded {
                         let random_inner = random_inner - (random_inner.rem($rem));
                     )?
 
-                    // Safe unwrap due to use of the types own range and rem values.
+                    // Safe unwrap due to use of the type's own range and rem values.
                     Self::new(random_inner).unwrap()
                 }
             }
