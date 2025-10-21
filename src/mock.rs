@@ -14,6 +14,7 @@ use rand::{
     distr::{Alphanumeric, SampleString, StandardUniform},
     rng,
 };
+use std::ops::Rem;
 
 range_bounded!((Prob, f32, 0.0..1.0));
 
@@ -249,11 +250,33 @@ impl Mock for OpVa {
 impl Mock for RefCyl {
     fn mock() -> Self {
         Self {
-            power: RefCylPower::mock(),
+            power: RefCylAltPower::mock().into(),
             axis: Axis::mock(),
         }
     }
 }
+
+// ----------------------------  //
+// constrain (mock the mocks) just for DB populating
+
+struct RefCylAltPower(pub i32);
+
+impl From<RefCylAltPower> for RefCylPower {
+    fn from(value: RefCylAltPower) -> Self {
+        Self::new(value.0).unwrap()
+    }
+}
+
+impl Mock for RefCylAltPower {
+    fn mock() -> Self {
+        let random_inner: i32 = rand::rng().random_range(-50..=50);
+        let random_inner = random_inner - (random_inner.rem(25));
+
+        Self(random_inner)
+    }
+}
+
+// ----------------------------  //
 
 impl Mock for Refraction {
     fn mock() -> Self {
