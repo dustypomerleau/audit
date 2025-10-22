@@ -18,14 +18,15 @@ pub fn Nav() -> impl IntoView {
                     <Logo />
                 </div>
             </a>
-            // todo: this link should be "sign in" or "sign out" depending on the cookies
-            // <a href="/killsession" rel="external">
-            // "sign out"
-            // </a>
-            // todo: burger
-            <a href="/signin" rel="external">
-                "sign in"
-            </a>
+        // todo: this link should be "sign in" or "sign out" depending on the cookies
+        // but put it inside a burger on mobile
+        // <a href="/killsession" rel="external">
+        // "sign out"
+        // </a>
+        // todo: burger
+        // <a href="/signin" rel="external">
+        // "sign in"
+        // </a>
         </header>
         <Outlet />
     }

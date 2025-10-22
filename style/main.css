@@ -442,7 +442,6 @@
     }
 
     .neon-pink-text {
-        /* font-weight: var(--fw-semibold); */
         color: #fff;
         text-shadow:
             0 0 7px #fff,
