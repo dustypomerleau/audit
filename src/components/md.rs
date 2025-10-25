@@ -11,12 +11,15 @@ use leptos::prelude::component;
 use leptos::prelude::server;
 use leptos::prelude::view;
 use markdown::to_html;
+use serde::Deserialize;
+use serde::Serialize;
 
 use crate::error::AppError;
 
+#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub enum Md {
     Inline(&'static str),
-    File(&'static str),
+    File(PathBuf),
 }
 
 /// Types that can be parsed as markdown.
@@ -55,12 +58,12 @@ pub fn Markdown(md: Md) -> impl IntoView {
     view! {
         <Suspense>
             {move || {
-                let html = match md {
+                let html = match md.clone() {
                     Md::Inline(md) => {
                         md.md_parse().unwrap_or("inline markdown could not be parsed.".to_string())
                     }
-                    Md::File(path) => {
-                        PathBuf::from(path)
+                    Md::File(path_buf) => {
+                        path_buf
                             .md_parse()
                             .unwrap_or("markdown from file could not be opened/parsed".to_string())
                     }
