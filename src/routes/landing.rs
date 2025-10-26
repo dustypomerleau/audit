@@ -16,7 +16,6 @@ pub fn Landing() -> impl IntoView {
         .parent()
         .unwrap()
         .join("site/markdown/landing.md");
-    dbg!(&markdown_path_buf);
 
     view! {
         <Hero />

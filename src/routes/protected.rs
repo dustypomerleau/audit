@@ -1,5 +1,4 @@
 #[cfg(feature = "ssr")] use gel_tokio::create_client;
-use leptos::prelude::Get;
 use leptos::prelude::IntoAny;
 use leptos::prelude::IntoView;
 use leptos::prelude::Resource;
@@ -41,9 +40,7 @@ pub fn Protected() -> impl IntoView {
     view! {
         <Suspense fallback=move || {
             view! { "Checking authorization for the current surgeon..." }
-        }>
-            {outlet_if_authorized}
-        </Suspense>
+        }>{outlet_if_authorized}</Suspense>
     }
 }
 
