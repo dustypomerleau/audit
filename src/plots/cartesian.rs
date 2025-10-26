@@ -227,11 +227,12 @@ impl CartesianData {
 
     // Eventually I think you separate this out into a trait Covariance: Variance: Mean (or some
     // arrangement like this), and then functions like centroid could be generic over that.
+    //
     /// Calculate the covariance of a cartesian dataset.
     pub fn covariance(&self) -> f64 {
         let (x, y) = self.split_axes();
         let (mean_x, mean_y) = (mean(&x), mean(&y));
-        let population = (self.points.len() - 1) as f64;
+        let population = usize::checked_sub(self.points.len(), 1).unwrap_or(0) as f64;
 
         let sum = self
             .points
@@ -239,6 +240,7 @@ impl CartesianData {
             .map(|CartesianPoint { x, y }| (x - mean_x) * (y - mean_y))
             .sum::<f64>();
 
+        // if population == 0.0, returns f64::NAN, but will not panic
         sum / population
     }
 
