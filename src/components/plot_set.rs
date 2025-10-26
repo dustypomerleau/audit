@@ -6,6 +6,7 @@ use leptos::prelude::IntoAny;
 use leptos::prelude::IntoView;
 use leptos::prelude::Resource;
 use leptos::prelude::RwSignal;
+use leptos::prelude::Suspend;
 use leptos::prelude::Suspense;
 use leptos::prelude::component;
 use leptos::prelude::server;
@@ -24,10 +25,10 @@ pub fn PlotSet() -> impl IntoView {
     let plot_resource = Resource::new_blocking(move || year.get(), move |_| get_plots(year.get()));
 
     view! {
-        <Suspense fallback=|| { "waiting for the plot_resource to load..." }>
+        <Suspense fallback=|| { "Loading plots..." }>
             <div class="plot-group">
-                {move || {
-                    if let Some(Ok(plots)) = plot_resource.get() {
+                {Suspend::new(async move {
+                    if let Ok(plots) = plot_resource.await {
                         plots
                             .into_iter()
                             .map(|PlotSet { title, info, plot }| {
@@ -44,9 +45,9 @@ pub fn PlotSet() -> impl IntoView {
                             .collect::<Vec<_>>()
                             .into_any()
                     } else {
-                        "no inner!".into_any()
+                        "no plots were found".into_any()
                     }
-                }}
+                })}
             </div>
         </Suspense>
     }

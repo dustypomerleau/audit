@@ -2,9 +2,10 @@
 use leptos::prelude::Get;
 use leptos::prelude::IntoAny;
 use leptos::prelude::IntoView;
-use leptos::prelude::OnceResource;
+use leptos::prelude::Resource;
 use leptos::prelude::RwSignal;
 use leptos::prelude::Set;
+use leptos::prelude::Suspend;
 use leptos::prelude::Suspense;
 use leptos::prelude::component;
 use leptos::prelude::provide_context;
@@ -24,23 +25,24 @@ use crate::model::Surgeon;
 #[component]
 pub fn Protected() -> impl IntoView {
     let current_surgeon = RwSignal::<Option<Surgeon>>::new(None);
-    let surgeon_resource = OnceResource::new(get_authorized_surgeon());
+    let surgeon_resource = Resource::new(|| (), |_| get_authorized_surgeon());
+
+    let outlet_if_authorized = Suspend::new(async move {
+        if let Ok(Some(surgeon)) = surgeon_resource.await {
+            current_surgeon.set(Some(surgeon));
+            provide_context(current_surgeon);
+
+            view! { <Outlet /> }.into_any()
+        } else {
+            view! { <SignedOut /> }.into_any()
+        }
+    });
 
     view! {
         <Suspense fallback=move || {
             view! { "Checking authorization for the current surgeon..." }
         }>
-            {move || {
-                if let Some(Ok(Some(surgeon))) = surgeon_resource.get() {
-                    current_surgeon.set(Some(surgeon));
-                    provide_context(current_surgeon);
-
-                    view! { <Outlet /> }
-                        .into_any()
-                } else {
-                    view! { <SignedOut /> }.into_any()
-                }
-            }}
+            {outlet_if_authorized}
         </Suspense>
     }
 }
