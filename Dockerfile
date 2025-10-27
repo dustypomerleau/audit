@@ -1,6 +1,6 @@
 # see https://github.com/leptos-rs/leptos-website/blob/main/Dockerfile for reference
 
-FROM rustlang/rust:nightly-alpine as builder
+FROM rustlang/rust:nightly-alpine AS builder
 
 RUN apk update \
     && apk add --no-cache \
@@ -22,7 +22,7 @@ WORKDIR /work
 COPY . .
 RUN RUSTFLAGS="--cfg erase_components" cargo leptos build --release -vv
 
-FROM rustlang/rust:nightly-alpine as runner
+FROM rustlang/rust:nightly-alpine AS runner
 
 WORKDIR /app
 COPY --from=builder /work/target/release/audit /app/
