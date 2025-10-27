@@ -1,4 +1,6 @@
+use std::env;
 use std::path::PathBuf;
+use std::sync::LazyLock;
 
 use leptos::prelude::ClassAttribute;
 use leptos::prelude::ElementChild;
@@ -14,6 +16,13 @@ use leptos::prelude::view;
 use markdown::to_html;
 
 use crate::error::AppError;
+
+pub static MARKDOWN_PATH: LazyLock<PathBuf> = LazyLock::new(|| {
+    let content_dir =
+        env::var("CONTENT_DIR").expect("expected CONTENT_DIR environment variable to be present");
+
+    PathBuf::from(content_dir).join("markdown")
+});
 
 /// Types that can be parsed as markdown.
 pub trait MdParse {
