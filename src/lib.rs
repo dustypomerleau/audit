@@ -1,6 +1,7 @@
 #![feature(lock_value_accessors)]
 #![feature(new_range_api)]
 #![feature(string_remove_matches)]
+#![deny(clippy::wildcard_imports)]
 #![warn(clippy::cast_lossless)]
 // #![feature(return_type_notation)]
 // #![feature(type_changing_struct_update)]
