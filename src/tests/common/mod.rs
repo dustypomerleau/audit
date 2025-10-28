@@ -9,20 +9,25 @@ use crate::components::insert_surgeon_case;
 use crate::mock::gen_mocks;
 use crate::model::SurgeonCase;
 
-pub static TEST_JWT: LazyLock<(String, String)> = LazyLock::new(|| {
+pub struct TestJwt {
+    surgeon: String,
+    cohort: String,
+}
+
+pub static TEST_JWTS: LazyLock<TestJwt> = LazyLock::new(|| {
     dotenv().ok();
 
-    let surgeon_test_jwt = env::var("SURGEON_TEST_JWT")
+    let surgeon = env::var("SURGEON_TEST_JWT")
         .expect("expected SURGEON_TEST_JWT environment variable to be present");
 
-    let cohort_test_jwt = env::var("COHORT_TEST_JWT")
+    let cohort = env::var("COHORT_TEST_JWT")
         .expect("expected COHORT_TEST_JWT environment variable to be present");
 
-    (surgeon_test_jwt, cohort_test_jwt)
+    TestJwt { surgeon, cohort }
 });
 
 pub async fn test_db() -> Client {
-    let jwt = &*TEST_JWT.0;
+    let jwt = &*TEST_JWTS.surgeon;
 
     create_client()
         .await
@@ -43,7 +48,7 @@ pub async fn populate_test_db() -> Client {
 
     let surgeon_client = test_db()
         .await
-        .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.0));
+        .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWTS.surgeon));
 
     let surgeon_mock_cases = gen_mocks::<SurgeonCase>(10);
 
