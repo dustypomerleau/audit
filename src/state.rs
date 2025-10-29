@@ -5,6 +5,7 @@ use axum_macros::FromRef;
 use gel_tokio::Client;
 use leptos::prelude::LeptosOptions;
 
+use crate::mail::Mailer;
 use crate::model::Surgeon;
 
 // `derive(FromRef)` is needed to make use of `leptos_axum`'s `extract_with_state()`
@@ -12,5 +13,6 @@ use crate::model::Surgeon;
 pub struct AppState {
     pub leptos_options: LeptosOptions,
     pub db: Arc<RwLock<Client>>,
+    pub mailer: Arc<Mailer>,
     pub surgeon: Arc<RwLock<Option<Surgeon>>>,
 }

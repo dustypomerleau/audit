@@ -26,6 +26,7 @@ leptos = { version = "0.8.12", features = ["nightly"] }
 leptos_axum = { version = "0.8.6", optional = true }
 leptos_meta = { version = "0.8.5" }
 leptos_router = { version = "0.8.9", features = ["nightly"] }
+mailgun-rs = { version = "2.0.1", optional = true }
 markdown = "1.0.0"
 # plotly = { version = "0.13.5", features = ["static_export_default"], optional = true }
 plotly = { git = "https://github.com/plotly/plotly.rs", features = [
@@ -56,6 +57,7 @@ ssr = [
   "dep:gel-protocol",
   "dep:gel-tokio",
   "dep:leptos_axum",
+  "dep:mailgun-rs",
   "dep:plotly",
   "dep:rand",
   "dep:sha2",

@@ -7,6 +7,7 @@ async fn main() {
     use audit::auth::handle_kill_session;
     use audit::auth::handle_pkce_code;
     use audit::auth::handle_sign_in;
+    use audit::mail::MAILER;
     use audit::routes::App;
     use audit::routes::shell;
     use audit::state::AppState;
@@ -31,11 +32,10 @@ async fn main() {
         .await
         .expect("the DB client to be initialized");
 
-    let db = Arc::new(RwLock::new(db_client));
-
     let app_state = AppState {
         leptos_options: leptos_options.clone(),
-        db: Arc::clone(&db),
+        db: Arc::new(RwLock::new(db_client)),
+        mailer: Arc::new(MAILER.clone()),
         surgeon: Arc::new(RwLock::new(None)),
     };
 

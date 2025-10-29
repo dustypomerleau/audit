@@ -199,11 +199,9 @@ impl CaseCompare {
     }
 }
 
-// In future, you may want the ability to compare a specific date range for the Surgeon, against
-// either the cohort, or against the surgeon's own baseline (all other dates outside the range).
-//
-// The reason we separate `get_compare_with_client()` into its own function is so we can call that
-// function directly from tests, and inject a different [`Client`] with a test JWT global.
+// todo: in future, you may want the ability to compare a specific date range for the Surgeon,
+// against either the cohort, or against the surgeon's own baseline (all other dates outside the
+// range).
 /// Query the database for cases from the given year.
 pub async fn get_compare(year: u32, cohort: Cohort) -> Result<CaseCompare, AppError> {
     let client = db().await?;
@@ -211,8 +209,11 @@ pub async fn get_compare(year: u32, cohort: Cohort) -> Result<CaseCompare, AppEr
     get_compare_with_client(&client, year, cohort).await
 }
 
-/// Query the database for cases from the given year, using a custom [`gel_tokio::Client`].
-pub async fn get_compare_with_client(
+// Query the database for cases from the given year, using a custom [`gel_tokio::Client`]. Factoring
+// out this function provides a way to supply our own Client in tests. In prod, it is assumed that
+// our main function will run and the Client will be retrieved from the [`AppState`] in context.
+#[doc(hidden)]
+pub(crate) async fn get_compare_with_client(
     client: &Client,
     year: u32,
     cohort: Cohort,

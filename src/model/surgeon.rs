@@ -8,7 +8,6 @@ use leptos::prelude::server;
 #[cfg(feature = "ssr")] use leptos::prelude::use_context;
 use serde::Deserialize;
 use serde::Serialize;
-use thiserror::Error;
 
 use crate::error::AppError;
 use crate::model::Formula;
@@ -16,10 +15,6 @@ use crate::model::Iol;
 use crate::model::Main;
 use crate::model::Sia;
 #[cfg(feature = "ssr")] use crate::state::AppState;
-
-#[derive(Debug, Error)]
-#[error("Email invalid: ({0:?})")]
-pub struct EmailValidationError(garde::Report);
 
 /// A [`garde`]-checked valid email [`String`].
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, Validate)]
@@ -31,17 +26,25 @@ impl Display for Email {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { self.0.fmt(f) }
 }
 
+impl TryFrom<String> for Email {
+    type Error = AppError;
+
+    fn try_from(email: String) -> Result<Self, Self::Error> { Email::new(email.as_str()) }
+}
+
 impl Email {
-    pub fn new(email: &str) -> Result<Self, EmailValidationError> {
+    pub fn new(email: &str) -> Result<Self, AppError> {
         let email = Self(email.to_string());
 
         match email.validate() {
             Ok(_) => Ok(email),
-            Err(e) => Err(EmailValidationError(e)),
+            Err(e) => Err(AppError::Bounds(format!("invalid email: {e}"))),
         }
     }
 
-    pub fn inner(self) -> String { self.0 }
+    pub fn inner(&self) -> String { self.0.clone() }
+
+    pub fn into_inner(self) -> String { self.0 }
 }
 
 /// A surgeon's default [`Sia`] for right and left eyes

@@ -1,8 +1,10 @@
+#![deny(clippy::wildcard_imports)]
 #![feature(lock_value_accessors)]
 #![feature(new_range_api)]
 #![feature(string_remove_matches)]
-#![deny(clippy::wildcard_imports)]
+#![forbid(unsafe_code)]
 #![warn(clippy::cast_lossless)]
+// #![warn(missing_docs)]
 // #![feature(return_type_notation)]
 // #![feature(type_changing_struct_update)]
 
@@ -20,9 +22,9 @@
 pub mod bounded;
 pub mod components;
 #[cfg(feature = "ssr")] pub mod db;
-pub mod email;
 pub mod error;
 pub mod macros;
+#[cfg(feature = "ssr")] pub mod mail;
 #[cfg(feature = "ssr")] pub mod mock;
 pub mod model;
 #[cfg(feature = "ssr")] pub mod plots;

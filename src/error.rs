@@ -28,28 +28,33 @@ pub enum AppError {
 }
 
 impl From<chrono::format::ParseError> for AppError {
-    fn from(err: chrono::format::ParseError) -> Self { Self::Server(format!("{err:?}")) }
+    fn from(err: chrono::format::ParseError) -> Self { Self::Server(format!("{err}")) }
 }
 
 #[cfg(feature = "ssr")]
 impl From<gel_tokio::Error> for AppError {
-    fn from(err: gel_tokio::Error) -> Self { Self::Db(format!("{err:?}")) }
+    fn from(err: gel_tokio::Error) -> Self { Self::Db(format!("{err}")) }
+}
+
+#[cfg(feature = "ssr")]
+impl From<mailgun_rs::SendError> for AppError {
+    fn from(err: mailgun_rs::SendError) -> Self { Self::Server(format!("{err}")) }
 }
 
 impl<T> From<PoisonError<T>> for AppError {
-    fn from(err: PoisonError<T>) -> Self { Self::State(format!("{err:?}")) }
+    fn from(err: PoisonError<T>) -> Self { Self::State(format!("{err}")) }
 }
 
 impl From<reqwest::Error> for AppError {
-    fn from(err: reqwest::Error) -> Self { Self::Server(format!("{err:?}")) }
+    fn from(err: reqwest::Error) -> Self { Self::Server(format!("{err}")) }
 }
 
 impl From<serde_json::Error> for AppError {
-    fn from(err: serde_json::Error) -> Self { Self::Serde(format!("{err:?}")) }
+    fn from(err: serde_json::Error) -> Self { Self::Serde(format!("{err}")) }
 }
 
 impl From<ServerFnErrorErr> for AppError {
-    fn from(err: ServerFnErrorErr) -> Self { Self::Server(format!("{err:?}")) }
+    fn from(err: ServerFnErrorErr) -> Self { Self::Server(format!("{err}")) }
 }
 
 impl From<std::io::Error> for AppError {

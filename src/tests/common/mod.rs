@@ -4,9 +4,13 @@ use std::sync::LazyLock;
 use dotenvy::dotenv;
 use gel_tokio::Client;
 use gel_tokio::create_client;
+use mailgun_rs::Mailgun;
 
 use crate::components::insert_surgeon_case;
+use crate::mail::EmailSender;
+use crate::mail::Mailer;
 use crate::mock::gen_mocks;
+use crate::model::Email;
 use crate::model::SurgeonCase;
 
 pub struct TestJwt {
@@ -81,4 +85,23 @@ pub async fn drop_test_db(client: &Client, branch: &str) {
         .execute(format!("drop branch {branch};"), &())
         .await
         .unwrap();
+}
+
+pub async fn test_mailer() -> Mailer {
+    dotenv().ok();
+
+    let api_key = env::var("MAILGUN_API_KEY")
+        .expect("expected MAILGUN_API_KEY environment variable to be present");
+
+    let domain = env::var("MAILGUN_DOMAIN")
+        .expect("expected MAILGUN_DOMAIN environment variable to be present");
+
+    Mailer {
+        sender: EmailSender {
+            name: "Test EmailSender".to_string(),
+            email: Email::new("no-reply@test.com").unwrap(),
+        },
+
+        mailgun: Mailgun { api_key, domain },
+    }
 }
