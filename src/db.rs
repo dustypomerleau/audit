@@ -8,6 +8,7 @@ use crate::state::AppState;
 
 pub async fn db() -> Result<Client, AppError> {
     let client = if let Some(state) = use_context::<AppState>() {
+        // The gel_tokio::Client is cheap to clone because its inner fields are Arc<T>
         state.db.get_cloned()?
     } else {
         return Err(AppError::Db(

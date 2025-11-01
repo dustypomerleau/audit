@@ -96,8 +96,8 @@ pub struct SurgeonDefaults {
     pub main: Main,
 }
 
-/// Return the current [`Surgeon`] from global server context. In practice, this function should
-/// rarely be needed, as accessing a protected route will call
+/// Return the current [`Surgeon`] from global server context by cloning its value. In practice,
+/// this function should rarely be needed, as accessing a protected route will call
 /// [`get_authorized_surgeon`](crate::auth::get_authorized_surgeon), which is then provided as
 /// client-side context.
 #[server]

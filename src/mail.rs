@@ -21,6 +21,7 @@ pub struct Mailer {
     pub mailgun: Mailgun,
 }
 
+// This impl is necessary because the [`Mailgun`] foreign type is not [`Clone`].
 impl Clone for Mailer {
     fn clone(&self) -> Self {
         Self {
@@ -30,6 +31,16 @@ impl Clone for Mailer {
                 domain: self.mailgun.domain.clone(),
             },
         }
+    }
+}
+
+pub fn mailer() -> Result<Arc<Mailer>, AppError> {
+    if let Some(AppState { mailer, .. }) = use_context::<AppState>() {
+        Ok(Arc::clone(&mailer))
+    } else {
+        Err(AppError::State(
+            "unable to get the mailer from context".to_string(),
+        ))
     }
 }
 
@@ -149,13 +160,9 @@ pub async fn transactional_email(
     surgeon: &Surgeon,
     email_type: EmailType,
 ) -> Result<SendResponse, AppError> {
-    if let Some(AppState { mailer, .. }) = use_context::<AppState>() {
-        transactional_email_with_mailer(surgeon, email_type, mailer).await
-    } else {
-        Err(AppError::State(
-            "unable to get the mailer from context".to_string(),
-        ))
-    }
+    let mailer = mailer()?;
+
+    transactional_email_with_mailer(surgeon, email_type, mailer).await
 }
 
 // Factoring out this function provides a way to supply our own [`Mailer`] in tests. In prod, it is
