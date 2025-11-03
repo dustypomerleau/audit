@@ -41,6 +41,18 @@ pub struct OpIol {
     //
     // This can be fixed with private fields and an OpIol::new() function - see method in impl of
     // Mock.
+    //
+    // Alternatively, it could be fixed by making OpIol an enum, which is more elegant.
+    // To go all the way with this idea, you would have separate Iol and ToricIol structs, and the
+    // iol field of OpIol would only include one or the other. Or better yet, you could have
+    // ToricIol contain an iol: Iol field and just also add the toric power.
+    // This may not be worth the tradeoffs in ergonomics, however.
+    //
+    // You might be able to make it more ergonomic by implementing a trait for both plain Iol and
+    // ToricIol containing an Iol, and then have the fields that contain an iol just use methods to
+    // get the inner data.
+    // You could even have a toric() method on the trait that returns whether the iol is a toric
+    // for filtering.
     pub axis: Option<Axis>,
 }
 
