@@ -8,7 +8,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 axum = { version = "0.8.6", optional = true }
-axum-extra = { version = "0.10.3", features = ["cookie", "typed-header"], optional = true }
+axum-extra = { version = "0.12.1", features = ["cookie", "typed-header"], optional = true }
 axum-macros = { version = "0.5.0", optional = true }
 base64ct = { version = "1.8.0", features = ["alloc"], optional = true }
 # todo: switch to jiff
@@ -27,6 +27,7 @@ leptos_axum = { version = "0.8.6", optional = true }
 leptos_meta = { version = "0.8.5" }
 leptos_router = { version = "0.8.9", features = ["nightly"] }
 mailgun-rs = { version = "2.0.1", optional = true }
+# todo: switch to pulldown-cmark https://github.com/pulldown-cmark/pulldown-cmark/
 markdown = "1.0.0"
 # plotly = { version = "0.13.5", features = ["static_export_default"], optional = true }
 plotly = { git = "https://github.com/plotly/plotly.rs", features = [
