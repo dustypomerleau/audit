@@ -1,0 +1,11 @@
+[package]
+edition = "2024"
+name = "audit_macro"
+version = "0.1.0"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+quote = { workspace = true }
+syn = { workspace = true }
