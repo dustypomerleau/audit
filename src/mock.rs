@@ -88,7 +88,7 @@ impl Mock for Name {
 }
 
 impl Name {
-    fn inner(self) -> String { self.0 }
+    fn into_inner(self) -> String { self.0 }
 }
 
 /// Used for mocking of Gel's `ext::auth::Identity`.
@@ -362,9 +362,9 @@ impl Mock for Surgeon {
             email: Email::mock(),
             terms: DateTime::<Utc>::mock_option(Prob::new(0.01).unwrap_or_default()),
             first_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
-                .map(|name| name.inner()),
+                .map(|name| name.into_inner()),
             last_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
-                .map(|name| name.inner()),
+                .map(|name| name.into_inner()),
             defaults: SurgeonDefaults::mock_option(Prob::new(0.01).unwrap_or_default()),
             sia: SurgeonSia::mock(),
         }
