@@ -4,7 +4,7 @@
 ///
 /// The generated type implements [`Bounded<integer_type>`](crate::bounded::Bounded),
 /// [`AsRef<integer_type>`], and a `Self::new()` constructor with bounds checking.
-// todo: replace the bounded macro with a derive macro that takes range and rem as arguments.
+// TODO: replace the bounded macro with a derive macro that takes range and rem as arguments.
 #[macro_export]
 macro_rules! range_bounded {
     ($(($name:ident, $type:ty, $range:expr $(, $rem:literal)? $(,)?)),+ $(,)?) => (

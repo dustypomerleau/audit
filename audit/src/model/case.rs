@@ -243,7 +243,7 @@ impl FormCase {
             Axis::new(sia_axis)?,
         );
 
-        // note: For now we are assuming the IOL model is in the DB. To start, offer an option in
+        // NOTE: For now we are assuming the IOL model is in the DB. To start, offer an option in
         // the datalist that the IOL is not listed, and have a DB option for that.
         let iol = if let Ok(Some(json)) = db()
             .await?

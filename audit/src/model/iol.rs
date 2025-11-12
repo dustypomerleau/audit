@@ -35,7 +35,7 @@ pub struct Iol {
 pub struct OpIol {
     pub iol: Iol,
     pub se: IolSe,
-    // note: It's theoretically possible to add an Axis to a case with a nontoric Iol, but the
+    // NOTE: It's theoretically possible to add an Axis to a case with a nontoric Iol, but the
     // cases selected for analysis of the Axis will be filtered by `self.iol.toric.is_some()`.
     // Using an enum that separates OpIols containing NontoricIol from those containing ToricIol is
     // possible, but in practice is not as ergonomic as it sounds.

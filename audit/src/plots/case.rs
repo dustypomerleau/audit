@@ -114,8 +114,8 @@ impl CaseCompare {
         PolarCompare { surgeon, cohort }
     }
 
-    // todo: Do we need an equivalent for SE or sph?
-    // todo: you don't want this to generate negative differences
+    // TODO: Do we need an equivalent for SE or sph?
+    // TODO: you don't want this to generate negative differences
     pub fn polar_cyl_target_error(&self) -> PolarCompare {
         fn delta_target(case: &Case) -> PolarPoint {
             let target = if let Target {
@@ -123,7 +123,7 @@ impl CaseCompare {
                 ..
             } = case.target
             {
-                // todo: We are presuming that the target power is in the spectacle plane, and
+                // TODO: We are presuming that the target power is in the spectacle plane, and
                 // therefore needs to be vertexed to corneal plane, but this needs to be
                 // confirmed (Abulafia article says yes).
                 PolarPoint {
@@ -199,7 +199,7 @@ impl CaseCompare {
     }
 }
 
-// todo: in future, you may want the ability to compare a specific date range for the Surgeon,
+// TODO: in future, you may want the ability to compare a specific date range for the Surgeon,
 // against either the cohort, or against the surgeon's own baseline (all other dates outside the
 // range).
 /// Query the database for cases from the given year.

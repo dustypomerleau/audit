@@ -45,7 +45,7 @@ impl Formula {
     }
 }
 
-// note: ToricPower, TargetCylPower are nonnegative, but RefCylPower can be negative.
+// NOTE: ToricPower, TargetCylPower are nonnegative, but RefCylPower can be negative.
 // This has implications for the `Cyl` trait that you need to consider.
 range_bounded!((TargetCylPower, u32, 0..=600), (TargetSe, i32, -600..=200));
 

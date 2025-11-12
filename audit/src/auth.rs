@@ -22,7 +22,7 @@ use uuid::Uuid;
 use crate::error::AppError;
 use crate::state::AppState;
 
-// note: new API for dotenvy will arrive in v16 release
+// NOTE: new API for dotenvy will arrive in v16 release
 pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
     if cfg!(test) {
         env::var("TEST_AUTH_URL")

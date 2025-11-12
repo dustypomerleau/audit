@@ -40,7 +40,7 @@ use crate::model::Iol;
 /// Display a form that inserts a `SurgeonCas` on submit.
 #[component]
 pub fn AddCase() -> impl IntoView {
-    // todo: load necessary datalists form the DB:
+    // TODO: load necessary datalists form the DB:
     //
     // 1. sites
     // 2. IOL models
@@ -60,13 +60,13 @@ pub fn AddCase() -> impl IntoView {
         <ActionForm action=insert_case>
             <div style="display: grid; grid-auto-columns: 1fr; grid-gap: 30px;">
                 "Enter the case details (fields are required unless marked optional)"
-                // todo: "To change your default values, please [update your profile](link)"
+                // TODO: "To change your default values, please [update your profile](link)"
                 <label>
                     "Unique (anonymised) identifier"
                     <input type="text" name="case[urn]" required autofocus />
                 </label> <fieldset>
                     <legend>"Side"</legend>
-                    // todo: we need a signal holding this value to update the Sia
+                    // TODO: we need a signal holding this value to update the Sia
                     <label>
                         "Right"<input type="radio" value="Right" name="case[side]" required />
                     </label>
@@ -111,7 +111,7 @@ pub fn AddCase() -> impl IntoView {
                     <input type="number" min=8 max=14 step=0.01 name="case[wtw]" />
                 </label>
                 <label>
-                    // todo: prefill the surgeon's default formula
+                    // TODO: prefill the surgeon's default formula
                     "Formula" <select name="case[formula]">
                         <optgroup label="Thick lens formulas">
                             <option value="Barrett">"Barrett"</option>
@@ -188,7 +188,7 @@ pub fn AddCase() -> impl IntoView {
                     <input type="number" min=-20 max=60 step=0.25 name="case[iol_se]" required />
                 </label>
                 <label>
-                    // todo: hide this field using a signal if the model is nontoric
+                    // TODO: hide this field using a signal if the model is nontoric
                     "IOL axis (0–179°)"
                     <input type="number" min=0 max=179 step=1 name="case[iol_axis]" />
                 </label>> <fieldset>
@@ -414,7 +414,7 @@ pub async fn insert_form_case(case: FormCase) -> Result<String, AppError> {
 
     Ok(inserted_case_json)
 
-    // todo: If possible, capture the returned JSON on form submit, deserialize it into a
+    // TODO: If possible, capture the returned JSON on form submit, deserialize it into a
     // SurgeonCase, and redirect to a view showing the inserted case, with a button to add another
     // case (or simply show it above the form to add another case).
 }
@@ -511,7 +511,7 @@ pub async fn insert_surgeon_case(
         Side::Left => "Side.Left",
     };
 
-    // note: We don't need to cast the integer types, because they are just going into a format
+    // NOTE: We don't need to cast the integer types, because they are just going into a format
     // string. The <int32> will be inferred based on the object field types in Gel.
     let (flat_k_power, flat_k_axis, steep_k_power, steep_k_axis, cct, wtw) = (
         ks.flat_power(),

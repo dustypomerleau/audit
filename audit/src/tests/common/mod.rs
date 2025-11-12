@@ -44,7 +44,7 @@ pub async fn test_db() -> Client {
 /// generically represents the rest of the comparison cohort.
 #[expect(unused)]
 pub async fn populate_test_db() -> Client {
-    // todo: consider shell command to check current DB branch and switch it to testdb.
+    // TODO: consider shell command to check current DB branch and switch it to testdb.
     //
     // - call `gel branch current` and get the output
     // - check that the output contains `testdb` or whatever unique string you choose

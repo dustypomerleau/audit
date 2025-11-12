@@ -9,7 +9,7 @@ async fn creates_plots() {
     let client = test_db().await;
 
     // uncomment below to populate the test DB with cases.
-    // note: This is hacky:
+    // NOTE: This is hacky:
     // - As currently written, populate_test_db() will fail if you don't already have at
     // least 2 Surgeons in the DB whose auth tokens match the test tokens in .env.
     // - It will also fail if there are no Iols in the DB, so you have to manually add at

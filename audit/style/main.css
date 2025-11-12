@@ -306,7 +306,7 @@
             }
         }
 
-        /* todo: design this gradient for your current color scheme, and probably un-nest it */
+        /* TODO: design this gradient for your current color scheme, and probably un-nest it */
         .divider {
             background-image: linear-gradient(to right, var(--gray-4), var(--gray-2));
             height: 2px;
@@ -503,7 +503,7 @@
                 .plot-traces {
                     width: 23rem;
 
-                    /* todo: the plotly plots have hardcoded size—ideally i'd like them larger on desktop */
+                    /* TODO: the plotly plots have hardcoded size—ideally i'd like them larger on desktop */
                     /* https://github.com/plotly/plotly.rs/issues/240 */
                     /* consider just transform: scale(1.5); or similar, but it doesn't help with doc flow */
                     @media (width >= 40rem) {

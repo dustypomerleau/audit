@@ -74,7 +74,7 @@ select (
     if let Ok(Some(surgeon_json)) = db().await?.query_single_json(query, &()).await {
         let surgeon = serde_json::from_str(surgeon_json.as_ref())?;
         set_current_surgeon(Some(surgeon)).await?;
-        // todo: call an async function that sends a transactional email to the new user
+        // TODO: call an async function that sends a transactional email to the new user
         redirect("/protected/add");
     } else {
         redirect("/signedout");

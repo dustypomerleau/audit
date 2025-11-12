@@ -28,7 +28,7 @@ pub fn SignUp() -> impl IntoView {
                 <label>"Email*" <input type="email" name="surgeon[email]" required /></label>
                 <label>"First Name" <input type="text" name="surgeon[first_name]" /></label>
                 <label>"Last Name" <input type="text" name="surgeon[last_name]" /></label>
-                // todo: populate this from the DB, and add a new site in the query if needed
+                // TODO: populate this from the DB, and add a new site in the query if needed
                 <label>
                     "Default Hospital/Site" <input list="sites" name="surgeon[default_site]" />
                     <datalist>
@@ -36,14 +36,14 @@ pub fn SignUp() -> impl IntoView {
                     </datalist>
                 </label>
                 <label>
-                    // todo: populate this from the DB with all IOLs
+                    // TODO: populate this from the DB with all IOLs
                     "Default IOL" <input list="iols" name="surgeon[default_iol]" /> <datalist>
                         <option label="SN60WF" value="sn60wf"></option>
                         <option label="DETxxx" value="detxxx"></option>
                     </datalist>
                 </label>
                 <label>
-                    // todo: populate this from the DB with all formulas
+                    // TODO: populate this from the DB with all formulas
                     "Default formula" <input list="formulas" name="surgeon[default_formula]" />
                     <datalist>
                         <option label="Barrett" value="barrett"></option>
@@ -210,7 +210,7 @@ select QuerySurgeon {{
     Ok(())
 }
 
-// todo: run testing and check all permutations of login antics:
+// TODO: run testing and check all permutations of login antics:
 //
 // A full list of possible scenarios:
 //
@@ -231,11 +231,11 @@ select QuerySurgeon {{
 //
 //   b. the email doesn't match, but you don't want to update the user without informing them that
 //   they already have an account with a different email:
-//   - todo: add logic for this
+//   - TODO: add logic for this
 //
 // 5. The user is new, they click new user and try to sign up with an email that is already being
 //    used by a different user (most likely scenario is that this is actually the same user, but
 //    they have multiple Google accounts).
 //    - currently this results in a redirect to `signed/out` and does not create the user, which is
 //    harmless, but not very informative
-//    - similar to 4b, todo: add specific logic for this
+//    - similar to 4b, TODO: add specific logic for this

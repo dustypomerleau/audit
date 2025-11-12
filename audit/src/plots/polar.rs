@@ -77,7 +77,7 @@ impl AsPlot for PolarCompare {
         let surgeon_ellipse = surgeon.confidence(None);
         let cohort_ellipse = cohort.confidence(None);
 
-        // todo: set these as constants app-wide, adapt for light mode, and use in all plots
+        // TODO: set these as constants app-wide, adapt for light mode, and use in all plots
         let cohort_centroid_marker_color = "#f5f5f6";
         let cohort_confidence_color = "#848998";
         let cohort_marker_color = "#848998";
@@ -163,12 +163,12 @@ impl AsPlot for PolarCompare {
             .hover_info(HoverInfo::Skip);
 
         let mut plot = Plot::new();
-        // todo: autosizable depends on the value of Layout::auto_size() - investigate.
+        // TODO: autosizable depends on the value of Layout::auto_size() - investigate.
         plot.set_configuration(
             Configuration::new()
                 .autosizable(true)
                 .display_logo(false)
-                // todo: PR for mode_bar_buttons_to_add
+                // TODO: PR for mode_bar_buttons_to_add
                 .mode_bar_buttons_to_remove(vec![
                     ModeBarButtonName::Lasso2d,
                     ModeBarButtonName::Zoom2d,
@@ -179,7 +179,7 @@ impl AsPlot for PolarCompare {
                         .scale(4),
                 ),
         );
-        // todo: PR to fix scroll_zoom which should be a string like "gl3d+geo+map"
+        // TODO: PR to fix scroll_zoom which should be a string like "gl3d+geo+map"
 
         plot.add_traces(vec![
             cohort,
@@ -219,7 +219,7 @@ impl AsPlot for PolarCompare {
         let radial_axis = RadialAxis::new().axis_attributes(radial_axis_attributes.clone());
         let angular_axis = AngularAxis::new().axis_attributes(angular_axis_attributes);
 
-        // todo: use a signal on the plot container to set the colors for light/dark mode.
+        // TODO: use a signal on the plot container to set the colors for light/dark mode.
         // Find a way to do this with CSS variables (not natively available in Plotly).
         let polar_layout = LayoutPolar::new()
             .bg_color("#252833")
@@ -332,7 +332,7 @@ impl PolarData {
     /// Separate a polar dataset into 2 vectors of equal length, containing values for
     ///  [`r`](PolarPoint::r) and [`theta`](PolarPoint::theta), respectively. This is useful for
     /// generating [`Plot`]s, which require each axis to be a separate vector.
-    // todo: it's probably better not to use this tuple, because it's easy to confuse the
+    // TODO: it's probably better not to use this tuple, because it's easy to confuse the
     // order of r and theta, but instead to directly produce a ScatterPolar::new and
     // return it.
     pub fn split_axes(&self) -> (Vec<f64>, Vec<f64>) {
@@ -447,7 +447,7 @@ impl PolarData {
     }
 }
 
-// todo: these fields should probably be bounded/newtyped. r must be non-negative, and theta must
+// TODO: these fields should probably be bounded/newtyped. r must be non-negative, and theta must
 // be 0.0..360.0.
 /// A single point on a polar plot, where [`theta`](Self::theta) represents the angular axis, and
 /// [`r`](Self::r) represents the radial axis.

@@ -65,7 +65,7 @@ pub fn App() -> impl IntoView {
         <Title text="Cataract audit" />
         <Router>
             <main>
-                // note: plain Axum server routes are not represented here,
+                // NOTE: plain Axum server routes are not represented here,
                 // as they are added directly to the router in `src/main.rs`.
                 <Routes fallback=|| "Page not found.".into_view()>
                     <ParentRoute path=StaticSegment("") view=Nav>
@@ -75,7 +75,7 @@ pub fn App() -> impl IntoView {
                         <Route path=StaticSegment("signup") view=SignUp />
                         <Route path=StaticSegment("terms") view=Terms />
                         <ParentRoute path=StaticSegment("protected") view=Protected>
-                            // todo: consider making instructions a sidebar inside Add
+                            // TODO: consider making instructions a sidebar inside Add
                             <Route path=StaticSegment("add") view=Add />
                             <Route path=StaticSegment("instructions") view=Instructions />
                             <Route path=StaticSegment("list") view=List />

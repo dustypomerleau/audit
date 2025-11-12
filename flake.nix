@@ -43,7 +43,7 @@
     });
 }
 
-# todo: start with the dockerfile in leptos docs:
+# TODO: start with the dockerfile in leptos docs:
 # https://book.leptos.dev/deployment/ssr.html
 # then use nix example below, from:
 # https://dev.to/johnreillymurray/rust-environment-and-docker-build-with-nix-flakes-19c1
@@ -151,3 +151,4 @@
 #       }
 #     );
 # }
+

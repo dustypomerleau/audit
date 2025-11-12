@@ -59,7 +59,7 @@ impl AsPlot for CartesianCompare {
                 .collect()
         }
 
-        // todo: set these as constants app-wide, adapt for light mode, and use in all plots
+        // TODO: set these as constants app-wide, adapt for light mode, and use in all plots
         // (see plots/polar.rs as well)
         #[allow(unused_variables)]
         let cohort_centroid_marker_color = "#f5f5f6";
@@ -112,7 +112,7 @@ impl AsPlot for CartesianCompare {
             .opacity(0.4)
             .hover_info(HoverInfo::Skip);
 
-        // todo: add plots for 0.25 D bins using the centroid colors
+        // TODO: add plots for 0.25 D bins using the centroid colors
 
         let mut plot = Plot::new();
 
@@ -120,7 +120,7 @@ impl AsPlot for CartesianCompare {
             Configuration::new()
                 .autosizable(true)
                 .display_logo(false)
-                // todo: PR for mode_bar_buttons_to_add
+                // TODO: PR for mode_bar_buttons_to_add
                 .mode_bar_buttons_to_remove(vec![
                     ModeBarButtonName::Lasso2d,
                     ModeBarButtonName::Pan2d,
@@ -139,7 +139,7 @@ impl AsPlot for CartesianCompare {
             .title(
                 Title::new()
                     .text("Preop corneal astigmatism (D)")
-                    // todo: none of these seem to work
+                    // TODO: none of these seem to work
                     .x_anchor(Anchor::Left)
                     .x(0.0)
                     .y_anchor(Anchor::Bottom)
@@ -182,7 +182,7 @@ impl AsPlot for CartesianCompare {
     }
 }
 
-// todo: consider creating a cartesian confidence and associated method for the ellipse, like you
+// TODO: consider creating a cartesian confidence and associated method for the ellipse, like you
 // did with the polar plot.
 
 /// A cartesian dataset, with values along the [`x`](CartesianPoint::x) and [`y`](CartesianPoint::y)
