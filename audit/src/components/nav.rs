@@ -13,7 +13,7 @@ use crate::components::Logo;
 pub fn Nav() -> impl IntoView {
     view! {
         <header id="header" class="header">
-            <a href="/" title="Vic Eye Audit | Home">
+            <a href="/" rel="external" title="Vic Eye Audit | Home">
                 <div class="logo">
                     <Logo />
                 </div>
@@ -31,3 +31,4 @@ pub fn Nav() -> impl IntoView {
         <Outlet />
     }
 }
+
