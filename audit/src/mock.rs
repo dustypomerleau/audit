@@ -1,11 +1,14 @@
 use std::ops::Rem;
 
+use audit_macro::RangeBounded;
 use chrono::DateTime;
 use chrono::Utc;
 use rand::Rng;
 use rand::distr::Alphanumeric;
 use rand::distr::SampleString;
 use rand::distr::StandardUniform;
+use rand::distr::uniform::SampleRange;
+use rand::distr::uniform::SampleUniform;
 use rand::rng;
 
 use crate::bounded::Bounded;
@@ -52,9 +55,9 @@ use crate::model::Va;
 use crate::model::VaDen;
 use crate::model::VaNum;
 use crate::model::Wtw;
-use crate::range_bounded;
 
-range_bounded!((Prob, f32, 0.0..1.0));
+#[derive(Clone, Copy, Debug, Default, PartialEq, RangeBounded)]
+pub struct Prob(#[bounded(range = 0.0..=1.0)] f32);
 
 /// Provides a mocked instance of `Self` for testing purposes.
 pub trait Mock: Sized {
@@ -106,6 +109,22 @@ impl Mock for Identity {
                 .map(|_| rng().random_range(0..=9).to_string())
                 .collect(),
         }
+    }
+}
+
+impl<T: Bounded> Mock for T {
+    fn mock() -> Self {
+        let random_inner = rng().random_range(T::range());
+
+        // Mathematically it's problematic to always round towards 0, but we accept
+        // this for simplicity, because we are only mocking values.
+        // You could also consider `random_inner.next_multiple_of($rem)` here.
+        //
+        // FIXME: you may be able to fix this error with trait bounds on Bounded::Idx
+        let random_inner = random_inner - (random_inner.rem());
+
+        // Safe unwrap due to use of the type's own range and rem values.
+        Self::new(random_inner).unwrap()
     }
 }
 

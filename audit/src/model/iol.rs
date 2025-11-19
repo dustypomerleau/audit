@@ -1,9 +1,9 @@
+use audit_macro::RangeBounded;
 use serde::Deserialize;
 use serde::Serialize;
 
 use crate::bounded::Bounded;
 use crate::model::Axis;
-use crate::range_bounded;
 
 /// The class of [`Iol`] (monofocal, EDOF, multifocal).
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
@@ -14,10 +14,11 @@ pub enum Focus {
     Multi,
 }
 
-range_bounded!(
-    (IolSe, i32, -2000..=6000, 25),
-    (ToricPower, u32, 100..=2000, 25),
-);
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct IolSe(#[bounded(range = -2000..=6000, rem = 25)] i32);
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct ToricPower(#[bounded(range = 100..=2000, rem = 25)] u32);
 
 /// A specific model of IOL.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
@@ -78,3 +79,4 @@ mod tests {
         assert!(ToricPower::new(520).is_err());
     }
 }
+

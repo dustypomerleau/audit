@@ -1,5 +1,6 @@
 use std::fmt::Display;
 
+use audit_macro::RangeBounded;
 use chrono::NaiveDate;
 use serde::Deserialize;
 use serde::Serialize;
@@ -14,7 +15,6 @@ use crate::model::OpVa;
 use crate::model::Sia;
 use crate::model::Site;
 use crate::model::Target;
-use crate::range_bounded;
 
 /// The side of the patient's surgery.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -67,7 +67,8 @@ impl Display for Adverse {
     }
 }
 
-range_bounded!((Main, u32, 100..=600));
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Main(#[bounded(range = 100..=600)] u32);
 
 /// A single surgical case.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
@@ -411,3 +412,4 @@ mod tests {
         dbg!(serde_json::to_string(&SurgeonCase::mock()).unwrap());
     }
 }
+

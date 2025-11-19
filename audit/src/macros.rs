@@ -47,7 +47,7 @@ macro_rules! range_bounded {
                 }
 
                 #[cfg(feature = "ssr")]
-                fn range() -> impl ::std::ops::RangeBounds<$type> + ::rand::distr::uniform::SampleRange<$type> {
+                fn range() -> impl ::std::ops::RangeBounds<$type> {
                     $range
                 }
             }
@@ -57,27 +57,6 @@ macro_rules! range_bounded {
                     write!(f, "{}", self.inner())
                 }
             }
-
-            #[cfg(feature = "ssr")]
-            impl $crate::mock::Mock for $name {
-                fn mock() -> Self {
-                    use ::rand::Rng;
-
-                    let random_inner = ::rand::rng().random_range(Self::range());
-
-                    $(
-                        use ::std::ops::Rem;
-
-                        // Mathematically it's problematic to always round towards 0, but we accept
-                        // this for simplicity, because we are only mocking values.
-                        // You could also consider `random_inner.next_multiple_of($rem)` here.
-                        let random_inner = random_inner - (random_inner.rem($rem));
-                    )?
-
-                    // Safe unwrap due to use of the type's own range and rem values.
-                    Self::new(random_inner).unwrap()
-                }
-            }
         )+
     )
 }
@@ -85,4 +64,19 @@ macro_rules! range_bounded {
 #[macro_export]
 macro_rules! some_or_empty {
     ($($id:ident),+) => (let ($($id),+) = ($($crate::db::some_or_empty($id),)+);)
+}
+
+#[cfg(test)]
+mod tests {
+    use audit_macro::RangeBounded;
+
+    use crate::bounded::Bounded;
+
+    #[test]
+    fn derives_range_bounded() {
+        #[derive(RangeBounded)]
+        struct TestStruct(#[bounded(range = 0..50, rem = 5)] u32);
+
+        TestStruct::new(25).unwrap();
+    }
 }

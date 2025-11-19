@@ -20,6 +20,7 @@ pub trait Bounded: Sized {
     /// Return the inner numeric value of the type.
     fn inner(&self) -> Self::Idx;
 
+    #[cfg(feature = "ssr")]
     /// Create a new [`Bounded`] instance.
     fn new(value: Self::Idx) -> Result<Self, AppError>;
 

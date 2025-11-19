@@ -1,14 +1,15 @@
+use audit_macro::RangeBounded;
 use serde::Deserialize;
 use serde::Serialize;
 
 use crate::bounded::Bounded;
-use crate::range_bounded;
 
 pub trait CylPower {}
 impl CylPower for i32 {}
 impl CylPower for u32 {}
 
-range_bounded!((Axis, u32, 0..=179));
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Axis(#[bounded(range = 0..=179)] u32);
 
 pub trait Cyl<T>
 where T: CylPower
