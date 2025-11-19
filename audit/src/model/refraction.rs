@@ -1,3 +1,4 @@
+use audit_macro::RangeBounded;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -6,12 +7,12 @@ use crate::error::AppError;
 use crate::model::Axis;
 use crate::model::Cyl;
 use crate::model::Sca;
-use crate::range_bounded;
 
-range_bounded!(
-    (RefCylPower, i32, -1000..=1000, 25),
-    (RefSph, i32, -2000..=2000, 25),
-);
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct RefCylPower(#[bounded(range = -1000..=1000, rem = 25)] i32);
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct RefSph(#[bounded(range = -2000..=2000, rem = 25)] i32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct RefCyl {

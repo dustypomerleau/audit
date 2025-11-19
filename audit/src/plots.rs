@@ -16,6 +16,7 @@ mod vertex;
 
 use std::f64::consts::PI;
 
+use audit_macro::RangeBounded;
 pub use cartesian::*;
 pub use case::*;
 use plotly::Plot;
@@ -25,14 +26,17 @@ use serde::Serialize;
 pub use vertex::*;
 
 use crate::bounded::Bounded;
-use crate::range_bounded;
 
 /// Generate a Plotly [`Plot`] from the given type.
 pub trait AsPlot {
     fn plot(&self) -> Plot;
 }
 
-range_bounded!((StdDev, f64, 1.0..=5.0), (PlotStep, f64, 0.001..=0.05));
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct PlotStep(#[bounded(range = 0.001..=0.05)] f64);
+
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct StdDev(#[bounded(range = 1.0..=5.0)] f64);
 
 /// The characteristics of a confidence ellipse.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]

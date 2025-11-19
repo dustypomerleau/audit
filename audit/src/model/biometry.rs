@@ -1,19 +1,28 @@
+use audit_macro::RangeBounded;
 use serde::Deserialize;
 use serde::Serialize;
 
 use crate::bounded::Bounded;
 use crate::model::Axis;
 use crate::model::Cyl;
-use crate::range_bounded;
 
-range_bounded!(
-    (Acd, u32, 0..=600),
-    (Al, u32, 1200..=3800),
-    (Cct, u32, 350..=650),
-    (Kpower, u32, 3000..=6500),
-    (Lt, u32, 200..=800),
-    (Wtw, u32, 800..=1400),
-);
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Acd(#[bounded(range = 0..=600)] u32);
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Al(#[bounded(range = 1200..=3800)] u32);
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Cct(#[bounded(range = 350..=650)] u32);
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Kpower(#[bounded(range = 3000..=6500)] u32);
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Lt(#[bounded(range = 200..=800)] u32);
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Wtw(#[bounded(range = 800..=1400)] u32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct K {

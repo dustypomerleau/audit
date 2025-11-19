@@ -1,4 +1,4 @@
-#[cfg(feature = "ssr")] use std::range::RangeBounds;
+use std::range::RangeBounds;
 
 #[cfg(feature = "ssr")] use rand::distr::uniform::SampleRange;
 #[cfg(feature = "ssr")] use rand::distr::uniform::SampleUniform;
@@ -26,4 +26,8 @@ pub trait Bounded: Sized {
     /// Return the [`Range`](std::range::Range) that bounds the type.
     #[cfg(feature = "ssr")]
     fn range() -> impl RangeBounds<Self::Idx> + SampleRange<Self::Idx>;
+
+    /// If a [`Rem`] value is required, return the value passed to the `%` predicate in the `new`
+    /// constructor.
+    fn rem() -> Option<Self::Idx>;
 }

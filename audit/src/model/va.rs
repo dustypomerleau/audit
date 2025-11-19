@@ -1,12 +1,16 @@
+use audit_macro::RangeBounded;
 use serde::Deserialize;
 use serde::Serialize;
 
 use crate::bounded::Bounded;
-use crate::range_bounded;
 
 // Choosing not to use NonZeroU32 for VaDen, because it has a slightly different interface than all
 // our other bounded types.
-range_bounded!((VaDen, u32, 1..u32::MAX), (VaNum, u32, 0..=2000));
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct VaDen(#[bounded(range = 1..=u32::MAX)] u32);
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct VaNum(#[bounded(range = 0..=2000)] u32);
 
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  

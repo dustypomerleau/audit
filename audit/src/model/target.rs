@@ -1,3 +1,4 @@
+use audit_macro::RangeBounded;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -5,7 +6,6 @@ use crate::bounded::Bounded;
 use crate::model::Axis;
 use crate::model::Cyl;
 use crate::model::Sca;
-use crate::range_bounded;
 
 /// A formula for calculating IOL power from biometry.
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
@@ -47,7 +47,11 @@ impl Formula {
 
 // NOTE: ToricPower, TargetCylPower are nonnegative, but RefCylPower can be negative.
 // This has implications for the `Cyl` trait that you need to consider.
-range_bounded!((TargetCylPower, u32, 0..=600), (TargetSe, i32, -600..=200));
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct TargetCylPower(#[bounded(range = 0..=600)] u32);
+
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct TargetSe(#[bounded(range = -600..=200)] i32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct TargetCyl {
@@ -105,3 +109,4 @@ mod tests {
         assert!(TargetSe::new(201).is_err());
     }
 }
+

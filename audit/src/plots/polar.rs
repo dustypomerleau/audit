@@ -253,7 +253,8 @@ impl AsPlot for PolarCompare {
 pub struct PolarData {
     // Although we could define:
     //
-    // range_bounded!((PolarAxis, f64, 0.0..360.0));
+    // #[derive(RangeBounded)]
+    // pub struct PolarAxis(#[range = 0.0..360.0] f64);
     //
     // and use that instead of f64, it adds complexity to passing the data to Plotly, and the
     // bounds will already be met because of the constraints on the DB.
@@ -473,3 +474,4 @@ impl Cartesian for PolarPoint {
 
 #[cfg(test)]
 mod tests {}
+

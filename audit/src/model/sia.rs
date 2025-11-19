@@ -1,12 +1,13 @@
+use audit_macro::RangeBounded;
 use serde::Deserialize;
 use serde::Serialize;
 
 use crate::bounded::Bounded;
 use crate::model::Axis;
 use crate::model::Cyl;
-use crate::range_bounded;
 
-range_bounded!((SiaPower, u32, 0..=200));
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct SiaPower(#[bounded(range = 0..=200)] u32);
 
 /// A surgically-induced astigmatism. The purist would prefer using
 /// `meridian` rather than `axis` for [`Sia`] and biometric Ks, but on balance I've
