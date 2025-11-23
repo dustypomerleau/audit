@@ -1,4 +1,4 @@
-use std::range::RangeBounds;
+#[cfg(feature = "ssr")] use std::range::RangeBounds;
 
 #[cfg(feature = "ssr")] use rand::distr::uniform::SampleRange;
 #[cfg(feature = "ssr")] use rand::distr::uniform::SampleUniform;

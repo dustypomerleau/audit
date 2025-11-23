@@ -383,10 +383,8 @@ select Iol {{
 
 #[cfg(test)]
 mod tests {
-    use crate::mock::Mock;
     use crate::model::Focus;
     use crate::model::Iol;
-    use crate::model::SurgeonCase;
 
     #[test]
     fn deserializes_iol() {
@@ -405,11 +403,4 @@ mod tests {
         let result = serde_json::from_str::<Iol>(json.as_str()).unwrap();
         assert_eq!(result, iol);
     }
-
-    #[test]
-    #[ignore]
-    fn fake_surgeon_case() {
-        dbg!(serde_json::to_string(&SurgeonCase::mock()).unwrap());
-    }
 }
-
