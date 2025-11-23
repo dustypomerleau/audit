@@ -67,14 +67,6 @@ ssr = [
   "leptos_router/ssr",
 ]
 
-# Defines a size-optimized profile for the WASM bundle in release mode
-[profile.wasm-release]
-codegen-units = 1
-inherits = "release"
-lto = true
-opt-level = 'z'
-panic = "abort"
-
 [package.metadata.leptos]
 # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
 output-name = "audit"
