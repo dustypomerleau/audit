@@ -9,13 +9,13 @@ RUN apk update \
         chromium-chromedriver \
         curl \
         libc-dev \
+        npm \
         openssl-dev \
         openssl-libs-static \
         perl \
         pkgconfig
 
 RUN cargo install cargo-binstall
-RUN cargo binstall wasm-bindgen-cli@0.2.105
 RUN cargo binstall cargo-leptos
 RUN rustup target add wasm32-unknown-unknown
 
