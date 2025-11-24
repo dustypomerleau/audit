@@ -1,4 +1,4 @@
 [instance]
 # You can use `gel project upgrade --to-latest` to update to the latest server version:
 # https://docs.geldata.com/reference/using/cli/gel_project/gel_project_upgrade
-server-version = "6.10"
+server-version = "7.0"
