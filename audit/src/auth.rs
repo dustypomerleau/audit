@@ -1,3 +1,5 @@
+// BOOKMARK: FIXME: auth cookies, study axum-gate
+
 use std::env;
 use std::sync::LazyLock;
 
@@ -22,14 +24,34 @@ use uuid::Uuid;
 use crate::error::AppError;
 use crate::state::AppState;
 
-// NOTE: new API for dotenvy will arrive in v16 release
-pub static BASE_AUTH_URL: LazyLock<String> = LazyLock::new(|| {
-    if cfg!(test) {
+struct AuthVars {
+    base_auth_url: String,
+    cookie_secure: bool,
+}
+
+static AUTH_VARS: LazyLock<AuthVars> = LazyLock::new(|| {
+    let base_auth_url = if cfg!(test) {
         env::var("TEST_AUTH_URL")
             .expect("expected TEST_AUTH_URL environment variable to be present")
     } else {
         env::var("BASE_AUTH_URL")
             .expect("expected BASE_AUTH_URL environment variable to be present")
+    };
+
+    let cookie_secure = match env::var("COOKIE_SECURE")
+        .unwrap_or("true".to_string())
+        .as_str()
+    {
+        "true" | "True" | "TRUE" => true,
+        "false" | "False" | "FALSE" => false,
+        // If we somehow set the environment variable to a non-boolean value, default to `Secure`
+        // for these cookies.
+        _ => true,
+    };
+
+    AuthVars {
+        base_auth_url,
+        cookie_secure,
     }
 });
 
@@ -89,14 +111,15 @@ pub async fn handle_sign_in(jar: CookieJar) -> (CookieJar, Redirect) {
         verifier,
     } = generate_pkce();
 
-    let base_auth_url = &*BASE_AUTH_URL;
+    let base_auth_url = &*AUTH_VARS.base_auth_url;
 
     let cookie = Cookie::build(("gel-pkce-verifier", verifier))
         .expires(None)
         .http_only(true)
         .path("/")
-        .same_site(SameSite::Lax) // required to send the cookie to the auth URL
-        .secure(true)
+        // Lax is required when arriving from a Gel Auth origin
+        .same_site(SameSite::Lax)
+        .secure(AUTH_VARS.cookie_secure)
         .build();
 
     let jar = jar.add(cookie);
@@ -114,7 +137,7 @@ pub async fn handle_pkce_code(
     Query(PkceParams { code }): Query<PkceParams>,
     jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AppError> {
-    let base_auth_url = &*BASE_AUTH_URL;
+    let base_auth_url = &*AUTH_VARS.base_auth_url;
 
     let verifier = if let Some(verifier) = jar.get("gel-pkce-verifier") {
         verifier.value()
@@ -132,12 +155,15 @@ pub async fn handle_pkce_code(
         .expires(None)
         .http_only(true)
         .path("/")
-        .same_site(SameSite::Strict)
-        .secure(true)
+        // Lax is required when arriving from a Gel Auth origin
+        .same_site(SameSite::Lax)
+        .secure(AUTH_VARS.cookie_secure)
         .build();
 
-    // Add the new auth token cookie, and remove the verifier, which is no longer needed.
+    // Add the new auth token cookie, and remove the verifier, which is unique to this iteration of
+    // the flow, and no longer needed.
     let jar = jar.add(cookie).remove(Cookie::from("gel-pkce-verifier"));
+
     Ok((jar, Redirect::to("/gateway")))
 }
 
@@ -195,6 +221,6 @@ mod tests {
     #[test]
     fn test_env_vars() {
         dotenv().ok();
-        log!("base auth URL: {}", &*BASE_AUTH_URL,);
+        log!("base auth URL: {}", &*AUTH_VARS.base_auth_url,);
     }
 }
