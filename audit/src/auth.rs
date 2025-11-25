@@ -62,7 +62,7 @@ static AUTH_VARS: LazyLock<AuthVars> = LazyLock::new(|| {
 /// return an auth token in JSON format, and storing this JSON as a cookie will allow you to check
 /// authentication for access to protected routes.
 #[derive(Debug)]
-pub struct Pkce {
+struct Pkce {
     verifier: String,
     challenge: String,
 }
@@ -76,7 +76,7 @@ pub struct PkceParams {
 /// A deserialization target for the Gel Auth JSON API.
 #[allow(unused)]
 #[derive(Debug, Deserialize, Serialize)]
-pub struct AuthResponse {
+struct AuthResponse {
     /// A Base64 URL-encoded JWT, consisting of dot-separated header, payload, and signature.
     pub auth_token: String,
     pub identity_id: Uuid,
@@ -87,7 +87,7 @@ pub struct AuthResponse {
 
 /// Generate a `verifier/challenge` pair for use in the authentication flow (see [`Pkce`] for
 /// details).
-pub fn generate_pkce() -> Pkce {
+fn generate_pkce() -> Pkce {
     // 1. generate 32 random bytes and URL-encode it:
     let input: [u8; 32] = rng().random();
     let verifier = Base64UrlUnpadded::encode_string(&input);
