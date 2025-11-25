@@ -20,9 +20,10 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
 
     match ast.data {
         Data::Struct(DataStruct {
-            fields: Fields::Unnamed(FieldsUnnamed { unnamed, .. }),
+            fields: Fields::Unnamed(FieldsUnnamed { ref unnamed, .. }),
             ..
         }) => {
+            // dbg!(&ast);
             if unnamed.len() == 1 {
                 let field = unnamed
                     .first()
@@ -61,26 +62,21 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
 
     let name = ast.ident;
 
-    let predicate = match (&range, &rem) {
-        (Some(range), Some(rem)) => {
-            quote! { (#range).contains(&value) && value % #rem == 0 as #ty }
-        }
+    let (predicate, rem) = match (&range, &rem) {
+        (Some(range), Some(rem)) => (
+            // We know that all of the numeric types implement `From<u8>`.
+            quote! { (#range).contains(&value) && value % #rem == #ty::from(0_u8) },
+            quote! { Some(#rem) },
+        ),
 
-        (Some(range), None) => {
-            quote! { (#range).contains(&value)}
-        }
+        (Some(range), None) => (quote! { (#range).contains(&value)}, quote! { None }),
 
-        (None, Some(rem)) => {
-            quote! { value % #rem == 0 as #ty }
-        }
+        (None, Some(rem)) => (
+            quote! { value % #rem == #ty::from(0_u8) },
+            quote! { Some(#rem) },
+        ),
 
-        (None, None) => quote! { true },
-    };
-
-    let rem = if let Some(rem) = rem {
-        quote! { Some(#rem) }
-    } else {
-        quote! { None }
+        (None, None) => (quote! { true }, quote! { None }),
     };
 
     let output = quote! {
