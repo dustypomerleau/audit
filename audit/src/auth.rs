@@ -37,16 +37,12 @@ static AUTH_VARS: LazyLock<AuthVars> = LazyLock::new(|| {
             .expect("expected BASE_AUTH_URL environment variable to be present")
     };
 
-    let cookie_secure = match env::var("COOKIE_SECURE")
-        .unwrap_or("true".to_string())
-        .as_str()
-    {
-        "true" | "True" | "TRUE" => true,
-        "false" | "False" | "FALSE" => false,
-        // If we somehow set the environment variable to a non-boolean value, default to `Secure`
-        // for these cookies.
-        _ => true,
-    };
+    // Unless en environment variable specifically sets COOKIE_SECURE to false (for dev
+    // environments), we set it to true.
+    let cookie_secure = matches!(
+        env::var("COOKIE_SECURE").unwrap_or_default().as_str(),
+        "false"
+    );
 
     AuthVars {
         base_auth_url,
@@ -121,7 +117,17 @@ pub async fn handle_sign_in(mut jar: CookieJar) -> (CookieJar, Redirect) {
         .secure(AUTH_VARS.cookie_secure)
         .build();
 
-    jar = jar.add(cookie);
+    // Clear out any old cookies before adding the new verifier, to prevent verifier/challenge
+    // mismatch. We clear both edgedb-pkce-challenge and gel-pkce-challenge, to provide some
+    // insurance if the auth extension updates their terminology. The other cookies require only
+    // the gel prefix, because we are providing them.
+    jar = jar
+        .remove(Cookie::from("edgedb-pkce-challenge"))
+        .remove(Cookie::from("gel-auth-token"))
+        .remove(Cookie::from("gel-pkce-challenge"))
+        .remove(Cookie::from("gel-pkce-verifier"))
+        .add(cookie);
+
     let url = format!("{base_auth_url}/ui/signin?challenge={challenge}");
 
     (jar, Redirect::to(&url))
@@ -159,9 +165,7 @@ pub async fn handle_pkce_code(
         .secure(AUTH_VARS.cookie_secure)
         .build();
 
-    // Add the new auth token cookie, and remove the verifier, which is unique to this iteration of
-    // the flow, and no longer needed.
-    jar = jar.add(cookie).remove(Cookie::from("gel-pkce-verifier"));
+    jar = jar.add(cookie);
 
     Ok((jar, Redirect::to("/gateway")))
 }
