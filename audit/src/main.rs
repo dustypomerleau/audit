@@ -30,7 +30,7 @@ async fn main() {
 
     let db_client = gel_tokio::create_client()
         .await
-        .expect("the DB client to be initialized");
+        .expect("expected the DB client to be initialized");
 
     let app_state = AppState {
         leptos_options: leptos_options.clone(),

@@ -178,7 +178,7 @@ pub async fn handle_kill_session(
     // surgeon-specific globals
     let client = gel_tokio::create_client()
         .await
-        .expect("DB client to be created");
+        .expect("expected DB client to be created");
 
     db.set(client)?;
     surgeon.set(None)?;
