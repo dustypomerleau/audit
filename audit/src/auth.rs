@@ -199,7 +199,6 @@ pub async fn get_jwt_cookie() -> Result<Option<String>, AppError> {
 
 #[cfg(test)]
 mod tests {
-    use dotenvy::dotenv;
     use leptos::logging::log;
 
     use super::*;
@@ -215,11 +214,5 @@ mod tests {
         );
 
         assert!(pkce.verifier.len() == pkce.challenge.len() && pkce.verifier.len() == 43);
-    }
-
-    #[test]
-    fn test_env_vars() {
-        dotenv().ok();
-        log!("base auth URL: {}", &*AUTH_VARS.base_auth_url,);
     }
 }
