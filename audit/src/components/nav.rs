@@ -31,4 +31,3 @@ pub fn Nav() -> impl IntoView {
         <Outlet />
     }
 }
-

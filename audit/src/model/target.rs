@@ -109,4 +109,3 @@ mod tests {
         assert!(TargetSe::new(201).is_err());
     }
 }
-

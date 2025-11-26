@@ -79,4 +79,3 @@ mod tests {
         assert!(ToricPower::new(520).is_err());
     }
 }
-

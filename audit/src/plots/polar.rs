@@ -474,4 +474,3 @@ impl Cartesian for PolarPoint {
 
 #[cfg(test)]
 mod tests {}
-
