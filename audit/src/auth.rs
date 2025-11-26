@@ -1,5 +1,3 @@
-// BOOKMARK: FIXME: auth cookies, study axum-gate
-
 use std::env;
 use std::sync::LazyLock;
 
