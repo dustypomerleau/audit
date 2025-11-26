@@ -238,6 +238,10 @@
     :target {
         scroll-margin-block: 5ex;
     }
+
+    fieldset {
+        border-style: solid;
+    }
 }
 
 @layer base {
@@ -286,6 +290,115 @@
     /*     height: 100vh; */
     /*     overflow-y: hidden; */
     /* } */
+
+    .form-add-case {
+        display: grid;
+        grid-auto-columns: 1fr;
+        gap: var(--space-4);
+
+        margin-inline: var(--space-4);
+        font-size: var(--fs-xl);
+
+        fieldset {
+            border-width: 2px;
+            border-radius: var(--radius-sm);
+            border-color: color-mix(in oklab, var(--mgray-1) 30%, var(--background));
+        }
+
+        .add-biometry {
+            display: grid;
+            grid-template-columns: 1fr;
+
+            @media (width >= 30rem) {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            @media (width >= 80rem) {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            gap: var(--space-8);
+
+            .add-ks {
+                display: flex;
+                flex-direction: column;
+                gap: var(--space-8);
+
+                div {
+                    display: flex;
+                    flex-direction: column;
+                    gap: var(--space-2);
+                }
+            }
+
+            label {
+                display: flex;
+                flex-direction: column;
+                align-items: inline-start;
+                gap: var(--space-2);
+
+                input {
+                    width: 25%;
+                    border-radius: var(--radius-sm);
+                }
+            }
+        }
+    }
+
+    .header {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        align-items: center;
+
+        background-color: var(--background-header);
+        color: var(--foreground-header);
+        column-gap: var(--space-8);
+        padding-block: var(--space-4);
+        padding-inline: var(--space-4);
+
+        @media (width >= 40rem) {
+            padding-inline: var(--space-8);
+        }
+    }
+
+    .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        padding-block-start: calc(var(--space) * 12);
+        margin-block-end: var(--space-6);
+    }
+
+    .hero-iol {
+        margin-block-start: -1rem;
+        width: 70%;
+        transform: rotate(-25deg);
+
+        @media (width >= 40rem) {
+            max-width: 35rem;
+        }
+    }
+
+    .hero-text {
+        font-size: var(--fs-3xl);
+
+        @media (width >= 40rem) {
+            font-size: calc(var(--fs-3xl) * 2);
+        }
+    }
+
+    .logo {
+        display: flex;
+        flex-direction: column;
+
+        width: calc(var(--space) * 35);
+
+        @media (width >= 40rem) {
+            width: calc(var(--space) * 40);
+        }
+    }
 
     .markdown-container {
         display: flex;
@@ -366,61 +479,6 @@
 
         p + p {
             padding-block-start: var(--space-2);
-        }
-    }
-
-    .header {
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between;
-        align-items: center;
-
-        background-color: var(--background-header);
-        color: var(--foreground-header);
-        column-gap: var(--space-8);
-        padding-block: var(--space-4);
-        padding-inline: var(--space-4);
-
-        @media (width >= 40rem) {
-            padding-inline: var(--space-8);
-        }
-    }
-
-    .hero {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-
-        padding-block-start: calc(var(--space) * 12);
-        margin-block-end: var(--space-6);
-    }
-
-    .hero-iol {
-        margin-block-start: -1rem;
-        width: 70%;
-        transform: rotate(-25deg);
-
-        @media (width >= 40rem) {
-            max-width: 35rem;
-        }
-    }
-
-    .hero-text {
-        font-size: var(--fs-3xl);
-
-        @media (width >= 40rem) {
-            font-size: calc(var(--fs-3xl) * 2);
-        }
-    }
-
-    .logo {
-        display: flex;
-        flex-direction: column;
-
-        width: calc(var(--space) * 35);
-
-        @media (width >= 40rem) {
-            width: calc(var(--space) * 40);
         }
     }
 
