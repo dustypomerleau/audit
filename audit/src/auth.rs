@@ -22,6 +22,7 @@ use uuid::Uuid;
 use crate::error::AppError;
 use crate::state::AppState;
 
+/// Environment variables needed during the OAuth PKCE flow.
 struct AuthVars {
     base_auth_url: String,
     cookie_secure: bool,
@@ -53,7 +54,7 @@ static AUTH_VARS: LazyLock<AuthVars> = LazyLock::new(|| {
     }
 });
 
-/// Holds the verifier/challenge pair that is used during site authentication. The challenge is
+/// The verifier/challenge pair that is used during site authentication. The challenge is
 /// passed via the URL, and the verifier is stored in an HTTP-only cookie for access after the
 /// authentication flow is completed. Successful authentication returns a `code` param in the URL.
 /// Supplying the `code/verifier` pair in a `GET` request to the Gel Auth token server will
@@ -103,7 +104,7 @@ fn generate_pkce() -> Pkce {
 /// with the challenge, and set a cookie with the verifier, redirecting to the OAuth
 /// provider.
 #[debug_handler]
-pub async fn handle_sign_in(jar: CookieJar) -> (CookieJar, Redirect) {
+pub async fn handle_sign_in(mut jar: CookieJar) -> (CookieJar, Redirect) {
     let Pkce {
         challenge,
         verifier,
@@ -120,7 +121,7 @@ pub async fn handle_sign_in(jar: CookieJar) -> (CookieJar, Redirect) {
         .secure(AUTH_VARS.cookie_secure)
         .build();
 
-    let jar = jar.add(cookie);
+    jar = jar.add(cookie);
     let url = format!("{base_auth_url}/ui/signin?challenge={challenge}");
 
     (jar, Redirect::to(&url))
@@ -133,7 +134,7 @@ pub async fn handle_sign_in(jar: CookieJar) -> (CookieJar, Redirect) {
 #[debug_handler]
 pub async fn handle_pkce_code(
     Query(PkceParams { code }): Query<PkceParams>,
-    jar: CookieJar,
+    mut jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AppError> {
     let base_auth_url = &*AUTH_VARS.base_auth_url;
 
@@ -160,7 +161,7 @@ pub async fn handle_pkce_code(
 
     // Add the new auth token cookie, and remove the verifier, which is unique to this iteration of
     // the flow, and no longer needed.
-    let jar = jar.add(cookie).remove(Cookie::from("gel-pkce-verifier"));
+    jar = jar.add(cookie).remove(Cookie::from("gel-pkce-verifier"));
 
     Ok((jar, Redirect::to("/gateway")))
 }
