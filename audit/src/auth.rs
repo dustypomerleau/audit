@@ -37,16 +37,16 @@ static AUTH_VARS: LazyLock<AuthVars> = LazyLock::new(|| {
             .expect("expected BASE_AUTH_URL environment variable to be present")
     };
 
-    // Unless en environment variable specifically sets COOKIE_SECURE to false (for dev
-    // environments), we set it to true.
-    let cookie_secure = matches!(
+    // Unless en environment variable specifically sets `COOKIE_SECURE` to `false` (for dev
+    // environments on localhost), the value of `AUTH_VARS.cookie_secure` will be `true`.
+    let insecure = matches!(
         env::var("COOKIE_SECURE").unwrap_or_default().as_str(),
         "false"
     );
 
     AuthVars {
         base_auth_url,
-        cookie_secure,
+        cookie_secure: !insecure,
     }
 });
 
@@ -117,17 +117,7 @@ pub async fn handle_sign_in(mut jar: CookieJar) -> (CookieJar, Redirect) {
         .secure(AUTH_VARS.cookie_secure)
         .build();
 
-    // Clear out any old cookies before adding the new verifier, to prevent verifier/challenge
-    // mismatch. We clear both edgedb-pkce-challenge and gel-pkce-challenge, to provide some
-    // insurance if the auth extension updates their terminology. The other cookies require only
-    // the gel prefix, because we are providing them.
-    jar = jar
-        .remove(Cookie::from("edgedb-pkce-challenge"))
-        .remove(Cookie::from("gel-auth-token"))
-        .remove(Cookie::from("gel-pkce-challenge"))
-        .remove(Cookie::from("gel-pkce-verifier"))
-        .add(cookie);
-
+    jar = jar.add(cookie);
     let url = format!("{base_auth_url}/ui/signin?challenge={challenge}");
 
     (jar, Redirect::to(&url))
