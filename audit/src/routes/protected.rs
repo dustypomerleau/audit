@@ -24,7 +24,7 @@ use crate::model::Surgeon;
 #[component]
 pub fn Protected() -> impl IntoView {
     let current_surgeon = RwSignal::<Option<Surgeon>>::new(None);
-    let surgeon_resource = Resource::new(|| (), |_| get_authorized_surgeon());
+    let surgeon_resource = Resource::new_blocking(|| (), |_| get_authorized_surgeon());
 
     let outlet_if_authorized = Suspend::new(async move {
         if let Ok(Some(surgeon)) = surgeon_resource.await {
@@ -33,7 +33,8 @@ pub fn Protected() -> impl IntoView {
 
             view! { <Outlet /> }.into_any()
         } else {
-            view! { <SignedOut /> }.into_any()
+            view! {"debug info: this signed out is the one inside the `outlet if authorized` `Suspend`" <br/> <SignedOut /> }
+                .into_any()
         }
     });
 
@@ -46,16 +47,22 @@ pub fn Protected() -> impl IntoView {
 
 #[server]
 pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, AppError> {
-    // FIXME: `couldn't retrieve either Parts or ResponseOptions while trying to redirect` is
-    // coming when we attempt to navigate to `/protected/...` and aren't logged in. That means the
-    // issue is with one of the 2 redirects here or the `get_jwt_cookie()` call.
-    // Of note is the fact that the redirect still works, so I'm not sure if the problem is
-    // significant.
-    let auth_token = get_jwt_cookie().await?.unwrap_or_else(|| {
-        redirect("/signedout");
-        // Hack: we only care about redirecting, but the return types need to match.
-        "Redirected to /signedout".to_string()
-    });
+    let state = if let Some(state) = use_context::<AppState>() {
+        state
+    } else {
+        return Err(AppError::State(
+            "the call to `use_context::<AppState>()` in `get_authorized_surgeon()` returned `None`"
+                .to_string(),
+        ));
+    };
+
+    let auth_token = if let Ok(Some(auth_token)) = get_jwt_cookie().await {
+        auth_token
+    } else {
+        return Err(AppError::Auth(
+            "the call to `get_jwt_cookie` in `get_authorized_surgeon` returned `None`".to_string(),
+        ));
+    };
 
     // `create_client()` errors if a connection can't immediately be established, so it
     // isn't necessary to call `ensure_connection()` if the client was created through this
@@ -64,11 +71,7 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, AppError> {
         .await?
         .with_globals_fn(|client| client.set("ext::auth::client_token", &auth_token));
 
-    if let Some(state) = use_context::<AppState>() {
-        state.db.set(client)?;
-    } else {
-        redirect("/signedout");
-    }
+    state.db.set(client)?;
 
     let query = r#"
 select global cur_surgeon {
@@ -93,15 +96,9 @@ select global cur_surgeon {
         let surgeon = serde_json::from_str::<Surgeon>(json.as_ref())?;
 
         if surgeon.terms.is_some() {
-            if let Some(state) = use_context::<AppState>() {
-                state.surgeon.set(Some(surgeon.clone()))?;
+            state.surgeon.set(Some(surgeon.clone()))?;
 
-                Ok(Some(surgeon))
-            } else {
-                Err(AppError::State(
-                    "AppState is not present in context".to_string(),
-                ))
-            }
+            Ok(Some(surgeon))
         } else {
             redirect("/terms");
 
