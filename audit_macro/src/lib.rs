@@ -18,12 +18,11 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
     let (mut ty, mut range, mut rem) =
         (Type::Verbatim(proc_macro2::TokenStream::new()), None, None);
 
-    match ast.data {
+    match &ast.data {
         Data::Struct(DataStruct {
-            fields: Fields::Unnamed(FieldsUnnamed { ref unnamed, .. }),
+            fields: Fields::Unnamed(FieldsUnnamed { unnamed, .. }),
             ..
         }) => {
-            // dbg!(&ast);
             if unnamed.len() == 1 {
                 let field = unnamed
                     .first()
@@ -37,8 +36,8 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
                             .parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)
                             .expect("nested attributes should be comma-separated");
 
-                        for meta in nested {
-                            if let Meta::NameValue(ref mnv) = meta {
+                        for meta in &nested {
+                            if let Meta::NameValue(mnv) = meta {
                                 match mnv.path.get_ident().unwrap().to_string().as_str() {
                                     "range" => {
                                         range = Some(mnv.value.clone());
