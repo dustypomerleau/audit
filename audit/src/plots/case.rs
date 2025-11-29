@@ -18,6 +18,7 @@ use crate::plots::Polar;
 use crate::plots::PolarCompare;
 use crate::plots::PolarPoint;
 use crate::plots::VertexK;
+use crate::plots::Year;
 use crate::query::query_select_compare;
 use crate::query::query_select_self_compare;
 
@@ -203,7 +204,7 @@ impl CaseCompare {
 // against either the cohort, or against the surgeon's own baseline (all other dates outside the
 // range).
 /// Query the database for cases from the given year.
-pub async fn get_compare(year: u32, cohort: Cohort) -> Result<CaseCompare, AppError> {
+pub async fn get_compare(year: Year, cohort: Cohort) -> Result<CaseCompare, AppError> {
     let client = db().await?;
 
     get_compare_with_client(&client, year, cohort).await
@@ -215,7 +216,7 @@ pub async fn get_compare(year: u32, cohort: Cohort) -> Result<CaseCompare, AppEr
 #[doc(hidden)]
 pub(crate) async fn get_compare_with_client(
     client: &Client,
-    year: u32,
+    year: Year,
     cohort: Cohort,
 ) -> Result<CaseCompare, AppError> {
     let query = match cohort {

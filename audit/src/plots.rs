@@ -38,6 +38,9 @@ pub struct PlotStep(#[bounded(range = 0.001..=0.05)] f64);
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
 pub struct StdDev(#[bounded(range = 1.0..=5.0)] f64);
 
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Year(#[bounded(range = 2025..=2100)] u32);
+
 /// The characteristics of a confidence ellipse.
 #[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
 pub struct ConfidenceParams {

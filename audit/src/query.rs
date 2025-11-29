@@ -1,4 +1,7 @@
-pub fn query_select_compare(year: u32) -> String {
+use crate::bounded::Bounded;
+use crate::plots::Year;
+
+pub fn query_select_compare(year: Year) -> String {
     format!(
         r#"
 with
@@ -105,8 +108,8 @@ select {{
     )
 }
 
-pub fn query_select_self_compare(year: u32) -> String {
-    let prior_year = year - 1;
+pub fn query_select_self_compare(year: Year) -> String {
+    let prior_year = year.inner() - 1;
 
     format!(
         r#"

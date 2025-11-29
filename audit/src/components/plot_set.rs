@@ -14,14 +14,18 @@ use leptos::prelude::view;
 use serde::Deserialize;
 use serde::Serialize;
 
+use crate::bounded::Bounded;
 use crate::error::AppError;
 #[cfg(feature = "ssr")] use crate::plots::AsPlot;
 #[cfg(feature = "ssr")] use crate::plots::Cohort;
+use crate::plots::Year;
 #[cfg(feature = "ssr")] use crate::plots::get_compare;
 
 #[component]
 pub fn PlotSet() -> impl IntoView {
-    let year = RwSignal::new(2025_u32);
+    let year =
+        RwSignal::new(Year::new(2025).expect("2025 should be a valid input to `Year::new()`"));
+
     let plot_resource = Resource::new_blocking(move || year.get(), move |_| get_plots(year.get()));
 
     view! {
@@ -61,7 +65,7 @@ pub struct PlotSet {
 }
 
 #[server]
-pub async fn get_plots(year: u32) -> Result<Vec<PlotSet>, AppError> {
+pub async fn get_plots(year: Year) -> Result<Vec<PlotSet>, AppError> {
     let compare = get_compare(year, Cohort::Peers).await?;
     // Eventually, we will want the surgeon to be able to compare to their prior data.
     //

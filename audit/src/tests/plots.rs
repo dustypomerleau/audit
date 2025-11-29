@@ -1,5 +1,7 @@
+use crate::bounded::Bounded;
 use crate::plots::AsPlot;
 use crate::plots::Cohort;
+use crate::plots::Year;
 use crate::plots::get_compare_with_client;
 #[allow(unused_imports)] use crate::tests::common::populate_test_db;
 use crate::tests::common::test_db;
@@ -22,7 +24,7 @@ async fn creates_plots() {
         // assert!(client.ensure_connected().await.is_ok());
     }
 
-    let compare = get_compare_with_client(&client, 2025, Cohort::Peers)
+    let compare = get_compare_with_client(&client, Year::new(2025).unwrap(), Cohort::Peers)
         .await
         .unwrap();
     // let scatter_plot = compare.cartesian_delta_cyl().plot();
