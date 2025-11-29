@@ -1,25 +1,26 @@
 session_name: audit
 windows:
-    - window_name: nvim
-      panes:
-          - nvim src/lib.rs
-    - window_name: bacon
-      panes:
-          - bacon -j nextest
-    - window_name: fish
-      focus: true
-      panes:
-          - jj status
-    - window_name: watch
-      panes:
-          - cargo leptos watch
-    - window_name: db local
-      panes:
-          - gel
-    - window_name: db cloud
-      panes:
-          - gel -I dustypomerleau/audit
-    - window_name: leptos
-      shell_command_before: cd ../er/leptos
-      panes:
-          - nvim leptos/src/lib.rs
+  - window_name: nvim
+    panes:
+      - nvim src/lib.rs
+  - window_name: bacon
+    panes:
+      # - bacon -j nextest
+      - bacon --all-features
+  - window_name: fish
+    focus: true
+    panes:
+      - jj status
+  - window_name: watch
+    panes:
+      - cargo leptos watch
+  - window_name: db local
+    panes:
+      - gel
+  - window_name: db cloud
+    panes:
+      - gel -I dustypomerleau/audit
+  - window_name: leptos
+    shell_command_before: cd ../er/leptos
+    panes:
+      - nvim leptos/src/lib.rs
