@@ -176,7 +176,10 @@ pub async fn handle_kill_session(
 
     db.set(client)?;
     surgeon.set(None)?;
-    jar = jar.remove(Cookie::from("gel-auth-token"));
+
+    jar = jar
+        .remove(Cookie::from("gel-auth-token"))
+        .remove(Cookie::from("gel-pkce-verifier"));
 
     Ok((jar, Redirect::to("/")))
 }
