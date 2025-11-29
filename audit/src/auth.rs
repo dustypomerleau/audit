@@ -166,7 +166,7 @@ pub async fn handle_pkce_code(
 #[debug_handler]
 pub async fn handle_kill_session(
     State(AppState { db, surgeon, .. }): State<AppState>,
-    jar: CookieJar,
+    mut jar: CookieJar,
 ) -> Result<(CookieJar, Redirect), AppError> {
     // A dummy DB client, so that we can replace the `gel_tokio::Client` that contains
     // surgeon-specific globals
@@ -176,7 +176,7 @@ pub async fn handle_kill_session(
 
     db.set(client)?;
     surgeon.set(None)?;
-    let jar = jar.remove(Cookie::from("gel-auth-token"));
+    jar = jar.remove(Cookie::from("gel-auth-token"));
 
     Ok((jar, Redirect::to("/")))
 }
