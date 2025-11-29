@@ -46,6 +46,11 @@ pub fn Protected() -> impl IntoView {
 
 #[server]
 pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, AppError> {
+    // FIXME: `couldn't retrieve either Parts or ResponseOptions while trying to redirect` is
+    // coming when we attempt to navigate to `/protected/...` and aren't logged in. That means the
+    // issue is with one of the 2 redirects here or the `get_jwt_cookie()` call.
+    // Of note is the fact that the redirect still works, so I'm not sure if the problem is
+    // significant.
     let auth_token = get_jwt_cookie().await?.unwrap_or_else(|| {
         redirect("/signedout");
         // Hack: we only care about redirecting, but the return types need to match.

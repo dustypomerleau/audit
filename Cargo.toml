@@ -40,7 +40,7 @@ thiserror = "2.0.17"
 tokio = { version = "1.48.0", features = ["macros", "rt-multi-thread"] }
 tower = { version = "0.5.2", features = ["util"] }
 tower-http = { version = "0.6.7", features = ["fs"] }
-tracing = { version = "0.1.41" }
+tracing = { version = "0.1.43" }
 uuid = { version = "1.18.1", features = ["serde"] }
 wasm-bindgen = "=0.2.104"
 
