@@ -3,7 +3,6 @@ use leptos::prelude::ClassAttribute;
 use leptos::prelude::ElementChild;
 use leptos::prelude::Get;
 use leptos::prelude::InnerHtmlAttribute;
-use leptos::prelude::IntoAny;
 use leptos::prelude::IntoView;
 use leptos::prelude::Resource;
 use leptos::prelude::RwSignal;
