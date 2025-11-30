@@ -15,8 +15,12 @@ use syn::punctuated::Punctuated;
 pub fn range_bounded(item: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(item as DeriveInput);
 
-    let (mut ty, mut range, mut rem) =
-        (Type::Verbatim(proc_macro2::TokenStream::new()), None, None);
+    let (mut ty, mut range, mut rem, mut default) = (
+        Type::Verbatim(proc_macro2::TokenStream::new()),
+        None,
+        None,
+        None,
+    );
 
     match &ast.data {
         Data::Struct(DataStruct {
@@ -39,6 +43,10 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
                         for meta in &nested {
                             if let Meta::NameValue(mnv) = meta {
                                 match mnv.path.get_ident().unwrap().to_string().as_str() {
+                                    "default" => {
+                                        default = Some(mnv.value.clone());
+                                    }
+
                                     "range" => {
                                         range = Some(mnv.value.clone());
                                     }
@@ -78,6 +86,16 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
         (None, None) => (quote! { true }, quote! { None }),
     };
 
+    let default = if let Some(default) = default {
+        quote! {
+            impl ::core::default::Default for #name {
+                fn default() -> Self { #name(#default) }
+            }
+        }
+    } else {
+        quote! {}
+    };
+
     let output = quote! {
         impl crate::bounded::Bounded for #name {
             type Idx = #ty;
@@ -109,6 +127,8 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
                 &self.0
             }
         }
+
+        #default
 
         impl ::std::fmt::Display for #name {
             fn fmt(&self, f: &mut ::std::fmt::Formatter<'_>) -> ::std::fmt::Result {

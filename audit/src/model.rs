@@ -12,6 +12,8 @@ pub mod va;
 use audit_macro::RangeBounded;
 pub use biometry::*;
 pub use case::*;
+use chrono::Datelike;
+use chrono::Utc;
 pub use cyl::*;
 pub use iol::*;
 pub use refraction::*;
@@ -26,4 +28,4 @@ pub use va::*;
 use crate::bounded::Bounded;
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Year(#[bounded(range = 2025..=2100)] u32);
+pub struct Year(#[bounded(range = 2025..=2100, default = Utc::now().year() as u32)] u32);
