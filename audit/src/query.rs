@@ -1,5 +1,5 @@
 use crate::bounded::Bounded;
-use crate::plots::Year;
+use crate::model::Year;
 
 pub fn query_select_compare(year: Year) -> String {
     format!(

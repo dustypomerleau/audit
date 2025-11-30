@@ -1,7 +1,7 @@
 use crate::bounded::Bounded;
 use crate::plots::AsPlot;
 use crate::plots::Cohort;
-use crate::plots::Year;
+use crate::model::Year;
 use crate::plots::get_compare_with_client;
 #[allow(unused_imports)] use crate::tests::common::populate_test_db;
 use crate::tests::common::test_db;

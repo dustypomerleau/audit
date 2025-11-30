@@ -17,9 +17,9 @@ use serde::Serialize;
 
 use crate::bounded::Bounded;
 use crate::error::AppError;
+use crate::model::Year;
 #[cfg(feature = "ssr")] use crate::plots::AsPlot;
 #[cfg(feature = "ssr")] use crate::plots::Cohort;
-use crate::plots::Year;
 #[cfg(feature = "ssr")] use crate::plots::get_compare;
 
 #[component]

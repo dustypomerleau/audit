@@ -18,7 +18,7 @@ use crate::plots::Polar;
 use crate::plots::PolarCompare;
 use crate::plots::PolarPoint;
 use crate::plots::VertexK;
-use crate::plots::Year;
+use crate::model::Year;
 use crate::query::query_select_compare;
 use crate::query::query_select_self_compare;
 
