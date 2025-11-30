@@ -443,6 +443,8 @@ pub async fn insert_surgeon_case(
     client: &gel_tokio::Client,
     surgeon_case: SurgeonCase,
 ) -> Result<Option<String>, AppError> {
+    use gel_protocol::named_args;
+
     let SurgeonCase {
         urn,
         date,

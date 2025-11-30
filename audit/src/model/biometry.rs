@@ -6,23 +6,24 @@ use crate::bounded::Bounded;
 use crate::model::Axis;
 use crate::model::Cyl;
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Acd(#[bounded(range = 0..=600)] u32);
+// TODO: use a more evidence-based approach to choosing these defaults.
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Acd(#[bounded(range = 0..=600, default = 350)] u32);
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Al(#[bounded(range = 1200..=3800)] u32);
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Al(#[bounded(range = 1200..=3800, default = 2400)] u32);
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Cct(#[bounded(range = 350..=650)] u32);
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Cct(#[bounded(range = 350..=650, default = 550)] u32);
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Kpower(#[bounded(range = 3000..=6500)] u32);
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Kpower(#[bounded(range = 3000..=6500, default = 4400)] u32);
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Lt(#[bounded(range = 200..=800)] u32);
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Lt(#[bounded(range = 200..=800, default = 450)] u32);
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Wtw(#[bounded(range = 800..=1400)] u32);
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct Wtw(#[bounded(range = 800..=1400, default = 1200)] u32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct K {

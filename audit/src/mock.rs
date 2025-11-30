@@ -55,8 +55,8 @@ use crate::model::VaDen;
 use crate::model::VaNum;
 use crate::model::Wtw;
 
-#[derive(Clone, Copy, Debug, Default, PartialEq, RangeBounded)]
-pub struct Prob(#[bounded(range = 0.0..=1.0)] f32);
+#[derive(Clone, Copy, Debug, PartialEq, RangeBounded)]
+pub struct Prob(#[bounded(range = 0.0..=1.0, default = 0.5)] f32);
 
 /// Provides a mocked instance of `Self` for testing purposes.
 pub trait Mock: Sized {

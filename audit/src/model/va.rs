@@ -6,11 +6,11 @@ use crate::bounded::Bounded;
 
 // Choosing not to use NonZeroU32 for VaDen, because it has a slightly different interface than all
 // our other bounded types.
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct VaDen(#[bounded(range = 1..=u32::MAX)] u32);
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct VaDen(#[bounded(range = 1..=u32::MAX, default = 600)] u32);
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct VaNum(#[bounded(range = 0..=2000)] u32);
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+pub struct VaNum(#[bounded(range = 0..=2000, default = 600)] u32);
 
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  
@@ -22,19 +22,10 @@ pub struct VaNum(#[bounded(range = 0..=2000)] u32);
 /// constraints. This makes the representation consistent with [`Cyl`](crate::cyl::Cyl),
 /// [`Iol`](crate::iol::Iol), [`Refraction`](crate::refraction::Refraction), and
 /// [`Target`](crate::target::Target).
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Va {
     pub num: VaNum,
     pub den: VaDen,
-}
-
-impl Default for Va {
-    fn default() -> Self {
-        Self {
-            num: VaNum::new(600).unwrap(),
-            den: VaDen::new(600).unwrap(),
-        }
-    }
 }
 
 impl Va {

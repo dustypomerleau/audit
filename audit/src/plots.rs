@@ -32,14 +32,14 @@ pub trait AsPlot {
     fn plot(&self) -> Plot;
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct PlotStep(#[bounded(range = 0.001..=0.05)] f64);
+#[derive(Clone, Copy, Debug, PartialEq, RangeBounded)]
+pub struct PlotStep(#[bounded(range = 0.001..=0.05, default = 0.01)] f64);
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct StdDev(#[bounded(range = 1.0..=5.0)] f64);
+#[derive(Clone, Copy, Debug, PartialEq, RangeBounded)]
+pub struct StdDev(#[bounded(range = 1.0..=5.0, default = 2.0)] f64);
 
 /// The characteristics of a confidence ellipse.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ConfidenceParams {
     /// Whether to use population variance or sample variance. See [`Variance`].
     variance: Variance,
@@ -48,16 +48,6 @@ pub struct ConfidenceParams {
     /// The size of the steps between points in the confidence ellipse (in the same units as
     /// [`r`](crate::plots::PolarPoint::r)).
     step: PlotStep,
-}
-
-impl Default for ConfidenceParams {
-    fn default() -> Self {
-        Self {
-            variance: Variance::Population,
-            std_dev: StdDev(2.0),
-            step: PlotStep(0.01),
-        }
-    }
 }
 
 impl ConfidenceParams {
@@ -87,9 +77,10 @@ impl ConfidenceParams {
 }
 
 /// Represents the variance of a 1-dimensional dataset.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub enum Variance {
     /// The entire population is available in the dataset.
+    #[default]
     Population,
     /// The entire dataset is not available, and only a sample has been taken.
     Sample,
