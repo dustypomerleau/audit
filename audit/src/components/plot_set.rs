@@ -1,3 +1,4 @@
+use leptos::either::Either;
 use leptos::prelude::ClassAttribute;
 use leptos::prelude::ElementChild;
 use leptos::prelude::Get;
@@ -33,23 +34,24 @@ pub fn PlotSet() -> impl IntoView {
             <div class="plot-group">
                 {Suspend::new(async move {
                     if let Ok(plots) = plot_resource.await {
-                        plots
+                        let plots = plots
                             .into_iter()
                             .map(|PlotSet { title, info, plot }| {
                                 view! {
                                     <div class="plot-container">
                                         <div class="plot">
-                                            <h2 class="plot-title">{title}</h2>
-                                            <div class="plot-traces" inner_html=plot></div>
+                                        <h2 class="plot-title">{title}</h2>
+                                        <div class="plot-traces" inner_html=plot></div>
                                         </div>
                                         <div class="plot-info">{info}</div>
-                                    </div>
+                                        </div>
                                 }
                             })
-                            .collect::<Vec<_>>()
-                            .into_any()
+                        .collect::<Vec<_>>();
+
+                        Either::Left(plots)
                     } else {
-                        "no plots were found".into_any()
+                        Either::Right("no plots were found")
                     }
                 })}
             </div>

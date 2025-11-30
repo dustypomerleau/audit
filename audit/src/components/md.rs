@@ -2,6 +2,7 @@ use std::env;
 use std::path::PathBuf;
 use std::sync::LazyLock;
 
+use leptos::either::Either;
 use leptos::prelude::ClassAttribute;
 use leptos::prelude::ElementChild;
 use leptos::prelude::InnerHtmlAttribute;
@@ -55,14 +56,13 @@ pub fn Markdown<T: MdParse + Clone + Send + Sync + 'static>(md: T) -> impl IntoV
         }>
             {Suspend::new(async move {
                 if let Ok(html) = html_resource.await {
-                    view! {
+                    Either::Left(view! {
                         <div class="markdown-container">
                             <div class="content" inner_html=html></div>
                         </div>
-                    }
-                        .into_any()
+                    })
                 } else {
-                    view! { "unable to load markdown content" }.into_any()
+                    Either::Right(view! { "unable to load markdown content" })
                 }
             })}
         </Suspense>

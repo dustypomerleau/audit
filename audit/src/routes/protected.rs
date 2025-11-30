@@ -1,4 +1,5 @@
 #[cfg(feature = "ssr")] use gel_tokio::create_client;
+use leptos::either::Either;
 use leptos::prelude::IntoAny;
 use leptos::prelude::IntoView;
 use leptos::prelude::Resource;
@@ -31,10 +32,11 @@ pub fn Protected() -> impl IntoView {
             current_surgeon.set(Some(surgeon));
             provide_context(current_surgeon);
 
-            view! { <Outlet /> }.into_any()
+            Either::Left(view! { <Outlet /> })
         } else {
-            view! {"debug info: this signed out is the one inside the `outlet if authorized` `Suspend`" <br/> <SignedOut /> }
-                .into_any()
+            Either::Right(
+                view! {"debug info: this signed out is the one inside the `outlet if authorized` `Suspend`" <br/> <SignedOut /> },
+            )
         }
     });
 
