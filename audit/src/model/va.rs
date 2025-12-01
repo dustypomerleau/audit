@@ -7,10 +7,10 @@ use crate::bounded::Bounded;
 // Choosing not to use NonZeroU32 for VaDen, because it has a slightly different interface than all
 // our other bounded types.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct VaDen(#[bounded(range = 1..=u32::MAX, default = 600)] u32);
+pub struct VaDen(#[bounded( range = 1..=u32::MAX, default = 600, mock_range = 500..=6000)] u32);
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct VaNum(#[bounded(range = 0..=2000, default = 600)] u32);
+pub struct VaNum(#[bounded(range = 0..=2000, default = 600, mock_range = 600..=600)] u32);
 
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  

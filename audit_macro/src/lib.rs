@@ -15,8 +15,9 @@ use syn::punctuated::Punctuated;
 pub fn range_bounded(item: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(item as DeriveInput);
 
-    let (mut ty, mut range, mut rem, mut default) = (
+    let (mut ty, mut range, mut rem, mut default, mut mock_range) = (
         Type::Verbatim(proc_macro2::TokenStream::new()),
+        None,
         None,
         None,
         None,
@@ -45,6 +46,10 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
                                 match mnv.path.get_ident().unwrap().to_string().as_str() {
                                     "default" => {
                                         default = Some(mnv.value.clone());
+                                    }
+
+                                    "mock_range" => {
+                                        mock_range = Some(mnv.value.clone());
                                     }
 
                                     "range" => {
@@ -96,6 +101,17 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
         quote! {}
     };
 
+    let mock_range = if let Some(mock_range) = mock_range {
+        quote! {
+            fn mock_range() -> impl ::std::ops::RangeBounds<Self::Idx>
+            + ::rand::distr::uniform::SampleRange<Self::Idx> {
+                #mock_range
+            }
+        }
+    } else {
+        quote! {}
+    };
+
     let output = quote! {
         impl crate::bounded::Bounded for #name {
             type Idx = #ty;
@@ -113,19 +129,15 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
             }
 
             #[cfg(feature = "ssr")]
-            fn range() -> impl ::std::ops::RangeBounds<Self::Idx> + ::rand::distr::uniform::SampleRange<Self::Idx> {
-                #range
-            }
+            fn range() -> impl ::std::ops::RangeBounds<Self::Idx>
+            + ::rand::distr::uniform::SampleRange<Self::Idx>
+            { #range }
 
-            fn rem() -> Option<Self::Idx> {
-                #rem
-            }
+            fn rem() -> Option<Self::Idx> { #rem }
         }
 
         impl ::core::convert::AsRef<#ty> for #name {
-            fn as_ref(&self) -> &#ty {
-                &self.0
-            }
+            fn as_ref(&self) -> &#ty { &self.0 }
         }
 
         #default
@@ -135,6 +147,9 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
                 write!(f, "{}", self.inner())
             }
         }
+
+        #[cfg(feature = "ssr")]
+        impl crate::mock::MockRange for #name { #mock_range }
     };
 
     output.into()

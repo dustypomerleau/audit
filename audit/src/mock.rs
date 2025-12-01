@@ -1,3 +1,4 @@
+use std::ops::RangeBounds;
 use std::ops::Rem;
 use std::ops::Sub;
 
@@ -8,6 +9,7 @@ use rand::Rng;
 use rand::distr::Alphanumeric;
 use rand::distr::SampleString;
 use rand::distr::StandardUniform;
+use rand::distr::uniform::SampleRange;
 use rand::rng;
 
 use crate::bounded::Bounded;
@@ -74,6 +76,12 @@ pub trait Mock: Sized {
     }
 }
 
+/// Allows specifying an alternative range for mocking bounded types. If no mock range is
+/// specified, we default to using the range from [`Bounded`].
+pub trait MockRange: Bounded {
+    fn mock_range() -> impl RangeBounds<Self::Idx> + SampleRange<Self::Idx> { Self::range() }
+}
+
 /// Generates a random, alphanumeric, owned [`String`] of the given length.
 pub fn random_string(length: usize) -> String {
     let mut rs = Alphanumeric.sample_string(&mut rng(), length);
@@ -113,11 +121,11 @@ impl Mock for Identity {
 
 impl<T> Mock for T
 where
-    T: Bounded,
+    T: MockRange,
     T::Idx: Copy + Rem<Output = T::Idx> + Sub<Output = T::Idx>,
 {
     fn mock() -> Self {
-        let mut random_inner = rng().random_range(T::range());
+        let mut random_inner = rng().random_range(T::mock_range());
 
         // Mathematically it's problematic to always round towards 0, but we accept
         // this for simplicity, because we are only mocking values.

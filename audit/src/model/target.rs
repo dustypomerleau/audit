@@ -48,10 +48,10 @@ impl Formula {
 // NOTE: ToricPower, TargetCylPower are nonnegative, but RefCylPower can be negative.
 // This has implications for the `Cyl` trait that you need to consider.
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct TargetCylPower(#[bounded(range = 0..=600)] u32);
+pub struct TargetCylPower(#[bounded(range = 0..=600, mock_range = 0..=75)] u32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct TargetSe(#[bounded(range = -600..=200)] i32);
+pub struct TargetSe(#[bounded(range = -600..=200, mock_range = -200..=20)] i32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct TargetCyl {

@@ -15,10 +15,14 @@ pub enum Focus {
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct IolSe(#[bounded(range = -2000..=6000, rem = 25, default = 2000)] i32);
+pub struct IolSe(
+    #[bounded(range = -2000..=6000, rem = 25, default = 2000, mock_range = -200..=3000)] i32,
+);
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct ToricPower(#[bounded(range = 100..=2000, rem = 25, default = 100)] u32);
+pub struct ToricPower(
+    #[bounded(range = 100..=2000, rem = 25, default = 100, mock_range = 100..=600)] u32,
+);
 
 /// A specific model of IOL.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
