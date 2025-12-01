@@ -57,14 +57,15 @@ pub fn AddCase() -> impl IntoView {
             .unwrap_or_default()
     };
 
+    // TODO: "To change your default values, please [update your profile](link)"
+    // TODO: we need a signal holding the side to update the Sia
+    // TODO: autofill k2 axis
     view! {
         <ActionForm action=insert_case>
             <div id="form-add-case" class="form-add-case">
                 "Enter the case details (fields are required unless marked optional)"
-                // TODO: "To change your default values, please [update your profile](link)"
                 <fieldset id="add-side">
                     <legend>"Side"</legend>
-                    // TODO: we need a signal holding this value to update the Sia
                     <label>
                         "Right"<input type="radio" value="Right" name="case[side]" required />
                     </label>
@@ -73,7 +74,7 @@ pub fn AddCase() -> impl IntoView {
                     </label>
                 </fieldset>
                 <fieldset id="add-biometry" class="add-biometry">
-                <legend>"Biometry"</legend>
+                    <legend>"Biometry"</legend>
                     <label>
                         "AL (12–38 mm)"
                         <input type="number" min=12 max=38 step=0.01 name="case[al]" required />
@@ -82,21 +83,49 @@ pub fn AddCase() -> impl IntoView {
                         <div id="k1">
                             <label>
                                 "K1 power (30–65 D)"
-                                <input type="number" min=30 max=65 step=0.01 name="case[k1_power]" required />
+                                <input
+                                    type="number"
+                                    min=30
+                                    max=65
+                                    step=0.01
+                                    name="case[k1_power]"
+                                    required
+                                />
                             </label>
                             <label>
                                 "K1 axis (0–179°)"
-                                <input type="number" min=0 max=179 step=1 name="case[k1_axis]" required />
+                                <input
+                                    type="number"
+                                    min=0
+                                    max=179
+                                    step=1
+                                    name="case[k1_axis]"
+                                    required
+                                />
                             </label>
                         </div>
                         <div id="k2">
                             <label>
                                 "K2 power (30–65 D)"
-                                <input type="number" min=30 max=65 step=0.01 name="case[k2_power]" required />
+                                <input
+                                    type="number"
+                                    min=30
+                                    max=65
+                                    step=0.01
+                                    name="case[k2_power]"
+                                    required
+                                />
                             </label>
                             <label>
                                 "K2 axis (0–179°)"
-                                <input type="number" min=0 max=179 step=1 name="case[k2_axis]" required />
+                                <input
+                                    type="number"
+                                    min=0
+                                    max=179
+                                    step=1
+                                    name="case[k2_axis]"
+                                    required
+                                />
                             </label>
                         </div>
                     </div>
@@ -120,108 +149,144 @@ pub fn AddCase() -> impl IntoView {
                 <fieldset id="add-target">
                     <legend>"Target"</legend>
                     <label>
-                    // TODO: prefill the surgeon's default formula
-                    "Formula" <select name="case[formula]">
-                        <optgroup label="Thick lens formulas">
-                            <option value="Barrett">"Barrett"</option>
-                            <option value="Evo">"EVO"</option>
-                            <option value="HillRbf">"Hill RBF"</option>
-                            <option value="Holladay2">"Holladay 2"</option>
-                            <option value="Kane" selected>
-                            "Kane"
-                            </option>
-                            <option value="Okulix">"Okulix raytracing"</option>
-                            <option value="Olsen">"Olsen"</option>
-                        </optgroup>
-                        <optgroup label="Thin lens formulas">
-                            <option value="Haigis">"Haigis"</option>
-                            <option value="HofferQ">"Hoffer Q"</option>
-                            <option value="Holladay1">"Holladay 1"</option>
-                            <option value="SrkT">"SRK/T"</option>
-                        </optgroup>
-                        <optgroup label="Post-refractive formulas">
-                            <option value="AscrsKrs">"ASCRS"</option>
-                            <option value="BarrettTrueK">"Barrett True K"</option>
-                            <option value="HaigisL">"Haigis-L"</option>
-                        </optgroup>
-                        <optgroup label="Other">
-                            <option value="Other">"Not listed"</option>
-                        </optgroup>
+                        // TODO: prefill the surgeon's default formula
+                        "Formula" <select name="case[formula]">
+                            <optgroup label="Thick lens formulas">
+                                <option value="Barrett">"Barrett"</option>
+                                <option value="Evo">"EVO"</option>
+                                <option value="HillRbf">"Hill RBF"</option>
+                                <option value="Holladay2">"Holladay 2"</option>
+                                <option value="Kane" selected>
+                                    "Kane"
+                                </option>
+                                <option value="Okulix">"Okulix raytracing"</option>
+                                <option value="Olsen">"Olsen"</option>
+                            </optgroup>
+                            <optgroup label="Thin lens formulas">
+                                <option value="Haigis">"Haigis"</option>
+                                <option value="HofferQ">"Hoffer Q"</option>
+                                <option value="Holladay1">"Holladay 1"</option>
+                                <option value="SrkT">"SRK/T"</option>
+                            </optgroup>
+                            <optgroup label="Post-refractive formulas">
+                                <option value="AscrsKrs">"ASCRS"</option>
+                                <option value="BarrettTrueK">"Barrett True K"</option>
+                                <option value="HaigisL">"Haigis-L"</option>
+                            </optgroup>
+                            <optgroup label="Other">
+                                <option value="Other">"Not listed"</option>
+                            </optgroup>
                         </select>
                     </label>
                     <label>
-                    "Check here if you use a custom/optimized IOL constant with this formula"
-                    <input type="checkbox" name="case[custom_constant]" value="true" />
+                        "Check here if you use a custom/optimized IOL constant with this formula"
+                        <input type="checkbox" name="case[custom_constant]" value="true" />
                     </label>
                     <label>
-                    "SIA power (D)"
-                    <input type="number" min=0 max=2 step=0.01 name="case[sia_power]" required />
-                </label>
-                <label>
-                    "SIA axis (°)"
-                    <input type="number" min=0 max=179 step=1 name="case[sia_axis]" required />
-                </label>
-                    <label>
-                    "Target spherical equivalent (-6–2 D)"
-                    <input type="number" min=-6 max=2 step=0.01 name="case[target_se]" required />
+                        "SIA power (D)"
+                        <input
+                            type="number"
+                            min=0
+                            max=2
+                            step=0.01
+                            name="case[sia_power]"
+                            required
+                        />
                     </label>
                     <label>
-                    "Target cylinder power (0–6 D, target cyl is optional but strongly encouraged)"
-                    <input type="number" min=0 max=6 step=0.01 name="case[target_cyl_power]" />
+                        "SIA axis (°)"
+                        <input type="number" min=0 max=179 step=1 name="case[sia_axis]" required />
                     </label>
                     <label>
-                    "Target cylinder axis (0–179°)"
-                    <input type="number" min=0 max=179 step=1 name="case[target_cyl_axis]" />
+                        "Target spherical equivalent (-6–2 D)"
+                        <input
+                            type="number"
+                            min=-6
+                            max=2
+                            step=0.01
+                            name="case[target_se]"
+                            required
+                        />
+                    </label>
+                    <label>
+                        "Target cylinder power (0–6 D, target cyl is optional but strongly encouraged)"
+                        <input type="number" min=0 max=6 step=0.01 name="case[target_cyl_power]" />
+                    </label>
+                    <label>
+                        "Target cylinder axis (0–179°)"
+                        <input type="number" min=0 max=179 step=1 name="case[target_cyl_axis]" />
                     </label>
                 </fieldset>
                 <fieldset id="add-surgical-details">
-                <label>"Date of surgery" <input type="date" name="case[date]" required /></label>
-                <label>"Hospital/Site (optional)" <input type="text" name="case[site]" /></label>
-                <label>
-                "Main incision size (1–6 mm)"
-                <input type="number" min=1 max=6 step=0.05 name="case[main]" required />
-                </label>
-                <Suspense fallback=move || view! { "Fetching IOLs..." }>
-                <label>
-                "IOL model" <input list="iols" name="case[iol_model]" required />
-                <datalist id="iols">
-                <For
-                each=iols
-                key=|iol| iol.model.clone()
-                let(Iol { model, name, company, .. })
-                >
-                <option value=model>{name}" ("{company}")"</option>
-                </For>
-                </datalist>
-                </label>
-                </Suspense>
-                <label>
-                "IOL spherical equivalent (-20–60 D)"
-                <input type="number" min=-20 max=60 step=0.25 name="case[iol_se]" required />
-                </label>
-                <label>
-                // TODO: hide this field using a signal if the model is nontoric
-                "IOL axis (0–179°)"
-                <input type="number" min=0 max=179 step=1 name="case[iol_axis]" />
-                </label>> <fieldset id="add-adverse">
-                <legend>"Adverse event"</legend>
-                <label>
-                "None"
-                <input type="radio" value="none" name="case[adverse]" required checked />
-                </label>
-                <label>
-                "Rhexis"<input type="radio" value="rhexis" name="case[adverse]" required />
-                </label>
-                <label>
-                "PC"<input type="radio" value="pc" name="case[adverse]" required />
-                </label>
-                <label>
-                "Zonule"<input type="radio" value="zonule" name="case[adverse]" required />
-                </label>
-                <label>
-                "Other"<input type="radio" value="other" name="case[adverse]" required />
-                </label>
-                </fieldset>
+                    <label>
+                        "Date of surgery" <input type="date" name="case[date]" required />
+                    </label>
+                    <label>
+                        "Hospital/Site (optional)" <input type="text" name="case[site]" />
+                    </label>
+                    <label>
+                        "Main incision size (1–6 mm)"
+                        <input type="number" min=1 max=6 step=0.05 name="case[main]" required />
+                    </label>
+                    <Suspense fallback=move || view! { "Fetching IOLs..." }>
+                        <label>
+                            "IOL model" <input list="iols" name="case[iol_model]" required />
+                            <datalist id="iols">
+                                <For
+                                    each=iols
+                                    key=|iol| iol.model.clone()
+                                    let(Iol { model, name, company, .. })
+                                >
+                                    <option value=model>{name}" ("{company}")"</option>
+                                </For>
+                            </datalist>
+                        </label>
+                    </Suspense>
+                    <label>
+                        "IOL spherical equivalent (-20–60 D)"
+                        <input
+                            type="number"
+                            min=-20
+                            max=60
+                            step=0.25
+                            name="case[iol_se]"
+                            required
+                        />
+                    </label>
+                    <label>
+                        // TODO: hide this field using a signal if the model is nontoric
+                        "IOL axis (0–179°)"
+                        <input type="number" min=0 max=179 step=1 name="case[iol_axis]" />
+                    </label>
+                    >
+                    <fieldset id="add-adverse">
+                        <legend>"Adverse event"</legend>
+                        <label>
+                            "None"
+                            <input
+                                type="radio"
+                                value="none"
+                                name="case[adverse]"
+                                required
+                                checked
+                            />
+                        </label>
+                        <label>
+                            "Rhexis"
+                            <input type="radio" value="rhexis" name="case[adverse]" required />
+                        </label>
+                        <label>
+                            "PC"<input type="radio" value="pc" name="case[adverse]" required />
+                        </label>
+                        <label>
+                            "Zonule"
+                            <input type="radio" value="zonule" name="case[adverse]" required />
+                        </label>
+                        <label>
+                            "Other"
+                            <input type="radio" value="other" name="case[adverse]" required />
+                        </label>
+                    </fieldset>
                 </fieldset>
                 <fieldset id="add-va">
                     "Visual acuity"
@@ -394,7 +459,8 @@ pub fn AddCase() -> impl IntoView {
                             />
                         </label>
                     </div>
-                </fieldset> <input type="submit" value="Submit case" />
+                </fieldset>
+                <input type="submit" value="Submit case" />
             </div>
         </ActionForm>
     }

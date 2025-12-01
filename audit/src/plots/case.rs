@@ -11,6 +11,7 @@ use crate::model::Refraction;
 use crate::model::SurgeonCase;
 use crate::model::Target;
 use crate::model::TargetCyl;
+use crate::model::Year;
 use crate::plots::Cartesian;
 use crate::plots::CartesianCompare;
 use crate::plots::CartesianPoint;
@@ -18,7 +19,6 @@ use crate::plots::Polar;
 use crate::plots::PolarCompare;
 use crate::plots::PolarPoint;
 use crate::plots::VertexK;
-use crate::model::Year;
 use crate::query::query_select_compare;
 use crate::query::query_select_self_compare;
 
