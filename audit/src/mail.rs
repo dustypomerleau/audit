@@ -88,8 +88,8 @@ pub enum EmailType {
 }
 
 pub fn email_sign_up(surgeon: &Surgeon) -> Message {
-    let name = if let Some(first_name) = surgeon.first_name.clone() {
-        first_name
+    let name = if let Some(full_name) = surgeon.full_name.clone() {
+        full_name
     } else {
         surgeon.email.inner()
     };
@@ -97,7 +97,7 @@ pub fn email_sign_up(surgeon: &Surgeon) -> Message {
     Message::builder()
         .to(vec![
             EmailAddress::builder()
-                .name(surgeon.first_name.clone())
+                .name(surgeon.full_name.clone())
                 .address(surgeon.email.inner())
                 .build(),
         ])

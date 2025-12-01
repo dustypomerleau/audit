@@ -56,8 +56,8 @@ select (
 ) {
     email,
     terms,
-    first_name,
-    last_name,
+    full_name,
+    preferred_name,
 
     defaults: {
         site: { name },

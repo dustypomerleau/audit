@@ -78,8 +78,8 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, AppError> {
 select global cur_surgeon {
     email,
     terms,
-    first_name,
-    last_name,
+    full_name,
+    preferred_name,
 
     defaults: {
         site: { name },

@@ -26,8 +26,8 @@ pub fn SignUp() -> impl IntoView {
             <div style="display: grid; grid-auto-columns: 1fr; grid-gap: 30px;">
                 "Sign up and complete your profile (fields with * are required). The values you give here will be used as defaults, but you can override them for an individual surgical case."
                 <label>"Email*" <input type="email" name="surgeon[email]" required /></label>
-                <label>"First Name" <input type="text" name="surgeon[first_name]" /></label>
-                <label>"Last Name" <input type="text" name="surgeon[last_name]" /></label>
+                <label>"Full Name" <input type="text" name="surgeon[full_name]" /></label>
+                <label>"Preferred Name: What should we call you?" <input type="text" name="surgeon[preferred_name]" /></label>
                 // TODO: populate this from the DB, and add a new site in the query if needed
                 <label>
                     "Default Hospital/Site" <input list="sites" name="surgeon[default_site]" />
@@ -93,8 +93,8 @@ pub fn SignUp() -> impl IntoView {
 pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
     let FormSurgeon {
         email,
-        first_name,
-        last_name,
+        full_name,
+        preferred_name,
         default_site,
         default_iol,
         default_formula,
@@ -108,8 +108,8 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
     let email = Email::new(&email)?.inner();
 
     some_or_empty!(
-        first_name,
-        last_name,
+        full_name,
+        preferred_name,
         default_site,
         default_iol,
         default_formula
@@ -145,8 +145,8 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
 with QuerySurgeon := (insert Surgeon {{
         identity := (select global ext::auth::ClientTokenIdentity),
         email := "{email}",
-        first_name := {first_name},
-        last_name := {last_name},
+        full_name := {full_name},
+        preferred_name := {preferred_name},
 
         defaults := (select (insert SurgeonDefaults {{
             site := (select(insert Site {{
@@ -173,8 +173,8 @@ with QuerySurgeon := (insert Surgeon {{
 select QuerySurgeon {{
     email,
     terms,
-    first_name,
-    last_name,
+    full_name,
+    preferred_name,
 
     defaults: {{
         site: {{ name }},

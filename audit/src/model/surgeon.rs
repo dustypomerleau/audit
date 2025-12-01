@@ -58,8 +58,8 @@ pub struct SurgeonSia {
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct FormSurgeon {
     pub email: String,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
+    pub full_name: Option<String>,
+    pub preferred_name: Option<String>,
     pub default_site: Option<String>,
     pub default_iol: Option<String>,
     pub default_formula: Option<String>,
@@ -81,8 +81,8 @@ pub struct Surgeon {
     /// A unique, valid email.
     pub email: Email,
     pub terms: Option<DateTime<Utc>>,
-    pub first_name: Option<String>,
-    pub last_name: Option<String>,
+    pub full_name: Option<String>,
+    pub preferred_name: Option<String>,
     pub defaults: Option<SurgeonDefaults>,
     pub sia: SurgeonSia,
 }

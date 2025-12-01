@@ -13,7 +13,7 @@ with
 
 select {{
     surgeon := QuerySurgeonCas {{
-        urn,
+        number,
         side,
         date,
         site: {{ name }},
@@ -129,7 +129,7 @@ with
 
 select {{
     surgeon := QuerySurgeonCas {{
-        urn,
+        number,
         side,
         date,
         site: {{ name }},

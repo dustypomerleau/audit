@@ -251,8 +251,8 @@ global cur_surgeon := (assert_single(
         required identity: ext::auth::Identity { constraint exclusive; }
         required email: EmailType { constraint exclusive; }
         terms: datetime; # the date terms were agreed by the surgeon
-        first_name: str;
-        last_name: str;
+        full_name: str;
+        preferred_name: str;
         defaults: SurgeonDefaults { on source delete delete target if orphan; }
         sia: SurgeonSia { on source delete delete target if orphan; }
         multi cases := .<surgeon[is SurgeonCas];

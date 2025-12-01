@@ -395,9 +395,9 @@ impl Mock for Surgeon {
         Self {
             email: Email::mock(),
             terms: DateTime::<Utc>::mock_option(Prob::new(0.01).unwrap_or_default()),
-            first_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
+            full_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
                 .map(|name| name.into_inner()),
-            last_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
+            preferred_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
                 .map(|name| name.into_inner()),
             defaults: SurgeonDefaults::mock_option(Prob::new(0.01).unwrap_or_default()),
             sia: SurgeonSia::mock(),
