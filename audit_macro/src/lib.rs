@@ -11,6 +11,28 @@ use syn::Type;
 use syn::parse_macro_input;
 use syn::punctuated::Punctuated;
 
+/// Implement [`Bounded`](audit::bounded::Bounded), [`Display`] (as the inner type), [`Default`],
+/// and [`MockRange`](audit::mock::MockRange) for range-bounded numeric tuple-structs.
+///
+/// ```
+/// use audit_macro::RangeBounded;
+///
+/// #[derive(RangeBounded)]
+/// pub struct MyBounded(
+///     // All attributes are optional
+///     #[bounded(range = 0..=50)]
+///     #[bounded(rem = 5)]
+///     #[bounded(default = 25)]
+///     #[bounded(mock_range = 20..=30)]
+///     u32,
+/// );
+///
+/// #[derive(RangeBounded)]
+/// pub struct MyBoundedTwo(
+///     // Attributes can also be comma-separated in a single attribute:
+///     #[bounded(range = 0..=50, rem = 5, default = 25, mock_range = 20..=30)] u32,
+/// );
+/// ```
 #[proc_macro_derive(RangeBounded, attributes(bounded))]
 pub fn range_bounded(item: TokenStream) -> TokenStream {
     let ast = parse_macro_input!(item as DeriveInput);
