@@ -36,7 +36,7 @@ pub struct Iol {
 
 /// The IOL for a particular [`Case`](crate::case::Case). Includes both the model and the specific
 /// power chosen for this patient.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct OpIol {
     pub iol: Iol,
     pub se: IolSe,

@@ -1,4 +1,5 @@
 #[cfg(feature = "ssr")] use chrono::Datelike;
+#[cfg(feature = "ssr")] use gel_protocol::named_args;
 use leptos::prelude::ActionForm;
 use leptos::prelude::ClassAttribute;
 use leptos::prelude::ElementChild;
@@ -61,11 +62,6 @@ pub fn AddCase() -> impl IntoView {
             <div id="form-add-case" class="form-add-case">
                 "Enter the case details (fields are required unless marked optional)"
                 // TODO: "To change your default values, please [update your profile](link)"
-                // TODO: use a generated id (auto-incrementing integer)
-                <label>
-                    "Unique (anonymised) identifier"
-                    <input type="text" name="case[urn]" required autofocus />
-                </label>
                 <fieldset id="add-side">
                     <legend>"Side"</legend>
                     // TODO: we need a signal holding this value to update the Sia
@@ -436,17 +432,14 @@ pub async fn insert_form_case(case: FormCase) -> Result<String, AppError> {
     // case (or simply show it above the form to add another case).
 }
 
-/// Insert a [`SurgeonCase`] into the database using the given [`gel_tokio::Client`]. Passing in the
-/// client makes it possible to use custom [`Client`](gel_tokio::Client)s for tests.
+/// Insert a [`SurgeonCase`] into the database using the given [`gel_tokio::Client`]. Passing
+/// in the client makes it possible to use custom [`Client`](gel_tokio::Client)s for tests.
 #[cfg(feature = "ssr")]
 pub async fn insert_surgeon_case(
     client: &gel_tokio::Client,
     surgeon_case: SurgeonCase,
 ) -> Result<Option<String>, AppError> {
-    use gel_protocol::named_args;
-
     let SurgeonCase {
-        urn,
         date,
         site,
         case:
@@ -519,6 +512,7 @@ pub async fn insert_surgeon_case(
                             },
                     },
             },
+        ..
     } = surgeon_case;
 
     let year = date.year();
@@ -695,7 +689,6 @@ QueryCas := (insert Cas {{
 
 QuerySurgeonCas := (insert SurgeonCas {{
     surgeon := (select global cur_surgeon),
-    urn := "{urn}",
     side := {side},
     date := <cal::local_date>"{date}",
 
@@ -707,7 +700,7 @@ QuerySurgeonCas := (insert SurgeonCas {{
 }})
 
 select QuerySurgeonCas {{
-    urn,
+    number,
     date,
     site: {{ name }},
 

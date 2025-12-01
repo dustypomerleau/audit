@@ -408,7 +408,7 @@ impl Mock for Surgeon {
 impl Mock for SurgeonCase {
     fn mock() -> Self {
         Self {
-            urn: format!("urn-{}", random_string(8)),
+            number: rng().random(),
             date: DateTime::<Utc>::mock().date_naive(),
             site: Site::mock_option(Prob::new(0.1).unwrap()),
             case: Case::mock(),

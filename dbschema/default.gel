@@ -11,6 +11,10 @@
 
 using extension auth;
 
+# https://docs.geldata.com/reference/datamodel/future#ref-datamodel-future
+using future simple_scoping;
+using future warn_old_scoping;
+
 module default {
 
 ### globals
@@ -37,6 +41,8 @@ global cur_surgeon := (assert_single(
         constraint min_value(0);
         constraint max_value(179);
     }
+
+    scalar type CasNumber extending sequence;
     
     scalar type Cct extending int32 {
         constraint min_value(350);
@@ -258,8 +264,8 @@ global cur_surgeon := (assert_single(
     # 3. If we remove a SurgeonCas, we also remove the linked Cas.
     # This allows someone to ghost completely, along with all the data they have entered. 
     type SurgeonCas extending SoftCreate {
+        required number: CasNumber { constraint exclusive };
         required surgeon: Surgeon { on target delete delete source; }
-        required urn: str;
         # Duplicating the side here is necessary to enforce the exclusive constraint.
         # Side is available on the Cas, but double-hops aren't permitted in constraints.
         # Without the constraint, we risk accidentally entering the same surgery multiple
@@ -273,8 +279,6 @@ global cur_surgeon := (assert_single(
             on source delete delete target if orphan;
         }
 
-        constraint exclusive on ((.surgeon, .urn, .side));
-        
         # When creating a plot, the surgeon accesses their own `SurgeonCas`es (which are 
         # restricted) but accesses others' `Cas`es (which are unrestricted) for comparison.
         access policy surgeon_full_access

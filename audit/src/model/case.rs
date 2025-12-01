@@ -17,8 +17,9 @@ use crate::model::Site;
 use crate::model::Target;
 
 /// The side of the patient's surgery.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub enum Side {
+    #[default]
     Right,
     Left,
 }
@@ -71,7 +72,7 @@ impl Display for Adverse {
 pub struct Main(#[bounded(range = 100..=600, default = 240, mock_range = 220..=275)] u32);
 
 /// A single surgical case.
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Case {
     pub side: Side,
     pub biometry: Biometry,
@@ -84,10 +85,15 @@ pub struct Case {
     pub refraction: OpRefraction,
 }
 
-#[derive(Clone, Debug, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct SurgeonCase {
-    /// A unique value that allows (only) the surgeon to deanonymize the case.
-    pub urn: String,
+    /// A unique value that allows (only) the surgeon to deanonymize the case. URNs and other
+    /// unique identifiers are not permitted in the DB. We use `number` rather than `id` or
+    /// `identifier` because those terms are easily confused with the `id: UUID` field. It is
+    /// highly unlikely that we would ever require such a large number of cases, but using a
+    /// [`u64`] guarantees that the value, which on the DB side is an auto-incrementing int64
+    /// (sequence), can never be out of bounds during deserialization.
+    pub number: u64,
     pub date: NaiveDate,
     pub site: Option<Site>,
     #[serde(alias = "cas")]
@@ -96,7 +102,6 @@ pub struct SurgeonCase {
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct FormCase {
-    pub urn: String,
     pub date: String,         // prefill today
     pub site: Option<String>, // prefill default
     pub side: Side,
@@ -153,6 +158,8 @@ impl FormCase {
         use crate::model::Kpower;
         use crate::model::Ks;
         use crate::model::Lt;
+        use crate::model::RawCyl;
+        use crate::model::RawSca;
         use crate::model::SiaPower;
         use crate::model::TargetCyl;
         use crate::model::TargetCylPower;
@@ -161,9 +168,9 @@ impl FormCase {
         use crate::model::VaDen;
         use crate::model::VaNum;
         use crate::model::Wtw;
+        use crate::model::into_refraction;
 
         let FormCase {
-            urn,
             date,
             site,
             side,
@@ -208,7 +215,7 @@ impl FormCase {
 
         let site = site.map(|name| Site { name });
 
-        // intentionally truncate
+        // These integer casts intentionally truncate the float values.
         let biometry = Biometry {
             al: Al::new((al * 100.0) as u32)?,
             ks: Ks::new(
@@ -325,8 +332,6 @@ select Iol {{
 
         let ref_before_raw_cyl = match (ref_before_cyl_power, ref_before_cyl_axis) {
             (Some(power), Some(axis)) => {
-                use crate::model::RawCyl;
-
                 Some(RawCyl::new((power * 100.0) as i32, Axis::new(axis)?))
             }
 
@@ -335,8 +340,6 @@ select Iol {{
 
         let ref_after_raw_cyl = match (ref_after_cyl_power, ref_after_cyl_axis) {
             (Some(power), Some(axis)) => {
-                use crate::model::RawCyl;
-
                 Some(RawCyl::new((power * 100.0) as i32, Axis::new(axis)?))
             }
 
@@ -345,16 +348,10 @@ select Iol {{
 
         let refraction = OpRefraction {
             before: {
-                use crate::model::RawSca;
-                use crate::model::into_refraction;
-
                 let sca = RawSca::new((ref_before_sph * 100.0) as i32, ref_before_raw_cyl);
                 into_refraction(sca)?
             },
             after: {
-                use crate::model::RawSca;
-                use crate::model::into_refraction;
-
                 let sca = RawSca::new((ref_after_sph * 100.0) as i32, ref_after_raw_cyl);
                 into_refraction(sca)?
             },
@@ -373,10 +370,10 @@ select Iol {{
         };
 
         Ok(SurgeonCase {
-            urn,
             date,
             site,
             case,
+            ..Default::default()
         })
     }
 }
