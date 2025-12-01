@@ -127,9 +127,10 @@ where
     fn mock() -> Self {
         let mut random_inner = rng().random_range(T::mock_range());
 
-        // Mathematically it's problematic to always round towards 0, but we accept
-        // this for simplicity, because we are only mocking values.
-        // You could also consider `random_inner.next_multiple_of(T::rem())` here.
+        // Mathematically it's problematic to always round towards 0, but we accept this for
+        // simplicity, because we are only mocking values. You considered sometimes rounding up with
+        // `random_inner.next_multiple_of(T::rem())` here, but that method is not available for
+        // floats.
         if let Some(rem) = T::rem() {
             random_inner = random_inner - (random_inner % rem);
         }
@@ -322,6 +323,9 @@ impl Mock for RefCyl {
 
 // ----------------------------  //
 // constrain (mock the mocks) just for DB populating
+// TODO: remove this workaround now that you have mock_range()
+// However, you may want to derive RangeBounded for a type that has a narrower range for postop,
+// like PostopVaDen and PostopRefCylPower
 
 struct RefCylAltPower(pub i32);
 
