@@ -15,6 +15,7 @@ use leptos_router::components::ParentRoute;
 use leptos_router::components::Route;
 use leptos_router::components::Router;
 use leptos_router::components::Routes;
+use leptos_router::path;
 
 use crate::components::Nav;
 use crate::components::SignedOut;
@@ -25,6 +26,7 @@ use crate::routes::Landing;
 use crate::routes::List;
 use crate::routes::Protected;
 use crate::routes::Report;
+use crate::routes::Review;
 use crate::routes::SignUp;
 use crate::routes::Terms;
 
@@ -77,6 +79,7 @@ pub fn App() -> impl IntoView {
                         <ParentRoute path=StaticSegment("protected") view=Protected>
                             // TODO: consider making instructions a sidebar inside Add
                             <Route path=StaticSegment("add") view=Add />
+                            <Route path=path!("review/:case") view=Review(:case) />
                             <Route path=StaticSegment("instructions") view=Instructions />
                             <Route path=StaticSegment("list") view=List />
                             <Route path=StaticSegment("report") view=Report />

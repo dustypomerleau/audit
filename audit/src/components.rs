@@ -5,6 +5,7 @@ pub mod logo;
 pub mod md;
 pub mod nav;
 pub mod plot_set;
+pub mod review;
 pub mod signed_out;
 
 pub use add_case::*;
@@ -14,4 +15,5 @@ pub use logo::*;
 pub use md::*;
 pub use nav::*;
 pub use plot_set::*;
+pub use review::*;
 pub use signed_out::*;

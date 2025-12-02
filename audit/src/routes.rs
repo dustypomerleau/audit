@@ -7,6 +7,7 @@ mod landing;
 mod list;
 mod protected;
 mod report;
+mod review;
 mod sign_up;
 mod terms;
 
@@ -19,5 +20,6 @@ pub use landing::*;
 pub use list::*;
 pub use protected::*;
 pub use report::*;
+pub use review::*;
 pub use sign_up::*;
 pub use terms::*;

@@ -48,6 +48,9 @@ pub fn AddCase() -> impl IntoView {
     // 3. surgeon defaults (should already be in context)
     //
     let insert_case = ServerAction::<InsertFormCase>::new();
+    let insert_case_value = insert_case.value();
+    dbg!(&insert_case_value);
+
     let iol_resource = OnceResource::new(get_iols());
 
     let iols = move || {
@@ -63,7 +66,9 @@ pub fn AddCase() -> impl IntoView {
     view! {
         <ActionForm action=insert_case>
             <div id="form-add-case" class="form-add-case">
-                "Enter the case details (fields are required unless marked optional)"
+                "Enter the case details (fields are required unless marked optional)."
+                <br/><br/>"Do not enter any patient-identifying information."
+                <br/><br/>"After each successful upload, you will receive a case number, which you can record in your own records to associate the case with a patient."
                 <fieldset id="add-side">
                     <legend>"Side"</legend>
                     <label>
@@ -462,6 +467,7 @@ pub fn AddCase() -> impl IntoView {
                 </fieldset>
                 <input type="submit" value="Submit case" />
             </div>
+            {insert_case_value.get()}
         </ActionForm>
     }
 }
