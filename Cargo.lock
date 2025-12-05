@@ -377,9 +377,9 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "base64ct"
-version = "1.8.0"
+version = "1.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "55248b47b0caf0546f7988906588779981c43bb1bc9d0c44087278f80cdb44ba"
+checksum = "0e050f626429857a27ddccb31e0aca21356bfa709c04041aefddac081a8f068a"
 
 [[package]]
 name = "basic-toml"
@@ -481,9 +481,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.48"
+version = "1.2.49"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c481bdbf0ed3b892f6f806287d72acd515b352a4ec27a208489b8c1bc839633a"
+checksum = "90583009037521a116abf44494efecd645ba48b6622457080f080b85544e2215"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -926,12 +926,31 @@ dependencies = [
 
 [[package]]
 name = "derive-io"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58cc7f4740088458993d183a200fe56e62378736f94bf0e2dd45807407e7bb94"
+dependencies = [
+ "derive-io-macros 0.4.1",
+ "tokio",
+]
+
+[[package]]
+name = "derive-io"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7e4cb9ab86d9e7cabf990ac7411b91a0ccc12c7bfc4276cde686ddbb009c9368"
 dependencies = [
- "derive-io-macros",
+ "derive-io-macros 0.5.0",
  "tokio",
+]
+
+[[package]]
+name = "derive-io-macros"
+version = "0.4.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8d0a1bd7eeab72097740967d03d53db5fbaf8e3c0dd471ebdefa43ce445a20a6"
+dependencies = [
+ "proc-macro2",
 ]
 
 [[package]]
@@ -1218,13 +1237,13 @@ checksum = "3a3076410a55c90011c298b04d0cfa770b00fa04e1e3c97d3f6c9de105a03844"
 
 [[package]]
 name = "flate2"
-version = "1.1.5"
+version = "1.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfe33edd8e85a12a67454e37f8c75e730830d83e313556ab9ebf9ee7fbeb3bfb"
+checksum = "a2152dbcb980c05735e2a651d96011320a949eb31a0c8b38b72645ce97dec676"
 dependencies = [
  "crc32fast",
- "libz-rs-sys",
  "miniz_oxide",
+ "zlib-rs",
 ]
 
 [[package]]
@@ -1375,8 +1394,6 @@ dependencies = [
 [[package]]
 name = "gel-auth"
 version = "0.1.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ac4f89ce9bbff96ca4594e09b58fde785507a81aa6c979b2794ef0a2c570f3bd"
 dependencies = [
  "base64 0.22.1",
  "constant_time_eq 0.4.2",
@@ -1393,8 +1410,6 @@ dependencies = [
 [[package]]
 name = "gel-db-protocol"
 version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "42e863db4641624ffdbc53fd3f002a621c28d2483417c919deb51045893bc199"
 dependencies = [
  "derive_more",
  "gel-protogen",
@@ -1404,8 +1419,6 @@ dependencies = [
 [[package]]
 name = "gel-derive"
 version = "0.7.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9154a66df92262e21e77343bb8e97942b3a4ac7153b153fefd688ba6a23f4f93"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1416,8 +1429,6 @@ dependencies = [
 [[package]]
 name = "gel-dsn"
 version = "0.2.16"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8985330a0932d11ee8570574f57a8151c621bcdfcc38abca5c3a8379c7bd7a05"
 dependencies = [
  "base64 0.22.1",
  "crc16",
@@ -1441,8 +1452,6 @@ dependencies = [
 [[package]]
 name = "gel-errors"
 version = "0.5.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5ec3314e56070c87b0d8106055b626c93e7cea5022baa72c45d81c303efafaf"
 dependencies = [
  "bytes",
 ]
@@ -1450,8 +1459,6 @@ dependencies = [
 [[package]]
 name = "gel-protocol"
 version = "0.9.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8133b5ad6193dc7e9ceabaeb34651f23ac9aa3412d308f328210ce5dd928eec"
 dependencies = [
  "bitflags 2.10.0",
  "bytes",
@@ -1469,8 +1476,6 @@ dependencies = [
 [[package]]
 name = "gel-protogen"
 version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1c0d9c5d727c9f6759f2a6427a1a1a8e137568b7f76e859f777562e48868c839"
 dependencies = [
  "const-str",
  "derive_more",
@@ -1483,8 +1488,6 @@ dependencies = [
 [[package]]
 name = "gel-protogen-proc-macros"
 version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "96142ced7c548c3cf42ec29ba1d0a48a74ce748b781b1610f0a7d086f136bdc9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1494,10 +1497,8 @@ dependencies = [
 [[package]]
 name = "gel-stream"
 version = "0.4.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "320a1c3087b45ecfe5eece9d40412bf2b4fe6f7254bc35a4f151b77a61fd8951"
 dependencies = [
- "derive-io",
+ "derive-io 0.5.0",
  "derive_more",
  "futures",
  "hickory-resolver",
@@ -1508,7 +1509,7 @@ dependencies = [
  "rustls-tokio-stream",
  "serde",
  "smallvec",
- "socket2 0.5.10",
+ "socket2 0.6.1",
  "tokio",
  "webpki",
  "webpki-roots",
@@ -1517,8 +1518,6 @@ dependencies = [
 [[package]]
 name = "gel-tokio"
 version = "0.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "791e9fe05ac93bd37cc16afa8dde36b489c7833e5d3eb3b29ef95cbf4870e535"
 dependencies = [
  "anyhow",
  "arc-swap",
@@ -2629,15 +2628,6 @@ dependencies = [
  "bitflags 2.10.0",
  "libc",
  "redox_syscall",
-]
-
-[[package]]
-name = "libz-rs-sys"
-version = "0.5.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8b484ba8d4f775eeca644c452a56650e544bf7e617f1d170fe7298122ead5222"
-dependencies = [
- "zlib-rs",
 ]
 
 [[package]]
@@ -3768,10 +3758,11 @@ checksum = "f87165f0995f63a9fbeea62b64d10b4d9d8e78ec6d7d51fb2125fda7bb36788f"
 
 [[package]]
 name = "rustls-tokio-stream"
-version = "0.6.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d522eeacb38c78777fb1225a25cec4b165eddeb03378c2b39f9683e0cc0a432b"
+checksum = "0560d12c0d8c672f849197de91b9ee61f5bf9aa024c97aaeeb112ec2f6c347fd"
 dependencies = [
+ "derive-io 0.4.1",
  "futures",
  "rustls",
  "socket2 0.5.10",
@@ -4155,9 +4146,9 @@ checksum = "7a2ae44ef20feb57a68b23d846850f861394c2e02dc425a50098ae8c90267589"
 
 [[package]]
 name = "slotmap"
-version = "1.0.7"
+version = "1.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dbff4acf519f630b3a3ddcfaea6c06b42174d9a44bc70c620e9ed1649d58b82a"
+checksum = "bdd58c3c93c3d278ca835519292445cb4b0d4dc59ccfdf7ceadaab3f8aeb4038"
 dependencies = [
  "version_check",
 ]
