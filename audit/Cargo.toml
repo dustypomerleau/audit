@@ -34,6 +34,7 @@ reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true, optional = true }
+sqlx = { workspace = true, optional = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, optional = true }
 tower = { workspace = true, optional = true }
@@ -44,6 +45,7 @@ wasm-bindgen = { workspace = true }
 
 [features]
 hydrate = ["leptos/hydrate"]
+
 ssr = [
   "dep:axum",
   "dep:axum-extra",
@@ -58,6 +60,7 @@ ssr = [
   "dep:plotly",
   "dep:rand",
   "dep:sha2",
+  "dep:sqlx",
   "dep:tokio",
   "dep:tower",
   "dep:tower-http",

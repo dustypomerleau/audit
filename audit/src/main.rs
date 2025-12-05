@@ -1,6 +1,8 @@
+#[cfg(feature = "ssr")] use audit::error::AppError;
+
 #[cfg(feature = "ssr")]
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), AppError> {
     use std::sync::Arc;
     use std::sync::RwLock;
 
@@ -18,6 +20,8 @@ async fn main() {
     use leptos::prelude::get_configuration;
     use leptos_axum::LeptosRoutes;
     use leptos_axum::generate_route_list;
+    use sqlx::Pool;
+    use sqlx::Postgres;
 
     #[cfg(debug_assertions)]
     dotenv().ok();
@@ -32,9 +36,11 @@ async fn main() {
         .await
         .expect("expected the DB client to be initialized");
 
+    let pool = Pool::<Postgres>::connect("postgres://").await?;
+
     let app_state = AppState {
         leptos_options: leptos_options.clone(),
-        db: Arc::new(RwLock::new(db_client)),
+        db: Arc::new(RwLock::new(pool)),
         mailer: Arc::new(MAILER.clone()),
         surgeon: Arc::new(RwLock::new(None)),
     };
@@ -57,6 +63,8 @@ async fn main() {
     axum::serve(listener, app.into_make_service())
         .await
         .unwrap();
+
+    Ok(())
 }
 
 #[cfg(not(feature = "ssr"))]

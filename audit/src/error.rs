@@ -57,6 +57,11 @@ impl From<ServerFnErrorErr> for AppError {
     fn from(err: ServerFnErrorErr) -> Self { Self::Server(format!("{err}")) }
 }
 
+#[cfg(feature = "ssr")]
+impl From<sqlx::Error> for AppError {
+    fn from(err: sqlx::Error) -> Self { Self::Db(format!("{err}")) }
+}
+
 impl From<std::io::Error> for AppError {
     fn from(err: std::io::Error) -> Self { Self::Server(format!("{err}")) }
 }
