@@ -23,6 +23,8 @@ async fn main() -> Result<(), AppError> {
     use leptos_axum::generate_route_list;
     use sqlx::Pool;
     use sqlx::Postgres;
+    use sqlx::migrate;
+    use sqlx::pool::PoolOptions;
 
     #[cfg(debug_assertions)]
     dotenv().ok();
@@ -37,11 +39,17 @@ async fn main() -> Result<(), AppError> {
         .await
         .expect("expected the DB client to be initialized");
 
-    let pool = Pool::<Postgres>::connect("postgres://").await?;
+    // see sqlx PgConnectOptions for options
+    let options = PoolOptions::<Postgres>::new().max_connections(90);
+    let pool = Pool::<Postgres>::connect_with(options).await?;
+
+    // ./migrations is the default, but we explicitly set it here. `.` is the same directory as the
+    // Cargo.toml for `audit` in dev, and the same directory as the audit binary in prod.
+    migrate!("./migrations").run(&pool).await?;
 
     let app_state = AppState {
         leptos_options: leptos_options.clone(),
-        db: Arc::new(RwLock::new(pool)),
+        db: pool,
         mailer: Arc::new(MAILER.clone()),
         surgeon: Arc::new(RwLock::new(None)),
     };

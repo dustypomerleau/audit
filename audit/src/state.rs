@@ -2,7 +2,6 @@ use std::sync::Arc;
 use std::sync::RwLock;
 
 use axum_macros::FromRef;
-use gel_tokio::Client;
 use leptos::prelude::LeptosOptions;
 use sqlx::Pool;
 use sqlx::Postgres;
@@ -14,7 +13,7 @@ use crate::model::Surgeon;
 #[derive(Clone, Debug, FromRef)]
 pub struct AppState {
     pub leptos_options: LeptosOptions,
-    pub db: Arc<RwLock<Pool<Postgres>>>,
+    pub db: Pool<Postgres>,
     pub mailer: Arc<Mailer>,
     pub surgeon: Arc<RwLock<Option<Surgeon>>>,
 }

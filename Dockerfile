@@ -17,6 +17,7 @@ RUN apk update \
 
 RUN cargo install cargo-binstall
 RUN cargo binstall cargo-leptos
+RUN cargo binstall sqlx-cli
 RUN rustup target add wasm32-unknown-unknown
 
 WORKDIR /work
@@ -29,6 +30,7 @@ WORKDIR /app
 COPY --from=builder /work/target/release/audit /app/
 COPY --from=builder /work/target/site /app/site
 COPY --from=builder /work/Cargo.toml /app/
+COPY --from=builder /work/migrations /app/
 
 ENV LEPTOS_SITE_ADDR=0.0.0.0:8080
 ENV LEPTOS_SITE_ROOT=site
