@@ -3,6 +3,7 @@
 #[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() -> Result<(), AppError> {
+    use std::env;
     use std::sync::Arc;
     use std::sync::RwLock;
 
