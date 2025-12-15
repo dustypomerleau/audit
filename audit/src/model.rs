@@ -28,4 +28,5 @@ pub use va::*;
 use crate::bounded::Bounded;
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Year(#[bounded(range = 2025..=2100, default = Utc::now().year() as u32)] u32);
+#[bounded(range = 2025..=2100, default = Utc::now().year() as u32)]
+pub struct Year(u32);

@@ -9,7 +9,8 @@ impl CylPower for i32 {}
 impl CylPower for u32 {}
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Axis(#[bounded(range = 0..=179)] u32);
+#[bounded(range = 0..=179)]
+pub struct Axis(u32);
 
 pub trait Cyl<T>
 where T: CylPower

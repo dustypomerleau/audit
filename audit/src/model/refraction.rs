@@ -9,10 +9,12 @@ use crate::model::Cyl;
 use crate::model::Sca;
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct RefCylPower(#[bounded(range = -1000..=1000, rem = 25, mock_range = -300..=300)] i32);
+#[bounded(range = -1000..=1000, rem = 25, mock_range = -300..=300)]
+pub struct RefCylPower(i32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct RefSph(#[bounded(range = -2000..=2000, rem = 25, mock_range = -800..=400)] i32);
+#[bounded(range = -2000..=2000, rem = 25, mock_range = -800..=400)]
+pub struct RefSph(i32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct RefCyl {

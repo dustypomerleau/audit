@@ -69,7 +69,8 @@ impl Display for Adverse {
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct Main(#[bounded(range = 100..=600, default = 240, mock_range = 220..=275)] u32);
+#[bounded(range = 100..=600, default = 240, mock_range = 220..=275)]
+pub struct Main(u32);
 
 /// A single surgical case.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]

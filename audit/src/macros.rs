@@ -12,7 +12,8 @@ mod tests {
     #[test]
     fn derives_range_bounded() {
         #[derive(RangeBounded)]
-        struct TestStruct(#[bounded(range = 0..50, rem = 5)] u32);
+        #[bounded(range = 0..50, rem = 5)]
+        struct TestStruct(u32);
 
         TestStruct::new(25).unwrap();
     }

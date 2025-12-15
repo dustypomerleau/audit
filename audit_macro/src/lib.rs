@@ -18,20 +18,16 @@ use syn::punctuated::Punctuated;
 /// use audit_macro::RangeBounded;
 ///
 /// #[derive(RangeBounded)]
-/// pub struct MyBounded(
-///     // All attributes are optional
-///     #[bounded(range = 0..=50)]
-///     #[bounded(rem = 5)]
-///     #[bounded(default = 25)]
-///     #[bounded(mock_range = 20..=30)]
-///     u32,
-/// );
+/// // All attributes are optional
+/// #[bounded(range = 0..=50)]
+/// #[bounded(rem = 5)]
+/// #[bounded(default = 25)]
+/// #[bounded(mock_range = 20..=30)]
+/// pub struct MyBounded(u32);
 ///
 /// #[derive(RangeBounded)]
-/// pub struct MyBoundedTwo(
-///     // Attributes can also be comma-separated in a single attribute:
-///     #[bounded(range = 0..=50, rem = 5, default = 25, mock_range = 20..=30)] u32,
-/// );
+/// #[bounded(range = 0..=50, rem = 5, default = 25, mock_range = 20..=30)]
+/// pub struct MyBoundedTwo(u32);
 /// ```
 #[proc_macro_derive(RangeBounded, attributes(bounded))]
 pub fn range_bounded(item: TokenStream) -> TokenStream {
@@ -45,49 +41,49 @@ pub fn range_bounded(item: TokenStream) -> TokenStream {
         None,
     );
 
+    ast.attrs.iter().for_each(|attr| {
+        if attr.path().is_ident("bounded") {
+            let nested = attr
+                .parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)
+                .expect("nested attributes should be comma-separated");
+
+            for meta in &nested {
+                if let Meta::NameValue(mnv) = meta {
+                    match mnv.path.get_ident().unwrap().to_string().as_str() {
+                        "default" => {
+                            default = Some(mnv.value.clone());
+                        }
+
+                        "mock_range" => {
+                            mock_range = Some(mnv.value.clone());
+                        }
+
+                        "range" => {
+                            range = Some(mnv.value.clone());
+                        }
+
+                        "rem" => {
+                            rem = Some(mnv.value.clone());
+                        }
+
+                        _ => unimplemented!("unrecognized key-value pair"),
+                    }
+                }
+            }
+        }
+    });
+
     match &ast.data {
         Data::Struct(DataStruct {
             fields: Fields::Unnamed(FieldsUnnamed { unnamed, .. }),
             ..
         }) => {
             if unnamed.len() == 1 {
-                let field = unnamed
+                ty = unnamed
                     .first()
-                    .expect("only implemented for singleton tuple structs");
-
-                field.attrs.iter().for_each(|attr| {
-                    if attr.path().is_ident("bounded") {
-                        ty = field.ty.clone();
-
-                        let nested = attr
-                            .parse_args_with(Punctuated::<Meta, Token![,]>::parse_terminated)
-                            .expect("nested attributes should be comma-separated");
-
-                        for meta in &nested {
-                            if let Meta::NameValue(mnv) = meta {
-                                match mnv.path.get_ident().unwrap().to_string().as_str() {
-                                    "default" => {
-                                        default = Some(mnv.value.clone());
-                                    }
-
-                                    "mock_range" => {
-                                        mock_range = Some(mnv.value.clone());
-                                    }
-
-                                    "range" => {
-                                        range = Some(mnv.value.clone());
-                                    }
-
-                                    "rem" => {
-                                        rem = Some(mnv.value.clone());
-                                    }
-
-                                    _ => unimplemented!("unrecognized key-value pair"),
-                                }
-                            }
-                        }
-                    }
-                })
+                    .expect("only implemented for singleton tuple structs")
+                    .ty
+                    .clone();
             }
         }
 

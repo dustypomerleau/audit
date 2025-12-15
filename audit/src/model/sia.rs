@@ -7,7 +7,8 @@ use crate::model::Axis;
 use crate::model::Cyl;
 
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-pub struct SiaPower(#[bounded(range = 0..=200, default = 10, mock_range = 5..=40)] u32);
+#[bounded(range = 0..=200, default = 10, mock_range = 5..=40)]
+pub struct SiaPower(u32);
 
 /// A surgically-induced astigmatism. The purist would prefer using
 /// `meridian` rather than `axis` for [`Sia`] and biometric Ks, but on balance I've

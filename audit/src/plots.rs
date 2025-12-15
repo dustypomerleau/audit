@@ -33,10 +33,12 @@ pub trait AsPlot {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, RangeBounded)]
-pub struct PlotStep(#[bounded(range = 0.001..=0.05, default = 0.01)] f64);
+#[bounded(range = 0.001..=0.05, default = 0.01)]
+pub struct PlotStep(f64);
 
 #[derive(Clone, Copy, Debug, PartialEq, RangeBounded)]
-pub struct StdDev(#[bounded(range = 1.0..=5.0, default = 2.0)] f64);
+#[bounded(range = 1.0..=5.0, default = 2.0)]
+pub struct StdDev(f64);
 
 /// The characteristics of a confidence ellipse.
 #[derive(Clone, Debug, Default, PartialEq)]
