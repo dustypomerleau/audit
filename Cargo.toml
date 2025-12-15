@@ -30,6 +30,7 @@ leptos_router = { version = "0.8.10", features = ["nightly"] }
 mailgun-rs = { version = "2.0.1" }
 # TODO: switch to pulldown-cmark https://github.com/pulldown-cmark/pulldown-cmark/
 markdown = "1.0.0"
+openidconnect = "4.0.1"
 proc-macro2 = "1.0.103"
 # TODO: waiting on release
 plotly = { git = "https://github.com/plotly/plotly.rs", features = ["static_export_default"] }
