@@ -17,9 +17,6 @@ console_error_panic_hook = { workspace = true }
 dotenvy = { workspace = true, optional = true }
 futures = { workspace = true }
 garde = { workspace = true }
-gel-derive = { workspace = true, optional = true }
-gel-protocol = { workspace = true, optional = true }
-gel-tokio = { workspace = true, optional = true }
 http = { workspace = true }
 leptos = { workspace = true }
 leptos_axum = { workspace = true, optional = true }
@@ -52,9 +49,6 @@ ssr = [
   "dep:axum-macros",
   "dep:base64ct",
   "dep:dotenvy",
-  "dep:gel-derive",
-  "dep:gel-protocol",
-  "dep:gel-tokio",
   "dep:leptos_axum",
   "dep:mailgun-rs",
   "dep:plotly",
