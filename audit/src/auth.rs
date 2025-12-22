@@ -13,6 +13,7 @@ use base64ct::Encoding;
 use leptos_axum::extract;
 use rand::Rng;
 use rand::rng;
+use reqwest::redirect::Policy;
 use serde::Deserialize;
 use serde::Serialize;
 use sha2::Digest;
@@ -21,6 +22,15 @@ use uuid::Uuid;
 
 use crate::error::AppError;
 use crate::state::AppState;
+
+fn wip_auth() {
+    let client = reqwest::ClientBuilder::new()
+        .redirect(Policy::none())
+        .build()
+        .expect("reqwest client did not build");
+}
+
+// --------------------- old
 
 /// Environment variables needed during the OAuth PKCE flow.
 struct AuthVars {

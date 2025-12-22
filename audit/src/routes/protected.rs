@@ -1,4 +1,4 @@
-#[cfg(feature = "ssr")] use gel_tokio::create_client;
+
 use leptos::either::Either;
 use leptos::prelude::IntoView;
 use leptos::prelude::Resource;

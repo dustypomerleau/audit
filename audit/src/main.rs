@@ -35,10 +35,6 @@ async fn main() -> Result<(), AppError> {
     let leptos_options = conf.leptos_options;
     let routes = generate_route_list(App);
 
-    let db_client = gel_tokio::create_client()
-        .await
-        .expect("expected the DB client to be initialized");
-
     // see sqlx PgConnectOptions for options
     let options = PoolOptions::<Postgres>::new().max_connections(90);
     let pool = Pool::<Postgres>::connect_with(options).await?;

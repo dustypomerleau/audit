@@ -2,8 +2,8 @@ use std::env;
 use std::sync::LazyLock;
 
 use dotenvy::dotenv;
-use gel_tokio::Client;
-use gel_tokio::create_client;
+
+
 use mailgun_rs::Mailgun;
 
 use crate::components::insert_surgeon_case;

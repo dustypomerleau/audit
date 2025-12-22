@@ -1,4 +1,3 @@
-use gel_tokio::Client;
 use serde::Deserialize;
 use serde::Serialize;
 
