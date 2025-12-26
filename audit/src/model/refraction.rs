@@ -29,12 +29,7 @@ impl Cyl<i32> for RefCyl {
 }
 
 impl RefCyl {
-    pub fn new(power: i32, axis: Axis) -> Result<Self, AppError> {
-        Ok(Self {
-            power: RefCylPower::new(power)?,
-            axis,
-        })
-    }
+    pub fn new(power: RefCylPower, axis: Axis) -> Self { Self { power, axis } }
 }
 
 /// A patient's subjective refraction.
