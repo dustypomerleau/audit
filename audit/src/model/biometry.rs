@@ -3,34 +3,43 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::bounded::Bounded;
+use crate::error::AppError;
 use crate::model::Axis;
 use crate::model::Cyl;
 
-// TODO: use a more evidence-based approach to choosing these defaults.
+// TODO: use a more evidence-based approach to choosing biometry defaults.
+
+/// A [`u32`] wrapper representing the depth of the anterior chamber in dm.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
 #[bounded(range = 0..=600, default = 350, mock_range = 250..=450)]
 pub struct Acd(u32);
 
+/// A [`u32`] wrapper representing the axial length in dm.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
 #[bounded(range = 1200..=3800, default = 2400, mock_range = 2200..=2800)]
 pub struct Al(u32);
 
+/// A [`u32`] wrapper representing the central corneal thickness in micrometers.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
 #[bounded(range = 350..=650, default = 550, mock_range = 450..=600)]
 pub struct Cct(u32);
 
+/// A [`u32`] wrapper representing the corneal curvature in (diopters * 100).
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
 #[bounded(range = 3000..=6500, default = 4400, mock_range = 3800..=4700)]
 pub struct Kpower(u32);
 
+/// A [`u32`] wrapper representing the lens thickness in dm.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
 #[bounded(range = 200..=800, default = 450, mock_range = 350..=550)]
 pub struct Lt(u32);
 
+/// A [`u32`] wrapper representing the white-to-white distance in dm.
 #[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
 #[bounded(range = 800..=1400, default = 1200, mock_range = 1000..=1300)]
 pub struct Wtw(u32);
 
+/// The corneal curvature in a single meridian.
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct K {
     pub power: Kpower,
@@ -47,7 +56,9 @@ impl K {
     pub fn new(power: Kpower, axis: Axis) -> Self { Self { power, axis } }
 }
 
-// Safety: These fields are private to enforce the invariant that flat <= steep.
+// Safety: These fields are private to enforce the invariants that flat <= steep and flat.axis =
+// (steep.axis + 90°).
+/// A set of biometric Ks, 90° apart.
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Ks {
     flat: K,
@@ -55,8 +66,17 @@ pub struct Ks {
 }
 
 impl Ks {
-    pub fn new(k1: K, k2: K) -> Self {
-        if k1.power.inner() <= k2.power.inner() {
+    // TODO: this function should enforce the invariant that the axes are 90° apart.
+    pub fn new(k1: K, k2: K) -> Result<Self, AppError> {
+        if !(k1.axis.inner() - k2.axis.inner() = 90 || k2.axis.inner() - k1.axis.inner() = 90) {
+            let (kai1, kai2) = (k1.axis, k2.axis);
+
+            return Err(AppError::Bounds(format!(
+                "the axes of a `biometry::Ks` should be 90° apart, but the given values were k1.axis: {kai1}, k2.axis: {kai2}"
+            )));
+        }
+
+        let ks = if k1.power.inner() <= k2.power.inner() {
             Self {
                 flat: k1,
                 steep: k2,
@@ -66,7 +86,9 @@ impl Ks {
                 flat: k2,
                 steep: k1,
             }
-        }
+        };
+
+        Ok(ks)
     }
 
     pub fn flat_power(&self) -> u32 { self.flat.power.inner() }
