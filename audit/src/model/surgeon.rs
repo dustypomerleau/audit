@@ -10,15 +10,21 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::error::AppError;
+use crate::model::Axis;
+use crate::model::Focus;
 use crate::model::Formula;
 use crate::model::Iol;
 use crate::model::Main;
 use crate::model::Sia;
+use crate::model::SiaPower;
+use crate::model::ToricPower;
 #[cfg(feature = "ssr")] use crate::state::AppState;
 
 /// A [`garde`]-checked valid email [`String`].
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize, Validate)]
 #[garde(transparent)]
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
 pub struct Email(#[garde(email)] String);
 
 // Implementing Display allows directly including an Email in a format String.
@@ -66,8 +72,33 @@ pub struct FormSurgeon {
     pub custom_constant: Option<String>,
     pub main: f32,
     pub sia_power: f32,
-    pub sia_right_axis: u32,
-    pub sia_left_axis: u32,
+    pub sia_right_axis: i32,
+    pub sia_left_axis: i32,
+}
+
+#[derive(Clone, Debug)]
+#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
+pub struct QuerySurgeon {
+    pub email: Email,
+    pub terms: Option<DateTime<Utc>>,
+    pub full_name: Option<String>,
+    pub preferred_name: Option<String>,
+
+    pub default_site_name: Option<String>,
+
+    pub default_iol_model: Option<String>,
+    pub default_iol_name: Option<String>,
+    pub default_iol_company: Option<String>,
+    pub default_iol_focus: Option<Focus>,
+    pub default_iol_toric: Option<ToricPower>,
+
+    pub default_formula: Option<Formula>,
+    pub default_custom_constant: bool,
+    pub default_main: Main,
+
+    pub default_sia_power: SiaPower,
+    pub default_sia_axis_right: Axis,
+    pub default_sia_axis_left: Axis,
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
@@ -83,8 +114,73 @@ pub struct Surgeon {
     pub terms: Option<DateTime<Utc>>,
     pub full_name: Option<String>,
     pub preferred_name: Option<String>,
-    pub defaults: Option<SurgeonDefaults>,
+    pub defaults: SurgeonDefaults,
     pub sia: SurgeonSia,
+}
+
+impl From<QuerySurgeon> for Surgeon {
+    fn from(qs: QuerySurgeon) -> Self {
+        let QuerySurgeon {
+            email,
+            terms,
+            full_name,
+            preferred_name,
+            default_site_name,
+            default_iol_model,
+            default_iol_name,
+            default_iol_company,
+            default_iol_focus,
+            default_iol_toric,
+            default_formula,
+            default_custom_constant,
+            default_main,
+            default_sia_power,
+            default_sia_axis_right,
+            default_sia_axis_left,
+        } = qs;
+
+        let site = default_site_name.map(|name| Site { name });
+
+        let iol = if let (Some(model), Some(focus)) = (default_iol_model, default_iol_focus) {
+            Some(Iol {
+                model,
+                name: default_iol_name,
+                company: default_iol_company,
+                focus,
+                toric: default_iol_toric,
+            })
+        } else {
+            None
+        };
+
+        let defaults = SurgeonDefaults {
+            site,
+            iol,
+            formula: default_formula,
+            custom_constant: default_custom_constant,
+            main: default_main,
+        };
+
+        let sia = SurgeonSia {
+            right: Sia {
+                power: default_sia_power,
+                axis: default_sia_axis_right,
+            },
+            left: Sia {
+                power: default_sia_power,
+                axis: default_sia_axis_left,
+            },
+        };
+
+        Surgeon {
+            email,
+            terms,
+            full_name,
+            preferred_name,
+            defaults,
+            sia,
+        }
+    }
 }
 
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]

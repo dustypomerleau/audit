@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use audit_macro::RangeBounded;
 use serde::Deserialize;
 use serde::Serialize;
@@ -9,6 +11,8 @@ use crate::model::Sca;
 
 /// A formula for calculating IOL power from biometry.
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(type_name = "formula"))]
 pub enum Formula {
     AscrsKrs,
     Barrett,
@@ -26,6 +30,28 @@ pub enum Formula {
     SrkT,
     #[default]
     Other,
+}
+
+impl Display for Formula {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::AscrsKrs => write!(f, "AscrsKrs"),
+            Self::Barrett => write!(f, "Barrett"),
+            Self::BarrettTrueK => write!(f, "BarrettTrueK"),
+            Self::Evo => write!(f, "Evo"),
+            Self::Haigis => write!(f, "Haigis"),
+            Self::HaigisL => write!(f, "HaigisL"),
+            Self::HillRbf => write!(f, "HillRbf"),
+            Self::HofferQ => write!(f, "HofferQ"),
+            Self::Holladay1 => write!(f, "Holladay1"),
+            Self::Holladay2 => write!(f, "Holladay2"),
+            Self::Kane => write!(f, "Kane"),
+            Self::Okulix => write!(f, "Okulix"),
+            Self::Olsen => write!(f, "Olsen"),
+            Self::SrkT => write!(f, "SrkT"),
+            Self::Other => write!(f, "Other"),
+        }
+    }
 }
 
 impl Formula {
@@ -47,12 +73,20 @@ impl Formula {
 
 // NOTE: ToricPower, TargetCylPower are nonnegative, but RefCylPower can be negative.
 // This has implications for the `Cyl` trait that you need to consider.
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, PartialEq, PartialOrd, RangeBounded, Serialize,
+)]
 #[bounded(range = 0..=600, mock_range = 0..=75)]
-pub struct TargetCylPower(u32);
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
+pub struct TargetCylPower(i32);
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, PartialEq, PartialOrd, RangeBounded, Serialize,
+)]
 #[bounded(range = -600..=200, mock_range = -200..=20)]
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
 pub struct TargetSe(i32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
@@ -61,8 +95,10 @@ pub struct TargetCyl {
     pub axis: Axis,
 }
 
-impl Cyl<u32> for TargetCyl {
-    fn power(&self) -> u32 { self.power.inner() }
+impl Cyl for TargetCyl {
+    type Power = TargetCylPower;
+
+    fn power(&self) -> Self::Power { self.power }
 
     fn axis(&self) -> Axis { self.axis }
 }
@@ -80,10 +116,12 @@ pub struct Target {
     pub cyl: Option<TargetCyl>,
 }
 
-impl Sca<u32> for Target {
-    fn sph(&self) -> i32 { self.se.inner() }
+impl Sca for Target {
+    type Sph = TargetSe;
 
-    fn cyl(&self) -> Option<impl Cyl<u32>> { self.cyl }
+    fn sph(&self) -> Self::Sph { self.se }
+
+    fn cyl(&self) -> Option<impl Cyl> { self.cyl }
 }
 
 #[cfg(test)]

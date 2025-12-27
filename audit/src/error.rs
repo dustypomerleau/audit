@@ -32,11 +32,6 @@ impl From<chrono::format::ParseError> for AppError {
 }
 
 #[cfg(feature = "ssr")]
-impl From<gel_tokio::Error> for AppError {
-    fn from(err: gel_tokio::Error) -> Self { Self::Db(format!("{err}")) }
-}
-
-#[cfg(feature = "ssr")]
 impl From<mailgun_rs::SendError> for AppError {
     fn from(err: mailgun_rs::SendError) -> Self { Self::Server(format!("{err}")) }
 }
@@ -60,6 +55,11 @@ impl From<ServerFnErrorErr> for AppError {
 #[cfg(feature = "ssr")]
 impl From<sqlx::Error> for AppError {
     fn from(err: sqlx::Error) -> Self { Self::Db(format!("{err}")) }
+}
+
+#[cfg(feature = "ssr")]
+impl From<sqlx::migrate::MigrateError> for AppError {
+    fn from(err: sqlx::migrate::MigrateError) -> Self { Self::Db(format!("{err}")) }
 }
 
 impl From<std::io::Error> for AppError {

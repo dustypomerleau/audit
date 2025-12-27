@@ -8,6 +8,7 @@ use leptos::prelude::component;
 use leptos::prelude::server;
 use leptos::prelude::view;
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
+#[cfg(feature = "ssr")] use sqlx::query;
 
 #[cfg(feature = "ssr")] use crate::db::db;
 #[cfg(feature = "ssr")] use crate::model::set_current_surgeon;
@@ -44,41 +45,25 @@ pub fn Terms() -> impl IntoView {
     }
 }
 
+// TODO:
 #[server]
 pub async fn accept_terms() -> Result<(), ServerFnError> {
-    // In theory, you could select only the terms field and update that, rather than replacing the
-    // entire Surgeon here, but that can be optimized later.
-    let query = r#"
-select (
-    update Surgeon
-    filter .identity = (select global ext::auth::ClientTokenIdentity)
-    set { terms := datetime_current() }
-) {
-    email,
-    terms,
-    full_name,
-    preferred_name,
+    query!(
+        r#"
+update surgeon set terms = now() where email = 'todo@todo.com';
+        "#
+    );
 
-    defaults: {
-        site: { name },
-        iol: { model, name, company, focus, toric },
-        formula,
-        custom_constant,
-        main
-    },
-
-    sia: { right: { power, axis }, left: { power, axis } }
-};
-    "#;
-
-    if let Ok(Some(surgeon_json)) = db().await?.query_single_json(query, &()).await {
-        let surgeon = serde_json::from_str(surgeon_json.as_ref())?;
-        set_current_surgeon(Some(surgeon)).await?;
-        // TODO: call an async function that sends a transactional email to the new user
-        redirect("/protected/add");
-    } else {
-        redirect("/signedout");
-    }
+    // TODO: fix the query to return the QuerySurgeon, convert to Surgeon and update globabl state.
+    //
+    // if let Ok(Some(surgeon_json)) = db().await?.query_single_json(query, &()).await {
+    //     let surgeon = serde_json::from_str(surgeon_json.as_ref())?;
+    //     set_current_surgeon(Some(surgeon)).await?;
+    //     // TODO: call an async function that sends a transactional email to the new user
+    //     redirect("/protected/add");
+    // } else {
+    //     redirect("/signedout");
+    // }
 
     Ok(())
 }

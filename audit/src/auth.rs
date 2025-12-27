@@ -180,11 +180,11 @@ pub async fn handle_kill_session(
 ) -> Result<(CookieJar, Redirect), AppError> {
     // A dummy DB client, so that we can replace the `gel_tokio::Client` that contains
     // surgeon-specific globals
-    let client = gel_tokio::create_client()
-        .await
-        .expect("expected DB client to be created");
-
-    db.set(client)?;
+    // let client = gel_tokio::create_client()
+    //     .await
+    //     .expect("expected DB client to be created");
+    //
+    // db.set(client)?;
     surgeon.set(None)?;
 
     jar = jar

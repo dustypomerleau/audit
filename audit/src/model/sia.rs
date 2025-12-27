@@ -6,9 +6,11 @@ use crate::bounded::Bounded;
 use crate::model::Axis;
 use crate::model::Cyl;
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, PartialOrd, RangeBounded, Serialize)]
 #[bounded(range = 0..=200, default = 10, mock_range = 5..=40)]
-pub struct SiaPower(u32);
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
+pub struct SiaPower(i32);
 
 /// A surgically-induced astigmatism. The purist would prefer using
 /// `meridian` rather than `axis` for [`Sia`] and biometric Ks, but on balance I've
@@ -20,8 +22,10 @@ pub struct Sia {
     pub axis: Axis,
 }
 
-impl Cyl<u32> for Sia {
-    fn power(&self) -> u32 { self.power.inner() }
+impl Cyl for Sia {
+    type Power = SiaPower;
+
+    fn power(&self) -> Self::Power { self.power }
 
     fn axis(&self) -> Axis { self.axis }
 }

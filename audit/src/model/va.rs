@@ -3,16 +3,21 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::bounded::Bounded;
+use crate::model::SplitOption;
 
 // Choosing not to use NonZeroU32 for VaDen, because it has a slightly different interface than all
 // our other bounded types.
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
-#[bounded( range = 1..=u32::MAX, default = 600, mock_range = 500..=6000)]
-pub struct VaDen(u32);
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, PartialOrd, RangeBounded, Serialize)]
+#[bounded( range = 1..=i32::MAX, default = 600, mock_range = 500..=6000)]
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
+pub struct VaDen(i32);
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, PartialOrd, RangeBounded, Serialize)]
 #[bounded(range = 0..=2000, default = 600, mock_range = 600..=600)]
-pub struct VaNum(u32);
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
+pub struct VaNum(i32);
 
 /// A Snellen-style fractional visual acuity, with numerator and denominator. Units are not
 /// specified, but both fields must be in the same unit.  
@@ -30,13 +35,26 @@ pub struct Va {
     pub den: VaDen,
 }
 
+impl SplitOption for Option<Va> {
+    type A = VaNum;
+    type B = VaDen;
+
+    fn split_option(&self) -> (Option<Self::A>, Option<Self::B>) {
+        if let Some(Va { num, den }) = *self {
+            (Some(num), Some(den))
+        } else {
+            (None, None)
+        }
+    }
+}
+
 impl Va {
     /// Creates a new [`Va`] with bounds checking.
     pub fn new(num: VaNum, den: VaDen) -> Self { Self { num, den } }
 
-    pub fn num(&self) -> u32 { self.num.inner() }
+    pub fn num(&self) -> VaNum { self.num }
 
-    pub fn den(&self) -> u32 { self.den.inner() }
+    pub fn den(&self) -> VaDen { self.den }
 }
 
 /// A collection of visual acuities from before surgery. We use separate structs for [`BeforeVa`]

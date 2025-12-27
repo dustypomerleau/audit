@@ -15,7 +15,6 @@ use leptos_router::components::ParentRoute;
 use leptos_router::components::Route;
 use leptos_router::components::Router;
 use leptos_router::components::Routes;
-use leptos_router::path;
 
 use crate::components::Nav;
 use crate::components::SignedOut;

@@ -8,14 +8,21 @@ use leptos::prelude::component;
 use leptos::prelude::server;
 use leptos::prelude::view;
 #[cfg(feature = "ssr")] use leptos_axum::redirect;
+#[cfg(feature = "ssr")] use sqlx::query_as;
 
+use crate::bounded::Bounded;
 #[cfg(feature = "ssr")] use crate::db::db;
-#[cfg(feature = "ssr")] use crate::db::to_centi;
+use crate::model::Axis;
 #[cfg(feature = "ssr")] use crate::model::Email;
+use crate::model::Focus;
 use crate::model::FormSurgeon;
+use crate::model::Formula;
+use crate::model::Main;
+use crate::model::QuerySurgeon;
+use crate::model::SiaPower;
 #[cfg(feature = "ssr")] use crate::model::Surgeon;
+use crate::model::ToricPower;
 #[cfg(feature = "ssr")] use crate::model::set_current_surgeon;
-#[cfg(feature = "ssr")] use crate::some_or_empty;
 
 #[component]
 pub fn SignUp() -> impl IntoView {
@@ -59,7 +66,7 @@ pub fn SignUp() -> impl IntoView {
                     <input type="number" min=1 max=6 step=0.05 name="surgeon[main]" required />
                 </label>
                 <label>
-                    "SIA power (D)*"
+                    "SIA power (D)* (power and axis can be overridden per-case)"
                     <input type="number" min=0 max=2 step=0.05 name="surgeon[sia_power]" required />
                 </label>
                 <label>
@@ -90,7 +97,7 @@ pub fn SignUp() -> impl IntoView {
 }
 
 #[server]
-pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
+pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<Option<Surgeon>, ServerFnError> {
     let FormSurgeon {
         email,
         full_name,
@@ -105,109 +112,122 @@ pub async fn insert_surgeon(surgeon: FormSurgeon) -> Result<(), ServerFnError> {
         sia_left_axis,
     } = surgeon;
 
-    let email = Email::new(&email)?.inner();
+    let email = Email::new(&email)?;
 
-    some_or_empty!(
+    let formula = if let Some(formula) = default_formula {
+        Some(serde_json::from_str::<Formula>(formula.as_str())?)
+    } else {
+        None
+    };
+
+    let custom_constant = custom_constant.is_some_and(|value| value.as_str() == "true");
+    let main = Main::new((main * 100.0) as i32)?;
+    let sia_power = SiaPower::new((sia_power * 100.0) as i32)?;
+    let (sia_right_axis, sia_left_axis) = (Axis::new(sia_right_axis)?, Axis::new(sia_left_axis)?);
+
+    let query_surgeon_result = query_as!(
+        QuerySurgeon,
+        r#"
+with s as (
+    insert into surgeon (
+        email,
+        full_name,
+        preferred_name,
+        default_site_id,
+        default_iol_id,
+        default_formula,
+        default_custom_constant,
+        default_main,
+        default_sia_power,
+        default_sia_axis_right,
+        default_sia_axis_left
+    )
+    values (
+        $1, $2, $3,
+        (select id from site where name = $4),
+        (select id from iol where model = $5),
+        $6, $7, $8, $9, $10, $11
+    )
+    returning
+        email,
+        terms,
+        full_name,
+        preferred_name,
+        default_site_id,
+        default_iol_id,
+        default_formula,
+        default_custom_constant,
+        default_main,
+        default_sia_power,
+        default_sia_axis_right,
+        default_sia_axis_left
+)
+
+select
+    s.email as "email: Email",
+    s.terms,
+    s.full_name,
+    s.preferred_name,
+
+    site.name as default_site_name,
+
+    iol.model as default_iol_model,
+    iol.name as default_iol_name,
+    iol.company as default_iol_company,
+    iol.focus as "default_iol_focus: Focus",
+    iol.toric as "default_iol_toric: ToricPower",
+
+    s.default_formula as "default_formula: Formula",
+    s.default_custom_constant,
+    s.default_main as "default_main: Main",
+
+    s.default_sia_power as "default_sia_power: SiaPower",
+    s.default_sia_axis_right as "default_sia_axis_right: Axis",
+    s.default_sia_axis_left as "default_sia_axis_left: Axis"
+
+from s
+join site on s.default_site_id = site.id
+join iol on s.default_iol_id = iol.id;
+        "#,
+        email as Email,
         full_name,
         preferred_name,
         default_site,
         default_iol,
-        default_formula
-    );
-
-    fn to_db_formula(formula: &str) -> &str {
-        match formula.to_lowercase().as_str() {
-            "ascrskrs" => "Formula.AscrsKrs",
-            "barrett" | "barretttoric" => "Formula.Barrett",
-            "barretttruek" => "Formula.BarrettTrueK",
-            "evo" => "Formula.Evo",
-            "haigis" => "Formula.Haigis",
-            "haigisl" => "Formula.HaigisL",
-            "hillrbf" => "Formula.HillRbf",
-            "hofferq" => "Formula.HofferQ",
-            "holladay1" => "Formula.Holladay1",
-            "holladay2" => "Formula.Holladay2",
-            "kane" => "Formula.Kane",
-            "okulix" => "Formula.Okulix",
-            "olsen" => "Formula.Olsen",
-            "srkt" => "Formula.SrkT",
-            _ => "Formula.Other",
-        }
-    }
-
-    let default_formula = to_db_formula(&default_formula);
-    let custom_constant = custom_constant.is_some_and(|value| value.as_str() == "true");
-    let main = to_centi(main);
-    let sia_power = to_centi(sia_power);
-
-    let query = format!(
-        r#"
-with QuerySurgeon := (insert Surgeon {{
-        identity := (select global ext::auth::ClientTokenIdentity),
-        email := "{email}",
-        full_name := {full_name},
-        preferred_name := {preferred_name},
-
-        defaults := (select (insert SurgeonDefaults {{
-            site := (select(insert Site {{
-                name := {default_site}
-            }} unless conflict on .name else (select Site))),
-
-            iol := (select Iol filter .model = {default_iol}),
-            formula := {default_formula},
-            custom_constant := {custom_constant},
-            main := {main}
-        }})),
-
-        sia := (select(insert SurgeonSia {{
-            right := (select(insert Sia {{
-                power := {sia_power}, axis := {sia_right_axis}
-            }})),
-
-            left := (select(insert Sia {{
-                power := {sia_power}, axis := {sia_left_axis}
-            }}))
-        }}))
-    }} unless conflict on .email else (select Surgeon))
-
-select QuerySurgeon {{
-    email,
-    terms,
-    full_name,
-    preferred_name,
-
-    defaults: {{
-        site: {{ name }},
-        iol: {{ model, name, company, focus, toric }},
-        formula,
+        formula as Option<Formula>,
         custom_constant,
-        main
-    }},
+        main as Main,
+        sia_power as SiaPower,
+        sia_right_axis as Axis,
+        sia_left_axis as Axis,
+    )
+    .fetch_one(&db().await?)
+    .await;
+    dbg!(&query_surgeon_result);
 
-    sia: {{ right: {{ power, axis }}, left: {{ power, axis }} }}
-}};
-        "#
-    );
+    if let Ok(query_surgeon) = query_surgeon_result {
+        let surgeon: Surgeon = query_surgeon.into();
+        set_current_surgeon(Some(surgeon.clone())).await?;
 
-    if let Ok(Some(json)) = db().await?.query_single_json(query, &()).await {
-        let surgeon = serde_json::from_str::<Surgeon>(json.as_ref())?;
-        set_current_surgeon(Some(surgeon)).await?;
-        redirect("/terms");
+        if surgeon.terms.is_none() {
+            redirect("/terms");
+        }
+
+        Ok(Some(surgeon))
     } else {
         // if we fail on the insert, then:
         //
         // 1. something is wrong with the form validation
-        // 2. the user already exists (email conflict) - with the current query that will still
-        //    return a surgeon, but it will be the one that already existed in the DB
+        // 2. the user already exists (email conflict). TODO: unlike our Gel implementation, this
+        //    one will error, so we need to rewrite the query to return the surgeon anyway, like we
+        //    used to
         // 3. the user navigated directly to the signup page without first signing in (in this case,
-        //    there would be no `ext::auth::ClientTokenIdentity`)
-        //
-        // We'll have to figure out a way to surface those errors, but for now just prompt the user
-        // to restart the flow.
+        //    there would be no `ext::auth::ClientTokenIdentity`) We'll have to figure out a way to
+        //    surface those errors, but for now just prompt the user to restart the flow.
         redirect("/signedout");
-    }
 
-    Ok(())
+        Ok(None)
+    }
 }
 
 // TODO: run testing and check all permutations of login antics:

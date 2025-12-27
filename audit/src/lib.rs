@@ -1,12 +1,12 @@
 #![deny(clippy::wildcard_imports)]
 #![feature(lock_value_accessors)]
 #![feature(new_range_api)]
+#![feature(return_type_notation)]
 #![feature(string_remove_matches)]
 #![forbid(unsafe_code)]
 #![warn(clippy::cast_lossless)]
-// #![warn(missing_docs)]
-// #![feature(return_type_notation)]
 // #![feature(type_changing_struct_update)]
+// #![warn(missing_docs)]
 
 //! The [`audit`](self) library provides tools for analyzing and plotting the results of cataract
 //! surgery. Powers that would typically be represented in diopters (1 m e-1) (refractions, IOLs,

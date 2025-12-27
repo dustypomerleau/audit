@@ -1,5 +1,7 @@
 use serde::Deserialize;
 use serde::Serialize;
+use sqlx::Pool;
+use sqlx::Postgres;
 
 use crate::bounded::Bounded;
 use crate::db::db;
@@ -86,7 +88,7 @@ impl CaseCompare {
             PolarPoint {
                 r: f64::from(ks.cyl()) / 100.0,
                 // We double the axis to create a double-angle plot.
-                theta: f64::from(ks.steep_axis()) * 2.0,
+                theta: f64::from(ks.steep_axis().inner()) * 2.0,
             }
         }
 
@@ -204,17 +206,15 @@ impl CaseCompare {
 // range).
 /// Query the database for cases from the given year.
 pub async fn get_compare(year: Year, cohort: Cohort) -> Result<CaseCompare, AppError> {
-    let client = db().await?;
-
-    get_compare_with_client(&client, year, cohort).await
+    get_compare_with_pool(&db().await?, year, cohort).await
 }
 
-// Query the database for cases from the given year, using a custom [`gel_tokio::Client`]. Factoring
-// out this function provides a way to supply our own Client in tests. In prod, it is assumed that
-// our main function will run and the Client will be retrieved from the [`AppState`] in context.
+// Query the database for cases from the given year, using a custom [`Pool<Postgres>`]. Factoring
+// out this function provides a way to supply our own pool in tests. In prod, it is assumed that our
+// main function will run and the Client will be retrieved from the [`AppState`] in context.
 #[doc(hidden)]
-pub(crate) async fn get_compare_with_client(
-    client: &Client,
+pub(crate) async fn get_compare_with_pool(
+    pool: &Pool<Postgres>,
     year: Year,
     cohort: Cohort,
 ) -> Result<CaseCompare, AppError> {
@@ -223,13 +223,20 @@ pub(crate) async fn get_compare_with_client(
         Cohort::Surgeon => query_select_self_compare(year),
     };
 
-    if let Some(query_result) = client.query_single_json(query, &()).await? {
-        let compare = serde_json::from_str::<CaseCompare>(query_result.as_ref())?;
+    // TODO: sqlx query for the CaseCompare
+    let todo = CaseCompare {
+        surgeon: vec![],
+        cohort: vec![],
+    };
+    Ok(todo)
 
-        Ok(compare)
-    } else {
-        Err(AppError::Db(
-            "the query for Compare was not successful".to_string(),
-        ))
-    }
+    // if let Some(query_result) = client.query_single_json(query, &()).await? {
+    //     let compare = serde_json::from_str::<CaseCompare>(query_result.as_ref())?;
+    //
+    //     Ok(compare)
+    // } else {
+    //     Err(AppError::Db(
+    //         "the query for Compare was not successful".to_string(),
+    //     ))
+    // }
 }

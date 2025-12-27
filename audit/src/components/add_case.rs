@@ -1,5 +1,4 @@
 #[cfg(feature = "ssr")] use chrono::Datelike;
-
 use leptos::prelude::ActionForm;
 use leptos::prelude::ClassAttribute;
 use leptos::prelude::ElementChild;
@@ -13,6 +12,7 @@ use leptos::prelude::component;
 use leptos::prelude::server;
 use leptos::prelude::view;
 use leptos::server::OnceResource;
+#[cfg(feature = "ssr")] use sqlx::query_as;
 
 #[cfg(feature = "ssr")] use crate::bounded::Bounded;
 #[cfg(feature = "ssr")] use crate::db::db;
@@ -22,20 +22,20 @@ use crate::error::AppError;
 #[cfg(feature = "ssr")] use crate::model::BeforeVa;
 #[cfg(feature = "ssr")] use crate::model::Biometry;
 #[cfg(feature = "ssr")] use crate::model::Case;
+#[cfg(feature = "ssr")] use crate::model::Focus;
 use crate::model::FormCase;
 #[cfg(feature = "ssr")] use crate::model::Formula;
 use crate::model::Iol;
 #[cfg(feature = "ssr")] use crate::model::OpIol;
 #[cfg(feature = "ssr")] use crate::model::OpRefraction;
 #[cfg(feature = "ssr")] use crate::model::OpVa;
-#[cfg(feature = "ssr")] use crate::model::RefCyl;
 #[cfg(feature = "ssr")] use crate::model::Refraction;
 #[cfg(feature = "ssr")] use crate::model::Sia;
 #[cfg(feature = "ssr")] use crate::model::Side;
-#[cfg(feature = "ssr")] use crate::model::Site;
+use crate::model::Site;
 #[cfg(feature = "ssr")] use crate::model::SurgeonCase;
 #[cfg(feature = "ssr")] use crate::model::Target;
-#[cfg(feature = "ssr")] use crate::model::TargetCyl;
+#[cfg(feature = "ssr")] use crate::model::ToricPower;
 #[cfg(feature = "ssr")] use crate::model::Va;
 
 /// Display a form that inserts a `SurgeonCas` on submit.
@@ -46,6 +46,19 @@ pub fn AddCase() -> impl IntoView {
     // 1. sites
     // 2. IOL models
     // 3. surgeon defaults (should already be in context)
+    //
+    // You probably want a single query for sites and IOL models.
+    // For efficiency, you don't actually want to return a Vec<Iol>, but instead just
+    // Vec<IolNameAndModel> or something, because you want a query like:
+    //
+    // ```
+    // select
+    //    iol.model as iol_model,
+    //    iol.name as iol_name,
+    //    site.name as site_name
+    // from iol, site;
+    //```
+    // which you can then use to populate the datalists.
     //
     let insert_case = ServerAction::<InsertFormCase>::new();
     let insert_case_value = insert_case.value();
@@ -306,7 +319,7 @@ pub fn AddCase() -> impl IntoView {
                                     min=0
                                     max=20
                                     step=1
-                                    name="case[va_raw_before_num]"
+                                    name="case[va_before_raw_num]"
                                 />
                             </label>
                             <label>
@@ -315,7 +328,7 @@ pub fn AddCase() -> impl IntoView {
                                     type="number"
                                     min=1
                                     step=0.1
-                                    name="case[va_raw_before_den]"
+                                    name="case[va_before_raw_den]"
                                 />
                             </label>
                         </div>
@@ -328,7 +341,7 @@ pub fn AddCase() -> impl IntoView {
                                     min=0
                                     max=20
                                     step=1
-                                    name="case[va_best_before_num]"
+                                    name="case[va_before_best_num]"
                                     required
                                 />
                             </label>
@@ -338,7 +351,7 @@ pub fn AddCase() -> impl IntoView {
                                     type="number"
                                     min=1
                                     step=0.1
-                                    name="case[va_best_before_den]"
+                                    name="case[va_before_best_den]"
                                     required
                                 />
                             </label>
@@ -355,7 +368,7 @@ pub fn AddCase() -> impl IntoView {
                                     min=0
                                     max=20
                                     step=1
-                                    name="case[va_raw_after_num]"
+                                    name="case[va_after_raw_num]"
                                     required
                                 />
                             </label>
@@ -365,7 +378,7 @@ pub fn AddCase() -> impl IntoView {
                                     type="number"
                                     min=1
                                     step=0.1
-                                    name="case[va_raw_after_den]"
+                                    name="case[va_after_raw_den]"
                                     required
                                 />
                             </label>
@@ -379,7 +392,7 @@ pub fn AddCase() -> impl IntoView {
                                     min=0
                                     max=20
                                     step=1
-                                    name="case[va_best_after_num]"
+                                    name="case[va_after_best_num]"
                                 />
                             </label>
                             <label>
@@ -388,7 +401,7 @@ pub fn AddCase() -> impl IntoView {
                                     type="number"
                                     min=1
                                     step=0.1
-                                    name="case[va_best_after_den]"
+                                    name="case[va_after_best_den]"
                                 />
                             </label>
                         </div>
@@ -459,7 +472,7 @@ pub fn AddCase() -> impl IntoView {
                                 type="number"
                                 min=0
                                 max=179
-                                step=1
+               step=1
                                 name="case[ref_after_cyl_axis]"
                             />
                         </label>
@@ -472,45 +485,67 @@ pub fn AddCase() -> impl IntoView {
     }
 }
 
+struct DlIol {
+    model: String,
+    name: String,
+}
+
+struct AddCaseDatalists {
+    iols: Vec<DlIol>,
+    sites: Vec<Site>,
+}
+
+// BOOKMARK change get_iols to be a single resource that returns AddCaseDatalists
+
 /// Return a [`Vec`] of all [`Iol`]s in the database.
 #[server]
 pub async fn get_iols() -> Result<Vec<Iol>, AppError> {
-    let json = db()
-        .await?
-        .query_json("select Iol { model, name, company, focus, toric };", &())
-        .await?
-        .to_string();
+    let iols = query_as!(
+        Iol,
+        r#"
+select model, name, company, focus as "focus: Focus", toric as "toric: ToricPower" from iol;
+        "#
+    )
+    .fetch_all(&db().await?)
+    .await?;
+    dbg!(&iols);
 
-    Ok(serde_json::from_str::<Vec<Iol>>(json.as_str()).unwrap_or_default())
+    Ok(iols)
 }
 
 /// Insert a [`SurgeonCas`] into the database on form submit.
 #[server]
-pub async fn insert_form_case(case: FormCase) -> Result<String, AppError> {
-    let client = db().await?;
+pub async fn insert_form_case(case: FormCase) -> Result<i32, AppError> {
     let surgeon_case = case.into_surgeon_case().await?;
+    let surgeon_case_number = insert_surgeon_case(surgeon_case).await?;
 
-    let inserted_case_json =
-        insert_surgeon_case(&client, surgeon_case)
-            .await?
-            .ok_or(AppError::Db(
-                "no JSON was returned after inserting the case".to_string(),
-            ))?;
-
-    Ok(inserted_case_json)
-
-    // TODO: If possible, capture the returned JSON on form submit, deserialize it into a
-    // SurgeonCase, and redirect to a view showing the inserted case, with a button to add another
-    // case (or simply show it above the form to add another case).
+    Ok(surgeon_case_number)
 }
 
-/// Insert a [`SurgeonCase`] into the database using the given [`gel_tokio::Client`]. Passing
-/// in the client makes it possible to use custom [`Client`](gel_tokio::Client)s for tests.
+/// Insert a [`SurgeonCase`] into the database using the given [`sqlx::Pool`]. Passing in the pool
+/// makes it possible to use custom pools for tests.
 #[cfg(feature = "ssr")]
-pub async fn insert_surgeon_case(
-    client: &gel_tokio::Client,
-    surgeon_case: SurgeonCase,
-) -> Result<Option<String>, AppError> {
+pub async fn insert_surgeon_case(surgeon_case: SurgeonCase) -> Result<i32, AppError> {
+    use crate::model::Acd;
+    use crate::model::Al;
+    use crate::model::Axis;
+    use crate::model::Cct;
+    use crate::model::Email;
+    use crate::model::IolSe;
+    use crate::model::Kpower;
+    use crate::model::Lt;
+    use crate::model::Main;
+    use crate::model::RefCylPower;
+    use crate::model::RefSph;
+    use crate::model::SiaPower;
+    use crate::model::SplitOption;
+    use crate::model::TargetCylPower;
+    use crate::model::TargetSe;
+    use crate::model::VaDen;
+    use crate::model::VaNum;
+    use crate::model::Wtw;
+    use crate::model::Year;
+
     let SurgeonCase {
         date,
         site,
@@ -541,10 +576,7 @@ pub async fn insert_surgeon_case(
                     },
                 iol:
                     OpIol {
-                        iol:
-                            Iol {
-                                model: iol_model, ..
-                            },
+                        iol,
                         se: iol_se,
                         axis: iol_axis,
                     },
@@ -555,18 +587,18 @@ pub async fn insert_surgeon_case(
                             BeforeVa {
                                 best:
                                     Va {
-                                        num: va_best_before_num,
-                                        den: va_best_before_den,
+                                        num: va_before_best_num,
+                                        den: va_before_best_den,
                                     },
-                                raw: va_raw_before,
+                                raw: va_before_raw,
                             },
                         after:
                             AfterVa {
-                                best: va_best_after,
+                                best: va_after_best,
                                 raw:
                                     Va {
-                                        num: va_raw_after_num,
-                                        den: va_raw_after_den,
+                                        num: va_after_raw_num,
+                                        den: va_after_raw_den,
                                     },
                             },
                     },
@@ -587,227 +619,144 @@ pub async fn insert_surgeon_case(
         ..
     } = surgeon_case;
 
-    let year = date.year();
-    let date = date.to_string();
-    let site_name = site.map(|Site { name }| name).unwrap_or("{}".to_string());
+    // TODO: figure out how to pass in the identity of the current Surgeon, matching
+    // email is a temporary workaround during wip.
+    let email = Email::new("todo@todo.com")?;
 
-    let side = match side {
-        Side::Right => "Side.Right",
-        Side::Left => "Side.Left",
-    };
+    let year = Year::new(date.year())?;
+    let site_name = site.map(|site| site.name);
+    let (target_cyl_power, target_cyl_axis) = target_cyl.split_option();
+    let iol_model = iol.map(|iol| iol.model);
+    let (va_before_raw_num, va_before_raw_den) = va_before_raw.split_option();
+    let (va_after_best_num, va_after_best_den) = va_after_best.split_option();
+    let (ref_before_cyl_power, ref_before_cyl_axis) = ref_before_cyl.split_option();
+    let (ref_after_cyl_power, ref_after_cyl_axis) = ref_after_cyl.split_option();
 
-    // NOTE: We don't need to cast the integer types, because they are just going into a format
-    // string. The <int32> will be inferred based on the object field types in Gel.
-    let (flat_k_power, flat_k_axis, steep_k_power, steep_k_axis, cct, wtw) = (
-        ks.flat_power(),
-        ks.flat_axis(),
-        ks.steep_power(),
-        ks.steep_axis(),
-        cct.map(|cct| cct.inner().to_string())
-            .unwrap_or("{}".to_string()),
-        wtw.map(|wtw| wtw.inner().to_string())
-            .unwrap_or("{}".to_string()),
-    );
+    #[derive(sqlx::FromRow)]
+    pub struct SurgeonCaseNumber {
+        number: i32,
+    }
 
-    let formula = if let Some(formula) = formula {
-        match formula {
-            Formula::AscrsKrs => "Formula.AscrsKrs",
-            Formula::Barrett => "Formula.Barrett",
-            Formula::BarrettTrueK => "Formula.BarrettTrueK",
-            Formula::Evo => "Formula.Evo",
-            Formula::Haigis => "Formula.Haigis",
-            Formula::HaigisL => "Formula.HaigisL",
-            Formula::HillRbf => "Formula.HillRbf",
-            Formula::HofferQ => "Formula.HofferQ",
-            Formula::Holladay1 => "Formula.Holladay1",
-            Formula::Holladay2 => "Formula.Holladay2",
-            Formula::Kane => "Formula.Kane",
-            Formula::Okulix => "Formula.Okulix",
-            Formula::Olsen => "Formula.Olsen",
-            Formula::SrkT => "Formula.SrkT",
-            Formula::Other => "Formula.Other",
-        }
-    } else {
-        "{}"
-    };
-
-    let target_cyl = if let Some(TargetCyl { power, axis }) = target_cyl {
-        format!("(select(insert TargetCyl {{ power := {power}, axis := {axis} }}))")
-    } else {
-        "{}".to_string()
-    };
-
-    let iol_axis = if let Some(iol_axis) = iol_axis {
-        format!("{iol_axis}")
-    } else {
-        "{}".to_string()
-    };
-
-    let adverse = if let Some(adverse) = adverse {
-        match adverse {
-            Adverse::Rhexis => "Adverse.Rhexis",
-            Adverse::Pc => "Adverse.Pc",
-            Adverse::Zonule => "Adverse.Zonule",
-            Adverse::Other => "Adverse.Other",
-        }
-    } else {
-        "{}"
-    };
-
-    let va_raw_before = if let Some(Va { num, den }) = va_raw_before {
-        format!("(select (insert Va {{ num := {num}, den := {den} }}))")
-    } else {
-        "{}".to_string()
-    };
-
-    let va_best_after = if let Some(Va { num, den }) = va_best_after {
-        format!("(select (insert Va {{ num := {num}, den := {den} }}))")
-    } else {
-        "{}".to_string()
-    };
-
-    let ref_before_cyl = if let Some(RefCyl { power, axis }) = ref_before_cyl {
-        format!("(select (insert RefCyl {{ power := {power}, axis := {axis} }}))")
-    } else {
-        "{}".to_string()
-    };
-
-    let ref_after_cyl = if let Some(RefCyl { power, axis }) = ref_after_cyl {
-        format!("(select (insert RefCyl {{ power := {power}, axis := {axis} }}))")
-    } else {
-        "{}".to_string()
-    };
-
-    let query = format!(
+    let case = query_as!(
+        SurgeonCaseNumber,
         r#"
-with QueryBiometry := (insert Biometry {{
-    al := {al},
-
-    ks := (select(insert Ks {{
-        flat := (select(insert K {{
-            power := {flat_k_power},
-            axis := {flat_k_axis}
-        }})),
-
-        steep := (select(insert K {{
-            power := {steep_k_power},
-            axis := {steep_k_axis}
-        }}))
-    }})),
-
-    acd := {acd},
-    lt := {lt},
-    cct := {cct},
-    wtw := {wtw}
-}}),
-
-QueryTarget := (insert Target {{
-    formula := {formula},
-    custom_constant := {custom_constant},
-    se := {target_se},
-    cyl := {target_cyl}
-}}),
-
-QueryIol := (select (insert OpIol {{
-    iol := (select Iol filter .model = "{iol_model}"),
-    se := {iol_se},
-    axis := {iol_axis}
-}})),
-
-QueryVa := (insert OpVa {{
-    before := (select (insert BeforeVa {{
-        best := (select (insert Va {{
-            num := {va_best_before_num},
-            den := {va_best_before_den}
-        }})),
-
-        raw := {va_raw_before}
-    }})),
-
-    after := (select (insert AfterVa {{
-        best := {va_best_after},
-
-        raw := (select (insert Va {{
-            num := {va_raw_after_num},
-            den := {va_raw_after_den}
-        }}))
-    }}))
-}}),
-
-QueryRefraction := (select (insert OpRefraction {{
-    before := (select (insert Refraction {{
-        sph := {ref_before_sph},
-        cyl := {ref_before_cyl}
-    }})),
-
-    after := (select (insert Refraction {{
-        sph := {ref_after_sph},
-        cyl := {ref_after_cyl}
-    }}))
-}})),
-
-QueryCas := (insert Cas {{
-    side := {side},
-    biometry := (select QueryBiometry),
-    target := (select QueryTarget),
-    year := {year},
-    main := {main},
-    sia := (select (insert Sia {{ power := {sia_power}, axis := {sia_axis} }})),
-    iol := (select QueryIol),
-    adverse := {adverse},
-    va := (select QueryVa),
-    refraction := (select QueryRefraction)
-}}),
-
-QuerySurgeonCas := (insert SurgeonCas {{
-    surgeon := (select global cur_surgeon),
-    side := {side},
-    date := <cal::local_date>"{date}",
-
-    site := (select (insert Site {{
-        name := "{site_name}"
-    }} unless conflict on .name else (select Site))),
-
-    cas := (select QueryCas)
-}})
-
-select QuerySurgeonCas {{
-    number,
-    date,
-    site: {{ name }},
-
-    cas: {{
+with c as (
+    insert into cas (
         side,
-        biometry: {{ al, ks, acd, lt, cct, wtw }},
+        al,
+        flat_k_power,
+        flat_k_axis,
+        steep_k_power,
+        steep_k_axis,
+        acd,
+        lt,
+        cct,
+        wtw,
+        target_formula,
+        target_custom_constant,
+        target_se,
+        target_cyl_power,
+        target_cyl_axis,
+        year,
         main,
-        sia: {{ power, axis }},
-
-        iol: {{
-            iol: {{ model, name, company, focus, toric }},
-            se,
-            axis
-        }},
-
+        sia_power,
+        sia_axis,
+        iol_id,
+        iol_se,
+        iol_axis,
         adverse,
+        va_before_best_num,
+        va_before_best_den,
+        va_before_raw_num,
+        va_before_raw_den,
+        va_after_best_num,
+        va_after_best_den,
+        va_after_raw_num,
+        va_after_raw_den,
+        ref_before_sph,
+        ref_before_cyl_power,
+        ref_before_cyl_axis,
+        ref_after_sph,
+        ref_after_cyl_power,
+        ref_after_cyl_axis
+    )
+    values (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19,
+        (select id from iol where model = $20 limit 1),
+        $21, $22, $23, $24, $25, $26, $27, $28, $29, $30, $31, $32, $33, $34, $35, $36, $37
+    )
+    returning id 
+),
 
-        va: {{
-            before: {{ best: {{ num, den }}, raw: {{ num, den }} }},
-            after: {{ best: {{ num, den }}, raw: {{ num, den }} }},
-        }},
+s as (
+    insert into surgeon_cas (surgeon_id, date, site_id, cas_id)
+    values (
+        (select id from surgeon where email = $38),
+        $39,
+        (select id from site where name = $40),
+        (select id from c)
+    )
+    returning number
+)
 
-        refraction: {{
-            before: {{ sph, cyl: {{ power, axis}} }},
-            after: {{ sph, cyl: {{ power, axis}} }}
-        }}
-    }}
-}};
-        "#
-    );
+select number from s;
+        "#,
+        side as Side,
+        al as Al,
+        ks.flat_power() as Kpower,
+        ks.flat_axis() as Axis,
+        ks.steep_power() as Kpower,
+        ks.steep_axis() as Axis,
+        acd as Acd,
+        lt as Lt,
+        cct as Option<Cct>,
+        wtw as Option<Wtw>,
+        formula as Option<Formula>,
+        custom_constant,
+        target_se as TargetSe,
+        target_cyl_power as Option<TargetCylPower>,
+        target_cyl_axis as Option<Axis>,
+        year as Year,
+        main as Main,
+        sia_power as SiaPower,
+        sia_axis as Axis,
+        iol_model,
+        iol_se as IolSe,
+        iol_axis as Option<Axis>,
+        adverse as Option<Adverse>,
+        va_before_best_num as VaNum,
+        va_before_best_den as VaDen,
+        va_before_raw_num as Option<VaNum>,
+        va_before_raw_den as Option<VaDen>,
+        va_after_best_num as Option<VaNum>,
+        va_after_best_den as Option<VaDen>,
+        va_after_raw_num as VaNum,
+        va_after_raw_den as VaDen,
+        ref_before_sph as RefSph,
+        ref_before_cyl_power as Option<RefCylPower>,
+        ref_before_cyl_axis as Option<Axis>,
+        ref_after_sph as RefSph,
+        ref_after_cyl_power as Option<RefCylPower>,
+        ref_after_cyl_axis as Option<Axis>,
+        email as Email,
+        date,
+        site_name,
+    )
+    .fetch_one(&db().await?)
+    .await?;
 
-    let case = client
-        .query_single_json(query, &())
-        .await?
-        .map(|json| json.as_ref().to_string());
+    // TODO: you need to decide whether you really want to return all the case data from this
+    // function. The thing that makes sense to do is simply to return the value of `number`, and to
+    // simply display the rest of the data from the SurgeonCase you passed in. You can do this by,
+    // on form submit, showing a view that takes the SurgeonCase as a prop, and loads the number
+    // returned from the DB as a resource. In that case, you only need to return i32, and you can
+    // dramatically simplify the returned columns from the query. The only issue with that is that
+    // it doesn't provide the same degree of confirmation about what was actually inserted, because
+    // it doesn't round trip the data.
+    //
+    // I think the best way forward is not to show the outlet until the resource loads, so
+    // basically pass the SurgeonCase to the view optimistically, but put it in a Suspense that
+    // waits for the number to come back from the DB.
 
-    Ok(case)
+    Ok(case.number)
 }

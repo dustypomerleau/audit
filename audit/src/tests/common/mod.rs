@@ -2,9 +2,9 @@ use std::env;
 use std::sync::LazyLock;
 
 use dotenvy::dotenv;
-
-
 use mailgun_rs::Mailgun;
+use sqlx::Pool;
+use sqlx::Postgres;
 
 use crate::components::insert_surgeon_case;
 use crate::mail::EmailSender;
@@ -30,62 +30,61 @@ pub static TEST_JWTS: LazyLock<TestJwt> = LazyLock::new(|| {
     TestJwt { surgeon, cohort }
 });
 
-pub async fn test_db() -> Client {
-    let jwt = &*TEST_JWTS.surgeon;
+pub async fn test_db() -> Pool<Postgres> {
+    // let jwt = &*TEST_JWTS.surgeon;
 
-    create_client()
+    Pool::<Postgres>::connect(env::var("DATABASE_URL").unwrap().as_str())
         .await
         .unwrap()
-        .with_globals_fn(|client| client.set("ext::auth::client_token", jwt))
 }
 
 /// Add 110 mock cases to a test branch of the DB. The first 10 cases use a JWT representing
 /// the currently logged-in [`Surgeon`], and the other 100 cases use a different JWT that
 /// generically represents the rest of the comparison cohort.
-#[expect(unused)]
-pub async fn populate_test_db() -> Client {
-    // TODO: consider shell command to check current DB branch and switch it to testdb.
-    //
-    // - call `gel branch current` and get the output
-    // - check that the output contains `testdb` or whatever unique string you choose
-    // - if it doesn't contain that, call `gel branch switch testdb` or similar
+// #[expect(unused)]
+// pub async fn populate_test_db() -> Client {
+//     // TODO: consider shell command to check current DB branch and switch it to testdb.
+//     //
+//     // - call `gel branch current` and get the output
+//     // - check that the output contains `testdb` or whatever unique string you choose
+//     // - if it doesn't contain that, call `gel branch switch testdb` or similar
+//
+//     let surgeon_client = test_db()
+//         .await
+//         .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWTS.surgeon));
+//
+//     let surgeon_mock_cases = gen_mocks::<SurgeonCase>(10);
+//
+//     // This is much slower than doing a bulk insert from JSON, but it avoids maxing out
+// connections     // to the [`gel_tokio::Client`] with a non-blocking iterator. At some point, we
+// can create a     // dedicated version of the insert query for test setup with JSON.
+//     for case in surgeon_mock_cases {
+//         insert_surgeon_case(&surgeon_client, case).await.unwrap();
+//     }
+//
+//     // let cohort_client = surgeon_client
+//     //     .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.1));
+//     //
+//     // let cohort_mock_cases = gen_mocks::<SurgeonCase>(100);
+//     //
+//     // for case in cohort_mock_cases {
+//     //     insert_surgeon_case(&cohort_client, case).await.unwrap();
+//     // }
+//
+//     surgeon_client
+// }
 
-    let surgeon_client = test_db()
-        .await
-        .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWTS.surgeon));
-
-    let surgeon_mock_cases = gen_mocks::<SurgeonCase>(10);
-
-    // This is much slower than doing a bulk insert from JSON, but it avoids maxing out connections
-    // to the [`gel_tokio::Client`] with a non-blocking iterator. At some point, we can create a
-    // dedicated version of the insert query for test setup with JSON.
-    for case in surgeon_mock_cases {
-        insert_surgeon_case(&surgeon_client, case).await.unwrap();
-    }
-
-    // let cohort_client = surgeon_client
-    //     .with_globals_fn(|client| client.set("ext::auth::client_token", &*TEST_JWT.1));
-    //
-    // let cohort_mock_cases = gen_mocks::<SurgeonCase>(100);
-    //
-    // for case in cohort_mock_cases {
-    //     insert_surgeon_case(&cohort_client, case).await.unwrap();
-    // }
-
-    surgeon_client
-}
-
-#[expect(unused)]
-pub async fn drop_test_db(client: &Client, branch: &str) {
-    // Add some safety checks so we don't drop prod.
-    assert!(branch.contains("testdb"));
-    assert!(branch.len() == 10);
-
-    client
-        .execute(format!("drop branch {branch};"), &())
-        .await
-        .unwrap();
-}
+// #[expect(unused)]
+// pub async fn drop_test_db(client: &Client, branch: &str) {
+//     // Add some safety checks so we don't drop prod.
+//     assert!(branch.contains("testdb"));
+//     assert!(branch.len() == 10);
+//
+//     client
+//         .execute(format!("drop branch {branch};"), &())
+//         .await
+//         .unwrap();
+// }
 
 pub async fn test_mailer() -> Mailer {
     dotenv().ok();
@@ -105,3 +104,4 @@ pub async fn test_mailer() -> Mailer {
         mailgun: Mailgun { api_key, domain },
     }
 }
+

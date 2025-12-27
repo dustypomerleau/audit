@@ -21,10 +21,8 @@ async fn main() -> Result<(), AppError> {
     use leptos::prelude::get_configuration;
     use leptos_axum::LeptosRoutes;
     use leptos_axum::generate_route_list;
-    use sqlx::Pool;
-    use sqlx::Postgres;
+    use sqlx::PgPool;
     use sqlx::migrate;
-    use sqlx::pool::PoolOptions;
 
     #[cfg(debug_assertions)]
     dotenv().ok();
@@ -35,9 +33,12 @@ async fn main() -> Result<(), AppError> {
     let leptos_options = conf.leptos_options;
     let routes = generate_route_list(App);
 
+    // TODO: customise the connection to like max 90 and handle env var errors.
     // see sqlx PgConnectOptions for options
-    let options = PoolOptions::<Postgres>::new().max_connections(90);
-    let pool = Pool::<Postgres>::connect_with(options).await?;
+    //
+    // let options = PgPoolOptions::new().max_connections(90);
+    // let options = PgConnectOptions::new();
+    let pool = PgPool::connect(env::var("DATABASE_URL").unwrap().as_str()).await?;
 
     // ./migrations is the default, but we explicitly set it here. `.` is the same directory as the
     // Cargo.toml for `audit` in dev, and the same directory as the audit binary in prod.

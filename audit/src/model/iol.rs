@@ -7,6 +7,8 @@ use crate::model::Axis;
 
 /// The class of [`Iol`] (monofocal, EDOF, multifocal).
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(type_name = "focus"))]
 pub enum Focus {
     #[default]
     Mono,
@@ -14,16 +16,21 @@ pub enum Focus {
     Multi,
 }
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, PartialOrd, RangeBounded, Serialize)]
 #[bounded(range = -2000..=6000, rem = 25, default = 2000, mock_range = -200..=3000)]
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
 pub struct IolSe(i32);
 
-#[derive(Clone, Copy, Debug, Deserialize, PartialEq, RangeBounded, Serialize)]
+#[derive(Clone, Copy, Debug, Deserialize, PartialEq, PartialOrd, RangeBounded, Serialize)]
 #[bounded(range = 100..=2000, rem = 25, default = 100, mock_range = 100..=600)]
-pub struct ToricPower(u32);
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
+pub struct ToricPower(i32);
 
 /// A specific model of IOL.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 pub struct Iol {
     pub model: String,
     pub name: Option<String>,
@@ -36,7 +43,7 @@ pub struct Iol {
 /// power chosen for this patient.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct OpIol {
-    pub iol: Iol,
+    pub iol: Option<Iol>,
     pub se: IolSe,
     // NOTE: It's theoretically possible to add an Axis to a case with a nontoric Iol, but the
     // cases selected for analysis of the Axis will be filtered by `self.iol.toric.is_some()`.

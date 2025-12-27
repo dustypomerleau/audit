@@ -3,17 +3,24 @@ use serde::Deserialize;
 use serde::Serialize;
 
 use crate::bounded::Bounded;
-use crate::error::AppError;
 use crate::model::Axis;
 use crate::model::Cyl;
 use crate::model::Sca;
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, PartialEq, PartialOrd, RangeBounded, Serialize,
+)]
 #[bounded(range = -1000..=1000, rem = 25, mock_range = -300..=300)]
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
 pub struct RefCylPower(i32);
 
-#[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, RangeBounded, Serialize)]
+#[derive(
+    Clone, Copy, Debug, Default, Deserialize, PartialEq, PartialOrd, RangeBounded, Serialize,
+)]
 #[bounded(range = -2000..=2000, rem = 25, mock_range = -800..=400)]
+#[cfg_attr(feature = "ssr", derive(sqlx::Type))]
+#[cfg_attr(feature = "ssr", sqlx(transparent))]
 pub struct RefSph(i32);
 
 #[derive(Clone, Copy, Debug, Default, Deserialize, PartialEq, Serialize)]
@@ -22,8 +29,10 @@ pub struct RefCyl {
     pub axis: Axis,
 }
 
-impl Cyl<i32> for RefCyl {
-    fn power(&self) -> i32 { self.power.inner() }
+impl Cyl for RefCyl {
+    type Power = RefCylPower;
+
+    fn power(&self) -> Self::Power { self.power }
 
     fn axis(&self) -> Axis { self.axis }
 }
@@ -39,10 +48,12 @@ pub struct Refraction {
     pub cyl: Option<RefCyl>,
 }
 
-impl Sca<i32> for Refraction {
-    fn sph(&self) -> i32 { self.sph.inner() }
+impl Sca for Refraction {
+    type Sph = RefSph;
 
-    fn cyl(&self) -> Option<impl Cyl<i32>> { self.cyl }
+    fn sph(&self) -> Self::Sph { self.sph }
+
+    fn cyl(&self) -> Option<impl Cyl> { self.cyl }
 }
 
 /// The preoperative and postoperative refractions for a given [`Case`](crate::case::Case).

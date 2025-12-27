@@ -102,24 +102,6 @@ impl Name {
     fn into_inner(self) -> String { self.0 }
 }
 
-/// Used for mocking of Gel's `ext::auth::Identity`.
-#[expect(unused)]
-struct Identity {
-    issuer: String,
-    subject: String,
-}
-
-impl Mock for Identity {
-    fn mock() -> Self {
-        Self {
-            issuer: "mock issuer".to_string(),
-            subject: (0..=20)
-                .map(|_| rng().random_range(0..=9).to_string())
-                .collect(),
-        }
-    }
-}
-
 impl<T> Mock for T
 where
     T: MockRange,
@@ -178,7 +160,8 @@ impl Mock for Biometry {
             ks: Ks::new(
                 K::new(Kpower::mock(), Axis::mock()),
                 K::new(Kpower::mock(), Axis::mock()),
-            ),
+            )
+            .unwrap(),
             acd: Acd::mock(),
             lt: Lt::mock(),
             cct: Cct::mock_option(Prob::new(0.05).unwrap_or_default()),
@@ -284,7 +267,7 @@ impl Mock for OpIol {
         let toric = iol.toric.is_some();
 
         Self {
-            iol,
+            iol: Some(iol),
             se: IolSe::mock(),
             axis: if toric {
                 Axis::mock_option(Prob::new(0.0).unwrap_or_default())
@@ -400,7 +383,7 @@ impl Mock for Surgeon {
                 .map(|name| name.into_inner()),
             preferred_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
                 .map(|name| name.into_inner()),
-            defaults: SurgeonDefaults::mock_option(Prob::new(0.01).unwrap_or_default()),
+            defaults: SurgeonDefaults::mock(),
             sia: SurgeonSia::mock(),
         }
     }
@@ -463,13 +446,13 @@ impl Mock for Target {
 
 impl Mock for Va {
     fn mock() -> Self {
-        let den: u32 = rng().random_range(400..20_000);
+        let den: i32 = rng().random_range(400..20_000);
 
         Self::new(VaNum::new(600).unwrap(), VaDen::new(den).unwrap())
     }
 }
 
-pub fn gen_mocks<T: Mock>(n: u32) -> Vec<T> { (0..n).map(|_| T::mock()).collect() }
+pub fn gen_mocks<T: Mock>(n: usize) -> Vec<T> { (0..n).map(|_| T::mock()).collect() }
 
 #[cfg(test)]
 mod tests {

@@ -2,14 +2,12 @@ use crate::bounded::Bounded;
 use crate::model::Year;
 use crate::plots::AsPlot;
 use crate::plots::Cohort;
-use crate::plots::get_compare_with_client;
-#[allow(unused_imports)] use crate::tests::common::populate_test_db;
+use crate::plots::get_compare_with_pool;
+// #[allow(unused_imports)] use crate::tests::common::populate_test_db;
 use crate::tests::common::test_db;
 
 #[tokio::test]
 async fn creates_plots() {
-    let client = test_db().await;
-
     // uncomment below to populate the test DB with cases.
     // NOTE: This is hacky:
     // - As currently written, populate_test_db() will fail if you don't already have at
@@ -24,7 +22,7 @@ async fn creates_plots() {
         // assert!(client.ensure_connected().await.is_ok());
     }
 
-    let compare = get_compare_with_client(&client, Year::new(2025).unwrap(), Cohort::Peers)
+    let compare = get_compare_with_pool(&test_db().await, Year::new(2025).unwrap(), Cohort::Peers)
         .await
         .unwrap();
     // let scatter_plot = compare.cartesian_delta_cyl().plot();

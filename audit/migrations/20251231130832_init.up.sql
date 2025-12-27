@@ -97,8 +97,8 @@ create table iol (
 create table cas (
     id uuid primary key default gen_random_uuid(),
 
-    iol uuid,
-    foreign key (iol) references iol (id) on delete set null,
+    iol_id uuid,
+    foreign key (iol_id) references iol (id) on delete set null,
 
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -117,7 +117,7 @@ create table cas (
     cct cct,
     wtw wtw,
 
-    iol_se iol_se,
+    iol_se iol_se not null,
     iol_axis axis,
 
     target_se target_se not null,
@@ -129,15 +129,15 @@ create table cas (
         or (target_cyl_power is null and target_cyl_axis is null)
     ),
 
-    year year not null,
-    main main,
-    sia_power sia_power,
-    sia_axis axis,
+    year year not null, -- TODO: default to current year
+    main main not null,
+    sia_power sia_power not null,
+    sia_axis axis not null,
 
-    constraint sia_cyl_field_agreement check (
-        (sia_power is not null and sia_axis is not null)
-        or (sia_power is null and sia_axis is null)
-    ),
+    -- constraint sia_cyl_field_agreement check (
+    --     (sia_power is not null and sia_axis is not null)
+    --     or (sia_power is null and sia_axis is null)
+    -- ),
 
     va_before_best_num va_num not null,
     va_before_best_den va_den not null,
@@ -182,11 +182,11 @@ create table site (
 create table surgeon (
     id uuid primary key default gen_random_uuid(),
 
-    default_site uuid,
-    foreign key (default_site) references site (id) on delete set null,
+    default_site_id uuid,
+    foreign key (default_site_id) references site (id) on delete set null,
 
-    default_iol uuid,
-    foreign key (default_iol) references iol (id) on delete set null,
+    default_iol_id uuid,
+    foreign key (default_iol_id) references iol (id) on delete set null,
 
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
@@ -194,14 +194,23 @@ create table surgeon (
 
     default_formula formula,
 
-    default_main main,
-    default_sia_power sia_power,
-    default_sia_axis axis,
+    default_main main not null,
+    default_sia_power sia_power not null,
+    default_sia_axis_right axis not null,
+    default_sia_axis_left axis not null,
 
-    constraint default_sia_field_agreement check (
-        (default_sia_power is not null and default_sia_axis is not null)
-        or (default_sia_power is null and default_sia_axis is null)
-    ),
+    -- constraint default_sia_field_agreement check (
+    --     (
+    --         default_sia_power is not null
+    --         and default_sia_axis_right is not null
+    --         and default_sia_axis_left is not null
+    --     )
+    --     or (
+    --         default_sia_power is null
+    --         and default_sia_axis_right is null
+    --         and default_sia_axis_left is null
+    --     )
+    -- ),
 
     default_custom_constant boolean not null default false,
 
@@ -214,16 +223,16 @@ create table surgeon (
 create table surgeon_cas (
     id uuid primary key default gen_random_uuid(),
 
-    surgeon uuid not null,
+    surgeon_id uuid not null,
     -- delete the surgeon_cas if its surgeon is deleted
-    foreign key (surgeon) references surgeon (id) on delete cascade,
+    foreign key (surgeon_id) references surgeon (id) on delete cascade,
 
-    site uuid,
-    foreign key (site) references site (id) on delete set null,
+    site_id uuid,
+    foreign key (site_id) references site (id) on delete set null,
 
-    cas uuid unique not null,
+    cas_id uuid unique not null,
     -- delete the surgeon_cas if its cas is deleted
-    foreign key (cas) references cas (id) on delete cascade,
+    foreign key (cas_id) references cas (id) on delete cascade,
 
     created_at timestamptz not null default now(),
     updated_at timestamptz not null default now(),
