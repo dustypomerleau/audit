@@ -2,7 +2,7 @@
 -- sizes are in bytes
 --
 -- uuid (including fks) - 16
--- bigint, bigserial, timestamptz (including created_at) 8
+-- bigint, bigserial, timestamptz (including created) 8
 -- date, enum, int, serial 4
 -- smallint, smallserial 2
 -- booleans 1
@@ -80,10 +80,9 @@ create type side as enum ('Right', 'Left');
 
 -- tables
 create table iol (
-    id uuid primary key default gen_random_uuid(),
+    id uuid primary key default uuidv7(),
 
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now(),
+    updated timestamptz not null default now(),
 
     focus focus not null default 'Mono',
 
@@ -95,13 +94,12 @@ create table iol (
 );
 
 create table cas (
-    id uuid primary key default gen_random_uuid(),
+    id uuid primary key default uuidv7(),
 
     iol_id uuid,
     foreign key (iol_id) references iol (id) on delete set null,
 
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now(),
+    updated timestamptz not null default now(),
 
     side side not null,
     target_formula formula,
@@ -169,18 +167,30 @@ create table cas (
     target_custom_constant boolean not null default false
 );
 
-create table site (
-    id uuid primary key default gen_random_uuid(),
+create table session (
+    -- We can't automatically generate a UUID v7 for the session primary key, because 
+    -- tower-sessions mandates that the `Record::id` is of type `Id`, which holds an i128 
+    -- that is generated randomly in tower_sessions::Record. Instead, we pretend that there 
+    -- is a collision and replace the `Record::id` inside SessionStore::create with the same 
+    -- 128 bits as the UUID v7 we insert here.
+    id uuid primary key,
 
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now(),
+    updated timestamptz not null default now(),
+    expiry timestamptz not null,
+
+    data jsonb
+);
+
+create table site (
+    id uuid primary key default uuidv7(),
+
+    updated timestamptz not null default now(),
 
     name text unique not null
 );
 
--- TODO: BetterAuth identity of some sort
 create table surgeon (
-    id uuid primary key default gen_random_uuid(),
+    id uuid primary key default uuidv7(),
 
     default_site_id uuid,
     foreign key (default_site_id) references site (id) on delete set null,
@@ -188,8 +198,7 @@ create table surgeon (
     default_iol_id uuid,
     foreign key (default_iol_id) references iol (id) on delete set null,
 
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now(),
+    updated timestamptz not null default now(),
     terms timestamptz,
 
     default_formula formula,
@@ -199,29 +208,17 @@ create table surgeon (
     default_sia_axis_right axis not null,
     default_sia_axis_left axis not null,
 
-    -- constraint default_sia_field_agreement check (
-    --     (
-    --         default_sia_power is not null
-    --         and default_sia_axis_right is not null
-    --         and default_sia_axis_left is not null
-    --     )
-    --     or (
-    --         default_sia_power is null
-    --         and default_sia_axis_right is null
-    --         and default_sia_axis_left is null
-    --     )
-    -- ),
-
     default_custom_constant boolean not null default false,
 
+    access_token text,
     email email unique not null,
+    google email unique not null,
     full_name text,
     preferred_name text
-
 );
 
 create table surgeon_cas (
-    id uuid primary key default gen_random_uuid(),
+    id uuid primary key default uuidv7(),
 
     surgeon_id uuid not null,
     -- delete the surgeon_cas if its surgeon is deleted
@@ -234,32 +231,34 @@ create table surgeon_cas (
     -- delete the surgeon_cas if its cas is deleted
     foreign key (cas_id) references cas (id) on delete cascade,
 
-    created_at timestamptz not null default now(),
-    updated_at timestamptz not null default now(),
+    updated timestamptz not null default now(),
 
     number serial unique,
     date date not null
 
 );
 
-create or replace function updated_at() returns trigger language 'plpgsql' as $$
-    begin new.updated_at = now(); return new; end;
+create or replace function updated() returns trigger language 'plpgsql' as $$
+    begin new.updated = now(); return new; end;
 $$;
 
-create trigger cas_updated_at
-before update on cas for each row execute function updated_at();
+create trigger cas_updated
+before update on cas for each row execute function updated();
 
-create trigger iol_updated_at
-before update on iol for each row execute function updated_at();
+create trigger iol_updated
+before update on iol for each row execute function updated();
 
-create trigger site_updated_at
-before update on site for each row execute function updated_at();
+create trigger session_updated
+before update on session for each row execute function updated();
 
-create trigger surgeon_updated_at
-before update on surgeon for each row execute function updated_at();
+create trigger site_updated
+before update on site for each row execute function updated();
 
-create trigger surgeon_cas_updated_at
-before update on surgeon_cas for each row execute function updated_at();
+create trigger surgeon_updated
+before update on surgeon for each row execute function updated();
+
+create trigger surgeon_cas_updated
+before update on surgeon_cas for each row execute function updated();
 
 -- inserting bulk data
 -- Method 1: Using INSERT with Multiple Rows

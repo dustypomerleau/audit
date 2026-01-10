@@ -1,3 +1,5 @@
+use chrono::DateTime;
+use chrono::Utc;
 use leptos::prelude::ActionForm;
 use leptos::prelude::ElementChild;
 use leptos::prelude::IntoView;
@@ -20,7 +22,7 @@ use crate::model::Formula;
 use crate::model::Main;
 use crate::model::QuerySurgeon;
 use crate::model::SiaPower;
-#[cfg(feature = "ssr")] use crate::model::Surgeon;
+use crate::model::Surgeon;
 use crate::model::ToricPower;
 #[cfg(feature = "ssr")] use crate::model::set_current_surgeon;
 
@@ -142,14 +144,19 @@ with s as (
         default_sia_axis_right,
         default_sia_axis_left
     )
+
     values (
         $1, $2, $3,
         (select id from site where name = $4),
         (select id from iol where model = $5),
         $6, $7, $8, $9, $10, $11
     )
+    
     returning
+        id,
+        access_token,
         email,
+        google,
         terms,
         full_name,
         preferred_name,
@@ -164,19 +171,23 @@ with s as (
 )
 
 select
+    s.id,
+    s.access_token,
+
     s.email as "email: Email",
-    s.terms,
+    s.google as "google: Email",
+    s.terms as "terms: DateTime<Utc>",
     s.full_name,
     s.preferred_name,
 
-    site.name as default_site_name,
-
-    iol.model as default_iol_model,
-    iol.name as default_iol_name,
-    iol.company as default_iol_company,
-    iol.focus as "default_iol_focus: Focus",
-    iol.toric as "default_iol_toric: ToricPower",
-
+    t.name as default_site_name,
+    
+    i.model as default_iol_model,
+    i.name as default_iol_name,
+    i.company as default_iol_company,
+    i.focus as "default_iol_focus: Focus",
+    i.toric as "default_iol_toric: ToricPower",
+    
     s.default_formula as "default_formula: Formula",
     s.default_custom_constant,
     s.default_main as "default_main: Main",
@@ -185,9 +196,10 @@ select
     s.default_sia_axis_right as "default_sia_axis_right: Axis",
     s.default_sia_axis_left as "default_sia_axis_left: Axis"
 
-from s
-join site on s.default_site_id = site.id
-join iol on s.default_iol_id = iol.id;
+from surgeon s
+left join site t on t.id = s.default_site_id
+left join iol i on i.id = s.default_iol_id
+limit 1;
         "#,
         email as Email,
         full_name,

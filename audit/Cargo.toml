@@ -7,9 +7,11 @@ version = "0.1.0"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+async-trait = { workspace = true }
 audit_macro = { workspace = true }
 axum = { workspace = true, optional = true }
 axum-extra = { workspace = true, optional = true }
+axum-login = { workspace = true, optional = true }
 axum-macros = { workspace = true, optional = true }
 base64ct = { workspace = true, optional = true }
 chrono = { workspace = true }
@@ -24,6 +26,7 @@ leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 mailgun-rs = { workspace = true, optional = true }
 markdown = { workspace = true }
+oauth2 = { workspace = true, optional = true }
 plotly = { workspace = true, optional = true }
 rand = { workspace = true, optional = true }
 reactive_stores = { workspace = true }
@@ -33,6 +36,7 @@ serde_json = { workspace = true }
 sha2 = { workspace = true, optional = true }
 sqlx = { workspace = true, optional = true }
 thiserror = { workspace = true }
+time = { workspace = true, optional = true }
 tokio = { workspace = true, optional = true }
 tower = { workspace = true, optional = true }
 tower-http = { workspace = true, optional = true }
@@ -46,15 +50,18 @@ hydrate = ["leptos/hydrate"]
 ssr = [
   "dep:axum",
   "dep:axum-extra",
+  "dep:axum-login",
   "dep:axum-macros",
   "dep:base64ct",
   "dep:dotenvy",
   "dep:leptos_axum",
   "dep:mailgun-rs",
+  "dep:oauth2",
   "dep:plotly",
   "dep:rand",
   "dep:sha2",
   "dep:sqlx",
+  "dep:time",
   "dep:tokio",
   "dep:tower",
   "dep:tower-http",
@@ -62,6 +69,7 @@ ssr = [
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",
+  "uuid/v7",
 ]
 
 [package.metadata.leptos]

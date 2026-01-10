@@ -1,3 +1,5 @@
+use chrono::DateTime;
+use chrono::Utc;
 use leptos::either::Either;
 use leptos::prelude::IntoView;
 use leptos::prelude::Resource;
@@ -14,7 +16,6 @@ use leptos::prelude::view;
 use leptos_router::components::Outlet;
 #[cfg(feature = "ssr")] use sqlx::query_as;
 
-#[cfg(feature = "ssr")] use crate::auth::get_jwt_cookie;
 use crate::components::SignedOut;
 #[cfg(feature = "ssr")] use crate::db::db;
 use crate::error::AppError;
@@ -65,13 +66,16 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, AppError> {
         ));
     };
 
-    let auth_token = if let Ok(Some(auth_token)) = get_jwt_cookie().await {
-        auth_token
-    } else {
-        return Err(AppError::Auth(
-            "the call to `get_jwt_cookie` in `get_authorized_surgeon` returned `None`".to_string(),
-        ));
-    };
+    // FIXME: temporary substitute
+    let auth_token = "fake token".to_string();
+
+    // let auth_token = if let Ok(Some(auth_token)) = get_jwt_cookie().await {
+    //     auth_token
+    // } else {
+    //     return Err(AppError::Auth(
+    //         "the call to `get_jwt_cookie` in `get_authorized_surgeon` returned
+    // `None`".to_string(),     ));
+    // };
 
     // `create_client()` errors if a connection can't immediately be established, so it
     // isn't necessary to call `ensure_connection()` if the client was created through this
@@ -101,57 +105,48 @@ pub async fn get_authorized_surgeon() -> Result<Option<Surgeon>, AppError> {
     // };
     //         "#;
 
-    let surgeon = query_as!(
+    let query_surgeon_result = query_as!(
         QuerySurgeon,
         r#"
-with s as (
-    select
-        email,
-        terms,
-        full_name,
-        preferred_name,
-        default_site_id,
-        default_iol_id,
-        default_formula,
-        default_custom_constant,
-        default_main,
-        default_sia_power,
-        default_sia_axis_right,
-        default_sia_axis_left
-    from surgeon
-    where email = $1
-    limit 1
-)
-
 select
+    s.id,
+    s.access_token,
+
     s.email as "email: Email",
-    s.terms,
+    s.google as "google: Email",
+    s.terms as "terms: DateTime<Utc>",
     s.full_name,
     s.preferred_name,
-    site.name as "default_site_name: String",
-    iol.model as "default_iol_model: String",
-    iol.name as "default_iol_name: String",
-    iol.company as "default_iol_company: String",
-    iol.focus as "default_iol_focus: Focus",
-    iol.toric as "default_iol_toric: ToricPower",
+
+    t.name as default_site_name,
+    
+    i.model as default_iol_model,
+    i.name as default_iol_name,
+    i.company as default_iol_company,
+    i.focus as "default_iol_focus: Focus",
+    i.toric as "default_iol_toric: ToricPower",
+    
     s.default_formula as "default_formula: Formula",
     s.default_custom_constant,
     s.default_main as "default_main: Main",
+
     s.default_sia_power as "default_sia_power: SiaPower",
     s.default_sia_axis_right as "default_sia_axis_right: Axis",
     s.default_sia_axis_left as "default_sia_axis_left: Axis"
 
-from s
-left join site on s.default_site_id = site.id
-left join iol on s.default_iol_id = iol.id; 
+from surgeon s
+left join site t on t.id = s.default_site_id
+left join iol i on i.id = s.default_iol_id
+where s.email = $1
+limit 1; 
         "#,
         "todo@todo.com"
     )
     .fetch_one(&db().await?)
     .await;
 
-    if let Ok(surgeon) = surgeon {
-        let surgeon: Surgeon = surgeon.into();
+    if let Ok(query_surgeon) = query_surgeon_result {
+        let surgeon: Surgeon = query_surgeon.into();
 
         if surgeon.terms.is_some() {
             state.surgeon.set(Some(surgeon.clone()))?;

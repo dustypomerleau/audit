@@ -30,6 +30,7 @@ pub mod model;
 #[cfg(feature = "ssr")] pub mod plots;
 #[cfg(feature = "ssr")] pub mod query;
 pub mod routes;
+#[cfg(feature = "ssr")] pub mod session;
 #[cfg(feature = "ssr")] pub mod state;
 #[cfg(test)] pub mod tests;
 

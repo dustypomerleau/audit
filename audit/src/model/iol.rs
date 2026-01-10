@@ -30,7 +30,6 @@ pub struct ToricPower(i32);
 
 /// A specific model of IOL.
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
-#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 pub struct Iol {
     pub model: String,
     pub name: Option<String>,

@@ -5,12 +5,13 @@ use std::ops::Sub;
 use audit_macro::RangeBounded;
 use chrono::DateTime;
 use chrono::Utc;
-use rand::Rng;
+use rand::RngExt;
 use rand::distr::Alphanumeric;
 use rand::distr::SampleString;
 use rand::distr::StandardUniform;
 use rand::distr::uniform::SampleRange;
 use rand::rng;
+use uuid::Uuid;
 
 use crate::bounded::Bounded;
 use crate::model::Acd;
@@ -377,7 +378,10 @@ impl Mock for Site {
 impl Mock for Surgeon {
     fn mock() -> Self {
         Self {
+            id: Uuid::now_v7(),
+            access_token: random_string(8),
             email: Email::mock(),
+            google: Email::mock(),
             terms: DateTime::<Utc>::mock_option(Prob::new(0.01).unwrap_or_default()),
             full_name: Name::mock_option(Prob::new(0.01).unwrap_or_default())
                 .map(|name| name.into_inner()),

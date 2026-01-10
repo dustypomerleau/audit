@@ -1,5 +1,5 @@
 {
-  description = "Vic Eye cataract audit";
+  description = "Vic Eye cataract audit flake";
 
   inputs = {
     crane = {
@@ -27,6 +27,7 @@
       flake-utils,
       nixpkgs,
     }:
+
     flake-utils.lib.eachDefaultSystem (system: {
       packages.default =
         let
@@ -151,4 +152,3 @@
 #       }
 #     );
 # }
-

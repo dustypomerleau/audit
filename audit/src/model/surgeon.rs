@@ -1,5 +1,6 @@
-use std::fmt::Display;
+use std::fmt::Debug;
 
+use axum_login::AuthUser;
 use chrono::DateTime;
 use chrono::Utc;
 use garde::Validate;
@@ -8,6 +9,7 @@ use leptos::prelude::server;
 #[cfg(feature = "ssr")] use leptos::prelude::use_context;
 use serde::Deserialize;
 use serde::Serialize;
+use uuid::Uuid;
 
 use crate::error::AppError;
 use crate::model::Axis;
@@ -26,11 +28,6 @@ use crate::model::ToricPower;
 #[cfg_attr(feature = "ssr", derive(sqlx::Type))]
 #[cfg_attr(feature = "ssr", sqlx(transparent))]
 pub struct Email(#[garde(email)] String);
-
-// Implementing Display allows directly including an Email in a format String.
-impl Display for Email {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result { self.0.fmt(f) }
-}
 
 impl TryFrom<String> for Email {
     type Error = AppError;
@@ -76,10 +73,13 @@ pub struct FormSurgeon {
     pub sia_left_axis: i32,
 }
 
-#[derive(Clone, Debug)]
-#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
+#[cfg(feature = "ssr")]
 pub struct QuerySurgeon {
+    pub id: Uuid,
+    pub access_token: Option<String>,
+
     pub email: Email,
+    pub google: Email,
     pub terms: Option<DateTime<Utc>>,
     pub full_name: Option<String>,
     pub preferred_name: Option<String>,
@@ -101,16 +101,52 @@ pub struct QuerySurgeon {
     pub default_sia_axis_left: Axis,
 }
 
+impl Debug for QuerySurgeon {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("QuerySurgeon")
+            .field("access_token", &"[redacted]")
+            .field("id", &"[redacted]")
+            .field("email", &self.email)
+            .field("google", &self.google)
+            .field("terms", &self.terms)
+            .field("full_name", &self.full_name)
+            .field("preferred_name", &self.preferred_name)
+            .field("default_site_name", &self.default_site_name)
+            .field("default_iol_model", &self.default_iol_model)
+            .field("default_iol_name", &self.default_iol_name)
+            .field("default_iol_company", &self.default_iol_company)
+            .field("default_iol_focus", &self.default_iol_focus)
+            .field("default_iol_toric", &self.default_iol_toric)
+            .field("default_formula", &self.default_formula)
+            .field("default_custom_constant", &self.default_custom_constant)
+            .field("default_main", &self.default_main)
+            .field("default_sia_power", &self.default_sia_power)
+            .field("default_sia_axis_right", &self.default_sia_axis_right)
+            .field("default_sia_axis_left", &self.default_sia_axis_left)
+            .finish()
+    }
+}
+
 #[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
 pub struct Site {
     pub name: String,
 }
 
 /// A unique surgeon
-#[derive(Clone, Debug, Default, Deserialize, PartialEq, Serialize)]
+#[derive(Clone, Default, Deserialize, PartialEq, Serialize)]
 pub struct Surgeon {
-    /// A unique, valid email.
+    // Never send the id to the frontend.
+    #[cfg(feature = "ssr")]
+    #[serde(skip_serializing)]
+    pub id: Uuid,
+
+    // Never send the access token to the frontend.
+    #[cfg(feature = "ssr")]
+    #[serde(skip_serializing)]
+    pub access_token: String,
+
     pub email: Email,
+    pub google: Email,
     pub terms: Option<DateTime<Utc>>,
     pub full_name: Option<String>,
     pub preferred_name: Option<String>,
@@ -118,10 +154,37 @@ pub struct Surgeon {
     pub sia: SurgeonSia,
 }
 
+impl AuthUser for Surgeon {
+    type Id = Uuid;
+
+    fn id(&self) -> Self::Id { self.id }
+
+    fn session_auth_hash(&self) -> &[u8] { self.access_token.as_bytes() }
+}
+
+impl Debug for Surgeon {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Surgeon")
+            .field("id", &"[redacted]")
+            .field("access_token", &"[redacted]")
+            .field("email", &self.email)
+            .field("google", &self.google)
+            .field("terms", &self.terms)
+            .field("full_name", &self.full_name)
+            .field("preferred_name", &self.preferred_name)
+            .field("defaults", &self.defaults)
+            .field("sia", &self.sia)
+            .finish()
+    }
+}
+
 impl From<QuerySurgeon> for Surgeon {
     fn from(qs: QuerySurgeon) -> Self {
         let QuerySurgeon {
+            id,
+            access_token,
             email,
+            google,
             terms,
             full_name,
             preferred_name,
@@ -139,6 +202,7 @@ impl From<QuerySurgeon> for Surgeon {
             default_sia_axis_left,
         } = qs;
 
+        let access_token = access_token.unwrap_or("no access token".to_string());
         let site = default_site_name.map(|name| Site { name });
 
         let iol = if let (Some(model), Some(focus)) = (default_iol_model, default_iol_focus) {
@@ -173,7 +237,10 @@ impl From<QuerySurgeon> for Surgeon {
         };
 
         Surgeon {
+            id,
+            access_token,
             email,
+            google,
             terms,
             full_name,
             preferred_name,

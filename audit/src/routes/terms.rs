@@ -54,7 +54,7 @@ update surgeon set terms = now() where email = 'todo@todo.com';
         "#
     );
 
-    // TODO: fix the query to return the QuerySurgeon, convert to Surgeon and update globabl state.
+    // TODO: fix the query to return the QuerySurgeon, convert to Surgeon and update global state.
     //
     // if let Ok(Some(surgeon_json)) = db().await?.query_single_json(query, &()).await {
     //     let surgeon = serde_json::from_str(surgeon_json.as_ref())?;

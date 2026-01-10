@@ -495,7 +495,7 @@ struct AddCaseDatalists {
     sites: Vec<Site>,
 }
 
-// BOOKMARK change get_iols to be a single resource that returns AddCaseDatalists
+// TODO: change get_iols to be a single resource that returns AddCaseDatalists
 
 /// Return a [`Vec`] of all [`Iol`]s in the database.
 #[server]
@@ -526,6 +526,8 @@ pub async fn insert_form_case(case: FormCase) -> Result<i32, AppError> {
 /// makes it possible to use custom pools for tests.
 #[cfg(feature = "ssr")]
 pub async fn insert_surgeon_case(surgeon_case: SurgeonCase) -> Result<i32, AppError> {
+    use chrono::NaiveDate;
+
     use crate::model::Acd;
     use crate::model::Al;
     use crate::model::Axis;
@@ -632,7 +634,6 @@ pub async fn insert_surgeon_case(surgeon_case: SurgeonCase) -> Result<i32, AppEr
     let (ref_before_cyl_power, ref_before_cyl_axis) = ref_before_cyl.split_option();
     let (ref_after_cyl_power, ref_after_cyl_axis) = ref_after_cyl.split_option();
 
-    #[derive(sqlx::FromRow)]
     pub struct SurgeonCaseNumber {
         number: i32,
     }
@@ -739,7 +740,7 @@ select number from s;
         ref_after_cyl_power as Option<RefCylPower>,
         ref_after_cyl_axis as Option<Axis>,
         email as Email,
-        date,
+        date as NaiveDate,
         site_name,
     )
     .fetch_one(&db().await?)

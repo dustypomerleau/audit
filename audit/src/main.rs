@@ -7,9 +7,9 @@ async fn main() -> Result<(), AppError> {
     use std::sync::Arc;
     use std::sync::RwLock;
 
-    use audit::auth::handle_kill_session;
-    use audit::auth::handle_pkce_code;
-    use audit::auth::handle_sign_in;
+    // use audit::auth::handle_kill_session;
+    // use audit::auth::handle_pkce_code;
+    // use audit::auth::handle_sign_in;
     use audit::mail::MAILER;
     use audit::routes::App;
     use audit::routes::shell;
@@ -21,11 +21,60 @@ async fn main() -> Result<(), AppError> {
     use leptos::prelude::get_configuration;
     use leptos_axum::LeptosRoutes;
     use leptos_axum::generate_route_list;
-    use sqlx::PgPool;
+    use oauth2::AuthUrl;
+    use oauth2::ClientId;
+    use oauth2::ClientSecret;
+    use oauth2::CsrfToken;
+    use oauth2::RedirectUrl;
+    use oauth2::RevocationUrl;
+    use oauth2::TokenUrl;
+    use oauth2::basic::BasicClient;
+    use sqlx::Pool;
+    use sqlx::Postgres;
     use sqlx::migrate;
 
     #[cfg(debug_assertions)]
     dotenv().ok();
+
+    let client_id = ClientId::new(
+        env::var("OAUTH_CLIENT_ID")
+            .expect("expected OAUTH_CLIENT_ID environment variable to be present"),
+    );
+
+    let auth_url = AuthUrl::new("https://accounts.google.com/o/oauth2/v2/auth".to_string())?;
+
+    let redirect_url = RedirectUrl::new(
+        env::var("OAUTH_REDIRECT_URI")
+            .expect("expected OAUTH_REDIRECT_URI environment variable to be present"),
+    )?;
+
+    let token_url = TokenUrl::new("https://oauth2.googleapis.com/token".to_string())?;
+    let revocation_url = RevocationUrl::new("https://oauth2.googleapis.com/revoke".to_string())?;
+
+    let oauth_client = BasicClient::new(client_id)
+        .set_auth_uri(auth_url)
+        .set_redirect_uri(redirect_url)
+        .set_token_uri(token_url)
+        .set_revocation_url(revocation_url);
+
+    // TODO: customise the connection to like max 90 and handle env var errors.
+    // see sqlx PgConnectOptions for options
+    //
+    // let options = PgPoolOptions::new().max_connections(90);
+    // let options = PgConnectOptions::new();
+    let pool = Pool::<Postgres>::connect(env::var("DATABASE_URL").unwrap().as_str()).await?;
+
+    // ./migrations is the default, but we explicitly set it here. `.` is the same directory as the
+    // Cargo.toml for `audit` in dev, and the same directory as the audit binary in prod.
+    migrate!("./migrations").run(&pool).await?;
+
+    let app_state = AppState::builder()
+        .oauth_client(oauth_client)
+        .http_client(http_client)
+        .leptos_options(leptos_options)
+        .db(pool)
+        .mailer(MAILER.clone())
+        .build()?;
 
     // Use default values for the `cargo-leptos` config:
     let conf = get_configuration(None).unwrap();
@@ -33,28 +82,15 @@ async fn main() -> Result<(), AppError> {
     let leptos_options = conf.leptos_options;
     let routes = generate_route_list(App);
 
-    // TODO: customise the connection to like max 90 and handle env var errors.
-    // see sqlx PgConnectOptions for options
-    //
-    // let options = PgPoolOptions::new().max_connections(90);
-    // let options = PgConnectOptions::new();
-    let pool = PgPool::connect(env::var("DATABASE_URL").unwrap().as_str()).await?;
-
-    // ./migrations is the default, but we explicitly set it here. `.` is the same directory as the
-    // Cargo.toml for `audit` in dev, and the same directory as the audit binary in prod.
-    migrate!("./migrations").run(&pool).await?;
-
-    let app_state = AppState {
-        leptos_options: leptos_options.clone(),
-        db: pool,
-        mailer: Arc::new(MAILER.clone()),
-        surgeon: Arc::new(RwLock::new(None)),
-    };
-
+    // BOOKMARK: TODO: add:
+    // session store using postgres adapter
+    // SessionManagerLayer and
+    // AuthManagerLayer
+    // (see oauth example in axum_login in app.rs)
     let app = Router::new()
-        .route("/code", get(handle_pkce_code))
-        .route("/killsession", get(handle_kill_session))
-        .route("/signin", get(handle_sign_in))
+        // .route("/code", get(handle_pkce_code))
+        // .route("/killsession", get(handle_kill_session))
+        // .route("/signin", get(handle_sign_in))
         .leptos_routes(&app_state, routes, {
             let leptos_options = leptos_options.clone();
             move || shell(leptos_options.clone())

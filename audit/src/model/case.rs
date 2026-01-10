@@ -578,7 +578,6 @@ where model = $1;
 }
 
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 pub struct QueryCase {
     pub side: Side,
     pub biometry_al: Al,
@@ -623,7 +622,6 @@ pub struct QueryCase {
 }
 
 #[derive(Clone, Debug)]
-#[cfg_attr(feature = "ssr", derive(sqlx::FromRow))]
 pub struct QuerySurgeonCase {
     pub number: i32,
     pub date: NaiveDate,
