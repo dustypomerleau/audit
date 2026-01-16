@@ -15,7 +15,7 @@ base64ct = { version = "1.8.3", features = ["alloc"] }
 quote = "1.0.43"
 syn = "2.0.114"
 # TODO: switch to jiff https://github.com/BurntSushi/jiff
-chrono = { version = "0.4.42", features = ["serde"] }
+chrono = { version = "0.4.43", features = ["serde"] }
 console_error_panic_hook = "0.1.7"
 dotenvy = "0.15.7"
 futures = "0.3.31"
@@ -56,7 +56,7 @@ tower = { version = "0.5.3", features = ["util"] }
 tower-http = { version = "0.6.8", features = ["fs"] }
 tracing = { version = "0.1.44" }
 uuid = { version = "1.19.0", features = ["serde"] }
-wasm-bindgen = "0.2.106"
+wasm-bindgen = "0.2.108"
 
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
