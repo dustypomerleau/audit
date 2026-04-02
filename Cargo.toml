@@ -13,7 +13,7 @@ axum-extra = { version = "0.12.5", features = ["cookie", "typed-header"] }
 axum-login = "0.18.0"
 axum-macros = { version = "0.5.0" }
 base64ct = { version = "1.8.3", features = ["alloc"] }
-quote = "1.0.44"
+quote = "1.0.45"
 syn = "2.0.117"
 # TODO: switch to jiff https://github.com/BurntSushi/jiff
 chrono = { version = "0.4.44", features = ["serde"] }
@@ -22,10 +22,10 @@ dotenvy = "0.15.7"
 futures = "0.3.32"
 garde = { version = "0.22.1", features = ["derive", "email"] }
 http = "1.4.0"
-leptos = { version = "0.8.16", features = ["nightly"] }
+leptos = { version = "0.8.17", features = ["nightly"] }
 leptos_axum = { version = "0.8.8" }
 leptos_meta = { version = "0.8.6" }
-leptos_router = { version = "0.8.12", features = ["nightly"] }
+leptos_router = { version = "0.8.13", features = ["nightly"] }
 mailgun-rs = { version = "2.0.2" }
 # TODO: switch to pulldown-cmark https://github.com/pulldown-cmark/pulldown-cmark/
 markdown = "1.0.0"
@@ -34,11 +34,11 @@ openidconnect = "4.0.1"
 plotly = { version = "0.14.1", features = ["static_export_default"] }
 proc-macro2 = "1.0.106"
 rand = { version = "0.10.0" }
-reactive_stores = "0.3.1"
+reactive_stores = "0.4.2"
 reqwest = { version = "0.13.2", features = ["blocking", "json"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1.0.149"
-sha2 = { version = "0.10.9", default-features = false }
+sha2 = { version = "0.11.0", default-features = false }
 
 sqlx = { version = "0.8.6", features = [
   "chrono",
@@ -55,12 +55,12 @@ sqlx = { version = "0.8.6", features = [
 
 thiserror = "2.0.18"
 time = { version = "0.3.47", features = ["formatting", "parsing", "macros"] }
-tokio = { version = "1.49.0", features = ["macros", "rt-multi-thread"] }
+tokio = { version = "1.50.0", features = ["macros", "rt-multi-thread"] }
 tower = { version = "0.5.3", features = ["util"] }
 tower-http = { version = "0.6.8", features = ["fs"] }
 tracing = { version = "0.1.44" }
-uuid = { version = "1.21.0", features = ["serde"] }
-wasm-bindgen = "0.2.113"
+uuid = { version = "1.23.0", features = ["serde"] }
+wasm-bindgen = "0.2.117"
 
 # Defines a size-optimized profile for the WASM bundle in release mode
 [profile.wasm-release]
