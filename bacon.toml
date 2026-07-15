@@ -1,9 +1,9 @@
 # This is a configuration file for the bacon tool
 #
 # Complete help on configuration: https://dystroy.org/bacon/config/
-# 
-# You may check the current default at
-#   https://github.com/Canop/bacon/blob/main/defaults/default-bacon.toml
+#
+#  You may check the current default at
+# https://github.com/Canop/bacon/blob/main/defaults/default-bacon.toml
 
 default_job = "check-all"
 env.CARGO_TERM_COLOR = "always"
@@ -67,9 +67,9 @@ on_success = "back" # so that we don't open the browser at each change
 allow_warnings = true
 background = true
 command = [
-  "cargo",
-  "run",
-  # put launch parameters for your program behind a `--` separator
+    "cargo",
+    "run",
+    # put launch parameters for your program behind a `--` separator
 ]
 need_stdout = true
 
@@ -85,9 +85,9 @@ need_stdout = true
 allow_warnings = true
 background = false
 command = [
-  "cargo",
-  "run",
-  # put launch parameters for your program behind a `--` separator
+    "cargo",
+    "run",
+    # put launch parameters for your program behind a `--` separator
 ]
 need_stdout = true
 on_change_strategy = "kill_then_restart"
